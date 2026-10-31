@@ -6,6 +6,7 @@
  *   sizes -> counts -> hierarchy -> names -> contracts
  */
 import { finish } from './layout.js';
+import { syntheticDoc } from './describe.js';
 import { DOMW, EVT, hash32, METHODS, MOD, mulberry32, NOUNS, REPO_A, REPO_B, SFX, SUF } from './vocab.js';
 
 /** Contract status odds by scope (same domain, same repo, cross-repo): cumulative thresholds for [matched, ambiguous]; the rest is unmatched. */
@@ -313,5 +314,12 @@ export function build(N) {
   const names = makeNames(random, sizes, hier);
   const leafName = makeLeafName(N, hier.KND);
   const contracts = makeContracts(random, sizes, hier, counts);
-  return finish({ ...sizes, ...hier, ...names, leafName, ...contracts, T0 });
+  const g = finish({ ...sizes, ...hier, ...names, leafName, ...contracts, T0 });
+  // demo graphs have no source: summaries are simulated, signatures exist only for endpoints
+  g.meta = { docSource: 'simulated' };
+  g.doc = i => syntheticDoc(g, i);
+  g.sig = i => (i < g.S ? '' : g.name(i));
+  g.loc = () => '';
+  g.end = () => 0;
+  return g;
 }

@@ -10,13 +10,19 @@ The JSON format Atlas reads for real graphs: the embedded "Self" graph, `Atlas.l
     "title": "Shop services",
     "source": "Indexed with my-indexer 1.2",
     "status": ["Matched", "Ambiguous", "Unmatched", "Inferred"],
-    "kind":   ["Service", "Endpoint", "Event", "Module"]
+    "kind":   ["Service", "Endpoint", "Event", "Module"],
+    "commit": "a1b2c3d",
+    "docSource": "ai"
   },
   "repos": [
     { "name": "web", "domains": [
       { "name": "checkout", "services": [
-        { "name": "cart_api", "loc": "services/cart/index.ts:1", "leaves": [
-          { "name": "POST /cart", "kind": 1, "loc": "services/cart/routes.ts:14" }
+        { "name": "cart_api", "loc": "services/cart/index.ts:1", "end": 120,
+          "doc": "Owns shopping carts: adds, removes and prices items.",
+          "sig": "export function createCartApi(db, pricing)",
+          "leaves": [
+            { "name": "POST /cart", "kind": 1, "loc": "services/cart/routes.ts:14", "end": 31,
+              "doc": "Adds an item to the caller's cart.", "sig": "POST /cart { sku, qty } -> Cart" }
         ] },
         { "name": "pay_api" }
       ] }
@@ -61,8 +67,23 @@ the three leaf kinds (for example `["Service", "Endpoint", "Event", "Module"]`).
 
 ## Optional fields
 
-`loc` (string such as `"path/file.ts:42"`, or a line number) shows in the inspector. `meta.label` names the scale
-button; `meta.source` appears in the Key.
+On services and leaves:
+
+| field | shown as |
+| --- | --- |
+| `doc` | "What it does": one or two plain sentences at the top of the inspector, also used by search by meaning |
+| `sig` | the signature under the summary (name and parameters, or an endpoint's request and response) |
+| `loc` | location, such as `"path/file.ts:42"`; enables "View source" when the page has the file |
+| `end` | last line of the definition, so the source view can mark the whole definition |
+
+On `meta`:
+
+| field | meaning |
+| --- | --- |
+| `commit` | the commit the graph was built from; shown with summaries and source |
+| `docSource` | where `doc` came from: `"comment"` (doc comments), `"ai"` (generated), `"simulated"` (demo). Shown under every summary |
+| `sourceBundle` | id of a `<script type="application/json">` holding `{ commit, files: { path: text } }`. Prototype only: stands in for fetching lines live from GitHub |
+| `label`, `title`, `source` | scale-button name, title, and the "Indexed with ..." line in the Key |
 
 ## Producing a spec
 

@@ -18,6 +18,7 @@ import { init as init_render_minimap } from './render/minimap.js';
 import { init as init_ui_zoom } from './ui/zoom.js';
 import { init as init_ui_where } from './ui/where.js';
 import { init as init_ui_perf } from './ui/perf.js';
+import { init as init_ui_code } from './ui/code-view.js';
 import { init as init_ui_legend } from './ui/legend.js';
 import { init as init_ui_inspector } from './ui/inspector.js';
 import { init as init_ui_attention } from './ui/attention.js';
@@ -40,6 +41,7 @@ export function start() {
   init_ui_zoom();
   init_ui_where();
   init_ui_perf();
+  init_ui_code();
   init_ui_controls();
   init_ui_legend();
   init_ui_inspector();

@@ -16,12 +16,14 @@ export function validateSpec(spec) {
     leaves = 0;
   spec.repos.forEach((r, ri) => {
     if (typeof r.name !== 'string') errs.push(`repos[${ri}].name must be a string`);
+    const texts = o => ['doc', 'sig'].filter(k => o[k] !== undefined && typeof o[k] !== 'string');
     if (!Array.isArray(r.domains) || !r.domains.length) errs.push(`repos[${ri}] needs at least one domain`);
     (r.domains || []).forEach((d, di) => {
       if (!Array.isArray(d.services) || !d.services.length)
         errs.push(`repos[${ri}].domains[${di}] needs at least one service`);
       (d.services || []).forEach(s => {
         services++;
+        for (const k of texts(s)) errs.push(`service "${s.name}": ${k} must be a string`);
         for (const l of s.leaves || []) {
           leaves++;
           if (![1, 2, 3].includes(l.kind)) errs.push(`leaf "${l.name}" has kind ${l.kind}; use 1, 2 or 3`);
@@ -57,7 +59,8 @@ function flattenHierarchy(spec) {
     rDe = [],
     dSs = [],
     dSe = [],
-    svcLoc = [];
+    svcLoc = [],
+    svcInfo = [];
   for (const [r, rp] of spec.repos.entries()) {
     rDs.push(domName.length);
     for (const dm of rp.domains) {
@@ -68,6 +71,7 @@ function flattenHierarchy(spec) {
         svcName.push(sv.name);
         svcDom.push(domName.length - 1);
         svcLoc.push(sv.loc || 0);
+        svcInfo.push([sv.doc || '', sv.sig || '', sv.end || 0]);
       }
       dSe.push(svcName.length);
     }
@@ -79,6 +83,7 @@ function flattenHierarchy(spec) {
     kinds = [],
     leafSvc = [],
     leafLoc = [],
+    leafInfo = [],
     sLs = [],
     sLe = [];
   let i = S;
@@ -91,6 +96,7 @@ function flattenHierarchy(spec) {
           kinds.push(lf.kind);
           leafSvc.push(sLs.length - 1);
           leafLoc.push(lf.loc || 0);
+          leafInfo.push([lf.doc || '', lf.sig || '', lf.end || 0]);
           i++;
         }
         sLe.push(i);
@@ -118,6 +124,7 @@ function flattenHierarchy(spec) {
     svcName,
     leafName: j => leafNames[j - S],
     loc: j => (j < S ? svcLoc[j] : leafLoc[j - S]),
+    info: j => (j < S ? svcInfo[j] : leafInfo[j - S]),
   };
 }
 
@@ -152,10 +159,13 @@ export function buildSpec(spec) {
   const problems = validateSpec(spec);
   if (problems.length) throw new Error('Invalid graph spec:\n- ' + problems.join('\n- '));
   const T0 = performance.now();
-  const { loc, ...hier } = flattenHierarchy(spec);
+  const { loc, info, ...hier } = flattenHierarchy(spec);
   const contracts = contractsFrom(spec.edges);
   const g = finish({ ...hier, ...contracts, hub: hubWeights(hier, contracts), T0 });
   g.meta = spec.meta;
   g.loc = loc;
+  g.doc = i => info(i)[0];
+  g.sig = i => info(i)[1];
+  g.end = i => info(i)[2];
   return g;
 }

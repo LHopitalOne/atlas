@@ -409,7 +409,7 @@ def git(*a):
     try: return subprocess.run(['git', *a], cwd=ROOT, capture_output=True, text=True, timeout=10).stdout.strip()
     except Exception: return ''
 commit = git('log', '-1', '--format=%h', '--', 'src')
-spec = {'meta': {'title': 'Atlas, indexed by itself', 'commit': commit or 'working tree', 'docSource': 'comment', 'status': ['Resolved', 'Ambiguous name', 'Unresolved', 'Inferred'],
+spec = {'meta': {'title': 'Atlas, indexed by itself', 'commit': commit or 'working tree', 'docSource': 'comment', 'sourceBundle': 'selfSource', 'status': ['Resolved', 'Ambiguous name', 'Unresolved', 'Inferred'],
                  'kind': ['Definition', 'Function or control', 'Event handler', 'Value, rule or uniform'],
                  'source': f"tree-sitter {getattr(_ts, '__version__', '')} + {tool.get('name', 'scip-typescript')} {tool.get('version', '')}".strip()},
         'repos': out_repos, 'edges': edges}

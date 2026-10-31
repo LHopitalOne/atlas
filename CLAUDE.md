@@ -49,6 +49,8 @@ E2E uses your Playwright browsers; set `CHROMIUM_PATH` to use another Chromium. 
 | Route finding | `src/graph/route-search.js` (pure), `src/app/route.js` (state) |
 | What draws on the GPU | `src/render/gl.js` (shaders, layers), `src/render/scene.js` (geometry), `src/render/frame.js` (per frame, level of detail) |
 | Labels | `src/render/labels.js` (placement tiers, fades), `src/config.js` `LABELS` |
+| Roles and impact | `src/graph/insights.js` (pure) |
+| What a component does | `src/ui/about.js` (summary, provenance, roles, impact, Copy for AI), `src/ui/code-view.js` (source view) |
 | Panels | `src/ui/*.js` |
 | Styles and markup | `src/index.html` (shadcn-style tokens on `:root`) |
 | Public JS API | `loadGraph(spec)` in `src/main.js`, exposed as `window.Atlas` |

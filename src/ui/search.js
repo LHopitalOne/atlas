@@ -22,7 +22,9 @@ export function buildIndex() {
   for (let r = 0; r < g.R; r++) a.push(['r', r, g.repoName[r]]);
   for (let d = 0; d < g.D; d++) a.push(['d', d, g.domName[d]]);
   for (let i = 0; i < g.N; i++) a.push(['n', i, g.name(i)]);
-  store.IDX = { items: a, low: a.map(x => x[2].toLowerCase()) };
+  // summaries make search work by meaning ("handles refunds"), not only by name
+  const about = a.map(x => (x[0] === 'n' && g.doc ? (g.doc(x[1]) || '').toLowerCase() : ''));
+  store.IDX = { items: a, low: a.map(x => x[2].toLowerCase()), about };
 }
 export function score(s, q) {
   const i = s.indexOf(q);
@@ -69,15 +71,43 @@ const ACTIONS = () => [
 const GROUP = h =>
   h[0] === 'a'
     ? 'Actions'
-    : h[0] === 'h'
-      ? 'Recent'
-      : h[0] === 'r'
-        ? 'Repositories'
-        : h[0] === 'd'
-          ? 'Domains'
-          : h[1] < store.G.S
-            ? 'Services'
-            : 'Endpoints';
+    : h[0] === 'm'
+      ? 'By what it does'
+      : h[0] === 'h'
+        ? 'Recent'
+        : h[0] === 'r'
+          ? 'Repositories'
+          : h[0] === 'd'
+            ? 'Domains'
+            : h[1] < store.G.S
+              ? 'Services'
+              : 'Endpoints';
+/** Items whose summary contains every word of the query (3+ letters), excluding those already found by name. */
+function meaningHits(q, byName) {
+  const words = q.split(/\s+/).filter(w => w.length >= 3);
+  if (!words.length) return [];
+  const { items, about } = store.IDX,
+    out = [];
+  for (let i = 0; i < items.length && out.length < 60; i++)
+    if (about[i] && !byName.has(i) && words.every(w => about[i].includes(w))) out.push([about[i].length, i]);
+  return out
+    .sort((a, b) => a[0] - b[0])
+    .slice(0, 6)
+    .map(([, i]) => ['m', items[i][1], items[i][2]]);
+}
+
+/** Summary snippet with the query words marked. */
+function snippet(text, q) {
+  const words = q.split(/\s+/).filter(w => w.length >= 3);
+  const lower = text.toLowerCase(),
+    at = Math.max(0, Math.min(...words.map(w => lower.indexOf(w)).filter(i => i >= 0)) - 24);
+  let t = (at ? '…' : '') + text.slice(at, at + 110) + (text.length > at + 110 ? '…' : '');
+  let html = esc(t);
+  for (const w of words)
+    html = html.replace(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), m => `<mark>${m}</mark>`);
+  return html;
+}
+
 function runSearch() {
   if (!store.G) return;
   const q = Q.value.trim().toLowerCase();
@@ -102,11 +132,15 @@ function runSearch() {
       if (top.length > 10) top.pop();
     }
   }
-  const order = ['Repositories', 'Domains', 'Services', 'Endpoints', 'Actions'];
+  const meaning = meaningHits(q, new Set(top.map(x => x[1])));
+  const order = ['Repositories', 'Domains', 'Services', 'Endpoints', 'By what it does', 'Actions'];
   ACTIONS().forEach((x, i) => {
     if (x.label.toLowerCase().includes(q)) top.push([0, -1, ['a', i, x.label]]);
   });
-  hits = top.map(x => (x[1] < 0 ? x[2] : it[x[1]])).sort((a, b) => order.indexOf(GROUP(a)) - order.indexOf(GROUP(b)));
+  hits = top
+    .map(x => (x[1] < 0 ? x[2] : it[x[1]]))
+    .concat(meaning)
+    .sort((a, b) => order.indexOf(GROUP(a)) - order.indexOf(GROUP(b)));
   act = 0;
   drawResults(q);
 }
@@ -140,6 +174,10 @@ function drawResults(q) {
       return;
     }
     if (t === 'h') id = +id;
+    if (t === 'm') {
+      h += `<div class="cmd-item two" role="option" id="opt-${n}" data-n="${n}" aria-selected="${n === act}">${dotHTML(id)}<span class="nm2"><span class="nm${id >= g.S ? ' mono' : ''}" ${nameAttrs}>${esc(nm)}</span><span class="desc">${snippet(g.doc(id), q)}</span></span><span class="hint">${ret}</span></div>`;
+      return;
+    }
     const p = q ? nm.toLowerCase().indexOf(q) : -1;
     const lab =
       p >= 0
@@ -171,7 +209,7 @@ function choose(n) {
     ACTIONS()[id].run();
     return;
   }
-  if (t === 'n' || t === 'h') {
+  if (t === 'n' || t === 'h' || t === 'm') {
     if (route.picking) {
       Q.blur();
       setRouteEnd(route.picking, { t: 's', id: store.G.own(id) });

@@ -14,6 +14,7 @@ import { announce } from '../ui/feedback.js';
 import { openInspector } from '../ui/inspector.js';
 import { pushRecent } from '../ui/search.js';
 import { $ } from '../util/dom.js';
+import { closeSource } from '../ui/code-view.js';
 
 let opener = null;
 export function pick(px, py, tolPx = 7) {
@@ -75,6 +76,10 @@ export function select(id, via) {
     return;
   }
   if (!inspOpen() && document.activeElement && !INSP.contains(document.activeElement)) opener = document.activeElement;
+  if (id !== store.selectedId) {
+    store.impactId = -1;
+    closeSource(false);
+  }
   store.selectedId = id;
   expanded.clear();
   pushRecent(id);
@@ -98,6 +103,8 @@ export function select(id, via) {
 export function deselect(restore) {
   if (store.selectedId < 0) return;
   store.selectedId = -1;
+  store.impactId = -1;
+  closeSource(false);
   store.placeDirty = true;
   app.classList.remove('has-insp');
   updateFocus();

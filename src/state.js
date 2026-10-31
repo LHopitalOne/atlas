@@ -17,6 +17,7 @@ export const store = {
   hover: null,
   hoverTO: 0,
   selectedId: -1,
+  impactId: -1,
   kbdMap: false,
   focusId: -1,
   focusT: 0,

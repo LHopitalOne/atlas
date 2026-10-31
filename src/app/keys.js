@@ -9,6 +9,7 @@ import { ov, Q } from '../dom.js';
 import { renderAttn } from '../ui/attention.js';
 import { setMode, toggleIssues } from '../ui/controls.js';
 import { renderRoute, startDirections } from '../ui/directions.js';
+import { closeSource, sourceOpen } from '../ui/code-view.js';
 
 const zoomStep = f => {
   const c = viewCenter();
@@ -16,7 +17,8 @@ const zoomStep = f => {
   if (store.kbdMap) keyHover();
 };
 function escape() {
-  if (route.picking) {
+  if (sourceOpen()) closeSource();
+  else if (route.picking) {
     route.picking = null;
     renderRoute();
   } else if (inspOpen()) deselect(true);

@@ -41,7 +41,8 @@ Built by `finish()` in `model/layout.js` from either generator. Node ids: servic
 | Positions | `PX PY PR` (node centre and radius), `RS RF` (service disc and footprint radius), `dcx dcy dR`, `rx ry rR` |
 | Territories | `dHull rHull` (flat convex hulls), `dTop rTop` (label anchors) |
 | Lookup | `grid` (uniform CSR grid for picking), `bounds`, `svcOrder domOrder repoOrder` (label priority), `medRF` etc. |
-| Meta | `src` (`'self'` or a size), `meta` (labels from a spec), `tGen tLay bytes` |
+| Descriptions | `doc(i)`, `sig(i)`, `loc(i)`, `end(i)`: summary, signature, location, last line (from the spec, or simulated for demo graphs in `model/describe.js`) |
+| Meta | `src` (`'self'` or a size), `meta` (labels, `commit`, `docSource`, `sourceBundle`), `tGen tLay bytes` |
 
 ## State
 
@@ -73,6 +74,13 @@ priority, so labels don't shuffle. Each label fades on its own clock. Tuning liv
 `either: true` it also walks calls backwards, which can join two services only because both use a third; the
 Directions panel names such weak links. `app/route.js` turns repository and domain ends into service sets, groups
 steps at the chosen detail, and builds the route's geometry.
+
+## Understanding a component
+
+`graph/insights.js` (pure) computes roles (`rolesOf`) and impact (`impactOf`: every transitive caller, nearest first,
+with the pair that reached each). `ui/about.js` renders the summary, provenance, roles, signature and impact, and builds
+the "Copy for AI" text. `ui/code-view.js` shows a definition's lines from `meta.sourceBundle`. Impact on the map is a
+focus mode: `store.impactId` makes `computeFocus` add the affected services and chains.
 
 ## URL
 

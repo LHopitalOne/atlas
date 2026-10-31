@@ -285,7 +285,7 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 .ins-title:focus-visible{box-shadow:none;outline:2px solid color-mix(in srgb,var(--ring) 55%,transparent);outline-offset:2px;border-radius:4px}
 .kindrow{display:flex;align-items:center;gap:8px;margin-top:8px}
 .close{position:absolute;top:10px;right:10px}
-.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:14px -4px 0}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin:14px -4px 0}
 .act{display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 2px;border-radius:8px;font-size:12px;font-weight:500;color:var(--muted-foreground);transition:color .15s ease}
 .act .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--border);color:var(--foreground);background:var(--background);transition:background-color .15s ease,transform 160ms var(--ease-out)}
 .act.primary .ic{background:var(--route);border-color:var(--route);color:#fff}
@@ -373,6 +373,61 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
   .btn:active,.dock button:active,.toggle-group button:active{transform:none}
   .spin{animation-duration:1.6s}
 }
+
+/* ---------- about: what it does, roles, signature, impact ---------- */
+.about{display:grid;gap:10px;padding:14px 16px 16px;border-bottom:1px solid var(--border)}
+.about-text{margin:0;font-size:13.5px;line-height:1.5;color:var(--foreground);text-wrap:pretty}
+.about-text.none{color:var(--muted-foreground)}
+.prov{font-size:11.5px;color:var(--muted-foreground);margin-top:-4px}
+.roles{display:flex;flex-wrap:wrap;gap:6px}
+.role{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;border:1px solid var(--border);font-size:12px;font-weight:500;color:var(--foreground);cursor:help}
+.role span[aria-hidden]{font-size:10px;color:var(--muted-foreground)}
+.role-hub,.role-bridge{border-color:color-mix(in srgb,var(--route) 45%,var(--border))}
+.sig{margin:0;padding:8px 10px;border-radius:8px;background:var(--muted);font:400 12px/1.5 var(--mono);color:var(--foreground);white-space:pre-wrap;word-break:break-word}
+.locrow{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted-foreground)}
+.linkbtn{all:unset;cursor:pointer;font-size:12px;font-weight:500;color:var(--foreground);border-radius:4px;padding:2px 4px;margin:-2px -4px}
+.linkbtn:focus-visible{box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 55%,transparent)}
+@media (hover:hover) and (pointer:fine){ .linkbtn:hover{text-decoration:underline;text-underline-offset:3px} }
+.impact-text{margin:0 0 10px;font-size:13px;line-height:1.5;color:var(--muted-foreground)}
+.impact-text b{color:var(--foreground);font-weight:600;font-variant-numeric:tabular-nums}
+.btn-sm{height:28px;padding:0 10px;font-size:12.5px}
+.btn[aria-pressed="true"]{background:var(--accent);border-color:var(--ring)}
+.act[disabled]{opacity:.45;cursor:not-allowed}
+
+/* ---------- search by meaning ---------- */
+.cmd-item.two{align-items:flex-start;padding-top:7px;padding-bottom:7px}
+.nm2{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.nm2 .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmd-item .desc{font-size:12px;line-height:1.4;color:var(--muted-foreground);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cmd-item .desc mark{background:none;color:var(--foreground);font-weight:600}
+
+/* ---------- source view ---------- */
+.codeview{position:absolute;top:64px;right:384px;bottom:12px;width:min(720px,calc(100vw - 408px));z-index:7;display:flex;flex-direction:column;overflow:hidden;
+  opacity:0;transform:translateX(12px);transition:opacity 180ms var(--ease-out),transform 180ms var(--ease-out)}
+.codeview.on{opacity:1;transform:none;transition-duration:220ms}
+.codeview[hidden]{display:none}
+.cv-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 8px 16px;border-bottom:1px solid var(--border)}
+.cv-title{display:flex;align-items:baseline;gap:10px;min-width:0;font-size:13px;font-weight:500}
+.cv-title .mono{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cv-range{color:var(--muted-foreground);font-size:12px;white-space:nowrap}
+.cv-prov{display:flex;align-items:center;gap:7px;padding:7px 16px;font-size:11.5px;color:var(--muted-foreground);border-bottom:1px solid var(--border);cursor:help}
+.dot-live{width:6px;height:6px;border-radius:50%;background:var(--route);box-shadow:0 0 0 3px color-mix(in srgb,var(--route) 22%,transparent)}
+.cv-body{flex:1;overflow:auto;outline:none}
+.cv-body:focus-visible{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--ring) 55%,transparent)}
+.code{margin:0;padding:8px 0 16px;font:400 12.5px/1.6 var(--mono);color:var(--foreground);tab-size:2}
+.ln{display:flex;padding-right:16px}
+.ln .no{flex:none;width:52px;padding-right:14px;text-align:right;color:var(--muted-foreground);opacity:.6;user-select:none}
+.ln .tx{white-space:pre}
+.ln.def{background:color-mix(in srgb,var(--route) 9%,transparent)}
+.ln.def .no{opacity:1;color:var(--foreground);box-shadow:inset 2px 0 0 var(--route)}
+.tc{color:var(--muted-foreground);font-style:italic}
+.ts{color:oklch(0.78 0.11 150)}
+.tn{color:oklch(0.8 0.1 70)}
+.tk{color:oklch(0.76 0.12 290)}
+@media (prefers-color-scheme: light){ .ts{color:oklch(0.5 0.12 150)} .tn{color:oklch(0.55 0.12 60)} .tk{color:oklch(0.5 0.15 290)} }
+.cut{padding:8px 16px 16px 66px;font-size:12px;color:var(--muted-foreground)}
+@media (max-width:760px){ .codeview{inset:0;width:auto;right:0;top:0;bottom:0;border-radius:0;z-index:30} }
+@media (prefers-reduced-motion: reduce){ .codeview{transition:none} }
 </style>
 </head>
 <body>
@@ -445,6 +500,8 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
     </div>
   </div>
 
+  <section class="codeview card" id="code" role="dialog" aria-label="Source code" hidden></section>
+
   <aside class="inspector card" id="insp" aria-labelledby="insTitle"></aside>
   <div class="toast card" id="toast" aria-hidden="true"></div>
 
@@ -453,6 +510,7 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 </div>
 
 <script type="application/json" id="selfGraph">__SELF_GRAPH__</script>
+<script type="application/json" id="selfSource">__SELF_SOURCE__</script>
 <script>
 __BUNDLE__
 </script>

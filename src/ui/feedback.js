@@ -11,8 +11,9 @@ export function announce(t) {
   }, 120);
 }
 // clipboard with a fallback for sandboxed frames where the async API is blocked
-export function copyText(t) {
-  const done = () => toast(`Copied ${t}`);
+/** Copy text to the clipboard; the toast shows `label` (or the text itself, if short). */
+export function copyText(t, label) {
+  const done = () => toast(label || `Copied ${t}`);
   const fallback = () => {
     const ta = document.createElement('textarea');
     ta.value = t;

@@ -48,6 +48,26 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
 - **Off-screen neighbours get edge chips.** These are arrows with counts at the screen edge, pointing to hidden
   connections of the selection, and clicking one reveals them.
 
+## Understanding a component
+
+- **The inspector answers "what is this, and should I care?" first.** Order: what it does, where that text came from,
+  roles, signature and location, then stats, impact and connections. Why: people decide from the summary; the lists are
+  for checking.
+- **Every summary says where it came from:** a doc comment, an AI summary (with the commit), or simulated demo text.
+  Why: people and AI agents must know how far to trust it, and AI summaries read by other AIs compound mistakes.
+- **Roles are computed from the graph, never written by AI.** Entry point (nothing calls it), hub (top 5% by callers,
+  at least 5), bridge (called from another repository and calls on into a repository that itself calls onward, so
+  using a library does not count), dead end (calls nothing), isolated.
+- **Impact means every service that calls it, directly or through others.** "Show on map" lights up those services and
+  the call chains that lead to them. Why: it is the question asked before every change, and the map shows it best.
+- **Code is shown, never stored.** The panel shows the signature; "View source" opens a wider view of the definition,
+  fetched live from GitHub at the indexed commit with the viewer's own access, labelled "not stored". The prototype
+  bundles its own source to stand in for GitHub.
+- **AI agents get the same answers as people.** "Copy for AI" gives identity, summary with its source, signature, roles,
+  impact, connections, location and a map link, as plain Markdown.
+- **Search works by meaning as well as by name.** Matches on summaries appear in their own group, "By what it does",
+  with the matching words marked. The product would use embeddings of the summaries (not of the code).
+
 ## Directions
 
 - **Either end can be a repository, domain, service or endpoint.** Typing or clicking works in both fields. After the

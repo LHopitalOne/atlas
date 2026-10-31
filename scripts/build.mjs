@@ -18,10 +18,12 @@ const result = await build({
 const bundle = result.outputFiles[0].text.replaceAll('</script', '<\\/script');
 if (!existsSync(graphFile)) throw new Error(`Graph file not found: ${graphFile}`);
 const graph = readFileSync(graphFile, 'utf8').replaceAll('</', '<\\/');
+const sourceFile = 'generated/self-source.json';
+const source = !graphArg && existsSync(sourceFile) ? readFileSync(sourceFile, 'utf8').replaceAll('</', '<\\/') : '{}';
 
-let html = readFileSync('src/index.html', 'utf8')
-  .replace('__SELF_GRAPH__', () => graph)
-  .replace('__BUNDLE__', () => bundle);
+// one pass over the template: inserted text is never scanned again (the source bundle contains index.html itself)
+const parts = { __SELF_GRAPH__: graph, __SELF_SOURCE__: source, __BUNDLE__: bundle };
+let html = readFileSync('src/index.html', 'utf8').replace(/__SELF_GRAPH__|__SELF_SOURCE__|__BUNDLE__/g, m => parts[m]);
 if (offline) {
   const d3 = readFileSync('node_modules/d3-hierarchy/dist/d3-hierarchy.min.js', 'utf8').replaceAll(
     '</script',

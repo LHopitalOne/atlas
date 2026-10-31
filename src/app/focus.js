@@ -6,6 +6,9 @@ import { route, store } from '../state.js';
 import { requestRender } from '../render/frame.js';
 import { LY, patch, upload } from '../render/gl.js';
 import { put4, theme } from '../render/theme.js';
+import { impactOf, pairContract } from '../graph/insights.js';
+import { fitNodes, flyTo } from './camera.js';
+import { announce } from '../ui/feedback.js';
 
 export function computeFocus(id) {
   const g = store.G;
@@ -38,6 +41,15 @@ export function computeFocus(id) {
       add(g.own(a));
       add(g.own(b));
     }
+  if (store.impactId === id && id < g.S) {
+    // impact view: everything that could break, with the call chains that lead to it
+    const im = impactOf(g, id);
+    for (const t of im.services) {
+      add(t);
+      const e = pairContract(g, im.via[t]);
+      if (e >= 0) store.focusEdges.push(e);
+    }
+  }
   for (let j = 0; j < store.A.svcs.n; j++) store.A.svcs.fl[j * 2] = 0;
   for (let j = 0; j < store.A.leaves.n; j++) store.A.leaves.fl[j * 2] = 0;
   for (const i of store.focusList) {
@@ -151,4 +163,27 @@ export function setHover(h, immediate) {
   requestRender();
   clearTimeout(store.hoverTO);
   store.hoverTO = setTimeout(updateFocus, immediate || store.selectedId >= 0 ? 0 : 110);
+}
+
+/** Show or hide, on the map, everything a change to service id could affect. */
+export function toggleImpact(id) {
+  store.impactId = store.impactId === id ? -1 : id;
+  store.focusId = -1;
+  updateFocus();
+  const btn = document.querySelector('[data-impact]');
+  if (btn) {
+    const on = store.impactId === id;
+    btn.setAttribute('aria-pressed', String(on));
+    btn.textContent = on ? 'Hide on map' : 'Show on map';
+  }
+  if (store.impactId === id)
+    flyTo(
+      fitNodes(
+        store.focusList.filter(i => i < store.G.S),
+        1.6,
+      ),
+    );
+  announce(
+    store.impactId === id ? `Showing everything a change to ${store.G.name(id)} could affect.` : 'Impact view off.',
+  );
 }
