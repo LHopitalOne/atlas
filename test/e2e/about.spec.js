@@ -4,7 +4,10 @@ import { test, expect } from './fixtures.js';
 async function selectService(page, name) {
   await page.keyboard.press('/');
   await page.keyboard.type(name);
-  await page.locator('#results [role="option"]', { hasText: new RegExp(`^${name}`) }).first().click();
+  await page
+    .locator('#results [role="option"]', { hasText: new RegExp(`^${name}`) })
+    .first()
+    .click();
   await expect(page.locator('#insTitle')).toHaveText(name);
 }
 
@@ -26,7 +29,9 @@ test('impact: how far a change reaches, and showing it on the map', async ({ atl
   await expect(atlas.locator('[data-impact]')).toHaveAttribute('aria-pressed', 'false');
 });
 
-test('source view: definition lines marked, labelled as live and not stored, Escape closes only it', async ({ atlas }) => {
+test('source view: definition lines marked, labelled as live and not stored, Escape closes only it', async ({
+  atlas,
+}) => {
   await atlas.open();
   await selectService(atlas, 'routeSearch');
   await atlas.click('.actions [data-source]');
@@ -40,11 +45,24 @@ test('source view: definition lines marked, labelled as live and not stored, Esc
 
 test('Copy for AI copies a structured description', async ({ atlas }) => {
   await atlas.open();
-  await atlas.evaluate(() => { navigator.clipboard.writeText = t => { window.__copied = t; return Promise.resolve(); }; });
+  await atlas.evaluate(() => {
+    navigator.clipboard.writeText = t => {
+      window.__copied = t;
+      return Promise.resolve();
+    };
+  });
   await selectService(atlas, 'routeSearch');
   await atlas.click('[data-copy-ai]');
   const text = await atlas.evaluate(() => window.__copied);
-  for (const part of ['# routeSearch', 'Summary:', 'Signature:', 'Impact:', 'Used by:', 'Source: graph/route-search.js']) expect(text).toContain(part);
+  for (const part of [
+    '# routeSearch',
+    'Summary:',
+    'Signature:',
+    'Impact:',
+    'Used by:',
+    'Source: graph/route-search.js',
+  ])
+    expect(text).toContain(part);
 });
 
 test('search finds things by what they do', async ({ atlas }) => {
