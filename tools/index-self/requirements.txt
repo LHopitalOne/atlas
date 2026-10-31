@@ -1,0 +1,4 @@
+tree-sitter==0.26.0
+tree-sitter-javascript
+tree-sitter-css
+tree-sitter-html

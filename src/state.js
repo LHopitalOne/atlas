@@ -1,0 +1,66 @@
+/**
+ * Shared mutable application state. Anything read or written by more than one module lives here;
+ * state used by a single module stays private to that module.
+ */
+export const store = {
+  gpuBytes: 0,
+  G: null,
+  W: 0,
+  H: 0,
+  dpr: 1,
+  KMIN: 0.01,
+  KMAX: 14,
+  colorMode: 'health',
+  userColor: false,
+  issuesOnly: false,
+  attnOpen: false,
+  hover: null,
+  hoverTO: 0,
+  selectedId: -1,
+  kbdMap: false,
+  focusId: -1,
+  focusT: 0,
+  focusGoal: 0,
+  dimT: 0,
+  dimGoal: 0,
+  inF: null,
+  focusList: [],
+  focusEdges: [],
+  anim: null,
+  introT0: 0,
+  introP: 1,
+  offHits: [],
+  A: {},
+  repoRank: null,
+  cpuMs: 0,
+  perfAt: 0,
+  drawn: 0,
+  placed: new Map(),
+  labelA: new Map(),
+  labelSide: new Map(),
+  placeDirty: true,
+  labelsAnimating: false,
+  whereKey: '',
+  viaKeys: false,
+  IDX: null,
+  recent: [],
+  buildInfo: { t: 0, bytes: 0 },
+};
+
+export const cam = { x: 0, y: 0, k: 1 };
+export const stOn = [1, 1, 1, 1];
+export const expanded = new Set();
+export const route = {
+  from: null,
+  to: null,
+  avoid: false,
+  links: 'calls',
+  detail: 'service',
+  detailSet: false,
+  picking: null,
+  path: [],
+  hops: [],
+  msg: '',
+  note: '',
+  hl: -1,
+};

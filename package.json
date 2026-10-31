@@ -1,0 +1,27 @@
+{
+  "name": "atlas",
+  "version": "1.0.0",
+  "description": "Zoomable WebGL2 map of a service graph, built to a single HTML file.",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs && node scripts/build.mjs --offline",
+    "test": "node --test test/*.test.js",
+    "test:e2e": "playwright test",
+    "lint": "eslint src test scripts && prettier --check \"src/**/*.js\" \"test/**/*.js\" \"scripts/**/*.mjs\"",
+    "check": "npm run lint && npm test && npm run build && npm run test:e2e",
+    "index:self": "tools/index-self/run.sh",
+    "format": "prettier --write \"src/**/*.js\" \"test/**/*.js\" \"scripts/**/*.mjs\""
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@playwright/test": "^1.48.2",
+    "@sourcegraph/scip-typescript": "^0.5.2",
+    "d3-hierarchy": "^3.1.2",
+    "esbuild": "^0.24.0",
+    "eslint": "^9.15.0",
+    "globals": "^15.12.0",
+    "prettier": "^3.3.3"
+  },
+  "private": true
+}

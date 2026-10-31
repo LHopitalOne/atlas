@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<title>Atlas – service map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3-hierarchy@3.1.2/dist/d3-hierarchy.min.js"></script>
+<style>
+/* Tokens: shadcn/ui neutral theme (new-york v4) with Vercel's black canvas */
+:root{
+  --map:#fafafa; --background:#ffffff; --foreground:#0a0a0a; --card:#ffffff; --raised:#ffffff;
+  --muted:#f5f5f5; --muted-foreground:#737373; --accent:#f5f5f5; --border:#e5e5e5; --input:#e5e5e5; --ring:#a1a1a1;
+  --primary:#171717; --primary-foreground:#fafafa;
+  --halo:#fafafa; --edge:rgba(0,0,0,.13); --grid:rgba(0,0,0,.075); --faint:#d4d4d4; --node:#404040;
+  --warning:#d97706; --destructive:#e7000b; --inferred:#7c3aed; --route:#0070f3;
+  --r0:#0070f3; --r1:#7928ca; --r2:#eb367f; --r3:#0d9488; --r4:#65a30d; --other:#a3a3a3;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 16px -6px rgba(0,0,0,.08);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --map:#000000; --background:#0a0a0a; --foreground:#fafafa; --card:#0a0a0a; --raised:#262626;
+    --muted:#171717; --muted-foreground:#a1a1a1; --accent:#262626; --border:rgba(255,255,255,.1); --input:rgba(255,255,255,.15); --ring:#737373;
+    --primary:#ededed; --primary-foreground:#0a0a0a;
+    --halo:#000000; --edge:rgba(255,255,255,.15); --grid:rgba(255,255,255,.075); --faint:#404040; --node:#d4d4d4;
+    --warning:#fbbf24; --destructive:#ff6467; --inferred:#a78bfa; --route:#3291ff;
+    --r0:#3291ff; --r1:#a855f7; --r2:#f472b6; --r3:#2dd4bf; --r4:#a3e635; --other:#525252;
+    --shadow:0 0 0 1px rgba(0,0,0,.5),0 10px 30px -10px rgba(0,0,0,.8);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --map:#000000; --background:#0a0a0a; --foreground:#fafafa; --card:#0a0a0a; --raised:#262626;
+  --muted:#171717; --muted-foreground:#a1a1a1; --accent:#262626; --border:rgba(255,255,255,.1); --input:rgba(255,255,255,.15); --ring:#737373;
+  --primary:#ededed; --primary-foreground:#0a0a0a;
+  --halo:#000000; --edge:rgba(255,255,255,.15); --grid:rgba(255,255,255,.075); --faint:#404040; --node:#d4d4d4;
+  --warning:#fbbf24; --destructive:#ff6467; --inferred:#a78bfa; --route:#3291ff;
+  --r0:#3291ff; --r1:#a855f7; --r2:#f472b6; --r3:#2dd4bf; --r4:#a3e635; --other:#525252;
+  --shadow:0 0 0 1px rgba(0,0,0,.5),0 10px 30px -10px rgba(0,0,0,.8);
+  color-scheme:dark;
+}
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --radius:10px;
+  /* Emil Kowalski's curves: strong ease-out for UI, strong ease-in-out for on-screen movement, iOS drawer */
+  --ease-out:cubic-bezier(.23,1,.32,1); --ease-in-out:cubic-bezier(.77,0,.175,1); --ease-drawer:cubic-bezier(.32,.72,0,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%;background:var(--map);scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;height:100%;background:var(--map);color:var(--foreground);font:14px/1.45 var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden;-webkit-tap-highlight-color:transparent}
+button,select,input{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulation}
+:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 55%,transparent)}
+ /* scrollbars: thin, rounded, neutral; standard properties only where WebKit's pseudo-elements don't exist */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--foreground) 16%,transparent);border-radius:999px;border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background-color:color-mix(in srgb,var(--foreground) 30%,transparent)}
+::-webkit-scrollbar-thumb:active{background-color:color-mix(in srgb,var(--foreground) 40%,transparent)}
+@supports not selector(::-webkit-scrollbar){ *{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--foreground) 22%,transparent) transparent} }
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+#app{position:relative;height:100%;overflow:hidden}
+#gl,#ov{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ov{touch-action:none;cursor:grab}
+#ov:focus-visible{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--ring) 70%,transparent)}
+#ov.dragging{cursor:grabbing}
+#ov.pointing{cursor:pointer}
+
+/* ---------- primitives (Card, Button, Badge, ToggleGroup, Kbd) ---------- */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;border-radius:6px;font-weight:500;font-size:13px;white-space:nowrap;border:1px solid transparent;transition:transform 160ms var(--ease-out),background-color .15s ease,color .15s ease,border-color .15s ease,opacity .15s ease}
+.btn:active,.dock button:active,.toggle-group button:active{transform:scale(.97)}
+.btn svg{flex:none}
+.btn-outline{border-color:var(--border);background:var(--background)}
+
+.btn-ghost{color:var(--muted-foreground)}
+
+.btn-primary{background:var(--primary);color:var(--primary-foreground)}
+
+.btn-icon{width:32px;padding:0}
+.btn-sm{height:28px;padding:0 10px;font-size:12.5px}
+.btn[aria-pressed="true"].btn-issues{background:color-mix(in srgb,var(--destructive) 12%,transparent);border-color:color-mix(in srgb,var(--destructive) 35%,transparent);color:var(--destructive)}
+.badge{display:inline-flex;align-items:center;justify-content:center;gap:4px;height:20px;min-width:20px;padding:0 6px;border-radius:6px;font-size:11.5px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap;border:1px solid transparent}
+.badge-secondary{background:var(--muted);color:var(--foreground)}
+.badge-outline{border-color:var(--border);color:var(--muted-foreground)}
+.badge-warning{background:color-mix(in srgb,var(--warning) 14%,transparent);color:var(--warning)}
+.badge-destructive{background:color-mix(in srgb,var(--destructive) 13%,transparent);color:var(--destructive)}
+.badge-inferred{background:color-mix(in srgb,var(--inferred) 14%,transparent);color:var(--inferred)}
+.toggle-group{position:relative;display:inline-flex;background:var(--muted);border-radius:8px;padding:3px;gap:2px;isolation:isolate}
+.toggle-group button{position:relative;z-index:1;height:26px;padding:0 10px;border-radius:5px;color:var(--muted-foreground);font-weight:500;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;transition:color .15s ease,transform 160ms var(--ease-out)}
+.toggle-group button[aria-checked="true"]{color:var(--foreground)}
+/* sliding thumb (after 21st.dev segmented controls by interior.dev and Klyv-UI) */
+.toggle-group .thumb{position:absolute;z-index:0;top:3px;left:0;height:26px;width:0;border-radius:5px;background:var(--raised);box-shadow:0 1px 2px rgba(0,0,0,.12),0 0 0 1px var(--border);transition:transform 200ms var(--ease-in-out),width 200ms var(--ease-in-out);pointer-events:none}
+.kbd{display:inline-grid;place-items:center;height:20px;min-width:20px;padding:0 5px;border-radius:4px;border:1px solid var(--border);background:var(--muted);color:var(--muted-foreground);font:500 11px var(--sans)}
+.select{height:32px;border-radius:6px;border:1px solid var(--input);background:var(--background);color:var(--foreground);padding:0 26px 0 10px;font-size:13px;font-weight:500;appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted-foreground) 50%),linear-gradient(135deg,var(--muted-foreground) 50%,transparent 50%);background-position:calc(100% - 13px) 14px,calc(100% - 9px) 14px;background-size:4px 4px;background-repeat:no-repeat}
+.sep-v{width:1px;height:20px;background:var(--border);flex:none}
+@media (hover:none){ .kbd{display:none} }
+
+/* glyphs */
+.g{display:inline-block;flex:none;justify-self:center;background:var(--c,var(--muted-foreground))}
+.g.ep{width:7px;height:7px;border-radius:50%}
+.g.ev{width:6px;height:6px;transform:rotate(45deg)}
+.g.md{width:6.5px;height:6.5px;border-radius:1.5px}
+.g.sv{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 2px var(--card)}
+.g.tr{width:12px;height:9px;border-radius:3px;background:transparent;border:1.5px solid var(--c)}
+
+/* ---------- header ---------- */
+.tl{position:absolute;top:12px;left:12px;display:flex;gap:8px;z-index:8;max-width:calc(100% - 24px)}
+.brand{display:flex;align-items:center;gap:10px;padding:0 14px 0 12px;height:44px}
+.brand-name{font-weight:600;font-size:15px;letter-spacing:-.02em}
+.brand-sub{color:var(--muted-foreground);font-size:13px;display:flex;align-items:center;gap:10px}
+.brand-sub::before{content:"/";color:var(--faint);font-size:18px;font-weight:300}
+.search{position:relative;display:flex;align-items:center;gap:8px;width:340px;height:44px;padding:0 8px 0 12px;min-width:0;transition:border-color .15s,box-shadow .15s}
+.search:focus-within{border-color:var(--ring);box-shadow:var(--shadow),0 0 0 3px color-mix(in srgb,var(--ring) 45%,transparent)}
+.search svg{flex:none;color:var(--muted-foreground)}
+.search input{flex:1;min-width:0;border:0;background:none;font-size:14px;outline:none;height:100%;box-shadow:none}
+.search input::placeholder{color:var(--muted-foreground)}
+.search input::-webkit-search-cancel-button{display:none}
+.cmd{position:absolute;top:50px;left:-1px;right:-1px;padding:4px;max-height:min(460px,60vh);overflow:auto;overscroll-behavior:contain}
+.cmd[hidden]{display:none}
+.cmd-h{padding:8px 8px 4px;color:var(--muted-foreground);font-size:11.5px;font-weight:500}
+.cmd-item{display:grid;grid-template-columns:14px minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;text-align:left;padding:7px 8px;border-radius:6px;font-size:13.5px}
+.cmd-item[aria-selected="true"]{background:var(--accent)}
+.cmd-item .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmd-item .nm.mono{font:400 12.5px var(--mono)}
+.cmd-item .sub{color:var(--muted-foreground);font-size:12px;white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.cmd-item mark{background:none;color:inherit;font-weight:600}
+.cmd-item .hint{display:flex;gap:4px;align-items:center;height:20px;line-height:1}
+.cmd-item .hint .kbd{height:18px;line-height:16px;font-size:10.5px}
+.cmd-item .nm{line-height:20px}
+.cmd-item .ret{visibility:hidden}
+.cmd-item[aria-selected="true"] .ret{visibility:visible}
+.cmd-item .ico{display:grid;place-items:center;color:var(--muted-foreground)}
+.cmd-empty{padding:20px 12px;text-align:center;color:var(--muted-foreground);font-size:13px}
+
+.toolbar{position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:8px;height:44px;padding:0 6px;z-index:6}
+.count{color:var(--muted-foreground);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;margin-left:8px}
+.count b{color:var(--foreground);font-weight:500}
+.scale-select{display:none}
+
+/* ---------- left panels: directions, needs attention ---------- */
+.lpanel{position:absolute;top:64px;left:12px;width:384px;z-index:5;display:none;flex-direction:column;max-height:calc(100% - 64px - 76px);overflow:hidden}
+/* one scroll area per panel, so a summary or note can never be clipped */
+.lp-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
+.lpanel > .scroll{flex:1;min-height:0}
+.lpanel.on{display:flex}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 8px 10px 16px}
+.ph h2{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em}
+.ph p{margin:2px 0 0;color:var(--muted-foreground);font-size:12.5px}
+.rt-fields{display:grid;grid-template-columns:16px 1fr 32px;gap:6px 10px;align-items:center;padding:4px 10px 12px 16px}
+.rt-pin{width:10px;height:10px;border-radius:50%;justify-self:center}
+.rt-pin.a{border:2.5px solid var(--route)}
+.rt-pin.b{background:var(--foreground);border-radius:50% 50% 50% 0;transform:rotate(-45deg)}
+.rt-in{width:100%;height:34px;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--background);color:var(--foreground);font-size:13px;font-weight:500;outline:none;transition:border-color .15s ease,box-shadow .15s ease}
+.rt-in::placeholder{color:var(--muted-foreground);font-weight:400}
+.rt-in:focus,.rt-in.picking{border-color:var(--route);box-shadow:0 0 0 3px color-mix(in srgb,var(--route) 25%,transparent)}
+.rt-ctl{display:grid;gap:12px;padding:12px 16px 14px;border-top:1px solid var(--border)}
+.rt-row{display:grid;gap:6px}
+.rt-lab{color:var(--muted-foreground);font-size:12px;font-weight:500}
+.rt-ctl .toggle-group{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;width:100%}
+.rt-ctl .toggle-group button{height:28px;padding:0 6px;font-size:12.5px}
+.rt-ctl .toggle-group button[aria-checked="true"]{background:var(--raised);box-shadow:0 1px 2px rgba(0,0,0,.12),0 0 0 1px var(--border)}
+.rt-legend{display:grid;gap:6px;margin:10px 16px 0;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;color:var(--muted-foreground)}
+.rt-legend .lg{display:grid;grid-template-columns:30px 1fr;align-items:center;gap:10px}
+.rt-legend b{color:var(--foreground);font-weight:500}
+.rt-legend svg{display:block}
+.rt-note b{color:var(--foreground);font-weight:500}
+.step > span:last-child{min-width:0}
+.rt-note ul{margin:6px 0 0;padding-left:16px}
+.rt-note li + li{margin-top:4px}
+.rt-note{margin:8px 16px 0;padding:8px 10px;border-radius:6px;background:var(--muted);color:var(--muted-foreground);font-size:12.5px}
+.rt-sug{margin:-4px 16px 10px 42px;padding:4px;border:1px solid var(--border);border-radius:8px;background:var(--card);max-height:260px;overflow:auto;overscroll-behavior:contain}
+.rt-sug[hidden]{display:none}
+.rt-sug .cmd-empty{padding:12px 8px}
+.rt-f{height:32px;display:flex;align-items:center;padding:0 10px;border-radius:6px;border:1px solid var(--input);background:var(--background);font-size:13px;font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:left}
+.rt-f.wait{color:var(--muted-foreground);font-weight:400}
+.rt-f.picking{border-color:var(--route);box-shadow:0 0 0 3px color-mix(in srgb,var(--route) 25%,transparent)}
+.rt-swap{grid-row:1/span 2;grid-column:3}
+.rt-opts{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--border)}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;min-height:24px}
+.chk input{accent-color:var(--primary);width:16px;height:16px;margin:0}
+.rt-sum{padding:12px 16px 8px;border-top:1px solid var(--border)}
+.rt-sum .big{font-size:20px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.rt-sum .sm{color:var(--muted-foreground);font-size:12.5px;margin-top:2px}
+.scroll{overflow:auto;overscroll-behavior:contain}
+.rt-steps{padding:4px 8px 12px}
+.step{display:grid;grid-template-columns:18px 1fr;gap:10px;padding:7px 8px;border-radius:6px;width:100%;text-align:left}
+.step:hover,.step:focus-visible{background:var(--accent)}
+.step .rail{position:relative;display:flex;justify-content:center}
+.step .rail i{width:9px;height:9px;border-radius:50%;background:var(--route);margin-top:4px;box-shadow:0 0 0 3px var(--card)}
+.step .rail::before{content:"";position:absolute;top:-10px;bottom:-14px;width:2px;background:var(--route);opacity:.3}
+.step:first-child .rail::before{top:8px}
+.step:last-child .rail::before{bottom:auto;height:0}
+.step .sn{font-weight:500;font-size:13px}
+.step .sd{display:flex;align-items:center;gap:6px;margin-top:3px;color:var(--muted-foreground);font:400 11.5px var(--mono);min-width:0}
+.step .sd span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- legend ---------- */
+.legend{position:absolute;left:12px;bottom:12px;width:236px;z-index:4;padding:0}
+.legend summary{list-style:none;display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 12px;font-size:13px;font-weight:500;border-radius:var(--radius)}
+.legend summary::-webkit-details-marker{display:none}
+.legend summary svg{color:var(--muted-foreground);transition:transform 150ms var(--ease-out)}
+.legend[open] summary svg{transform:rotate(180deg)}
+.lg-body{padding:0 8px 10px}
+.lg-h{color:var(--muted-foreground);font-size:11.5px;font-weight:500;margin:4px 6px 4px}
+.lg-group + .lg-group{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.lg-row{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:8px;width:100%;text-align:left;padding:5px 6px;border-radius:6px;font-size:13px;min-height:28px}
+.lg-row:hover{background:var(--accent)}
+.lg-row[aria-pressed="false"]{opacity:.4}
+.lg-row .n{color:var(--muted-foreground);font-variant-numeric:tabular-nums;font-size:12px}
+.lg-row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sw-line{width:20px;height:0;border-top:2px solid var(--c)}
+.sw-line.dash{border-top-style:dashed}
+.sw-dot{width:10px;height:10px;border-radius:50%;background:var(--c);justify-self:center}
+.shapes{display:flex;flex-wrap:wrap;gap:6px 14px;padding:4px 6px 0;color:var(--muted-foreground);font-size:12px}
+.shapes span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.hgrad{height:6px;border-radius:3px;margin:6px 6px 4px;background:linear-gradient(90deg,var(--node),var(--warning) 50%,var(--destructive))}
+.hgrad-l{display:flex;justify-content:space-between;color:var(--muted-foreground);font-size:11.5px;margin:0 6px}
+
+/* ---------- bottom right ---------- */
+.br{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:4;transition:transform 180ms var(--ease-out)}
+.has-insp .br{transition:transform 260ms var(--ease-drawer)}
+.has-insp .br{transform:translateX(-372px)}
+/* map dock with one shared tooltip that slides between buttons (after 21st.dev Toolbar Dock by Ruixen UI) */
+.navcard{width:208px;padding:0;overflow:visible}
+.dock{position:relative;display:flex;align-items:center;justify-content:space-between;padding:4px;border-bottom:1px solid var(--border)}
+.dock button{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;color:var(--muted-foreground);transition:background-color .15s ease,color .15s ease,transform 160ms var(--ease-out)}
+.dock button:focus-visible{background:var(--accent);color:var(--foreground)}
+.zoom-ic{display:grid;place-items:center;width:22px;height:34px;margin-left:2px;color:var(--muted-foreground);flex:none}
+.zslider{--p:50%;flex:1;min-width:64px;height:34px;margin:0 8px 0 2px;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer;touch-action:none}
+.zslider::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:linear-gradient(to right,color-mix(in srgb,var(--foreground) 55%,transparent) 0 var(--p),var(--border) var(--p) 100%)}
+.zslider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;margin-top:-6px;border-radius:50%;background:var(--foreground);border:3px solid var(--card);box-shadow:0 0 0 1px var(--border);transition:transform 160ms var(--ease-out)}
+.zslider:active::-webkit-slider-thumb{transform:scale(1.15)}
+.zslider::-moz-range-track{height:2px;border-radius:2px;background:var(--border)}
+.zslider::-moz-range-progress{height:2px;border-radius:2px;background:color-mix(in srgb,var(--foreground) 55%,transparent)}
+.zslider::-moz-range-thumb{width:10px;height:10px;border-radius:50%;background:var(--foreground);border:3px solid var(--card);box-shadow:0 0 0 1px var(--border)}
+.zslider:focus-visible{box-shadow:none}
+.zslider:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 1px var(--border),0 0 0 4px color-mix(in srgb,var(--ring) 55%,transparent)}
+.zslider:focus-visible::-moz-range-thumb{box-shadow:0 0 0 4px color-mix(in srgb,var(--ring) 55%,transparent)}
+@media (prefers-reduced-motion: reduce){ .zslider::-webkit-slider-thumb{transition:none} }
+.dock .dsep{width:1px;height:18px;background:var(--border);margin:0 3px}
+.dock-tip{position:absolute;bottom:calc(100% + 8px);left:0;display:flex;align-items:center;gap:8px;height:28px;padding:0 8px 0 10px;border-radius:7px;background:var(--primary);color:var(--primary-foreground);font-size:12px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transform-origin:bottom center;transition:opacity 125ms var(--ease-out),scale 125ms var(--ease-out);scale:.97}
+.dock-tip.on{opacity:1;scale:1}
+.dock-tip.instant{transition-duration:0ms}
+.dock-tip .kbd{background:color-mix(in srgb,var(--primary-foreground) 14%,transparent);border-color:transparent;color:inherit;height:18px}
+.perf{display:flex;align-items:center;gap:8px;height:26px;padding:0 10px;border-top:1px solid var(--border);color:var(--muted-foreground);font:400 11px var(--mono);white-space:nowrap}
+.perf .r{margin-left:auto}
+.perf b{color:var(--foreground);font-weight:500}
+.live{width:6px;height:6px;border-radius:50%;background:var(--faint)}
+.live.on{background:var(--route)}
+.mini{padding:5px;line-height:0}
+.navcard .mini,.navcard .dock,.navcard .perf{box-shadow:none}
+#mm{width:196px;height:128px;display:block;cursor:crosshair;touch-action:none;border-radius:6px}
+
+/* ---------- location breadcrumb + toast ---------- */
+.where{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;height:34px;padding:0 12px 0 6px;border-radius:999px;z-index:3;white-space:nowrap;max-width:min(560px,calc(100% - 600px))}
+.where .loc{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis}
+.where .loc span{color:var(--faint);margin:0 6px;font-weight:400}
+.where .badge{border-radius:999px}
+.toast{position:absolute;left:50%;bottom:60px;transform:translate(-50%,8px);z-index:30;display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:13px;opacity:0;pointer-events:none;transition:opacity 150ms ease,transform 150ms var(--ease-out);max-width:calc(100% - 24px)}
+.toast.on{opacity:1;transform:translate(-50%,0);transition-duration:220ms}
+
+/* ---------- inspector (Sheet) ---------- */
+/* enter on the drawer curve, exit faster than enter */
+.inspector{position:absolute;top:64px;right:12px;bottom:12px;width:360px;z-index:6;display:flex;flex-direction:column;overflow:hidden;transform:translateX(calc(100% + 24px));opacity:0;visibility:hidden;transition:transform 180ms var(--ease-out),opacity 150ms ease,visibility 0s 180ms}
+.has-insp .inspector{transform:none;opacity:1;visibility:visible;transition:transform 260ms var(--ease-drawer),opacity 150ms ease}
+.handle{display:none}
+.ins-head{padding:16px 16px 14px;border-bottom:1px solid var(--border);position:relative}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:2px;color:var(--muted-foreground);font-size:12.5px;padding-right:36px}
+.crumbs button{border-radius:4px;padding:1px 4px}
+.crumbs button:hover{color:var(--foreground);background:var(--accent)}
+.crumbs .slash{color:var(--faint);margin:0 2px}
+.ins-title{margin:6px 0 0;font-size:18px;font-weight:600;letter-spacing:-.02em;line-height:1.25;word-break:break-word}
+.ins-title.mono{font:500 15px/1.35 var(--mono);letter-spacing:0}
+.ins-title:focus-visible{box-shadow:none;outline:2px solid color-mix(in srgb,var(--ring) 55%,transparent);outline-offset:2px;border-radius:4px}
+.kindrow{display:flex;align-items:center;gap:8px;margin-top:8px}
+.close{position:absolute;top:10px;right:10px}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:14px -4px 0}
+.act{display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 2px;border-radius:8px;font-size:12px;font-weight:500;color:var(--muted-foreground);transition:color .15s ease}
+.act .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--border);color:var(--foreground);background:var(--background);transition:background-color .15s ease,transform 160ms var(--ease-out)}
+.act.primary .ic{background:var(--route);border-color:var(--route);color:#fff}
+.act:active .ic{transform:scale(.94)}
+.act:focus-visible{box-shadow:none}
+.act:focus-visible .ic{box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 55%,transparent)}
+@media (hover:hover) and (pointer:fine){ .act:hover{color:var(--foreground)} .act:hover .ic{background:var(--accent)} .act.primary:hover .ic{background:var(--route);filter:brightness(1.1)} }
+.ins-body{padding:4px 8px 16px;flex:1}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:14px 8px 4px}
+.stat .l{color:var(--muted-foreground);font-size:12px}
+.stat .v{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:2px}
+.stat.warn .v{color:var(--destructive)}
+.hbar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin:12px 8px 6px;background:var(--muted);gap:2px}
+.hbar i{display:block;background:var(--c)}
+.hleg{display:flex;flex-wrap:wrap;gap:4px 12px;margin:0 8px 4px;color:var(--muted-foreground);font-size:12px}
+.hleg span{display:flex;align-items:center;gap:5px}
+.hleg i{width:7px;height:7px;border-radius:2px;background:var(--c)}
+.sec{margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;padding:0 8px 6px}
+.sec-h h3{margin:0;font-size:13px;font-weight:600}
+.sec-h span{color:var(--muted-foreground);font-size:12px;font-variant-numeric:tabular-nums}
+.row{display:grid;grid-template-columns:14px minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;text-align:left;padding:7px 8px;border-radius:6px;font-size:13px}
+.row:hover{background:var(--accent)}
+.row .rn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .rn.mono{font:400 12.5px var(--mono)}
+.row .rs{display:block;color:var(--muted-foreground);font:400 12px var(--sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .rm{display:flex;gap:4px;align-items:center}
+.more{margin:4px 8px 0}
+.none{color:var(--muted-foreground);padding:2px 8px 4px;font-size:13px}
+
+.building{position:absolute;inset:0;display:grid;place-items:center;z-index:20;pointer-events:none;opacity:0;transition:opacity .2s}
+.building.on{opacity:1}
+.building .card{padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:13px}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--foreground);animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.nogl{position:absolute;inset:0;display:none;place-items:center;z-index:30;padding:24px;text-align:center;color:var(--muted-foreground)}
+.nogl.on{display:grid}
+
+@media (max-width:1320px){ .count,.count + .sep-v,.brand-sub{display:none} }
+@media (max-width:1150px){ .perf .ms2{display:none} .search{width:260px} }
+@media (max-width:1000px){ .where{display:none} }
+/* mid widths (side panels, small laptops): toolbar drops to its own row so it never covers search */
+@media (max-width:1040px) and (min-width:761px){
+  .search{flex:1;width:auto}
+  .tl{right:12px}
+  .toolbar{top:62px;right:auto;left:12px}
+  .lpanel{top:114px;max-height:calc(100% - 114px - 76px)}
+  .inspector{top:114px}
+}
+@media (max-width:760px){
+  .brand-name{display:none}
+  .brand{padding:0 12px}
+  .search{width:auto;flex:1}
+  .tl{right:12px}
+  .toolbar{top:62px;left:12px;right:12px;padding:0 6px;justify-content:space-between;gap:6px}
+  .toolbar .sep-v,.scale-group{display:none}
+  .scale-select{display:block}
+  .lpanel{top:114px;left:8px;right:8px;width:auto;max-height:calc(100% - 114px - 70px)}
+  .legend{width:auto;max-width:calc(100% - 80px)}
+  .br .perf,.br .mini,.dock-tip{display:none}
+  .navcard{width:auto}
+  .dock{border-bottom:0;gap:2px}
+  .has-insp .br{transform:none}
+  .inspector{top:auto;left:8px;right:8px;bottom:8px;width:auto;height:50%;transform:translateY(calc(100% + 24px));transition:transform 180ms var(--ease-out),opacity 150ms ease,visibility 0s 180ms}
+  .has-insp .inspector{transition:transform 260ms var(--ease-drawer),opacity 150ms ease}
+  .inspector.tall{height:calc(100% - 126px)}
+  .handle{display:grid;place-items:center;height:20px;width:100%;flex:none}
+  .handle::before{content:"";width:40px;height:4px;border-radius:2px;background:var(--border)}
+  .ins-head{padding-top:4px}
+}
+/* hover feedback only where a real pointer exists, so taps never leave sticky states */
+@media (hover:hover) and (pointer:fine){
+  .btn-outline:hover{background:var(--accent)}
+  .btn-ghost:hover{background:var(--accent);color:var(--foreground)}
+  .btn-primary:hover{opacity:.9}
+  .toggle-group button:hover{color:var(--foreground)}
+  .dock button:hover{background:var(--accent);color:var(--foreground)}
+  .cmd-item:hover{background:var(--accent)}
+}
+@media (hover:none){ .row:hover,.lg-row:hover,.step:hover,.crumbs button:hover{background:transparent} }
+/* reduced motion: keep fades that aid comprehension, drop movement */
+@media (prefers-reduced-motion: reduce){
+  .inspector,.has-insp .inspector,.br,.has-insp .br,.toggle-group .thumb,.legend summary svg{transition:opacity 150ms ease}
+  .toast,.toast.on{transition:opacity 150ms ease}
+  .btn:active,.dock button:active,.toggle-group button:active{transform:none}
+  .spin{animation-duration:1.6s}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <canvas id="ov" tabindex="0" role="application" aria-roledescription="map" aria-label="Service map" aria-describedby="mapHelp"></canvas>
+  <p id="mapHelp" class="sr-only">Arrow keys move the map, plus and minus zoom, Enter opens the item under the centre marker, Escape closes panels. Use search to jump to any repository, domain, service or endpoint.</p>
+  <div id="sr" class="sr-only" role="status" aria-live="polite"></div>
+
+  <div class="tl">
+    <div class="brand card">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.6" fill="currentColor"/><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-opacity=".35" stroke-dasharray="1.5 2.3"/><circle cx="16.4" cy="5.6" r="1.7" fill="currentColor"/><circle cx="4.2" cy="15" r="1.7" fill="currentColor"/></svg>
+      <span class="brand-name">Atlas</span>
+      <span class="brand-sub">Service map</span>
+    </div>
+    <div class="search card">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input id="q" name="map-search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="results" aria-label="Search the map" placeholder="Find a service, e.g. lobby_api…" autocomplete="off" spellcheck="false">
+      <span class="kbd" aria-hidden="true">/</span>
+      <div id="results" class="cmd card" role="listbox" aria-label="Search results" hidden></div>
+    </div>
+  </div>
+
+  <section class="lpanel card" id="route" aria-label="Directions"></section>
+  <section class="lpanel card" id="attn" aria-labelledby="attnTitle"></section>
+
+  <div class="toolbar card" role="toolbar" aria-label="Map controls">
+    <span class="count" id="count"></span>
+    <span class="sep-v"></span>
+    <div class="toggle-group scale-group" id="scale" role="radiogroup" aria-label="Dataset size">
+      <span class="thumb" aria-hidden="true"></span>
+      <button role="radio" data-v="self" aria-checked="true" tabindex="0" title="Atlas's own source, indexed with tree-sitter and SCIP">Self</button>
+      <button role="radio" data-v="281" aria-checked="false" tabindex="-1">281</button>
+      <button role="radio" data-v="5000" aria-checked="false" tabindex="-1">5k</button>
+      <button role="radio" data-v="25000" aria-checked="false" tabindex="-1">25k</button>
+      <button role="radio" data-v="100000" aria-checked="false" tabindex="-1">100k</button>
+    </div>
+    <select class="select scale-select" id="scaleSel" aria-label="Dataset size">
+      <option value="self" selected>Self</option><option value="281">281</option><option value="5000">5k</option><option value="25000">25k</option><option value="100000">100k</option>
+    </select>
+    <span class="sep-v"></span>
+    <div class="toggle-group" id="seg" role="radiogroup" aria-label="Colour nodes by">
+      <span class="thumb" aria-hidden="true"></span>
+      <button role="radio" data-v="health" aria-checked="true" tabindex="0">Health</button>
+      <button role="radio" data-v="repo" aria-checked="false" tabindex="-1">Repo</button>
+    </div>
+    <span class="sep-v"></span>
+    <button class="btn btn-outline btn-issues" id="issues" aria-pressed="false" title="Show only ambiguous and unmatched contracts (I)">Issues <span class="badge badge-destructive" id="issueN"></span></button>
+  </div>
+
+  <details class="legend card" id="legend" open>
+    <summary>Key <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3.5 5.5L7 9l3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+    <div class="lg-body" id="legendBody"></div>
+  </details>
+
+  <div class="where card" id="where"></div>
+
+  <div class="br">
+    <div class="navcard card">
+      <div class="dock" role="toolbar" aria-label="Map view" id="dock">
+        <span class="dock-tip" id="dockTip" aria-hidden="true"></span>
+        <button id="fit" aria-label="Fit to screen" data-tip="Fit to screen" data-kbd="F"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button id="dirBtn" aria-label="Get directions" data-tip="Directions"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5l6.5 6.5L8 14.5 1.5 8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 9.5V8a1 1 0 011-1h3M8.6 5.4L10 7 8.6 8.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <span class="dsep" aria-hidden="true"></span>
+        <span class="zoom-ic" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.8" stroke="currentColor" stroke-width="1.5"/><path d="M10.6 10.6L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        <input type="range" id="zoom" class="zslider" min="0" max="1000" step="1" value="500" aria-label="Zoom" title="Zoom (scroll, pinch, or + and −)">
+      </div>
+      <div class="mini"><canvas id="mm" tabindex="0" role="button" aria-label="Overview map. Press Enter to fit everything; click to move there."></canvas></div>
+      <div class="perf" id="perf"></div>
+    </div>
+  </div>
+
+  <aside class="inspector card" id="insp" aria-labelledby="insTitle"></aside>
+  <div class="toast card" id="toast" aria-hidden="true"></div>
+
+  <div class="building" id="building" role="status"><div class="card"><span class="spin" aria-hidden="true"></span><span id="buildMsg">Building the map…</span></div></div>
+  <div class="nogl" id="nogl"><div>This view needs WebGL2, which this browser has turned off.<br>Turn on hardware acceleration and reload.</div></div>
+</div>
+
+<script type="application/json" id="selfGraph">__SELF_GRAPH__</script>
+<script>
+__BUNDLE__
+</script>
+</body>
+</html>
