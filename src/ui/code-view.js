@@ -111,9 +111,12 @@ export function openSource(id, from) {
   requestAnimationFrame(() => panel.classList.add('on'));
   openId = id;
   opener = from || document.activeElement;
-  const def = panel.querySelector('.ln.def');
-  if (def) def.scrollIntoView({ block: 'center' });
-  panel.querySelector('[data-cv-close]').focus({ preventScroll: true });
+  // centre the definition vertically and start at the left edge (scrollIntoView can also scroll sideways)
+  const body = panel.querySelector('.cv-body'),
+    def = panel.querySelector('.ln.def');
+  body.scrollLeft = 0;
+  if (def) body.scrollTop = Math.max(0, def.offsetTop - body.clientHeight / 2 + def.offsetHeight * 2);
+  panel.focus({ preventScroll: true });
 }
 
 /** Close the source view and return focus to what opened it. */

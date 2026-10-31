@@ -63,17 +63,16 @@ export function drawMinimap() {
     vy0 = (-cam.y / cam.k) * MT.s + MT.oy,
     vx1 = vx0 + (store.W / cam.k) * MT.s,
     vy1 = vy0 + (store.H / cam.k) * MT.s;
-  const cx0 = clamp(vx0, 0.5, mw - 0.5),
-    cy0 = clamp(vy0, 0.5, mh - 0.5),
-    cx1 = clamp(vx1, 0.5, mw - 0.5),
-    cy1 = clamp(vy1, 0.5, mh - 0.5);
-  if (cx1 - cx0 > 1 && cy1 - cy0 > 1) {
+  const inside =
+    (vx0 > 0.5 || vy0 > 0.5 || vx1 < mw - 0.5 || vy1 < mh - 0.5) && vx1 > 0 && vy1 > 0 && vx0 < mw && vy0 < mh;
+  if (vx1 - vx0 > 1 && vy1 - vy0 > 1 && inside) {
+    // the canvas clips the box: edges outside the overview simply aren't drawn, so it never looks like a frame
     mctx.fillStyle = css(theme.text, 0.06);
-    mctx.fillRect(cx0, cy0, cx1 - cx0, cy1 - cy0);
+    mctx.fillRect(vx0, vy0, vx1 - vx0, vy1 - vy0);
     mctx.strokeStyle = css(theme.text, 0.7);
     mctx.lineWidth = 1;
-    mctx.strokeRect(cx0, cy0, cx1 - cx0, cy1 - cy0);
-  } else {
+    mctx.strokeRect(Math.round(vx0) + 0.5, Math.round(vy0) + 0.5, Math.round(vx1 - vx0) - 1, Math.round(vy1 - vy0) - 1);
+  } else if (!inside && !(vx0 <= 0.5 && vy0 <= 0.5 && vx1 >= mw - 0.5 && vy1 >= mh - 0.5)) {
     // looking entirely outside the overview: a small arrow on the edge points to where the view is
     const tx = (vx0 + vx1) / 2,
       ty = (vy0 + vy1) / 2,

@@ -99,6 +99,11 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
   quiet stats. Segmented controls span their row with equal segments. Inspector actions form one row of round
   buttons that never wraps.
 - **On mobile the inspector is a bottom sheet with a drag handle.**
+- **Panels never cover the toolbar or each other.** The source view starts where the inspector starts and sits beside it.
+  In narrow windows with the inspector open, the map controls shrink to the dock and the Key steps aside until it fits.
+- **The minimap box only draws edges that are really inside the overview,** and nothing when the whole map is in view.
+  Why: a box clamped to the minimap's border looks like a frame, not like "you are here".
+- **In the source view, line numbers stay pinned and the definition is highlighted across the full line.**
 
 ## Accessibility
 

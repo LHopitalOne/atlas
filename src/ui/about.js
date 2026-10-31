@@ -27,7 +27,7 @@ export function aboutHTML(id) {
   let h = '<div class="about">';
   h += doc
     ? `<p class="about-text">${esc(doc)}</p><div class="prov">${provenance(g)}</div>`
-    : `<p class="about-text none">No description in the code yet.</p><div class="prov">In the product, an AI summary would appear here, marked as AI-written.</div>`;
+    : `<p class="about-text empty">No description in the code yet.</p><div class="prov">In the product, an AI summary would appear here, marked as AI-written.</div>`;
   if (id < g.S) {
     const roles = rolesOf(g, id);
     if (roles.length)
@@ -47,8 +47,12 @@ export function impactHTML(id) {
     n = im.services.length,
     on = store.impactId === id;
   let h = '<div class="sec"><div class="sec-h"><h3>Impact</h3></div>';
-  if (!n) return h + '<p class="impact-text">Nothing calls it, so a change here stays here.</p></div>';
-  h += `<p class="impact-text">Changing this can affect <b>${fmt(n)}</b> service${n === 1 ? '' : 's'} in <b>${fmt(im.repos)}</b> repositor${im.repos === 1 ? 'y' : 'ies'}: ${fmt(im.direct)} ${im.direct === 1 ? 'calls' : 'call'} it directly${n > im.direct ? ', the rest through them' : ''}.</p>`;
+  if (!n)
+    return (
+      h +
+      '<div class="impact-body"><p class="impact-text">Nothing calls it, so a change here stays here.</p></div></div>'
+    );
+  h += `<div class="impact-body"><p class="impact-text">Changing this can affect <b>${fmt(n)}</b> service${n === 1 ? '' : 's'} in <b>${fmt(im.repos)}</b> repositor${im.repos === 1 ? 'y' : 'ies'}: ${fmt(im.direct)} ${im.direct === 1 ? 'calls' : 'call'} it directly${n > im.direct ? ', the rest through them' : ''}.</p>`;
   return (
     h +
     `<button class="btn btn-outline btn-sm" data-impact aria-pressed="${on}">${on ? 'Hide on map' : 'Show on map'}</button></div>`
