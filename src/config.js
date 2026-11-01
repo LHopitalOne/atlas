@@ -20,3 +20,12 @@ export const LABELS = {
 
 /** Camera flights (see app/camera.js). */
 export const FLIGHT = { defaultMs: 450, introMs: 600, zoomButtonMs: 220 };
+
+/**
+ * Ask Atlas engine. 'demo': simulated, animated answers (scripted rendering walkthrough, offline answers otherwise).
+ * 'claude': ask Claude through the artifact sample capability (publish with capabilities {sample: {}}).
+ */
+export const ASK_ENGINE = 'demo';
+
+/** Ask Atlas playback timing (ms). */
+export const ASK_PLAYBACK = { think: 520, tick: 28, tokensPerTick: 2 };

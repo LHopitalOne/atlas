@@ -20,11 +20,14 @@ import { announce } from './feedback.js';
 import { closeDirections } from './directions.js';
 import { renderAttn, syncLegend } from './attention.js';
 import { dotHTML, ICON_X } from './fragments.js';
+import { DEMO_QUESTION, scriptFor } from '../ask/demo.js';
+import { ASK_ENGINE, ASK_PLAYBACK } from '../config.js';
+import { reduceMotion } from '../util/dom.js';
 
 /** Conversation: { q, text, steps, status: 'thinking'|'streaming'|'done'|'error', mode: 'claude'|'local', note } */
 let thread = [];
 let busy = null; // AbortController of the running question
-let mode = 'local';
+let mode = ASK_ENGINE === 'demo' ? 'demo' : 'local';
 let showing = -1; // index of the answer whose items are on the map
 let mention = null; // { start, items, act }
 
@@ -52,7 +55,8 @@ function suggestions() {
   const sel = store.selectedId >= 0 ? g.name(store.selectedId) : null;
   const a = g.svcName[Math.min(g.S - 1, 3)];
   return [
-    sel ? `What does ${sel} do?` : 'What is this codebase?',
+    g.src === 'self' ? DEMO_QUESTION : sel ? `What does ${sel} do?` : 'What is this codebase?',
+    ...(g.src === 'self' && sel ? [`What does ${sel} do?`] : []),
     `What breaks if I change ${g.svcName[hub]}?`,
     `Who uses ${sel || a}?`,
     `How does ${g.svcName[g.S - 1]} reach ${g.svcName[hub]}?`,
@@ -70,13 +74,14 @@ export function openAsk(question) {
   ASK.classList.add('on');
   syncLegend();
   if (first) render();
-  claudeAvailable().then(fn => {
-    const m = fn ? 'claude' : 'local';
-    if (m !== mode) {
-      mode = m;
-      renderHead();
-    }
-  });
+  if (ASK_ENGINE === 'claude')
+    claudeAvailable().then(fn => {
+      const m = fn ? 'claude' : 'local';
+      if (m !== mode) {
+        mode = m;
+        renderHead();
+      }
+    });
   if (question && question.trim()) ask(question.trim());
   else ASK.querySelector('textarea').focus();
 }
@@ -91,6 +96,30 @@ export function closeAsk() {
   clearShowing();
   syncLegend();
   if (hadFocus) ov.focus({ preventScroll: true });
+}
+
+/** Light up an answer's items on the map (everything else dims) and bring them into view. */
+function showOnMap(i, quiet) {
+  const { refs } = renderAnswer(thread[i].text, valid, nameOf);
+  if (refs.length < 2 && quiet) return;
+  clearShowing();
+  showing = i;
+  store.askSet = refs;
+  store.focusId = -1;
+  updateFocus();
+  const b = ASK.querySelector(`[data-show="${i}"]`);
+  if (b) {
+    b.setAttribute('aria-pressed', 'true');
+    b.textContent = 'Hide on map';
+  }
+  if (store.selectedId < 0)
+    flyTo(
+      fitNodes(
+        store.focusList.filter(n => n < store.G.S),
+        2,
+      ),
+    );
+  if (!quiet) announce(`Showing ${refs.length} items from the answer on the map.`);
 }
 
 function clearShowing() {
@@ -122,92 +151,175 @@ function readMentions(q) {
   return { text, refs };
 }
 
+// ---------------------------------------------------------------- simulated playback
+
+/** Wait, unless motion is reduced; rejects as cancelled when Stop is pressed. */
+const wait = (ms, signal) =>
+  new Promise((done, fail) => {
+    if (signal.aborted) return fail({ code: 'cancelled' });
+    const t = setTimeout(done, reduceMotion ? 0 : ms);
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(t);
+        fail({ code: 'cancelled' });
+      },
+      { once: true },
+    );
+  });
+
+/** Ring an item on the map while the answer talks about it. */
+const ring = ref => {
+  const e = ref && resolve(store.G, ref);
+  if (e) setHover({ t: e.t, id: e.id }, true);
+};
+
+/** Words, spaces and citations as separate tokens, so a citation never streams in half-written. */
+const tokens = text => text.split(/(\[\[[ndr]\d+\]\]|\s+)/).filter(Boolean);
+
+/** Play a script: think, show each step (ringing its item), then stream the text in. */
+async function play(turn, i, script, signal) {
+  await wait(ASK_PLAYBACK.think, signal);
+  for (const st of script.steps) {
+    turn.steps.push(st.label);
+    turn.stepAt.push(performance.now());
+    if (st.ref) ring(st.ref);
+    renderTurn(i);
+    await wait(st.ms || 440, signal);
+  }
+  turn.status = 'streaming';
+  const all = tokens(script.text);
+  for (let k = 0; k < all.length; ) {
+    k = reduceMotion ? all.length : Math.min(all.length, k + ASK_PLAYBACK.tokensPerTick);
+    turn.text = all.slice(0, k).join('');
+    for (const m of turn.text.matchAll(/\[\[([ndr]\d+)\]\]/g))
+      if (!turn.appear[m[1]]) {
+        turn.appear[m[1]] = performance.now();
+        ring(m[1]);
+      }
+    renderTurn(i);
+    if (k < all.length) await wait(ASK_PLAYBACK.tick, signal);
+  }
+  turn.text = script.text;
+}
+
+/** Ask Claude with the map's tools, streaming into the turn. */
+async function answerWithClaude(turn, q, refs, sel, ctl) {
+  const g = store.G;
+  const onStep = label => {
+    turn.steps.push(label);
+    turn.stepAt.push(performance.now());
+    renderTurn(thread.length - 1);
+  };
+  const ctx = [
+    `Map: ${g.src === 'self' ? 'Atlas’s own source code' : `a demo map of ${g.N} nodes`} (${g.R} repositories, ${g.S} services, ${g.L} endpoints).`,
+    sel
+      ? `Selected: ${g.name(+sel.slice(1))} (ref ${sel}). "This" or "it" means the selection.`
+      : 'Nothing is selected.',
+    refs.length ? `Mentioned: ${refs.map(r => `${nameOf(r)} (ref ${r})`).join(', ')}.` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+  const history = thread
+    .slice(0, -1)
+    .filter(t => t.status === 'done')
+    .slice(-4)
+    .flatMap(t => [
+      { role: 'user', content: t.q },
+      { role: 'assistant', content: t.text },
+    ]);
+  turn.text = await askClaude({
+    question: q,
+    history,
+    context: ctx,
+    nameOf,
+    signal: ctl.signal,
+    onStep,
+    tools: toolSet(g, { readSource: id => sourceLines(id) }),
+    onText: t => {
+      turn.text = t;
+      turn.status = 'streaming';
+      renderTurn(thread.length - 1);
+    },
+  });
+}
+
+/** A stopped or failed answer: keep what can stay; fall back to the index when Claude isn't available. */
+function onFailure(turn, e, q, refs, sel) {
+  const g = store.G;
+  turn.text = (e && e.text) || turn.text;
+  if (e && e.code === 'cancelled') {
+    setHover(null);
+    turn.status = 'done';
+    turn.doneAt = performance.now();
+    turn.note = 'Stopped.';
+  } else if (
+    e &&
+    [
+      'not_granted',
+      'sampling_disabled',
+      'capability_disabled',
+      'capability_removed',
+      'not_declared',
+      'unavailable',
+      'tools_unavailable',
+    ].includes(e.code)
+  ) {
+    // Claude isn't allowed here: answer from the index instead, and say so
+    disableClaude();
+    mode = 'local';
+    renderHead();
+    turn.mode = 'local';
+    turn.steps = [];
+    turn.note = 'Claude isn’t available for this page, so this answer comes from the index only.';
+    turn.text = answerLocally(g, q, { context: refs[0] || sel, onStep: l => turn.steps.push(l) });
+    turn.status = 'done';
+  } else {
+    turn.status = 'error';
+    turn.note =
+      e && e.code === 'rate_limited'
+        ? 'Too many questions at once. Try again in a moment.'
+        : 'Something went wrong while answering. Try again.';
+  }
+}
+
 async function ask(raw) {
   if (busy) busy.abort();
   const g = store.G,
     { text: q, refs } = readMentions(raw);
-  const turn = { q: raw, text: '', steps: [], status: 'thinking', mode, note: '' };
+  const turn = {
+    q: raw,
+    text: '',
+    steps: [],
+    stepAt: [],
+    appear: {},
+    born: performance.now(),
+    doneAt: 0,
+    status: 'thinking',
+    mode,
+    note: '',
+  };
   thread.push(turn);
   clearShowing();
   renderThread(true);
   const ctl = (busy = new AbortController());
-  const onStep = label => {
-    turn.steps.push(label);
-    renderTurn(thread.length - 1);
-  };
+  renderComposer(); // Send becomes Stop while answering
   const sel = contextRef();
   try {
-    if (mode === 'claude') {
-      const ctx = [
-        `Map: ${g.src === 'self' ? 'Atlas’s own source code' : `a demo map of ${g.N} nodes`} (${g.R} repositories, ${g.S} services, ${g.L} endpoints).`,
-        sel
-          ? `Selected: ${g.name(+sel.slice(1))} (ref ${sel}). "This" or "it" means the selection.`
-          : 'Nothing is selected.',
-        refs.length ? `Mentioned: ${refs.map(r => `${nameOf(r)} (ref ${r})`).join(', ')}.` : '',
-      ]
-        .filter(Boolean)
-        .join('\n');
-      const history = thread
-        .slice(0, -1)
-        .filter(t => t.status === 'done')
-        .slice(-4)
-        .flatMap(t => [
-          { role: 'user', content: t.q },
-          { role: 'assistant', content: t.text },
-        ]);
-      turn.text = await askClaude({
-        question: q,
-        history,
-        context: ctx,
-        nameOf,
-        signal: ctl.signal,
-        onStep,
-        tools: toolSet(g, { readSource: id => sourceLines(id) }),
-        onText: t => {
-          turn.text = t;
-          turn.status = 'streaming';
-          renderTurn(thread.length - 1);
-        },
-      });
+    if (ASK_ENGINE === 'claude' && mode === 'claude') {
+      await answerWithClaude(turn, q, refs, sel, ctl);
     } else {
-      await new Promise(r => setTimeout(r, 120));
-      turn.text = answerLocally(g, q, { context: refs[0] || sel, onStep });
+      const script = scriptFor(g, q, { context: refs[0] || sel });
+      if (script.note) turn.note = script.note;
+      await play(turn, thread.length - 1, script, ctl.signal);
     }
     turn.status = 'done';
+    turn.doneAt = performance.now();
     announce('Answer ready.');
+    setHover(null);
+    if (!turn.note) showOnMap(thread.length - 1, true);
   } catch (e) {
-    turn.text = (e && e.text) || turn.text;
-    if (e && e.code === 'cancelled') {
-      turn.status = 'done';
-      turn.note = 'Stopped.';
-    } else if (
-      e &&
-      [
-        'not_granted',
-        'sampling_disabled',
-        'capability_disabled',
-        'capability_removed',
-        'not_declared',
-        'unavailable',
-        'tools_unavailable',
-      ].includes(e.code)
-    ) {
-      // Claude isn't allowed here: answer from the index instead, and say so
-      disableClaude();
-      mode = 'local';
-      renderHead();
-      turn.mode = 'local';
-      turn.steps = [];
-      turn.note = 'Claude isn’t available for this page, so this answer comes from the index only.';
-      turn.text = answerLocally(g, q, { context: refs[0] || sel, onStep: l => turn.steps.push(l) });
-      turn.status = 'done';
-    } else {
-      turn.status = 'error';
-      turn.note =
-        e && e.code === 'rate_limited'
-          ? 'Too many questions at once. Try again in a moment.'
-          : 'Something went wrong while answering. Try again.';
-    }
+    onFailure(turn, e, q, refs, sel);
   } finally {
     if (busy === ctl) busy = null;
     renderTurn(thread.length - 1);
@@ -220,11 +332,13 @@ async function ask(raw) {
 function renderHead() {
   const h = ASK.querySelector('.ask-mode');
   if (!h) return;
-  h.textContent = mode === 'claude' ? 'Claude' : 'Offline';
+  h.textContent = mode === 'claude' ? 'Claude' : mode === 'demo' ? 'Demo' : 'Offline';
   h.title =
-    mode === 'claude'
-      ? 'Answers by Claude, using Atlas’s index. Uses your Claude account.'
-      : 'Answers come from the index, without AI. Works for common questions.';
+    mode === 'demo'
+      ? 'Simulated answers for this prototype: a scripted walkthrough for rendering questions, answers from the index otherwise. The product answers with Claude.'
+      : mode === 'claude'
+        ? 'Answers by Claude, using Atlas’s index. Uses your Claude account.'
+        : 'Answers come from the index, without AI. Works for common questions.';
 }
 
 function render() {
@@ -258,14 +372,38 @@ function renderThread(scroll) {
 
 function stepsHTML(t) {
   if (!t.steps.length && t.status === 'thinking')
-    return `<div class="steps live"><span class="shimmer">Thinking…</span></div>`;
+    return `<div class="steps running" data-at="${t.born}"><span class="shimmer">Thinking…</span></div>`;
   if (!t.steps.length) return '';
-  const live = t.status === 'thinking' || t.status === 'streaming';
+  const live = t.status === 'thinking';
+  if (live)
+    return `<ol class="steps running" data-at="${t.stepAt[0]}">${t.steps
+      .map(
+        (s, k) =>
+          `<li data-at="${t.stepAt[k]}" class="${k === t.steps.length - 1 ? 'now' : 'did'}"><span class="${k === t.steps.length - 1 ? 'shimmer' : ''}">${esc(s)}</span></li>`,
+      )
+      .join('')}</ol>`;
   const readCode = t.steps.some(s => s.startsWith('Read the code'));
-  const label = live
-    ? esc(t.steps[t.steps.length - 1]) + '…'
-    : `Looked at ${t.steps.length} thing${t.steps.length === 1 ? '' : 's'}${readCode ? ' · read code live' : ' · from the index'}`;
-  return `<details class="steps${live ? ' live' : ''}"><summary><span class="${live ? 'shimmer' : ''}">${label}</span></summary><ol>${t.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol></details>`;
+  const label = `Looked at ${t.steps.length} thing${t.steps.length === 1 ? '' : 's'}${readCode ? ' · read code live' : ' · from the index'}`;
+  return `<details class="steps"><summary>${label}</summary><ol>${t.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol></details>`;
+}
+
+/** The blinking caret goes at the end of the text, inside the last paragraph or list item. */
+const withCaret = html => {
+  const caret = '<span class="caret" aria-hidden="true"></span>';
+  const m = html.match(/<\/(p|li)>(?![\s\S]*<\/(p|li)>)/);
+  return m ? html.slice(0, m.index) + caret + html.slice(m.index) : html + caret;
+};
+
+/** Entrance animations resume where they were: each element carries the time it first appeared. */
+function resumeAnimations(el, t) {
+  const now = performance.now();
+  el.querySelectorAll('[data-at]').forEach(x => {
+    x.style.animationDelay = `${Math.min(0, +x.dataset.at - now)}ms`;
+  });
+  el.querySelectorAll('.cite').forEach(x => {
+    const at = t.appear[x.dataset.ref];
+    x.style.animationDelay = `${at ? Math.min(0, at - now) : -1000}ms`;
+  });
 }
 
 function renderTurn(i) {
@@ -285,22 +423,23 @@ function renderTurn(i) {
               : e.t === 'd'
                 ? 'Domain'
                 : 'Repository';
-          return `<button class="src" data-ref="${ref}"><span class="n">${n + 1}</span>${dot}<span class="sn${e.t === 'n' && e.id >= store.G.S ? ' mono' : ''}">${esc(nameOf(ref))}</span><span class="sw">${esc(where)}</span></button>`;
+          return `<button class="src" data-ref="${ref}" data-at="${t.appear[ref] || t.born}"><span class="n">${n + 1}</span>${dot}<span class="sn${e.t === 'n' && e.id >= store.G.S ? ' mono' : ''}">${esc(nameOf(ref))}</span><span class="sw">${esc(where)}</span></button>`;
         })
         .join('')}</div>`
     : '';
   const done = t.status === 'done' || t.status === 'error';
   const actions =
     done && r.refs.length
-      ? `<div class="ans-actions"><button class="btn btn-outline btn-sm" data-show="${i}" aria-pressed="${showing === i}">${showing === i ? 'Hide on map' : 'Show on map'}</button></div>`
+      ? `<div class="ans-actions" data-at="${t.doneAt}"><button class="btn btn-outline btn-sm" data-show="${i}" aria-pressed="${showing === i}">${showing === i ? 'Hide on map' : 'Show on map'}</button></div>`
       : '';
   const follow =
     done && r.followups.length && i === thread.length - 1
-      ? `<div class="sugg follow">${r.followups.map(s => `<button class="chip-q" data-q="${esc(s)}">${esc(s)}</button>`).join('')}</div>`
+      ? `<div class="sugg follow" data-at="${t.doneAt}">${r.followups.map(s => `<button class="chip-q" data-q="${esc(s)}">${esc(s)}</button>`).join('')}</div>`
       : '';
-  el.innerHTML = `<div class="uq">${esc(t.q)}</div><div>${stepsHTML(t)}${t.note ? `<div class="ans-note">${esc(t.note)}</div>` : ''}
-    <div class="ans-text">${r.html}${t.status === 'streaming' ? '<span class="caret" aria-hidden="true"></span>' : ''}</div>${sources}${actions}${follow}
-    ${done && t.mode === 'local' && !t.note ? '<div class="ans-meta">Answered from the index, without AI.</div>' : ''}</div>`;
+  el.innerHTML = `<div class="uq" data-at="${t.born}">${esc(t.q)}</div><div>${stepsHTML(t)}${t.note ? `<div class="ans-note">${esc(t.note)}</div>` : ''}
+    <div class="ans-text">${t.status === 'streaming' ? withCaret(r.html) : r.html}</div>${sources}${actions}${follow}
+    ${done && !t.note ? (t.mode === 'demo' ? '<div class="ans-meta">Simulated answer for this prototype.</div>' : t.mode === 'local' ? '<div class="ans-meta">Answered from the index, without AI.</div>' : '') : ''}</div>`;
+  resumeAnimations(el, t);
   if (t.status !== 'done') {
     const box = ASK.querySelector('.ask-thread');
     box.scrollTop = box.scrollHeight;
@@ -470,21 +609,7 @@ function onClick(e) {
   if (show) {
     const i = +show.dataset.show;
     if (showing === i) return clearShowing();
-    clearShowing();
-    const { refs } = renderAnswer(thread[i].text, valid, nameOf);
-    showing = i;
-    store.askSet = refs;
-    store.focusId = -1;
-    updateFocus();
-    show.setAttribute('aria-pressed', 'true');
-    show.textContent = 'Hide on map';
-    flyTo(
-      fitNodes(
-        store.focusList.filter(n => n < store.G.S),
-        2,
-      ),
-    );
-    return announce(`Showing ${refs.length} items from the answer on the map.`);
+    return showOnMap(i);
   }
   const el = e.target.closest('[data-ref]');
   if (el) {

@@ -1,5 +1,8 @@
 import { test, expect } from './fixtures.js';
 
+// answers play instantly with reduced motion; test/e2e/ask-playback.spec.js covers the animation
+test.use({ contextOptions: { reducedMotion: 'reduce' } });
+
 async function askFromSearch(page, q) {
   await page.keyboard.press('/');
   await page.keyboard.type(q);
@@ -14,8 +17,8 @@ test('a question in the search bar opens Ask Atlas with a cited answer', async (
   await expect(atlas.locator('#ask .ans-text')).toContainText(/can affect \d+ services/);
   await expect(atlas.locator('#ask .cite').first()).toBeVisible();
   expect(await atlas.locator('#ask .src').count()).toBe(await atlas.locator('#ask .sources .src').count());
-  await expect(atlas.locator('#ask .ask-mode')).toHaveText('Offline');
-  await expect(atlas.locator('#ask .ans-meta')).toContainText('without AI');
+  await expect(atlas.locator('#ask .ask-mode')).toHaveText('Demo');
+  await expect(atlas.locator('#ask .ans-meta')).toContainText('Simulated');
   expect(await atlas.locator('#legend').evaluate(d => d.open)).toBe(false);
 });
 
@@ -38,9 +41,13 @@ test('citations lead to the map; "this" means the selection', async ({ atlas }) 
   await expect(atlas.locator('#ask .turn').nth(1).locator('.ans-text')).toContainText('breadth-first');
 });
 
-test('Show on map toggles; @ mentions complete names', async ({ atlas }) => {
+test('answers show on the map, the button toggles it; @ mentions complete names', async ({ atlas }) => {
   await atlas.open();
   await askFromSearch(atlas, 'who uses store?');
+  // answers light up their items on the map when they finish; the button toggles that
+  await expect(atlas.locator('#ask [data-show]')).toHaveAttribute('aria-pressed', 'true');
+  await atlas.locator('#ask [data-show]').click();
+  await expect(atlas.locator('#ask [data-show]')).toHaveAttribute('aria-pressed', 'false');
   await atlas.locator('#ask [data-show]').click();
   await expect(atlas.locator('#ask [data-show]')).toHaveAttribute('aria-pressed', 'true');
   await atlas.locator('#ask textarea').click();
@@ -63,4 +70,21 @@ test('one left panel at a time, and Escape closes Ask', async ({ atlas }) => {
   await atlas.click('#dirBtn');
   await expect(atlas.locator('#route')).toHaveClass(/on/);
   await expect(atlas.locator('#ask')).not.toHaveClass(/on/);
+});
+
+test('the rendering walkthrough cites the real pipeline and lights it up on the map', async ({ atlas }) => {
+  await atlas.open();
+  await askFromSearch(atlas, 'How are we rendering the graph? The end-to-end flow');
+  await expect(atlas.locator('#ask .steps summary')).toHaveText(/Looked at 6 things · read code live/);
+  for (const name of ['buildScene', 'requestRender', 'drawOverlay', 'placeLabels'])
+    await expect(atlas.locator('#ask .sources')).toContainText(name);
+  await expect(atlas.locator('#ask [data-show]')).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('the walkthrough is the first suggestion on the Self map', async ({ atlas }) => {
+  await atlas.open();
+  await atlas.keyboard.press('a');
+  await expect(atlas.locator('#ask .ask-empty .chip-q').first()).toHaveText(
+    'How are we rendering the graph? The end-to-end flow',
+  );
 });

@@ -89,3 +89,24 @@ test('the tool set is described for Claude, with source reading only when availa
   );
   assert.ok(toolSet(self, { readSource: () => null }).some(t => t.name === 'read_source'));
 });
+
+test('the rendering walkthrough cites real functions on the Self map', async () => {
+  const { renderingScript, scriptFor, RENDER_QUESTION, DEMO_QUESTION } = await import('../src/ask/demo.js');
+  assert.ok(RENDER_QUESTION.test(DEMO_QUESTION));
+  const s = renderingScript(self);
+  assert.equal(s.note, '', 'every name in the script exists in the Self index');
+  const { refs } = renderAnswer(
+    s.text,
+    ref => !!resolve(self, ref),
+    r => r,
+  );
+  assert.ok(refs.length >= 15, `cites ${refs.length} functions`);
+  assert.ok(s.steps.every(st => !('ref' in st) || st.ref === undefined || st.ref === null || resolve(self, st.ref)));
+  assert.equal(scriptFor(self, 'who uses store?').steps[0].label.startsWith('Searched'), true);
+});
+
+test('on a demo map the walkthrough says it is about Atlas itself', async () => {
+  const { renderingScript } = await import('../src/ask/demo.js');
+  const { build } = await import('../src/model/synthetic.js');
+  assert.match(renderingScript(build(281)).note, /Switch to Self/);
+});
