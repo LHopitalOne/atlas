@@ -23,6 +23,7 @@ import { dotHTML, ICON_X } from './fragments.js';
 import { DEMO_QUESTION, scriptFor } from '../ask/demo.js';
 import { ASK_ENGINE, ASK_PLAYBACK } from '../config.js';
 import { reduceMotion } from '../util/dom.js';
+import { ensureReverse } from '../graph/route-search.js';
 
 /** Conversation: { q, text, steps, status: 'thinking'|'streaming'|'done'|'error', mode: 'claude'|'local', note } */
 let thread = [];
@@ -40,26 +41,32 @@ const ICON_NEW =
 
 export const askOpen = () => ASK.classList.contains('on');
 
-/** Suggestions for an empty conversation, chosen from the current map so they always have answers. */
+const SELF_SUGGESTIONS = [
+  DEMO_QUESTION,
+  'What breaks if I change routeSearch?',
+  'Who uses store?',
+  'How does placeLabels reach requestRender?',
+];
+
+/** Suggestions for an empty conversation, chosen so each one has a real answer on the current map. */
 function suggestions() {
-  const g = store.G;
-  let hub = 0,
-    hubN = -1;
-  for (let s = 0; s < g.S; s++) {
-    const n = g.QO ? g.QO[s + 1] - g.QO[s] : 0;
-    if (n > hubN) {
-      hubN = n;
-      hub = s;
-    }
-  }
-  const sel = store.selectedId >= 0 ? g.name(store.selectedId) : null;
-  const a = g.svcName[Math.min(g.S - 1, 3)];
+  const g = store.G,
+    sel = store.selectedId >= 0 ? g.name(store.selectedId) : null;
+  if (g.src === 'self')
+    return sel ? [SELF_SUGGESTIONS[0], `What does ${sel} do?`, ...SELF_SUGGESTIONS.slice(1, 3)] : SELF_SUGGESTIONS;
+  // demo maps: the most-used service, and a caller two steps away from it, so the route question has an answer
+  ensureReverse(g); // who-calls-whom is built on first use
+  let hub = 0;
+  for (let s = 1; s < g.S; s++) if (g.QO[s + 1] - g.QO[s] > g.QO[hub + 1] - g.QO[hub]) hub = s;
+  const callerOf = s => (g.QO[s + 1] > g.QO[s] ? g.dr.a[g.QI[g.QO[s]]] : -1);
+  const c1 = callerOf(hub),
+    c2 = c1 >= 0 ? callerOf(c1) : -1,
+    from = c2 >= 0 && c2 !== hub ? c2 : c1;
   return [
-    g.src === 'self' ? DEMO_QUESTION : sel ? `What does ${sel} do?` : 'What is this codebase?',
-    ...(g.src === 'self' && sel ? [`What does ${sel} do?`] : []),
+    sel ? `What does ${sel} do?` : 'What is this codebase?',
     `What breaks if I change ${g.svcName[hub]}?`,
-    `Who uses ${sel || a}?`,
-    `How does ${g.svcName[g.S - 1]} reach ${g.svcName[hub]}?`,
+    `Who uses ${g.svcName[hub]}?`,
+    ...(from >= 0 ? [`How does ${g.svcName[from]} reach ${g.svcName[hub]}?`] : []),
   ];
 }
 

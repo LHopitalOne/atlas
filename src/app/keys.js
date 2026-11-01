@@ -63,7 +63,9 @@ function onKey(e) {
     return;
   }
   const action = SHORTCUTS[e.key.toLowerCase()];
-  if (action) action();
+  if (!action) return;
+  e.preventDefault(); // a shortcut that focuses a text box must not also type its key into it
+  action();
 }
 
 /** Wire this module to the DOM. Called once from main.js. */

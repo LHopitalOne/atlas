@@ -110,3 +110,8 @@ test('on a demo map the walkthrough says it is about Atlas itself', async () => 
   const { build } = await import('../src/model/synthetic.js');
   assert.match(renderingScript(build(281)).note, /Switch to Self/);
 });
+
+test('the suggested questions for the Self map all have real answers', () => {
+  const qs = ['What breaks if I change routeSearch?', 'Who uses store?', 'How does placeLabels reach requestRender?'];
+  for (const q of qs) assert.doesNotMatch(answerLocally(self, q), /couldn't find|aren't connected/, q);
+});

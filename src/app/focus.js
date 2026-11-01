@@ -109,7 +109,8 @@ export const ASK_FOCUS = 2 ** 30 + 1;
 export const routeActive = () => route.path.length > 1;
 export function updateFocus() {
   const hid = store.hover && store.hover.t === 'n' ? store.hover.id : -1,
-    id = store.selectedId >= 0 ? store.selectedId : routeActive() ? -1 : hid;
+    // while a route or an answer is on the map, hovering only rings items; it never takes over the focus
+    id = store.selectedId >= 0 ? store.selectedId : routeActive() || store.askSet.length ? -1 : hid;
   if (id >= 0) {
     if (id !== store.focusId) {
       computeFocus(id);

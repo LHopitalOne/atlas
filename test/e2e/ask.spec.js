@@ -88,3 +88,18 @@ test('the walkthrough is the first suggestion on the Self map', async ({ atlas }
     'How are we rendering the graph? The end-to-end flow',
   );
 });
+
+test('the A shortcut opens Ask without typing an "a"', async ({ atlas }) => {
+  await atlas.open();
+  await atlas.keyboard.press('a');
+  await expect(atlas.locator('#ask textarea')).toBeFocused();
+  await expect(atlas.locator('#ask textarea')).toHaveValue('');
+});
+
+test('suggestions on a demo map are answerable', async ({ atlas }) => {
+  await atlas.open('#5k');
+  await atlas.keyboard.press('a');
+  const route = atlas.locator('#ask .ask-empty .chip-q', { hasText: /^How does/ });
+  await route.click();
+  await expect(atlas.locator('#ask .ans-text')).toContainText(/hops?/);
+});
