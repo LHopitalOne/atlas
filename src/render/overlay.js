@@ -4,7 +4,7 @@
  */
 import { cam, route, stOn, store } from '../state.js';
 import { safeRect, viewCenter } from '../app/camera.js';
-import { ROUTE_FOCUS, routeActive } from '../app/focus.js';
+import { ASK_FOCUS, ROUTE_FOCUS, routeActive } from '../app/focus.js';
 import { endPoint } from '../app/route.js';
 import { oc } from '../dom.js';
 import { scrR } from './frame.js';
@@ -100,15 +100,21 @@ function drawSelectionFlow(fx) {
   }
 }
 
-/** Dots travelling along the route, from start to destination. */
+/** Dots travelling along the route (start to destination) or an answer's trail (in reading order). */
 function drawRouteFlow(fx) {
   const { g, k, I, now, SX, SY, on } = fx;
-  // flow along the route, start to destination
-  if (store.focusId === ROUTE_FOCUS && routeActive() && store.dimT > 0.02 && !reduceMotion) {
+  // flow along the route (start to destination), or along an answer's trail (in reading order)
+  const hops =
+    store.focusId === ROUTE_FOCUS && routeActive()
+      ? route.hops
+      : store.focusId === ASK_FOCUS && store.askSet.length
+        ? store.askHops
+        : null;
+  if (hops && hops.length && store.dimT > 0.02 && !reduceMotion) {
     oc.lineWidth = 1;
     oc.strokeStyle = css(theme.halo);
     oc.fillStyle = css(theme.route);
-    for (const h of route.hops) {
+    for (const h of hops) {
       const x0 = g.PX[h.a],
         y0 = g.PY[h.a],
         x1 = g.PX[h.b],

@@ -58,3 +58,21 @@ test('calling a library does not make a service a bridge', () => {
     assert.ok(!rolesOf(g, 1).some(r => r.key === 'bridge'), 'C -> s1 -> Lib is not a bridge: Lib calls nothing onward');
   });
 });
+
+test('an answer trail joins cited services in order through short chains', async () => {
+  const { answerTrail } = await import('../src/graph/insights.js');
+  const g = tinyGraph();
+  // s0 -> s1 -> s2 <- s3 : citing s0, s2, s3 walks s0-s1-s2, then s2-s3 (against the call)
+  const { hops, via } = answerTrail(g, [0, 2, 3]);
+  assert.deepEqual(
+    hops.map(h => [h.a, h.b]),
+    [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+    ],
+  );
+  assert.deepEqual(via, [1], 's1 is passed through but not named');
+  assert.equal(hops[2].fwd, false);
+  assert.deepEqual(answerTrail(g, [0, 3], 2).hops, [], 'pairs further apart than maxHops stay unjoined');
+});

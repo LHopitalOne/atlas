@@ -19,6 +19,7 @@ export const store = {
   selectedId: -1,
   impactId: -1,
   askSet: [],
+  askHops: [],
   kbdMap: false,
   focusId: -1,
   focusT: 0,

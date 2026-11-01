@@ -24,6 +24,8 @@ import { DEMO_QUESTION, scriptFor } from '../ask/demo.js';
 import { ASK_ENGINE, ASK_PLAYBACK } from '../config.js';
 import { reduceMotion } from '../util/dom.js';
 import { ensureReverse } from '../graph/route-search.js';
+import { safeRect } from '../app/camera.js';
+import { cam } from '../state.js';
 
 /** Conversation: { q, text, steps, status: 'thinking'|'streaming'|'done'|'error', mode: 'claude'|'local', note } */
 let thread = [];
@@ -105,11 +107,32 @@ export function closeAsk() {
   if (hadFocus) ov.focus({ preventScroll: true });
 }
 
+/** Whether every item is already on screen (then the camera stays put). */
+function inView(ids) {
+  const g = store.G,
+    R = safeRect();
+  return ids.every(i => {
+    const x = g.PX[i] * cam.k + cam.x,
+      y = g.PY[i] * cam.k + cam.y;
+    return x > R.l && x < R.r && y > R.t && y < R.b;
+  });
+}
+
+/** While an answer streams, light up what it has cited so far and the trail between them (no camera move). */
+function followOnMap(i) {
+  const { refs } = renderAnswer(thread[i].text, valid, nameOf, true);
+  if (refs.length < 2) return;
+  showing = i;
+  store.askSet = refs;
+  store.focusId = -1;
+  updateFocus();
+}
+
 /** Light up an answer's items on the map (everything else dims) and bring them into view. */
 function showOnMap(i, quiet) {
   const { refs } = renderAnswer(thread[i].text, valid, nameOf);
   if (refs.length < 2 && quiet) return;
-  clearShowing();
+  if (showing !== i) clearShowing();
   showing = i;
   store.askSet = refs;
   store.focusId = -1;
@@ -119,13 +142,14 @@ function showOnMap(i, quiet) {
     b.setAttribute('aria-pressed', 'true');
     b.textContent = 'Hide on map';
   }
-  if (store.selectedId < 0)
-    flyTo(
-      fitNodes(
-        store.focusList.filter(n => n < store.G.S),
-        2,
-      ),
+  if (store.selectedId < 0) {
+    // move only when it helps: the items are off screen, or zooming in would make them much easier to read
+    const target = fitNodes(
+      store.focusList.filter(n => n < store.G.S),
+      2,
     );
+    if (!inView(store.focusList) || target.k > cam.k * 1.5) flyTo(target);
+  }
   if (!quiet) announce(`Showing ${refs.length} items from the answer on the map.`);
 }
 
@@ -199,11 +223,14 @@ async function play(turn, i, script, signal) {
   for (let k = 0; k < all.length; ) {
     k = reduceMotion ? all.length : Math.min(all.length, k + ASK_PLAYBACK.tokensPerTick);
     turn.text = all.slice(0, k).join('');
+    let cited = false;
     for (const m of turn.text.matchAll(/\[\[([ndr]\d+)\]\]/g))
       if (!turn.appear[m[1]]) {
         turn.appear[m[1]] = performance.now();
         ring(m[1]);
+        cited = true;
       }
+    if (cited) followOnMap(i); // the map traces the answer as it is read
     renderTurn(i);
     if (k < all.length) await wait(ASK_PLAYBACK.tick, signal);
   }
@@ -419,8 +446,9 @@ function renderTurn(i) {
   const t = thread[i],
     streaming = t.status === 'thinking' || t.status === 'streaming';
   const r = renderAnswer(t.text || '', valid, nameOf, streaming);
+  const preview = r.refs.slice(0, 3).map(nameOf).join(', ') + (r.refs.length > 3 ? ` +${r.refs.length - 3}` : '');
   const sources = r.refs.length
-    ? `<div class="sources"><div class="src-h">Sources</div>${r.refs
+    ? `<details class="sources"${t.srcOpen ? ' open' : ''} data-turn-src="${i}"><summary><span class="src-count">${r.refs.length} source${r.refs.length === 1 ? '' : 's'}</span><span class="src-prev">${esc(preview)}</span></summary><div class="src-list">${r.refs
         .map((ref, n) => {
           const e = resolve(store.G, ref),
             dot = e.t === 'n' ? dotHTML(e.id) : '<span class="g tr" aria-hidden="true"></span>';
@@ -430,9 +458,9 @@ function renderTurn(i) {
               : e.t === 'd'
                 ? 'Domain'
                 : 'Repository';
-          return `<button class="src" data-ref="${ref}" data-at="${t.appear[ref] || t.born}"><span class="n">${n + 1}</span>${dot}<span class="sn${e.t === 'n' && e.id >= store.G.S ? ' mono' : ''}">${esc(nameOf(ref))}</span><span class="sw">${esc(where)}</span></button>`;
+          return `<button class="src" data-ref="${ref}"><span class="n">${n + 1}</span>${dot}<span class="sn${e.t === 'n' && e.id >= store.G.S ? ' mono' : ''}">${esc(nameOf(ref))}</span><span class="sw">${esc(where)}</span></button>`;
         })
-        .join('')}</div>`
+        .join('')}</div></details>`
     : '';
   const done = t.status === 'done' || t.status === 'error';
   const actions =
@@ -636,6 +664,15 @@ export function init() {
   ASK.addEventListener('input', onInput);
   ASK.addEventListener('mouseover', onOver);
   ASK.addEventListener('mouseout', onOut);
+  // remember whether a turn's sources are open (the answer re-renders while it streams); toggle doesn't bubble
+  ASK.addEventListener(
+    'toggle',
+    e => {
+      const d = e.target.closest && e.target.closest('[data-turn-src]');
+      if (d && thread[+d.dataset.turnSrc]) thread[+d.dataset.turnSrc].srcOpen = d.open;
+    },
+    true,
+  );
 }
 
 /** Clear the conversation when the dataset changes (refs belong to one graph). */

@@ -103,3 +103,13 @@ test('suggestions on a demo map are answerable', async ({ atlas }) => {
   await route.click();
   await expect(atlas.locator('#ask .ans-text')).toContainText(/hops?/);
 });
+
+test('sources start folded to one line and stay open once opened', async ({ atlas }) => {
+  await atlas.open();
+  await askFromSearch(atlas, 'How are we rendering the graph?');
+  const src = atlas.locator('#ask .sources');
+  await expect(src.locator('summary')).toContainText('17 sources');
+  expect(await src.evaluate(d => d.open)).toBe(false);
+  await src.locator('summary').click();
+  await expect(src.locator('.src').first()).toBeVisible();
+});

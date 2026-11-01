@@ -4,7 +4,7 @@
  */
 import { cam, stOn, store } from '../state.js';
 import { stepAnim } from '../app/camera.js';
-import { clearFocus, ROUTE_FOCUS, routeActive } from '../app/focus.js';
+import { ASK_FOCUS, clearFocus, ROUTE_FOCUS, routeActive } from '../app/focus.js';
 import { LEAF_MAX_PX, SVC_MAX_PX } from '../config.js';
 import { glc } from '../dom.js';
 import { gl, LY, P_BG, P_EDGE, P_FILL, P_NODE } from './gl.js';
@@ -33,6 +33,14 @@ let lastT = 0;
 export function requestRender() {
   if (!raf) raf = requestAnimationFrame(frame);
 }
+/** Is something flowing on the map (dots along a selection's contracts, a route, or an answer's trail)? */
+function flowing() {
+  if (store.dimT <= 0.02 || reduceMotion) return false;
+  if (store.selectedId >= 0) return store.focusEdges.length > 0 && store.focusEdges.length <= 900;
+  if (store.focusId === ROUTE_FOCUS) return routeActive();
+  return store.focusId === ASK_FOCUS && store.askSet.length > 0 && store.askHops.length > 0;
+}
+
 function frame(now) {
   raf = 0;
   if (!store.G) return;
@@ -51,15 +59,7 @@ function frame(now) {
     store.focusId = -1;
     clearFocus();
   }
-  if (
-    store.selectedId >= 0 &&
-    store.dimT > 0.02 &&
-    !reduceMotion &&
-    store.focusEdges.length &&
-    store.focusEdges.length <= 900
-  )
-    more = true;
-  if (store.focusId === ROUTE_FOCUS && routeActive() && store.dimT > 0.02 && !reduceMotion) more = true;
+  if (flowing()) more = true;
   const t0 = performance.now();
   render(now);
   const ms = performance.now() - t0;

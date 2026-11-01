@@ -2,7 +2,7 @@
  * What a service means in the graph: its roles and how far a change to it reaches. Pure: no DOM, no global state.
  * Uses the directed service table `g.dr` and its forward (`RO/RI`) and reverse (`QO/QI`) indexes.
  */
-import { ensureReverse } from './route-search.js';
+import { ensureReverse, routeSearch } from './route-search.js';
 
 const callers = (g, s) => g.QO[s + 1] - g.QO[s];
 const callees = (g, s) => g.RO[s + 1] - g.RO[s];
@@ -103,4 +103,35 @@ export function pairContract(g, p) {
     if (e >= 0) return e;
   }
   return -1;
+}
+
+/**
+ * The trail an answer takes through the map: its services in citation order, each joined to the next by the shortest
+ * chain of calls (in either direction, at most `maxHops`). Pairs that are further apart are left unjoined.
+ * @param {number[]} services in the order the answer mentions them
+ * @returns {{hops: {a:number, b:number, fwd:boolean, p:number}[], via:number[]}} hops in reading order; via = services
+ *   the trail passes through that the answer did not name
+ */
+export function answerTrail(g, services, maxHops = 3) {
+  const hops = [],
+    seen = new Set(),
+    named = new Set(services),
+    via = new Set();
+  for (let k = 1; k < services.length && hops.length < 60; k++) {
+    const a = services[k - 1],
+      b = services[k];
+    if (a === b) continue;
+    const r = routeSearch(g, [a], [b], { either: true });
+    if (!r || r.path.length - 1 > maxHops) continue;
+    for (let j = 1; j < r.path.length; j++) {
+      const u = r.path[j - 1],
+        v = r.path[j],
+        key = u < v ? `${u}-${v}` : `${v}-${u}`;
+      if (!named.has(v)) via.add(v);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      hops.push({ a: u, b: v, fwd: !!r.fwd[v], p: r.via[v] });
+    }
+  }
+  return { hops, via: [...via] };
 }

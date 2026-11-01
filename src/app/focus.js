@@ -6,7 +6,7 @@ import { route, store } from '../state.js';
 import { requestRender } from '../render/frame.js';
 import { LY, patch, upload } from '../render/gl.js';
 import { put4, theme } from '../render/theme.js';
-import { impactOf, pairContract } from '../graph/insights.js';
+import { answerTrail, impactOf, pairContract } from '../graph/insights.js';
 import { fitNodes, flyTo } from './camera.js';
 import { announce } from '../ui/feedback.js';
 
@@ -202,7 +202,7 @@ export function toggleImpact(id) {
   );
 }
 
-/** Light up a set of map items (an answer's citations): nodes with their services, territories with their services. */
+/** Light up an answer: its items, the trail joining them in reading order, and the services the trail passes through. */
 export function computeSetFocus(refs) {
   const g = store.G;
   for (const i of store.focusList) store.inF[i] = 0;
@@ -214,17 +214,22 @@ export function computeSetFocus(refs) {
       store.focusList.push(i);
     }
   };
+  const order = [];
   for (const ref of refs) {
     const t = ref[0],
       id = +ref.slice(1);
     if (t === 'n') {
       add(id);
       add(g.own(id));
+      order.push(g.own(id));
     } else {
       const [d0, d1] = t === 'd' ? [id, id + 1] : [g.rDs[id], g.rDe[id]];
       for (let d = d0; d < d1; d++) for (let s = g.dSs[d]; s < g.dSe[d] && store.focusList.length < 2000; s++) add(s);
     }
   }
+  const trail = answerTrail(g, order);
+  store.askHops = trail.hops;
+  trail.via.forEach(add);
   for (let j = 0; j < store.A.svcs.n; j++) store.A.svcs.fl[j * 2] = 0;
   for (let j = 0; j < store.A.leaves.n; j++) store.A.leaves.fl[j * 2] = 0;
   for (const i of store.focusList) {
@@ -233,5 +238,20 @@ export function computeSetFocus(refs) {
   }
   patch(LY.svcs, 2, store.A.svcs.fl);
   patch(LY.leaves, 2, store.A.leaves.fl);
-  LY.focusE.n = 0;
+  // trail lines: service to service, in the route colour; steps against the call are dashed, as in Directions
+  const n = trail.hops.length,
+    seg = new Float32Array(n * 4),
+    prm = new Float32Array(n * 4),
+    col = new Uint8Array(n * 4);
+  trail.hops.forEach((h, j) => {
+    seg.set([g.PX[h.a], g.PY[h.a], g.PX[h.b], g.PY[h.b]], j * 4);
+    prm.set([1.8, 0.1, h.fwd ? 0 : 1, 0], j * 4);
+    put4(col, j, theme.route, 0.85);
+  });
+  LY.focusE.n = n;
+  if (n) {
+    upload(LY.focusE, 0, seg, true);
+    upload(LY.focusE, 1, prm, true);
+    upload(LY.focusE, 2, col, true);
+  }
 }

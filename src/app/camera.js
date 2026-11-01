@@ -98,13 +98,14 @@ export const flyToTerr = (lvl, id) => {
   flyTo(fitBox(cx - r, cy - r, cx + r, cy + r));
 };
 
-/** The part of the screen not covered by panels: used to centre the camera and place edge markers. */
+/** The part of the screen not covered by panels or sheets: used to centre the camera and place edge markers. */
 export function safeRect() {
   const wide = store.W > 760;
   return {
     l: wide && leftOpen() ? 412 : 16,
     r: store.W - 16 - (inspOpen() && wide ? 374 : 0),
     t: store.W > 1040 ? 68 : 112,
-    b: store.H - (inspOpen() && !wide ? store.H * 0.5 + 16 : 16),
+    // phones: the inspector (half the screen) and left panels (bottom sheets, 62% plus the row below) cover the bottom
+    b: store.H - (wide ? 16 : inspOpen() ? store.H * 0.5 + 16 : leftOpen() ? store.H * 0.62 + 72 : 16),
   };
 }

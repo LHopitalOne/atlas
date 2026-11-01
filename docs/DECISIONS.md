@@ -79,6 +79,12 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
   answer's items. Why: answers should be checkable at a glance, and the map is the best place to check them.
 - **The answer shows what it looked at** ("Searched the index", "Checked the impact of …", "Read the code of … (live,
   not stored)"), collapsed to one line when done. Why: people and agents see whether code was read or only the index.
+- **Answers trace their path on the map.** The items an answer cites are joined in reading order by the shortest call
+  chain between each pair (at most three hops), drawn like a route: lines in the route colour, dashed against the call,
+  dots flowing along them. The trail grows while the answer streams. When it finishes, the camera moves only if the
+  items are off screen or too small to read.
+- **Sources fold into one line** ("17 sources · build, buildSpec, finish +14") that opens to the list; the numbered
+  chips in the text are the main way in.
 - **Selection is context:** an "About …" chip shows what "this" means; `@` mentions items by name.
 - **Claude answers when the page may ask it** (the viewer's own account, with consent); otherwise an offline answerer
   handles the common questions from the index, and the panel says "Offline · answered from the index, without AI".
@@ -124,7 +130,8 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
 - **Panels share one layout system.** The map controls are one card of one width: actions, zoom slider, minimap,
   quiet stats. Segmented controls span their row with equal segments. Inspector actions form one row of round
   buttons that never wraps.
-- **On mobile the inspector is a bottom sheet with a drag handle.**
+- **On phones the inspector and the left panels (Ask, Directions, Needs attention) are bottom sheets,** and the camera
+  treats the sheet as covered space, so what you're looking at stays visible above it.
 - **Panels never cover the toolbar or each other.** The source view starts where the inspector starts and sits beside it.
   In narrow windows with the inspector open, the map controls shrink to the dock and the Key steps aside until it fits.
 - **The minimap box only draws edges that are really inside the overview,** and nothing when the whole map is in view.
