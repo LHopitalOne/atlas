@@ -87,8 +87,8 @@ focus mode: `store.impactId` makes `computeFocus` add the affected services and 
 `ask/tools.js` (pure) is the set of lookups every answerer uses: search, describe, impact, route, overview and, when
 source is available, read_source. `ask/local.js` (pure) answers common questions from those tools without AI;
 `ask/claude.js` gives the same tools to Claude through the artifact `sample` capability and asks it to cite items as
-`[[ref]]`; `ask/format.js` (pure) turns answers into safe HTML with numbered citations and follow-ups. `ui/ask.js` is
-the panel. "Show on map" is a focus mode like routes: `store.askSet` makes `computeSetFocus` light up the cited items.
+`[[ref]]`; `ask/format.js` (pure) turns answers into safe HTML with numbered citations and follow-ups. `ask/demo.js` (pure) scripts simulated answers for the prototype
+(`ASK_ENGINE = 'demo'`): the rendering walkthrough and offline answers, played by `ui/ask.js`, which is the panel. "Show on map" is a focus mode like routes: `store.askSet` makes `computeSetFocus` light up the cited items.
 
 ## URL
 

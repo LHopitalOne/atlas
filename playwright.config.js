@@ -5,6 +5,9 @@ export default defineConfig({
   testDir: 'test/e2e',
   timeout: 60_000,
   workers: 1, // software WebGL in containers makes parallel browsers flaky
+  // a long run on software WebGL (no GPU) occasionally stalls input; a retry restarts the browser.
+  // A test that only passes on retry is reported as flaky, so real regressions still show.
+  retries: 1,
   use: {
     viewport: { width: 1280, height: 860 },
     colorScheme: 'dark',

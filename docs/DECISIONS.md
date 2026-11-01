@@ -83,6 +83,14 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
 - **Claude answers when the page may ask it** (the viewer's own account, with consent); otherwise an offline answerer
   handles the common questions from the index, and the panel says "Offline · answered from the index, without AI".
   Both use the same tools (search, describe, impact, route, overview, read_source), which are also what agents get.
+- **Answers play out, they don't pop in.** "Thinking…", then each step appears with a spinner that turns into a check
+  (and rings the item it looked at on the map), then the text streams in word by word with chips popping in and sources
+  sliding in as they are cited. When it finishes, the answer's items light up on the map. Stop ends it where it is.
+  Entrance animations carry the time they started, so re-rendering a streaming answer never restarts them. With
+  reduced motion everything appears at once.
+- **The prototype simulates answers** (`ASK_ENGINE = 'demo'` in `src/config.js`): a scripted walkthrough for questions
+  about rendering, cited against Atlas's real functions, and offline answers for the rest, labelled "Demo" and
+  "Simulated answer". The Claude engine is kept behind the same switch for the product.
 - **Composer:** grows with the text, Enter sends, Shift+Enter adds a line, Send becomes Stop while answering, Escape
   closes the panel and returns focus to the map.
 
