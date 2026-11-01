@@ -82,6 +82,14 @@ with the pair that reached each). `ui/about.js` renders the summary, provenance,
 the "Copy for AI" text. `ui/code-view.js` shows a definition's lines from `meta.sourceBundle`. Impact on the map is a
 focus mode: `store.impactId` makes `computeFocus` add the affected services and chains.
 
+## Asking about the code
+
+`ask/tools.js` (pure) is the set of lookups every answerer uses: search, describe, impact, route, overview and, when
+source is available, read_source. `ask/local.js` (pure) answers common questions from those tools without AI;
+`ask/claude.js` gives the same tools to Claude through the artifact `sample` capability and asks it to cite items as
+`[[ref]]`; `ask/format.js` (pure) turns answers into safe HTML with numbered citations and follow-ups. `ui/ask.js` is
+the panel. "Show on map" is a focus mode like routes: `store.askSet` makes `computeSetFocus` light up the cited items.
+
 ## URL
 
 `#<dataset>[-node-<id>][-route-<from>-<to>[-avoid][-any][-by<detail>]][-issues][-<colour>]`, ends as

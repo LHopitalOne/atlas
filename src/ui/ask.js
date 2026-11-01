@@ -5,7 +5,7 @@
  * and the panel says which.
  */
 import { store, route } from '../state.js';
-import { ASK } from '../dom.js';
+import { ASK, ov } from '../dom.js';
 import { esc } from '../util/format.js';
 import { renderAnswer } from '../ask/format.js';
 import { refName, resolve, search, toolSet } from '../ask/tools.js';
@@ -85,9 +85,12 @@ export function openAsk(question) {
 export function closeAsk() {
   if (!askOpen()) return;
   if (busy) busy.abort();
+  // a hidden text box would keep focus and swallow shortcuts: hand focus back to the map
+  const hadFocus = ASK.contains(document.activeElement);
   ASK.classList.remove('on');
   clearShowing();
   syncLegend();
+  if (hadFocus) ov.focus({ preventScroll: true });
 }
 
 function clearShowing() {

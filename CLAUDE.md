@@ -50,6 +50,7 @@ E2E uses your Playwright browsers; set `CHROMIUM_PATH` to use another Chromium. 
 | What draws on the GPU | `src/render/gl.js` (shaders, layers), `src/render/scene.js` (geometry), `src/render/frame.js` (per frame, level of detail) |
 | Labels | `src/render/labels.js` (placement tiers, fades), `src/config.js` `LABELS` |
 | Roles and impact | `src/graph/insights.js` (pure) |
+| Asking about the code | `src/ask/` (tools, offline answers, Claude engine, formatting), `src/ui/ask.js` (panel) |
 | What a component does | `src/ui/about.js` (summary, provenance, roles, impact, Copy for AI), `src/ui/code-view.js` (source view) |
 | Panels | `src/ui/*.js` |
 | Styles and markup | `src/index.html` (shadcn-style tokens on `:root`) |

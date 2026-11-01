@@ -36,7 +36,8 @@ src/
   model/ graph/      generation, spec validation, layout, indexes, route search (pure, Node-testable)
   render/            WebGL2 layers, frame loop, overlay, labels, minimap
   app/               camera, focus, selection, routes, URL, keyboard and pointer input
-  ui/                panels: inspector, directions, search, key, needs attention, controls
+  ask/               questions about the code: shared lookup tools, offline answers, Claude engine
+  ui/                panels: inspector, directions, search, key, needs attention, ask, controls
 test/                unit + architecture tests; test/e2e/ Playwright
 tools/index-self/    tree-sitter + SCIP indexer for the Self graph
 docs/                DECISIONS, ARCHITECTURE, GRAPH_SPEC, INTEGRATION

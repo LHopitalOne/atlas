@@ -4,7 +4,7 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: 'test/e2e',
   timeout: 60_000,
-  workers: 2,
+  workers: 1, // software WebGL in containers makes parallel browsers flaky
   use: {
     viewport: { width: 1280, height: 860 },
     colorScheme: 'dark',

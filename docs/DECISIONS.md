@@ -68,6 +68,24 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
 - **Search works by meaning as well as by name.** Matches on summaries appear in their own group, "By what it does",
   with the matching words marked. The product would use embeddings of the summaries (not of the code).
 
+## Asking about the code
+
+- **The search bar is the one way in.** Typing a question offers "Ask Atlas: …" first; typing a name offers it last.
+  `A` or the "Ask Atlas" action opens it empty. Why: one box for finding, asking and acting; no competing chat bubble.
+- **The conversation lives in the left panel,** one left panel at a time: opening Ask closes Directions and Needs
+  attention (and the other way round), and the Key folds while it is open.
+- **Every map item an answer mentions is a numbered chip,** listed again under Sources. Hovering a chip or source rings
+  the item on the map; clicking selects it (territories fly into view). "Show on map" dims everything except the
+  answer's items. Why: answers should be checkable at a glance, and the map is the best place to check them.
+- **The answer shows what it looked at** ("Searched the index", "Checked the impact of …", "Read the code of … (live,
+  not stored)"), collapsed to one line when done. Why: people and agents see whether code was read or only the index.
+- **Selection is context:** an "About …" chip shows what "this" means; `@` mentions items by name.
+- **Claude answers when the page may ask it** (the viewer's own account, with consent); otherwise an offline answerer
+  handles the common questions from the index, and the panel says "Offline · answered from the index, without AI".
+  Both use the same tools (search, describe, impact, route, overview, read_source), which are also what agents get.
+- **Composer:** grows with the text, Enter sends, Shift+Enter adds a line, Send becomes Stop while answering, Escape
+  closes the panel and returns focus to the map.
+
 ## Directions
 
 - **Either end can be a repository, domain, service or endpoint.** Typing or clicking works in both fields. After the
