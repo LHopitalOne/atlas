@@ -44,7 +44,7 @@ G = Graph()
 
 def layer(mod):
     top = mod.split('/')[0]
-    return {'model': 'Model', 'graph': 'Model', 'render': 'Render', 'app': 'App', 'ui': 'UI', 'dom': 'UI'}.get(top, 'Core')
+    return {'model': 'Model', 'graph': 'Model', 'render': 'Render', 'app': 'App', 'ask': 'App', 'ui': 'UI', 'dom': 'UI'}.get(top, 'Core')
 
 # ---------------------------------------------------------------- JavaScript modules (tree-sitter)
 JSP = Parser(Language(tsjs.language()))

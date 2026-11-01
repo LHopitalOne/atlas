@@ -295,7 +295,7 @@ function renderTurn(i) {
     done && r.followups.length && i === thread.length - 1
       ? `<div class="sugg follow">${r.followups.map(s => `<button class="chip-q" data-q="${esc(s)}">${esc(s)}</button>`).join('')}</div>`
       : '';
-  el.innerHTML = `<div class="uq">${esc(t.q)}</div><div class="ans">${stepsHTML(t)}${t.note ? `<div class="ans-note">${esc(t.note)}</div>` : ''}
+  el.innerHTML = `<div class="uq">${esc(t.q)}</div><div>${stepsHTML(t)}${t.note ? `<div class="ans-note">${esc(t.note)}</div>` : ''}
     <div class="ans-text">${r.html}${t.status === 'streaming' ? '<span class="caret" aria-hidden="true"></span>' : ''}</div>${sources}${actions}${follow}
     ${done && t.mode === 'local' && !t.note ? '<div class="ans-meta">Answered from the index, without AI.</div>' : ''}</div>`;
   if (t.status !== 'done') {

@@ -9,6 +9,7 @@ import { dotHTML, ICON_X, nameAttrs, pills } from './fragments.js';
 import { $ } from '../util/dom.js';
 import { esc } from '../util/format.js';
 import { closeAsk } from './ask.js';
+import { leftOpen } from '../app/camera.js';
 
 let attnList = [];
 export function buildAttn() {
@@ -28,7 +29,7 @@ let legendWas = true;
 /** Fold the Key while a left panel is open; restore it afterwards. */
 export function syncLegend() {
   const L = $('#legend'),
-    now = RT.classList.contains('on') || ATTN.classList.contains('on');
+    now = leftOpen();
   if (now && !leftWas) {
     legendWas = L.open;
     L.open = false;

@@ -218,7 +218,7 @@ function drawResults(q) {
   Q.setAttribute('aria-activedescendant', 'opt-' + act);
 }
 function choose(n) {
-  const [t, id] = hits[n];
+  const [t, id, label] = hits[n];
   Q.value = '';
   closeResults();
   if (t === 'a') {
@@ -228,7 +228,7 @@ function choose(n) {
   }
   if (t === 'q') {
     Q.blur();
-    openAsk(hits[n][2]);
+    openAsk(label);
     return;
   }
   if (t === 'n' || t === 'h' || t === 'm') {

@@ -455,9 +455,10 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 .send{all:unset;flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--foreground);color:var(--background);cursor:pointer;transition:opacity .15s ease,transform 160ms var(--ease-out)}
 .send:active{transform:scale(.94)}
 .send:disabled{opacity:.3;cursor:not-allowed}
+.send.stop{background:var(--muted);color:var(--foreground)}
 .send:focus-visible{box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 55%,transparent)}
 .chint{margin-top:6px;font-size:11px;color:var(--muted-foreground)}
-.mentions{position:absolute;left:12px;right:12px;bottom:calc(100% - 6px);z-index:2;padding:4px;border:1px solid var(--border);border-radius:10px;background:var(--popover,var(--card));box-shadow:0 8px 24px rgb(0 0 0 / .35)}
+.mentions{position:absolute;left:12px;right:12px;bottom:calc(100% - 6px);z-index:2;padding:4px;border:1px solid var(--border);border-radius:10px;background:var(--card);box-shadow:0 8px 24px rgb(0 0 0 / .35)}
 .mentions[hidden]{display:none}
 .mi{display:flex;justify-content:space-between;gap:10px;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer}
 .mi .mw{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--muted-foreground)}
