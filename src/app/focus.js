@@ -104,6 +104,8 @@ export function clearFocus() {
 /** Two hover targets ({t, id} or null) are the same thing. */
 export const same = (a, b) => (!a && !b) || (a && b && a.t === b.t && a.id === b.id);
 export const ROUTE_FOCUS = 2 ** 30;
+/** Focus id for the items an Ask answer is showing on the map. */
+export const ASK_FOCUS = 2 ** 30 + 1;
 export const routeActive = () => route.path.length > 1;
 export function updateFocus() {
   const hid = store.hover && store.hover.t === 'n' ? store.hover.id : -1,
@@ -120,8 +122,19 @@ export function updateFocus() {
       store.focusId = ROUTE_FOCUS;
     }
     store.focusGoal = 1;
+  } else if (store.askSet.length) {
+    if (store.focusId !== ASK_FOCUS) {
+      computeSetFocus(store.askSet);
+      store.focusId = ASK_FOCUS;
+    }
+    store.focusGoal = 1;
   } else store.focusGoal = 0;
-  store.dimGoal = store.selectedId >= 0 || (store.focusId === ROUTE_FOCUS && routeActive()) ? 1 : 0;
+  store.dimGoal =
+    store.selectedId >= 0 ||
+    (store.focusId === ROUTE_FOCUS && routeActive()) ||
+    (store.focusId === ASK_FOCUS && store.askSet.length)
+      ? 1
+      : 0;
   requestRender();
 }
 // route spotlight: the services on the path plus the endpoints each hop's contract runs between
@@ -186,4 +199,38 @@ export function toggleImpact(id) {
   announce(
     store.impactId === id ? `Showing everything a change to ${store.G.name(id)} could affect.` : 'Impact view off.',
   );
+}
+
+/** Light up a set of map items (an answer's citations): nodes with their services, territories with their services. */
+export function computeSetFocus(refs) {
+  const g = store.G;
+  for (const i of store.focusList) store.inF[i] = 0;
+  store.focusList = [];
+  store.focusEdges = [];
+  const add = i => {
+    if (i >= 0 && !store.inF[i]) {
+      store.inF[i] = 1;
+      store.focusList.push(i);
+    }
+  };
+  for (const ref of refs) {
+    const t = ref[0],
+      id = +ref.slice(1);
+    if (t === 'n') {
+      add(id);
+      add(g.own(id));
+    } else {
+      const [d0, d1] = t === 'd' ? [id, id + 1] : [g.rDs[id], g.rDe[id]];
+      for (let d = d0; d < d1; d++) for (let s = g.dSs[d]; s < g.dSe[d] && store.focusList.length < 2000; s++) add(s);
+    }
+  }
+  for (let j = 0; j < store.A.svcs.n; j++) store.A.svcs.fl[j * 2] = 0;
+  for (let j = 0; j < store.A.leaves.n; j++) store.A.leaves.fl[j * 2] = 0;
+  for (const i of store.focusList) {
+    if (i < g.S) store.A.svcs.fl[i * 2] = 255;
+    else store.A.leaves.fl[(i - g.S) * 2] = 255;
+  }
+  patch(LY.svcs, 2, store.A.svcs.fl);
+  patch(LY.leaves, 2, store.A.leaves.fl);
+  LY.focusE.n = 0;
 }

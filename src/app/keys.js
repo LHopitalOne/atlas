@@ -10,6 +10,7 @@ import { renderAttn } from '../ui/attention.js';
 import { setMode, toggleIssues } from '../ui/controls.js';
 import { renderRoute, startDirections } from '../ui/directions.js';
 import { closeSource, sourceOpen } from '../ui/code-view.js';
+import { askOpen, closeAsk, openAsk } from '../ui/ask.js';
 
 const zoomStep = f => {
   const c = viewCenter();
@@ -25,7 +26,7 @@ function escape() {
   else if (store.attnOpen) {
     store.attnOpen = false;
     renderAttn();
-  }
+  } else if (askOpen()) closeAsk();
 }
 /** Single-key shortcuts (ignored while typing). */
 const SHORTCUTS = {
@@ -33,6 +34,7 @@ const SHORTCUTS = {
   f: () => fitAll(),
   i: () => toggleIssues(),
   d: () => startDirections(),
+  a: () => openAsk(),
   c: () => {
     store.userColor = true;
     setMode(store.colorMode === 'health' ? 'repo' : 'health');

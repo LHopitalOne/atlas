@@ -15,6 +15,7 @@ import { openInspector } from '../ui/inspector.js';
 import { pushRecent } from '../ui/search.js';
 import { $ } from '../util/dom.js';
 import { closeSource } from '../ui/code-view.js';
+import { syncAskContext } from '../ui/ask.js';
 
 let opener = null;
 export function pick(px, py, tolPx = 7) {
@@ -88,6 +89,7 @@ export function select(id, via) {
   store.hover = null;
   updateFocus();
   openInspector(id);
+  syncAskContext();
   const svcK = 18 / store.G.medRF,
     t = fitNodes(store.focusList, id < g.S ? 2.4 : 3.2);
   flyTo(t.k >= svcK * 0.6 ? t : camFor(g.PX[id], g.PY[id], Math.max(cam.k, svcK * 1.6)));
@@ -107,6 +109,7 @@ export function deselect(restore) {
   closeSource(false);
   store.placeDirty = true;
   app.classList.remove('has-insp');
+  syncAskContext();
   updateFocus();
   writeHash();
   if (restore && opener && document.contains(opener)) opener.focus({ preventScroll: true });

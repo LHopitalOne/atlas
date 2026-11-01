@@ -25,6 +25,7 @@ import { renderPerf } from '../ui/perf.js';
 import { loadRecent } from '../ui/search.js';
 import { $ } from '../util/dom.js';
 import { fmt } from '../util/format.js';
+import { resetAsk } from '../ui/ask.js';
 
 export function loadDataset(n, state) {
   const hadState = store.G && (store.selectedId >= 0 || !!route.from || !!route.to);
@@ -56,6 +57,7 @@ export function loadDataset(n, state) {
       store.placeDirty = true;
       store.G = n === 'self' ? buildSpec(selfSpec()) : build(n);
       store.G.src = n;
+      resetAsk();
       store.inF = new Uint8Array(store.G.N);
       // labels come from the dataset: indexed code uses its own vocabulary for statuses and kinds
       STATUS.splice(0, 4, ...((store.G.meta && store.G.meta.status) || DEFAULT_STATUS));

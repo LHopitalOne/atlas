@@ -145,3 +145,22 @@ export function init() {
     }
   });
 }
+
+/**
+ * The plain lines of a definition, for Ask's read_source tool (in the product: fetched live from GitHub, not stored).
+ * @returns {{file:string, lines:string, code:string, truncated:boolean, commit:string} | null}
+ */
+export function sourceLines(id, max = 80) {
+  const b = sources(),
+    at = locate(id);
+  if (!b || !at || b.files[at.file] === undefined) return null;
+  const all = b.files[at.file].split('\n'),
+    last = Math.min(at.end, at.start + max - 1);
+  return {
+    file: at.file,
+    lines: `${at.start}-${last}`,
+    code: all.slice(at.start - 1, last).join('\n'),
+    truncated: last < at.end,
+    commit: b.commit,
+  };
+}

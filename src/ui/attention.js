@@ -8,6 +8,7 @@ import { STATUS } from '../model/vocab.js';
 import { dotHTML, ICON_X, nameAttrs, pills } from './fragments.js';
 import { $ } from '../util/dom.js';
 import { esc } from '../util/format.js';
+import { closeAsk } from './ask.js';
 
 let attnList = [];
 export function buildAttn() {
@@ -24,7 +25,8 @@ export function buildAttn() {
 // a left panel and the open Key would overlap: fold the Key while a panel is open, restore it after
 let leftWas = false;
 let legendWas = true;
-function syncLegend() {
+/** Fold the Key while a left panel is open; restore it afterwards. */
+export function syncLegend() {
   const L = $('#legend'),
     now = RT.classList.contains('on') || ATTN.classList.contains('on');
   if (now && !leftWas) {
@@ -36,6 +38,7 @@ function syncLegend() {
   leftWas = now;
 }
 export function renderAttn() {
+  if (store.attnOpen) closeAsk();
   const g = store.G;
   const show = store.attnOpen && !RT.classList.contains('on');
   ATTN.classList.toggle('on', show);

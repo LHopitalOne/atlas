@@ -18,6 +18,7 @@ export const store = {
   hoverTO: 0,
   selectedId: -1,
   impactId: -1,
+  askSet: [],
   kbdMap: false,
   focusId: -1,
   focusT: 0,

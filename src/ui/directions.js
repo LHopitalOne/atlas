@@ -16,6 +16,7 @@ import { renderAttn } from './attention.js';
 import { BCLS, dotHTML, ICON_X, nameAttrs } from './fragments.js';
 import { buildIndex, score } from './search.js';
 import { esc, fmt } from '../util/format.js';
+import { closeAsk } from './ask.js';
 
 export function startDirections() {
   if (!store.G) return;
@@ -158,6 +159,7 @@ export function renderRoute() {
   const g = store.G;
   const on = !!route.from || !!route.to || !!route.picking;
   RT.classList.toggle('on', on);
+  if (on) closeAsk();
   renderAttn();
   if (!on) return;
   let h = headerHTML() + fieldsHTML() + controlsHTML();
@@ -283,18 +285,20 @@ const hopHL = e => {
   }
 };
 
-/** Wire this module to the DOM. Called once from main.js. */
+/** Close the Directions panel and clear the route. */
+export function closeDirections() {
+  route.from = route.to = null;
+  route.picking = null;
+  route.detailSet = false;
+  computeRoute();
+  renderRoute();
+  requestRender();
+  writeHash();
+}
+
+/** Clicks inside the Directions panel. */
 function onClick(e) {
-  if (e.target.closest('[data-rclose]')) {
-    route.from = route.to = null;
-    route.picking = null;
-    route.detailSet = false;
-    computeRoute();
-    renderRoute();
-    requestRender();
-    writeHash();
-    return;
-  }
+  if (e.target.closest('[data-rclose]')) return closeDirections();
   if (e.target.closest('[data-swap]')) {
     [route.from, route.to] = [route.to, route.from];
     route.picking = !route.from ? 'from' : !route.to ? 'to' : null;

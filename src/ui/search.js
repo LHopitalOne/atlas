@@ -13,6 +13,7 @@ import { announce } from './feedback.js';
 import { dotHTML, nameAttrs } from './fragments.js';
 import { $ } from '../util/dom.js';
 import { esc, fmt } from '../util/format.js';
+import { openAsk } from './ask.js';
 
 let hits = [];
 let act = 0;
@@ -66,22 +67,25 @@ const ACTIONS = () => [
     },
   },
   { label: 'Get directions', kbd: 'D', run: () => startDirections() },
+  { label: 'Ask Atlas a question', kbd: 'A', run: () => openAsk() },
   { label: 'Fit to screen', kbd: 'F', run: () => fitAll() },
 ];
 const GROUP = h =>
-  h[0] === 'a'
-    ? 'Actions'
-    : h[0] === 'm'
-      ? 'By what it does'
-      : h[0] === 'h'
-        ? 'Recent'
-        : h[0] === 'r'
-          ? 'Repositories'
-          : h[0] === 'd'
-            ? 'Domains'
-            : h[1] < store.G.S
-              ? 'Services'
-              : 'Endpoints';
+  h[0] === 'q'
+    ? 'Ask Atlas'
+    : h[0] === 'a'
+      ? 'Actions'
+      : h[0] === 'm'
+        ? 'By what it does'
+        : h[0] === 'h'
+          ? 'Recent'
+          : h[0] === 'r'
+            ? 'Repositories'
+            : h[0] === 'd'
+              ? 'Domains'
+              : h[1] < store.G.S
+                ? 'Services'
+                : 'Endpoints';
 /** Items whose summary contains every word of the query (3+ letters), excluding those already found by name. */
 function meaningHits(q, byName) {
   const words = q.split(/\s+/).filter(w => w.length >= 3);
@@ -107,6 +111,12 @@ function snippet(text, q) {
     html = html.replace(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), m => `<mark>${m}</mark>`);
   return html;
 }
+
+/** Does the text read like a question rather than a name? */
+export const looksLikeQuestion = q =>
+  /\?$/.test(q) ||
+  /^(how|what|why|where|which|who|when|does|do|is|are|can|should|explain|describe|tell|show|list|find)\b/i.test(q) ||
+  q.split(/\s+/).length >= 4;
 
 function runSearch() {
   if (!store.G) return;
@@ -141,6 +151,9 @@ function runSearch() {
     .map(x => (x[1] < 0 ? x[2] : it[x[1]]))
     .concat(meaning)
     .sort((a, b) => order.indexOf(GROUP(a)) - order.indexOf(GROUP(b)));
+  // a question goes to Ask Atlas: first when it reads like one, last otherwise
+  const askHit = ['q', 0, Q.value.trim()];
+  hits = looksLikeQuestion(q) ? [askHit, ...hits] : [...hits, askHit];
   act = 0;
   drawResults(q);
 }
@@ -171,6 +184,10 @@ function drawResults(q) {
     if (t === 'a') {
       const ax = ACTIONS()[id];
       h += `<div class="cmd-item" role="option" id="opt-${n}" data-n="${n}" aria-selected="${n === act}"><span class="ico" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nm">${esc(nm)}</span><span class="hint">${ax.kbd ? `<span class="kbd" aria-label="Shortcut ${ax.kbd}">${ax.kbd}</span>` : ''}${ret}</span></div>`;
+      return;
+    }
+    if (t === 'q') {
+      h += `<div class="cmd-item" role="option" id="opt-${n}" data-n="${n}" aria-selected="${n === act}"><span class="ask-ico" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2.5 9.3 6.7 13.5 8 9.3 9.3 8 13.5 6.7 9.3 2.5 8l4.2-1.3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span><span class="nm">Ask Atlas: <b>${esc(nm)}</b></span><span class="hint">${ret}</span></div>`;
       return;
     }
     if (t === 'h') id = +id;
@@ -207,6 +224,11 @@ function choose(n) {
   if (t === 'a') {
     Q.blur();
     ACTIONS()[id].run();
+    return;
+  }
+  if (t === 'q') {
+    Q.blur();
+    openAsk(hits[n][2]);
     return;
   }
   if (t === 'n' || t === 'h' || t === 'm') {
