@@ -33,7 +33,8 @@ test('names in the search bar still search; asking is offered last', async ({ at
 test('citations lead to the map; "this" means the selection', async ({ atlas }) => {
   await atlas.open();
   await askFromSearch(atlas, 'What breaks if I change routeSearch?');
-  await atlas.locator('#ask .src').first().click();
+  // the numbered chips in the text are the way in (sources are folded)
+  await atlas.locator('#ask .cite').first().click();
   await expect(atlas.locator('#insTitle')).toHaveText('routeSearch');
   await expect(atlas.locator('#ask .ctx')).toContainText('routeSearch');
   await atlas.locator('#ask textarea').fill('what does this do?');
