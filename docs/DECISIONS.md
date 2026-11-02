@@ -83,14 +83,17 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
   chain between each pair (at most three hops), drawn like a route: lines in the route colour, dashed against the call,
   dots flowing along them. The trail grows while the answer streams. When it finishes, the camera moves only if the
   items are off screen or too small to read.
-- **Answers that describe an order get a diagram** (`ASK_DIAGRAM = 'diagram'`): stage boxes with their items, joined
-  by arrows that draw themselves, or for routes a chain of items with arrows labelled "calls" / "called by". Drawn as
-  SVG in the design system, every item a button. The alternative (`'steps'`) is a step line: one stop per step (a
-  route's services, or a pipeline's stages with their functions). Solid along calls, dashed against them; each stop is
-  clickable and rings on the map; stops appear 45 ms apart when the answer finishes. Why not a rendered Mermaid diagram:
-  the map already shows where things are, a diagram can't link to the map, and the library is heavier than all of Atlas.
-  The step line adds the one thing the map can't show at a glance: order. It comes from a `FLOW:` line in the answer,
-  which Claude is asked for too.
+- **Each answer gets the picture that fits its shape** (`ui/answer-visual.js`):
+  - a **loop** is a racetrack: down the left column, a turn, up the right, a turn back; every arrowhead axis-aligned;
+    two-step loops are two boxes joined by an arc over and an arc under;
+  - a **route or branching answer** is a layered graph like Mermaid's (callers above callees, parents centred over
+    children, arrows leaving and entering boxes vertically, smooth splines), so shapes like a weak link's V show
+    themselves; drawn by Atlas so boxes ring on the map and open on click;
+  - a **pipeline** is a stage list: stage titles on a rail, items as text;
+  - **big answers** get summaries instead of diagrams: impact as counts and bars by module, the module tangle as the
+    modules holding it together and its tightest loops. Why: any diagram of 100+ nodes shrinks to unreadable in a
+    chat panel (Mermaid renders them at 18–24%).
+  Not Mermaid itself: 2.5 MB, no link to the map, and it shrinks wide diagrams instead of summarising them.
 - **"Copy as Mermaid"** exports an answer as a Mermaid flowchart (stages as subgraphs, calls as labelled edges), to
   paste into docs, pull requests or an AI agent. Mermaid is for sharing, not for reading inside Atlas.
 - **Sources fold into one line** ("17 sources · build, buildSpec, finish +14") that opens to the list; the numbered

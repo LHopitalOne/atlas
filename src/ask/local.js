@@ -97,7 +97,7 @@ function answerCycles(g, q, step) {
     .slice(0, 3)
     .map(x => `- ${x.loop.map(cite).join(' → ')}${x.size > x.loop.length - 1 ? ` (in a group of ${x.size})` : ''}`);
   const first = show.loop[0].name;
-  return `${lines.join(' ')}\n\nThe tightest loops:\n${loops.join('\n')}\n\nFLOW: ${loopFlow(show.loop)}\nFOLLOWUPS: Is ${first} part of a cycle? | ${level ? 'Are there cycles between services?' : 'Are there cycles between modules?'}`;
+  return `${lines.join(' ')}\n\nThe tightest loops:\n${loops.join('\n')}\n\nFLOW: ${loopFlow(show.loop)}${d && d.count ? '\nSUMMARY: tangle' : ''}\nFOLLOWUPS: Is ${first} part of a cycle? | ${level ? 'Are there cycles between services?' : 'Are there cycles between modules?'}`;
 }
 
 function answerCycleOf(g, intent, need, step) {
@@ -146,7 +146,7 @@ function answerImpact(g, intent, need, step) {
   const more = `\n\nFOLLOWUPS: What does ${im.name} do? | ${im.affects ? `Show me the code of ${im.name}` : `What does ${im.name} depend on?`}`;
   if (!im.affects) return `Nothing calls ${im.name} [[${im.ref}]], so a change there stays there.${more}`;
   const s = n => (n === 1 ? '' : 's');
-  return `Changing ${im.name} [[${im.ref}]] can affect ${im.affects} service${s(im.affects)} in ${im.repositories} repositor${im.repositories === 1 ? 'y' : 'ies'}. ${im.directCallers} call${im.directCallers === 1 ? 's' : ''} it directly; the rest reach it through them.\n\nNearest first: ${list(im.nearest, 6)}.${more}`;
+  return `Changing ${im.name} [[${im.ref}]] can affect ${im.affects} service${s(im.affects)} in ${im.repositories} repositor${im.repositories === 1 ? 'y' : 'ies'}. ${im.directCallers} call${im.directCallers === 1 ? 's' : ''} it directly; the rest reach it through them.\n\nNearest first: ${list(im.nearest, 6)}.\n\nSUMMARY: impact ${im.ref}${more}`;
 }
 
 function answerTerritory(d) {

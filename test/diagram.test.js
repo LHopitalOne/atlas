@@ -77,32 +77,6 @@ test('the formatter returns the step line once an answer is complete, never whil
   );
 });
 
-test('diagram layout: stage boxes stack without overlapping, pills stay inside their box and the width', async () => {
-  const { layoutFlow } = await import('../src/ask/diagram.js');
-  const flow = parseFlow('Data=n1,n2,n3 | Upload=n4 | Draw=n5,n6,n7,n8,n9');
-  const L = layoutFlow(flow, { width: 300, textWidth: s => s.length * 7.2, nameOf: r => 'function_' + r });
-  assert.equal(L.boxes.length, 3);
-  assert.equal(L.arrows.length, 2);
-  for (let k = 1; k < L.boxes.length; k++) assert.ok(L.boxes[k].y >= L.boxes[k - 1].y + L.boxes[k - 1].h + 20);
-  for (const n of L.nodes) {
-    const b = L.boxes[n.stage];
-    assert.ok(n.x >= b.x && n.x + n.w <= b.x + b.w && n.y >= b.y && n.y + n.h <= b.y + b.h, `${n.ref} inside its box`);
-    assert.ok(n.x + n.w <= 300);
-  }
-  assert.equal(L.height, L.boxes[2].y + L.boxes[2].h);
-});
-
-test('diagram layout: a route is a centred chain with one arrow per link', async () => {
-  const { layoutFlow } = await import('../src/ask/diagram.js');
-  const L = layoutFlow(parseFlow('n1 > n2 < n3'), { width: 300, textWidth: s => s.length * 7, nameOf: r => r });
-  assert.equal(L.boxes.length, 0);
-  assert.deepEqual(
-    L.arrows.map(a => a.kind),
-    ['>', '<'],
-  );
-  for (const n of L.nodes) assert.ok(Math.abs(n.x + n.w / 2 - 150) < 1);
-});
-
 test('citations are grouped by paragraph and list item, so separate findings get separate trails', () => {
   const r = renderAnswer(
     'Two loops:\n- a [[n1]] → b [[n2]] → a [[n1]]\n- c [[n3]] → d [[n4]] → c [[n3]]\n\nFLOW: n1 > n2 > n1',
@@ -119,4 +93,20 @@ test('citations are grouped by paragraph and list item, so separate findings get
     x => x,
   );
   assert.deepEqual(staged.groups.at(-1), ['n2', 'n3'], 'stages join last-to-first');
+});
+
+test('SUMMARY lines ask for a summary picture, alongside FLOW and FOLLOWUPS', () => {
+  const r = splitControl('Body.\n\nSUMMARY: impact n12\nFOLLOWUPS: a | b');
+  assert.deepEqual(r.summary, { kind: 'impact', ref: 'n12' });
+  assert.equal(splitControl('x\nFLOW: n1 > n2\nSUMMARY: tangle').summary.kind, 'tangle');
+  assert.equal(
+    renderAnswer(
+      'x [[n1]]\n\nSUMMARY: impact n1',
+      () => true,
+      r2 => r2,
+      true,
+    ).summary,
+    null,
+    'not while streaming',
+  );
 });

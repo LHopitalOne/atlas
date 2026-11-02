@@ -115,7 +115,7 @@ test('sources start folded to one line and stay open once opened', async ({ atla
   await expect(src.locator('.src').first()).toBeVisible();
 });
 
-test('ordered answers draw a diagram; Copy as Mermaid copies a flowchart', async ({ atlas }) => {
+test('a pipeline is drawn as a stage list; Copy as Mermaid copies a flowchart', async ({ atlas }) => {
   await atlas.open();
   await atlas.evaluate(() => {
     navigator.clipboard.writeText = t => {
@@ -124,10 +124,9 @@ test('ordered answers draw a diagram; Copy as Mermaid copies a flowchart', async
     };
   });
   await askFromSearch(atlas, 'How are we rendering the graph?');
-  await expect(atlas.locator('#ask .dgm .dbox')).toHaveCount(6);
-  await expect(atlas.locator('#ask .dgm .dn')).toHaveCount(17);
-  await expect(atlas.locator('#ask .dgm .darr')).toHaveCount(5);
-  await atlas.locator('#ask .dgm .dn', { hasText: 'buildScene' }).click();
+  await expect(atlas.locator('#ask .stages .stg')).toHaveCount(6);
+  await expect(atlas.locator('#ask .stages .si')).toHaveCount(17);
+  await atlas.locator('#ask .stages .si', { hasText: 'buildScene' }).click();
   await expect(atlas.locator('#insTitle')).toHaveText('buildScene');
   await atlas.locator('#ask [data-mermaid]').click();
   const text = await atlas.evaluate(() => window.__copied);
@@ -135,24 +134,34 @@ test('ordered answers draw a diagram; Copy as Mermaid copies a flowchart', async
   expect(text).toContain('subgraph');
 });
 
-test('a route answer is a chain with labelled arrows, and items work from the keyboard', async ({ atlas }) => {
+test('a route is drawn as a graph, and its boxes work from the keyboard', async ({ atlas }) => {
   await atlas.open();
   await askFromSearch(atlas, 'How does placeLabels reach requestRender?');
-  await expect(atlas.locator('#ask .dgm .dn')).toHaveCount(3);
-  await expect(atlas.locator('#ask .dgm .dl').first()).toHaveText('calls');
-  await atlas.locator('#ask .dgm .dn').nth(1).focus();
+  await expect(atlas.locator('#ask .gv .gn')).toHaveCount(3);
+  await expect(atlas.locator('#ask .gv .ge')).toHaveCount(2);
+  await atlas.locator('#ask .gv .gn').nth(1).focus();
   await atlas.keyboard.press('Enter');
   await expect(atlas.locator('#insTitle')).toHaveText('placementDue');
 });
 
-test('cycle questions: the loop is drawn as a chain that comes back to its start', async ({ atlas }) => {
+test('cycle questions: the loop is drawn as a racetrack, one arrow per step', async ({ atlas }) => {
   await atlas.open();
-  await askFromSearch(atlas, 'Is requestRender part of a cycle?');
+  await askFromSearch(atlas, 'Is placeLabels part of a cycle?');
   await expect(atlas.locator('#ask .ans-text')).toContainText('is in a cycle');
-  const names = await atlas.locator('#ask .dgm .dn text').allTextContents();
-  expect(names[0]).toBe('requestRender');
-  expect(names.at(-1)).toBe('requestRender');
+  await expect(atlas.locator('#ask .gv .gn')).toHaveCount(7);
+  await expect(atlas.locator('#ask .gv .ge')).toHaveCount(7);
+  await expect(atlas.locator('#ask .gv .gn.start')).toContainText('placeLabels');
   await expect(atlas.locator('#ask [data-show]')).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('big answers get summaries: impact by module, and the module tangle', async ({ atlas }) => {
+  await atlas.open();
+  await askFromSearch(atlas, 'What breaks if I change store?');
+  await expect(atlas.locator('#ask .sum .sum-h')).toContainText('services could break');
+  expect(await atlas.locator('#ask .sum .bar').count()).toBeGreaterThan(3);
+  await atlas.locator('#ask textarea').fill('Are there circular imports between modules?');
+  await atlas.keyboard.press('Enter');
+  await expect(atlas.locator('#ask .turn').nth(1).locator('.sum')).toContainText('Holding it together');
 });
 
 test('the cycle question is suggested on the Self map', async ({ atlas }) => {

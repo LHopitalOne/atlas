@@ -30,5 +30,3 @@ export const ASK_ENGINE = 'demo';
 /** Ask Atlas playback timing (ms). */
 export const ASK_PLAYBACK = { think: 520, tick: 28, tokensPerTick: 2 };
 
-/** How ordered answers are drawn: 'diagram' (stage boxes and arrows, SVG) or 'steps' (a vertical step line). */
-export const ASK_DIAGRAM = 'diagram';

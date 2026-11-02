@@ -21,15 +21,14 @@ import { closeDirections } from './directions.js';
 import { renderAttn, syncLegend } from './attention.js';
 import { dotHTML, ICON_X } from './fragments.js';
 import { DEMO_QUESTION, scriptFor } from '../ask/demo.js';
-import { ASK_DIAGRAM, ASK_ENGINE, ASK_PLAYBACK } from '../config.js';
+import { ASK_ENGINE, ASK_PLAYBACK } from '../config.js';
 import { reduceMotion } from '../util/dom.js';
 import { ensureReverse } from '../graph/route-search.js';
 import { safeRect } from '../app/camera.js';
 import { cam } from '../state.js';
-import { layoutFlow, toMermaid } from '../ask/diagram.js';
+import { toMermaid } from '../ask/diagram.js';
 import { answerTrail } from '../graph/insights.js';
-import { tw } from '../render/canvas.js';
-import { MONO, SANS } from '../util/format.js';
+import { visualHTML } from './answer-visual.js';
 
 /** Conversation: { q, text, steps, status: 'thinking'|'streaming'|'done'|'error', mode: 'claude'|'local', note } */
 let thread = [];
@@ -434,72 +433,6 @@ const withCaret = html => {
   return m ? html.slice(0, m.index) + caret + html.slice(m.index) : html + caret;
 };
 
-/** The step line: one stop per step, connectors solid along calls, dashed against them, neutral between stages. */
-function flowHTML(flow, at) {
-  const cls = { '>': 'l-calls', '<': 'l-against', '|': 'l-seq' };
-  const chip = ref => {
-    const e = resolve(store.G, ref),
-      dot = e.t === 'n' ? dotHTML(e.id) : '';
-    return `<button class="fchip" data-ref="${ref}" title="${esc(nameOf(ref))}">${dot}<span>${esc(nameOf(ref))}</span></button>`;
-  };
-  return `<ol class="flow" aria-label="Steps">${flow.stops
-    .map((st, k) => {
-      const link = k < flow.links.length ? cls[flow.links[k]] : '';
-      const tip = flow.links[k] === '<' ? ' title="The next step calls this one (against the call)"' : '';
-      return `<li class="fs ${link}" data-at="${at + k * 45}"${tip}><span class="fm" aria-hidden="true"></span><div class="fb">${st.title ? `<div class="ft">${esc(st.title)}</div>` : ''}<div class="fi">${st.refs.map(chip).join('')}</div></div></li>`;
-    })
-    .join('')}</ol>`;
-}
-
-/** Fit a label into a width, measured in the diagram font. */
-function fitText(font, text, max) {
-  if (tw(font, text) <= max) return text;
-  let t = text;
-  while (t.length > 1 && tw(font, t + '…') > max) t = t.slice(0, -1);
-  return t + '…';
-}
-
-/**
- * The answer as a diagram: stage boxes (or a chain of items) joined by arrows. Boxes fade in one after another and
- * arrows draw themselves; every item is a button that rings on the map and opens on click.
- */
-function diagramHTML(flow, at, i) {
-  const box = ASK.querySelector('.ask-thread');
-  const width = Math.max(240, Math.min(440, (box ? box.clientWidth : 380) - 34));
-  const F = `400 12px ${MONO}`,
-    FT = `600 12px ${SANS}`,
-    STEP = 90;
-  const L = layoutFlow(flow, { width, textWidth: x => tw(F, x), nameOf });
-  const out = [];
-  for (const b of L.boxes)
-    out.push(
-      `<g class="dbox" data-at="${at + b.stage * STEP}"><rect x="${b.x + 0.5}" y="${b.y + 0.5}" width="${b.w - 1}" height="${b.h - 1}" rx="10"/><text class="dt" x="${b.x + 10}" y="${b.y + 23}">${esc(fitText(FT, b.title, b.w - 20))}</text></g>`,
-    );
-  for (const a of L.arrows) {
-    const len = a.y2 - a.y1,
-      mid = (a.y1 + a.y2) / 2,
-      back = a.kind === '<';
-    const label = L.boxes.length
-      ? ''
-      : `<text class="dl" x="${a.x1 + 10}" y="${mid + 4}">${back ? 'called by' : 'calls'}</text>`;
-    out.push(
-      `<g class="darr${back ? ' back' : ''}"><path d="M${a.x1} ${a.y1} V${a.y2 - 2}" style="--len:${len}" data-at="${at + a.stage * STEP - 40}" marker-end="url(#ah${i})"/>${label}</g>`,
-    );
-  }
-  for (const n of L.nodes) {
-    const name = nameOf(n.ref);
-    out.push(
-      `<g class="dn${n.end ? ' end' : ''}" data-ref="${n.ref}" data-at="${at + n.stage * STEP + 30}" tabindex="0" role="button" aria-label="${esc(name)}"><rect x="${n.x + 0.5}" y="${n.y + 0.5}" width="${n.w - 1}" height="${n.h - 1}" rx="6"/><text x="${n.x + n.w / 2}" y="${n.y + n.h / 2 + 4}" text-anchor="middle">${esc(fitText(F, name, n.w - 16))}</text></g>`,
-    );
-  }
-  return `<div class="dgm"><svg viewBox="0 0 ${width} ${L.height + 2}" width="${width}" height="${L.height + 2}" role="group" aria-label="Diagram of the answer">
-    <defs><marker id="ah${i}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0.5 L7.5,4 L0,7.5 z"/></marker></defs>${out.join('')}</svg></div>`;
-}
-
-/** An ordered answer's picture: a diagram or a step line (see ASK_DIAGRAM). */
-const orderHTML = (flow, at, i) =>
-  !flow ? '' : ASK_DIAGRAM === 'diagram' ? diagramHTML(flow, at, i) : flowHTML(flow, at);
-
 /** Mermaid text for an answer: from its step line, or from the trail between the items it cites. */
 function mermaidFor(i) {
   const t = thread[i],
@@ -545,7 +478,17 @@ function renderTurn(i) {
         .join('')}</div></details>`
     : '';
   const done = t.status === 'done' || t.status === 'error';
-  const afterFlow = t.doneAt + (r.flow ? r.flow.stops.length * (ASK_DIAGRAM === 'diagram' ? 90 : 45) + 60 : 0);
+  const threadEl = ASK.querySelector('.ask-thread');
+  const pic = done
+    ? visualHTML(
+        r.flow,
+        r.summary,
+        t.doneAt,
+        i,
+        Math.max(240, Math.min(440, (threadEl ? threadEl.clientWidth : 380) - 34)),
+      )
+    : { html: '', settle: 0 };
+  const afterFlow = done ? pic.settle : t.doneAt;
   const actions =
     done && r.refs.length
       ? `<div class="ans-actions" data-at="${afterFlow}"><button class="btn btn-outline btn-sm" data-show="${i}" aria-pressed="${showing === i}">${showing === i ? 'Hide on map' : 'Show on map'}</button><button class="btn btn-ghost btn-sm" data-mermaid="${i}" title="Copy a Mermaid flowchart of this answer, to paste into docs, pull requests or an AI agent">Copy as Mermaid</button></div>`
@@ -555,7 +498,7 @@ function renderTurn(i) {
       ? `<div class="sugg follow" data-at="${afterFlow + 60}">${r.followups.map(s => `<button class="chip-q" data-q="${esc(s)}">${esc(s)}</button>`).join('')}</div>`
       : '';
   el.innerHTML = `<div class="uq" data-at="${t.born}">${esc(t.q)}</div><div>${stepsHTML(t)}${t.note ? `<div class="ans-note">${esc(t.note)}</div>` : ''}
-    <div class="ans-text">${t.status === 'streaming' ? withCaret(r.html) : r.html}</div>${done ? orderHTML(r.flow, t.doneAt, i) : ''}${sources}${actions}${follow}
+    <div class="ans-text">${t.status === 'streaming' ? withCaret(r.html) : r.html}</div>${pic.html}${sources}${actions}${follow}
     ${done && !t.note ? (t.mode === 'demo' ? '<div class="ans-meta">Simulated answer for this prototype.</div>' : t.mode === 'local' ? '<div class="ans-meta">Answered from the index, without AI.</div>' : '') : ''}</div>`;
   resumeAnimations(el, t);
   if (t.status !== 'done') {
@@ -649,7 +592,7 @@ function send() {
 }
 
 function onKeydown(e) {
-  const dn = e.target.closest && e.target.closest('.dn');
+  const dn = e.target.closest && e.target.closest('.gn');
   if (dn && (e.key === 'Enter' || e.key === ' ')) {
     e.preventDefault();
     return onClick({ target: dn });

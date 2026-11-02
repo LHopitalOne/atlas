@@ -30,12 +30,12 @@ export function splitFollowups(text) {
  * @returns {{html:string, refs:string[], followups:string[], flow:object|null}} refs in citation order (chip n = refs[n-1])
  */
 export function renderAnswer(text, isValid, nameOf, streaming = false) {
-  let { body, followups, flow } = splitControl(text);
+  let { body, followups, flow, summary } = splitControl(text);
   // while streaming, hide a half-written citation or control line
   if (streaming)
     body = body
       .replace(/\[\[[^\]]*$/, '')
-      .replace(/\n?[ \t]*(FOLLOWUPS|FLOW):[^\n]*$/i, '')
+      .replace(/\n?[ \t]*(FOLLOWUPS|FLOW|SUMMARY):[^\n]*$/i, '')
       .replace(/\n[ \t]*F[LOWUPS]{0,8}$/i, '');
   const refs = [],
     groups = [];
@@ -99,5 +99,12 @@ export function renderAnswer(text, isValid, nameOf, streaming = false) {
     flushList();
   }
   const parsed = streaming ? null : parseFlow(flow, isValid);
-  return { html: out.join(''), refs, groups: groups.concat(flowGroups(parsed)), followups, flow: parsed };
+  return {
+    html: out.join(''),
+    refs,
+    groups: groups.concat(flowGroups(parsed)),
+    followups,
+    flow: parsed,
+    summary: streaming ? null : summary,
+  };
 }

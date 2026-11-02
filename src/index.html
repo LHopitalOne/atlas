@@ -494,48 +494,48 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 @media (prefers-reduced-motion: reduce){ .ask.on,.uq,.src,.steps.running li,.steps.running,.ans-actions,.sugg.follow,.cite{animation:none} .steps.running li.now::before{animation:none} }
 
 
-/* ---------- ask: step line ---------- */
-.flow{list-style:none;margin:12px 0 4px;padding:0}
-.fs{position:relative;display:grid;grid-template-columns:12px minmax(0,1fr);gap:10px;padding-bottom:12px;animation:ask-rise 280ms var(--ease-out) both}
-.fs:last-child{padding-bottom:0}
-.fm{position:relative;z-index:1;width:10px;height:10px;margin-top:6px;border-radius:50%;box-sizing:border-box;border:1.5px solid var(--route);background:var(--card)}
-.fs:first-child .fm,.fs:last-child .fm{background:var(--route)}
-.fs:not(:last-child)::before{content:"";position:absolute;left:4.25px;top:17px;bottom:-5px;border-left:1.5px solid var(--route)}
-.fs.l-against::before{border-left-style:dashed}
-.fs.l-seq::before{border-left-color:color-mix(in srgb,var(--route) 45%,var(--border))}
-.fb{min-width:0}
-.ft{margin-bottom:5px;font-size:12px;font-weight:600;line-height:22px;color:var(--foreground)}
-.fs:not(:has(.ft)) .fi{margin-top:0}
-.fi{display:flex;flex-wrap:wrap;gap:4px}
-.fchip{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;max-width:100%;height:22px;padding:0 7px;border:1px solid var(--border);border-radius:6px;font:400 12px var(--mono);color:var(--foreground);cursor:pointer;transition:background-color .15s ease,border-color .15s ease}
-.fchip span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fchip.hl{background:var(--accent);border-color:var(--ring)}
-.fchip:focus-visible{box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 55%,transparent)}
-.ans-actions{display:flex;flex-wrap:wrap;gap:6px}
-@media (hover:hover) and (pointer:fine){ .fchip:hover{background:var(--accent)} }
-@media (prefers-reduced-motion: reduce){ .fs{animation:ask-fade 200ms ease both} }
-@keyframes ask-fade{from{opacity:0}to{opacity:1}}
-
-
-/* ---------- ask: diagram ---------- */
-.dgm{margin:14px 0 4px;overflow-x:auto}
-.dgm svg{display:block;overflow:visible}
-.dbox rect{fill:color-mix(in srgb,var(--muted) 55%,transparent);stroke:var(--border)}
-.dt{fill:var(--foreground);font:600 12px var(--sans)}
-.dn{cursor:pointer;outline:none}
-.dn rect{fill:var(--card);stroke:var(--border);transition:fill .15s ease,stroke .15s ease}
-.dn text{fill:var(--foreground);font:400 12px var(--mono);pointer-events:none}
-.dn.end rect{stroke:var(--route)}
-.dn.hl rect,.dn:focus-visible rect{fill:var(--accent);stroke:var(--ring)}
-.darr path{fill:none;stroke:var(--route);stroke-width:1.5;stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:dgm-draw 340ms var(--ease-out) forwards}
-.darr.back path{stroke-dasharray:4 3;stroke-dashoffset:0;animation:dgm-fade 260ms ease both}
-.dgm marker path{fill:var(--route)}
-.dl{fill:var(--muted-foreground);font:400 11px var(--sans)}
-.dbox,.dn{animation:dgm-fade 280ms var(--ease-out) both}
-@keyframes dgm-draw{to{stroke-dashoffset:0}}
-@keyframes dgm-fade{from{opacity:0}to{opacity:1}}
-@media (hover:hover) and (pointer:fine){ .dn:hover rect{fill:var(--accent)} }
-@media (prefers-reduced-motion: reduce){ .darr path{animation:none;stroke-dashoffset:0} .darr.back path{stroke-dasharray:4 3} .dbox,.dn{animation:dgm-fade 200ms ease both} }
+/* ---------- ask: answer pictures (graph, racetrack, stages, summaries) ---------- */
+.gv{margin:14px 0 4px;overflow-x:auto}
+.gv svg{display:block;overflow:visible}
+.ge{fill:none;stroke:var(--route);stroke-width:1.3;stroke-opacity:.9;stroke-dasharray:1;stroke-dashoffset:1;animation:gv-draw 360ms var(--ease-out) forwards}
+.ge.back{stroke-dasharray:none;stroke-dashoffset:0;animation:gv-fade 260ms ease both}
+.gv marker path{fill:var(--route)}
+.gn{cursor:pointer;outline:none;animation:gv-fade 260ms var(--ease-out) both}
+.gn rect{fill:var(--card);stroke:color-mix(in srgb,var(--foreground) 16%,transparent);transition:fill .15s ease,stroke .15s ease}
+.gn.start rect{stroke:color-mix(in srgb,var(--foreground) 34%,transparent)}
+.gn circle{fill:var(--foreground)}
+.gn text{fill:var(--foreground);font:400 12px var(--mono);pointer-events:none}
+.gn.hl rect,.gn:focus-visible rect{fill:var(--accent);stroke:var(--ring)}
+.stages{list-style:none;margin:14px 0 4px;padding:0}
+.stg{position:relative;display:grid;grid-template-columns:14px minmax(0,1fr);column-gap:10px;padding-bottom:12px;animation:gv-fade 260ms var(--ease-out) both}
+.stg:last-child{padding-bottom:0}
+.sd{width:7px;height:7px;margin:5px 0 0 3px;border-radius:50%;background:var(--card);box-shadow:0 0 0 1.25px var(--muted-foreground)}
+.stg.end .sd{background:var(--foreground);box-shadow:none}
+.stg:not(:last-child)::before{content:"";position:absolute;left:6.5px;top:16px;bottom:2px;border-left:1px solid color-mix(in srgb,var(--foreground) 18%,transparent)}
+.stt{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;line-height:17px;color:var(--muted-foreground)}
+.sit{font:400 13px var(--mono);line-height:21px}
+.sit .sep{color:color-mix(in srgb,var(--foreground) 25%,transparent)}
+.si{all:unset;cursor:pointer;border-radius:4px;color:var(--foreground);font:inherit}
+.si.hl,.si:focus-visible{background:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.sum{margin:14px 0 4px;animation:gv-fade 260ms var(--ease-out) both}
+.sum-h{margin-bottom:12px;font-size:12.5px;color:var(--muted-foreground)}
+.sum-h b{color:var(--foreground);font-weight:600;font-variant-numeric:tabular-nums}
+.sum-l{margin-bottom:6px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-foreground)}
+.bar{all:unset;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,130px) 1fr 34px;align-items:center;gap:10px;width:100%;height:24px;padding:0 4px;margin:0 -4px;border-radius:6px;cursor:pointer;animation:gv-fade 240ms var(--ease-out) both}
+.bar.plain{grid-template-columns:minmax(0,130px) 1fr}
+.bn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 12px var(--mono)}
+.bt{height:4px;border-radius:2px;background:color-mix(in srgb,var(--foreground) 8%,transparent);overflow:hidden}
+.bt i{display:block;height:100%;border-radius:2px;background:var(--route)}
+.bc{font-size:11.5px;color:var(--muted-foreground);text-align:right;font-variant-numeric:tabular-nums}
+.bc2{font-size:11.5px;color:var(--muted-foreground)}
+.bar.hl,.bar:focus-visible{background:var(--accent)}
+.sm-more{margin-top:4px;font-size:11.5px;color:var(--muted-foreground)}
+.pair{display:flex;align-items:center;gap:8px;height:24px;font:400 12px var(--mono);animation:gv-fade 240ms var(--ease-out) both}
+.pair .arr{color:var(--route)}
+@keyframes gv-draw{to{stroke-dashoffset:0}}
+@keyframes gv-fade{from{opacity:0}to{opacity:1}}
+@media (hover:hover) and (pointer:fine){ .gn:hover rect{fill:var(--accent)} .si:hover{background:var(--accent);box-shadow:0 0 0 2px var(--accent)} .bar:hover{background:var(--accent)} }
+@media (prefers-reduced-motion: reduce){ .ge{animation:none;stroke-dashoffset:0;stroke-dasharray:none} .gn,.stg,.sum,.bar,.pair{animation:gv-fade 200ms ease both} }
 
 /* ---------- source view ---------- */
 .codeview{position:absolute;top:64px;right:384px;bottom:12px;width:min(720px,calc(100vw - 408px));z-index:7;display:flex;flex-direction:column;overflow:hidden;
