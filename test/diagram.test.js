@@ -76,3 +76,29 @@ test('the formatter returns the step line once an answer is complete, never whil
     'a half-written control line stays hidden',
   );
 });
+
+test('diagram layout: stage boxes stack without overlapping, pills stay inside their box and the width', async () => {
+  const { layoutFlow, parseFlow } = await import('../src/ask/diagram.js');
+  const flow = parseFlow('Data=n1,n2,n3 | Upload=n4 | Draw=n5,n6,n7,n8,n9');
+  const L = layoutFlow(flow, { width: 300, textWidth: s => s.length * 7.2, nameOf: r => 'function_' + r });
+  assert.equal(L.boxes.length, 3);
+  assert.equal(L.arrows.length, 2);
+  for (let k = 1; k < L.boxes.length; k++) assert.ok(L.boxes[k].y >= L.boxes[k - 1].y + L.boxes[k - 1].h + 20);
+  for (const n of L.nodes) {
+    const b = L.boxes[n.stage];
+    assert.ok(n.x >= b.x && n.x + n.w <= b.x + b.w && n.y >= b.y && n.y + n.h <= b.y + b.h, `${n.ref} inside its box`);
+    assert.ok(n.x + n.w <= 300);
+  }
+  assert.equal(L.height, L.boxes[2].y + L.boxes[2].h);
+});
+
+test('diagram layout: a route is a centred chain with one arrow per link', async () => {
+  const { layoutFlow, parseFlow } = await import('../src/ask/diagram.js');
+  const L = layoutFlow(parseFlow('n1 > n2 < n3'), { width: 300, textWidth: s => s.length * 7, nameOf: r => r });
+  assert.equal(L.boxes.length, 0);
+  assert.deepEqual(
+    L.arrows.map(a => a.kind),
+    ['>', '<'],
+  );
+  for (const n of L.nodes) assert.ok(Math.abs(n.x + n.w / 2 - 150) < 1);
+});

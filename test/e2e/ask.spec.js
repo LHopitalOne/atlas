@@ -115,7 +115,7 @@ test('sources start folded to one line and stay open once opened', async ({ atla
   await expect(src.locator('.src').first()).toBeVisible();
 });
 
-test('ordered answers draw a step line; Copy as Mermaid copies a flowchart', async ({ atlas }) => {
+test('ordered answers draw a diagram; Copy as Mermaid copies a flowchart', async ({ atlas }) => {
   await atlas.open();
   await atlas.evaluate(() => {
     navigator.clipboard.writeText = t => {
@@ -124,12 +124,23 @@ test('ordered answers draw a step line; Copy as Mermaid copies a flowchart', asy
     };
   });
   await askFromSearch(atlas, 'How are we rendering the graph?');
-  await expect(atlas.locator('#ask .flow .fs')).toHaveCount(6);
-  await expect(atlas.locator('#ask .flow .ft').first()).toHaveText('Data');
-  await atlas.locator('#ask .flow .fchip', { hasText: 'buildScene' }).click();
+  await expect(atlas.locator('#ask .dgm .dbox')).toHaveCount(6);
+  await expect(atlas.locator('#ask .dgm .dn')).toHaveCount(17);
+  await expect(atlas.locator('#ask .dgm .darr')).toHaveCount(5);
+  await atlas.locator('#ask .dgm .dn', { hasText: 'buildScene' }).click();
   await expect(atlas.locator('#insTitle')).toHaveText('buildScene');
   await atlas.locator('#ask [data-mermaid]').click();
   const text = await atlas.evaluate(() => window.__copied);
   expect(text).toContain('flowchart TD');
   expect(text).toContain('subgraph');
+});
+
+test('a route answer is a chain with labelled arrows, and items work from the keyboard', async ({ atlas }) => {
+  await atlas.open();
+  await askFromSearch(atlas, 'How does placeLabels reach requestRender?');
+  await expect(atlas.locator('#ask .dgm .dn')).toHaveCount(3);
+  await expect(atlas.locator('#ask .dgm .dl').first()).toHaveText('calls');
+  await atlas.locator('#ask .dgm .dn').nth(1).focus();
+  await atlas.keyboard.press('Enter');
+  await expect(atlas.locator('#insTitle')).toHaveText('placementDue');
 });

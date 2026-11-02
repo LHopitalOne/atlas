@@ -83,7 +83,9 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
   chain between each pair (at most three hops), drawn like a route: lines in the route colour, dashed against the call,
   dots flowing along them. The trail grows while the answer streams. When it finishes, the camera moves only if the
   items are off screen or too small to read.
-- **Answers that describe an order get a step line**: a small vertical diagram after the text, one stop per step (a
+- **Answers that describe an order get a diagram** (`ASK_DIAGRAM = 'diagram'`): stage boxes with their items, joined
+  by arrows that draw themselves, or for routes a chain of items with arrows labelled "calls" / "called by". Drawn as
+  SVG in the design system, every item a button. The alternative (`'steps'`) is a step line: one stop per step (a
   route's services, or a pipeline's stages with their functions). Solid along calls, dashed against them; each stop is
   clickable and rings on the map; stops appear 45 ms apart when the answer finishes. Why not a rendered Mermaid diagram:
   the map already shows where things are, a diagram can't link to the map, and the library is heavier than all of Atlas.

@@ -516,6 +516,27 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 @media (prefers-reduced-motion: reduce){ .fs{animation:ask-fade 200ms ease both} }
 @keyframes ask-fade{from{opacity:0}to{opacity:1}}
 
+
+/* ---------- ask: diagram ---------- */
+.dgm{margin:14px 0 4px;overflow-x:auto}
+.dgm svg{display:block;overflow:visible}
+.dbox rect{fill:color-mix(in srgb,var(--muted) 55%,transparent);stroke:var(--border)}
+.dt{fill:var(--foreground);font:600 12px var(--sans)}
+.dn{cursor:pointer;outline:none}
+.dn rect{fill:var(--card);stroke:var(--border);transition:fill .15s ease,stroke .15s ease}
+.dn text{fill:var(--foreground);font:400 12px var(--mono);pointer-events:none}
+.dn.end rect{stroke:var(--route)}
+.dn.hl rect,.dn:focus-visible rect{fill:var(--accent);stroke:var(--ring)}
+.darr path{fill:none;stroke:var(--route);stroke-width:1.5;stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:dgm-draw 340ms var(--ease-out) forwards}
+.darr.back path{stroke-dasharray:4 3;stroke-dashoffset:0;animation:dgm-fade 260ms ease both}
+.dgm marker path{fill:var(--route)}
+.dl{fill:var(--muted-foreground);font:400 11px var(--sans)}
+.dbox,.dn{animation:dgm-fade 280ms var(--ease-out) both}
+@keyframes dgm-draw{to{stroke-dashoffset:0}}
+@keyframes dgm-fade{from{opacity:0}to{opacity:1}}
+@media (hover:hover) and (pointer:fine){ .dn:hover rect{fill:var(--accent)} }
+@media (prefers-reduced-motion: reduce){ .darr path{animation:none;stroke-dashoffset:0} .darr.back path{stroke-dasharray:4 3} .dbox,.dn{animation:dgm-fade 200ms ease both} }
+
 /* ---------- source view ---------- */
 .codeview{position:absolute;top:64px;right:384px;bottom:12px;width:min(720px,calc(100vw - 408px));z-index:7;display:flex;flex-direction:column;overflow:hidden;
   opacity:0;transform:translateX(12px);transition:opacity 180ms var(--ease-out),transform 180ms var(--ease-out)}

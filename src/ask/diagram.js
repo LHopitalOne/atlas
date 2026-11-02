@@ -99,3 +99,63 @@ export function toMermaid({ flow = null, hops = [], title = '' }, nameOf) {
   for (const h of hops) out.push(h.fwd ? `  n${h.a} -->|calls| n${h.b}` : `  n${h.b} -->|calls| n${h.a}`);
   return out.join('\n');
 }
+
+/**
+ * Lay out a step line as a diagram that fits a given width. Pure: text widths come from `textWidth`.
+ * Staged flows: one box per stage (title + wrapped item pills), stacked, with an arrow between boxes.
+ * Routes (one item per stop, no titles): a vertical chain of pills with labelled arrows.
+ * @param {{stops:{title:string, refs:string[]}[], links:string[]}} flow
+ * @param {{width:number, textWidth:(s:string)=>number, nameOf:(ref:string)=>string}} o
+ * @returns {{width:number, height:number, boxes:object[], nodes:object[], arrows:object[]}}
+ */
+export function layoutFlow(flow, { width, textWidth, nameOf }) {
+  const P = { pad: 10, title: 20, pillH: 24, pillPad: 10, gapX: 6, gapY: 6, gap: 30, maxPill: width - 2 * 10 };
+  const pillW = ref => Math.min(P.maxPill, Math.ceil(textWidth(nameOf(ref))) + 2 * P.pillPad);
+  const staged = flow.stops.some(s => s.title || s.refs.length > 1);
+  const boxes = [],
+    nodes = [],
+    arrows = [];
+  let y = 0;
+  if (staged) {
+    flow.stops.forEach((st, k) => {
+      const top = y,
+        inner = width - 2 * P.pad;
+      let x = 0,
+        row = 0;
+      const placed = st.refs.map(ref => {
+        const w = Math.min(pillW(ref), inner);
+        if (x > 0 && x + w > inner) {
+          x = 0;
+          row++;
+        }
+        const n = { ref, x: P.pad + x, y: top + P.pad + P.title + row * (P.pillH + P.gapY), w, h: P.pillH, stage: k };
+        x += w + P.gapX;
+        return n;
+      });
+      const h = P.pad + P.title + (row + 1) * P.pillH + row * P.gapY + P.pad;
+      boxes.push({ x: 0, y: top, w: width, h, title: st.title || `Step ${k + 1}`, stage: k });
+      nodes.push(...placed);
+      if (k > 0)
+        arrows.push({
+          x1: width / 2,
+          y1: top - P.gap + 3,
+          x2: width / 2,
+          y2: top - 3,
+          kind: flow.links[k - 1],
+          stage: k,
+        });
+      y = top + h + P.gap;
+    });
+  } else {
+    flow.stops.forEach((st, k) => {
+      const ref = st.refs[0],
+        w = pillW(ref),
+        h = P.pillH + 4;
+      nodes.push({ ref, x: (width - w) / 2, y, w, h, stage: k, end: k === 0 || k === flow.stops.length - 1 });
+      if (k > 0)
+        arrows.push({ x1: width / 2, y1: y - P.gap + 3, x2: width / 2, y2: y - 3, kind: flow.links[k - 1], stage: k });
+      y += h + P.gap;
+    });
+  }
+  return { width, height: Math.max(0, y - P.gap), boxes, nodes, arrows };
+}
