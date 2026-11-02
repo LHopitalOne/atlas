@@ -102,3 +102,21 @@ test('diagram layout: a route is a centred chain with one arrow per link', async
   );
   for (const n of L.nodes) assert.ok(Math.abs(n.x + n.w / 2 - 150) < 1);
 });
+
+test('citations are grouped by paragraph and list item, so separate findings get separate trails', () => {
+  const r = renderAnswer(
+    'Two loops:\n- a [[n1]] → b [[n2]] → a [[n1]]\n- c [[n3]] → d [[n4]] → c [[n3]]\n\nFLOW: n1 > n2 > n1',
+    () => true,
+    x => x,
+  );
+  assert.deepEqual(r.groups.slice(0, 2), [
+    ['n1', 'n2', 'n1'],
+    ['n3', 'n4', 'n3'],
+  ]);
+  const staged = renderAnswer(
+    'x [[n1]]\n\nFLOW: A=n1,n2 | B=n3',
+    () => true,
+    x => x,
+  );
+  assert.deepEqual(staged.groups.at(-1), ['n2', 'n3'], 'stages join last-to-first');
+});

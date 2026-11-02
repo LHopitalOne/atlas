@@ -154,3 +154,9 @@ test('cycle questions: the loop is drawn as a chain that comes back to its start
   expect(names.at(-1)).toBe('requestRender');
   await expect(atlas.locator('#ask [data-show]')).toHaveAttribute('aria-pressed', 'true');
 });
+
+test('the cycle question is suggested on the Self map', async ({ atlas }) => {
+  await atlas.open();
+  await atlas.keyboard.press('a');
+  await expect(atlas.locator('#ask .ask-empty .chip-q', { hasText: 'Are there any dependency cycles?' })).toBeVisible();
+});

@@ -20,6 +20,7 @@ export const store = {
   impactId: -1,
   askSet: [],
   askHops: [],
+  askGroups: [],
   kbdMap: false,
   focusId: -1,
   focusT: 0,

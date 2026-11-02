@@ -49,8 +49,8 @@ export const askOpen = () => ASK.classList.contains('on');
 
 const SELF_SUGGESTIONS = [
   DEMO_QUESTION,
+  'Are there any dependency cycles?',
   'What breaks if I change routeSearch?',
-  'Who uses store?',
   'How does placeLabels reach requestRender?',
 ];
 
@@ -124,21 +124,23 @@ function inView(ids) {
 
 /** While an answer streams, light up what it has cited so far and the trail between them (no camera move). */
 function followOnMap(i) {
-  const { refs } = renderAnswer(thread[i].text, valid, nameOf, true);
+  const { refs, groups } = renderAnswer(thread[i].text, valid, nameOf, true);
   if (refs.length < 2) return;
   showing = i;
   store.askSet = refs;
+  store.askGroups = groups;
   store.focusId = -1;
   updateFocus();
 }
 
 /** Light up an answer's items on the map (everything else dims) and bring them into view. */
 function showOnMap(i, quiet) {
-  const { refs } = renderAnswer(thread[i].text, valid, nameOf);
+  const { refs, groups } = renderAnswer(thread[i].text, valid, nameOf);
   if (refs.length < 2 && quiet) return;
   if (showing !== i) clearShowing();
   showing = i;
   store.askSet = refs;
+  store.askGroups = groups;
   store.focusId = -1;
   updateFocus();
   const b = ASK.querySelector(`[data-show="${i}"]`);

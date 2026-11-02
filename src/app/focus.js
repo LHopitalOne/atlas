@@ -125,7 +125,7 @@ export function updateFocus() {
     store.focusGoal = 1;
   } else if (store.askSet.length) {
     if (store.focusId !== ASK_FOCUS) {
-      computeSetFocus(store.askSet);
+      computeSetFocus(store.askSet, store.askGroups);
       store.focusId = ASK_FOCUS;
     }
     store.focusGoal = 1;
@@ -203,7 +203,7 @@ export function toggleImpact(id) {
 }
 
 /** Light up an answer: its items, the trail joining them in reading order, and the services the trail passes through. */
-export function computeSetFocus(refs) {
+export function computeSetFocus(refs, groups = [refs]) {
   const g = store.G;
   for (const i of store.focusList) store.inF[i] = 0;
   store.focusList = [];
@@ -214,22 +214,34 @@ export function computeSetFocus(refs) {
       store.focusList.push(i);
     }
   };
-  const order = [];
   for (const ref of refs) {
     const t = ref[0],
       id = +ref.slice(1);
     if (t === 'n') {
       add(id);
       add(g.own(id));
-      order.push(g.own(id));
     } else {
       const [d0, d1] = t === 'd' ? [id, id + 1] : [g.rDs[id], g.rDe[id]];
       for (let d = d0; d < d1; d++) for (let s = g.dSs[d]; s < g.dSe[d] && store.focusList.length < 2000; s++) add(s);
     }
   }
-  const trail = answerTrail(g, order);
-  store.askHops = trail.hops;
-  trail.via.forEach(add);
+  // trails join items only within a paragraph, list item or the step line, so separate findings stay separate
+  const hops = [],
+    seen = new Set();
+  for (const grp of groups) {
+    const svcs = grp.filter(r => r[0] === 'n').map(r => g.own(+r.slice(1)));
+    const t = answerTrail(g, svcs);
+    t.via.forEach(add);
+    for (const h of t.hops) {
+      const key = h.a < h.b ? `${h.a}-${h.b}` : `${h.b}-${h.a}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        hops.push(h);
+      }
+    }
+  }
+  const trail = { hops };
+  store.askHops = hops;
   for (let j = 0; j < store.A.svcs.n; j++) store.A.svcs.fl[j * 2] = 0;
   for (let j = 0; j < store.A.leaves.n; j++) store.A.leaves.fl[j * 2] = 0;
   for (const i of store.focusList) {
