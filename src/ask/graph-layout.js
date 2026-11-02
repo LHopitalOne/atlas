@@ -248,3 +248,99 @@ function route(edges, fwd, nodes, at, chain, V, X, yOf, nodeH, width) {
     return { from: e.from, to: e.to, back: false, points: pts, d: basisPath(pts) };
   });
 }
+
+/**
+ * A dependency cycle as a racetrack: down the left column, a turn at the bottom, up the right column, a turn at the
+ * top. Every step is part of the same circuit (no special "return" edge) and every arrowhead is axis-aligned.
+ * Two-step loops are two boxes side by side, joined by an arc over the top and one under the bottom.
+ * @param {{id:string, label:string, pad?:number}[]} loop the cycle in order, without repeating the start
+ * @param {{width:number, textWidth:(s:string)=>number, nodeH?:number, rowGap?:number, colGap?:number}} o
+ */
+export function layoutLoop(loop, { width, textWidth, nodeH = 26, rowGap = 22, colGap = 56 }) {
+  const n = loop.length,
+    w = loop.map(nd => Math.ceil(textWidth(nd.label)) + 20 + (nd.pad || 0));
+  const leftN = Math.ceil(n / 2),
+    rightN = n - leftN;
+  const leftW = Math.max(...w.slice(0, leftN)),
+    rightW = rightN ? Math.max(...w.slice(leftN)) : 0;
+  const total = leftW + colGap + rightW,
+    x0 = (width - total) / 2,
+    row = nodeH + rowGap;
+  const lx = x0 + leftW / 2,
+    rx = x0 + leftW + colGap + rightW / 2;
+  const top = n === 2 ? 22 : 0,
+    rows = Math.max(leftN, rightN);
+  // right column is centred vertically against the left (odd loops have one fewer on the right)
+  const rOff = ((leftN - rightN) * row) / 2;
+  const nodes = loop.map((nd, k) => {
+    const left = k < leftN,
+      i = left ? k : leftN + rightN - 1 - k + 0;
+    const cx = left ? lx : rx,
+      y = top + (left ? k * row : rOff + (rightN - 1 - (k - leftN)) * row);
+    return { ...nd, x: cx - w[k] / 2, y, w: w[k], h: nodeH, side: left ? 'left' : 'right', i };
+  });
+  const mid = nd => [nd.x + nd.w / 2, nd.y + nodeH / 2];
+  const edges = [];
+  for (let k = 0; k < n; k++) {
+    const A = nodes[k],
+      B = nodes[(k + 1) % n];
+    let pts;
+    if (n === 2) {
+      // over the top left-to-right, under the bottom right-to-left
+      const [ax] = mid(A),
+        [bx] = mid(B),
+        up = k === 0,
+        y = up ? A.y : A.y + nodeH,
+        dy = up ? -1 : 1;
+      pts = [
+        [ax, y],
+        [ax, y + dy * 14],
+        [(ax + bx) / 2, y + dy * 20],
+        [bx, y + dy * 14],
+        [bx, y + dy * 4],
+      ];
+    } else if (A.side === B.side) {
+      // straight along a column: down on the left, up on the right
+      const [x] = mid(A),
+        down = A.side === 'left';
+      pts = down
+        ? [
+            [x, A.y + nodeH],
+            [x, B.y - 3],
+          ]
+        : [
+            [x, A.y],
+            [x, B.y + nodeH + 3],
+          ];
+    } else if (A.side === 'left') {
+      // bottom turn: out of the left box's right side, into the right box's left side
+      const [, ay] = mid(A),
+        [, by] = mid(B),
+        x1 = A.x + A.w,
+        x2 = B.x - 3;
+      pts = [
+        [x1, ay],
+        [x1 + 12, ay],
+        [(x1 + x2) / 2, (ay + by) / 2],
+        [x2 - 12, by],
+        [x2, by],
+      ];
+    } else {
+      // top turn: out of the right box's left side, into the left box's right side
+      const [, ay] = mid(A),
+        [, by] = mid(B),
+        x1 = A.x,
+        x2 = B.x + B.w + 3;
+      pts = [
+        [x1, ay],
+        [x1 - 12, ay],
+        [(x1 + x2) / 2, (ay + by) / 2],
+        [x2 + 12, by],
+        [x2, by],
+      ];
+    }
+    edges.push({ from: A.id, to: B.id, back: false, points: pts, d: basisPath(pts) });
+  }
+  const height = top * 2 + (rows - 1) * row + nodeH;
+  return { width, height, nodes, edges, fits: total <= width };
+}

@@ -163,3 +163,27 @@ test('a parent with two children sits centred over them', () => {
     hi = Math.max(...L.nodes.map(x => x.x + x.w));
   assert.ok(Math.abs((lo + hi) / 2 - 160) < 1, 'and the drawing as a whole is centred');
 });
+
+test('cycles: a racetrack where every arrowhead is axis-aligned and every step joins the next', async () => {
+  const { layoutLoop } = await import('../src/ask/graph-layout.js');
+  for (const names of [
+    ['a', 'b'],
+    ['a', 'b', 'c'],
+    ['p', 'q', 'r', 's', 't', 'u', 'v'],
+  ]) {
+    const L = layoutLoop(
+      names.map(x => ({ id: x, label: x })),
+      { width: 330, textWidth: tw },
+    );
+    assert.equal(L.edges.length, names.length, 'one edge per step, the last closing the loop');
+    assert.equal(L.edges.at(-1).to, names[0]);
+    for (const e of L.edges) {
+      const [p, q] = e.points.slice(-2);
+      assert.ok(
+        Math.abs(p[0] - q[0]) < 0.01 || Math.abs(p[1] - q[1]) < 0.01,
+        `${e.from}->${e.to} arrowhead is axis-aligned`,
+      );
+    }
+    assert.ok(L.fits);
+  }
+});
