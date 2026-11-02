@@ -78,7 +78,7 @@ test('the formatter returns the step line once an answer is complete, never whil
 });
 
 test('diagram layout: stage boxes stack without overlapping, pills stay inside their box and the width', async () => {
-  const { layoutFlow, parseFlow } = await import('../src/ask/diagram.js');
+  const { layoutFlow } = await import('../src/ask/diagram.js');
   const flow = parseFlow('Data=n1,n2,n3 | Upload=n4 | Draw=n5,n6,n7,n8,n9');
   const L = layoutFlow(flow, { width: 300, textWidth: s => s.length * 7.2, nameOf: r => 'function_' + r });
   assert.equal(L.boxes.length, 3);
@@ -93,7 +93,7 @@ test('diagram layout: stage boxes stack without overlapping, pills stay inside t
 });
 
 test('diagram layout: a route is a centred chain with one arrow per link', async () => {
-  const { layoutFlow, parseFlow } = await import('../src/ask/diagram.js');
+  const { layoutFlow } = await import('../src/ask/diagram.js');
   const L = layoutFlow(parseFlow('n1 > n2 < n3'), { width: 300, textWidth: s => s.length * 7, nameOf: r => r });
   assert.equal(L.boxes.length, 0);
   assert.deepEqual(

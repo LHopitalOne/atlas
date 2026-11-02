@@ -95,6 +95,10 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
   paste into docs, pull requests or an AI agent. Mermaid is for sharing, not for reading inside Atlas.
 - **Sources fold into one line** ("17 sources · build, buildSpec, finish +14") that opens to the list; the numbered
   chips in the text are the main way in.
+- **Cycle questions are answered from the graph, not guessed.** "Are there any dependency cycles?", "circular imports
+  between modules?", "Is X part of a cycle?" use real cycle detection (strongly connected components) on calls between
+  services and between domains/modules, and show the shortest loop: in the text, as a diagram chain that comes back to
+  its start, and as a trail on the map. Answers say why it matters (nothing in a cycle can change or be tested alone).
 - **Selection is context:** an "About …" chip shows what "this" means; `@` mentions items by name.
 - **Claude answers when the page may ask it** (the viewer's own account, with consent); otherwise an offline answerer
   handles the common questions from the index, and the panel says "Offline · answered from the index, without AI".

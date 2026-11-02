@@ -71,7 +71,7 @@ function suggestions() {
   return [
     sel ? `What does ${sel} do?` : 'What is this codebase?',
     `What breaks if I change ${g.svcName[hub]}?`,
-    `Who uses ${g.svcName[hub]}?`,
+    'Are there any dependency cycles?',
     ...(from >= 0 ? [`How does ${g.svcName[from]} reach ${g.svcName[hub]}?`] : []),
   ];
 }

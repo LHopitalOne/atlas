@@ -77,7 +77,8 @@ steps at the chosen detail, and builds the route's geometry.
 
 ## Understanding a component
 
-`graph/insights.js` (pure) computes roles (`rolesOf`) and impact (`impactOf`: every transitive caller, nearest first,
+`graph/cycles.js` (pure) finds dependency cycles (iterative Tarjan, so 100k nodes don't hit recursion limits) and
+the shortest loop through any member. `graph/insights.js` (pure) computes roles (`rolesOf`) and impact (`impactOf`: every transitive caller, nearest first,
 with the pair that reached each). `ui/about.js` renders the summary, provenance, roles, signature and impact, and builds
 the "Copy for AI" text. `ui/code-view.js` shows a definition's lines from `meta.sourceBundle`. Impact on the map is a
 focus mode: `store.impactId` makes `computeFocus` add the affected services and chains.

@@ -3,7 +3,7 @@
  * who uses X, what is this codebase) and answers them from the index with the same tools Claude uses, without AI.
  * Used when Claude is not available, and by the tests. Pure: returns text in the same format Claude is asked for.
  */
-import { describe, impact, overview, resolve, route, search } from './tools.js';
+import { cycles, describe, impact, overview, resolve, route, search } from './tools.js';
 
 const strip = s =>
   s
@@ -28,6 +28,17 @@ const cite = x => `${x.name} [[${x.ref}]]`;
 const list = (xs, n = 5) => xs.slice(0, n).map(cite).join(', ') + (xs.length > n ? `, and ${xs.length - n} more` : '');
 
 const INTENTS = [
+  {
+    key: 'cycleOf',
+    re: /^(is|are|does|do)\s+(.+?)\s+(part of|in|have|has|involved in|caught in)\s+(a |any |an )?(circular|cycle|cycles|dependency cycle|loop)/i,
+    a: 2,
+  },
+  {
+    key: 'cycleOf',
+    re: /(cycles?|circular dependenc(?:y|ies)|loops?)\s+(involving|through|around|with)\s+(.+)$/i,
+    a: 3,
+  },
+  { key: 'cycles', re: /(cycles?|circular|loops?\b|depend on each other|mutual(ly)? dependen)/i },
   {
     key: 'overview',
     re: /^(give me an? )?(overview|summary)|what('s| is) (this|the) (codebase|code|system|map|repo)|how is (this|the|it).*(organi[sz]ed|structured)/i,
@@ -54,6 +65,49 @@ export function parseQuestion(q) {
     if (m) return { key: it.key, a: it.a ? m[it.a] : null, b: it.b ? m[it.b] : null };
   }
   return { key: 'search', a: text };
+}
+
+const loopFlow = loop => loop.map((x, k) => (k ? `> ${x.ref}` : x.ref)).join(' ');
+const many = (n, one, other) => `${n.toLocaleString('en-US')} ${n === 1 ? one : other}`;
+
+function answerCycles(g, q, step) {
+  const level = /\b(modules?|domains?|imports?|files?)\b/i.test(q) ? 'domain' : null;
+  step('Looked for dependency cycles in the call graph');
+  const c = cycles(g, level ? { level } : {});
+  const s = c.services,
+    d = c.domains;
+  if ((!s || !s.count) && (!d || !d.count))
+    return `No dependency cycles: everything depends one way only, so each part can change and be tested on its own.\n\nFOLLOWUPS: What are the hubs? | What is this codebase?`;
+  const lines = [],
+    show = (s && s.count ? s : d).groups[0];
+  if (s)
+    lines.push(
+      s.count
+        ? `Found ${many(s.count, 'cycle', 'cycles')} between services, involving ${many(s.members, 'service', 'services')}.`
+        : 'No cycles between services.',
+    );
+  if (d)
+    lines.push(
+      d.count
+        ? `Between ${level ? 'modules' : 'domains (modules)'}: ${many(d.count, 'cycle', 'cycles')}, the largest joining ${many(d.groups[0].size, 'domain', 'domains')} that depend on each other.`
+        : 'No cycles between domains.',
+    );
+  lines.push('In a cycle, each part depends on the others, so none of them can change or be tested alone.');
+  const loops = (s && s.count ? s.groups : d.groups)
+    .slice(0, 3)
+    .map(x => `- ${x.loop.map(cite).join(' → ')}${x.size > x.loop.length - 1 ? ` (in a group of ${x.size})` : ''}`);
+  const first = show.loop[0].name;
+  return `${lines.join(' ')}\n\nThe tightest loops:\n${loops.join('\n')}\n\nFLOW: ${loopFlow(show.loop)}\nFOLLOWUPS: Is ${first} part of a cycle? | ${level ? 'Are there cycles between services?' : 'Are there cycles between modules?'}`;
+}
+
+function answerCycleOf(g, intent, need, step) {
+  const ref = need(intent.a);
+  const r = cycles(g, { ref });
+  step(`Checked whether ${r.name} is in a cycle`);
+  if (!r.inCycle)
+    return `${r.name} [[${r.ref}]] isn't part of any dependency cycle: nothing it depends on depends back on it.\n\nFOLLOWUPS: Are there any dependency cycles? | What breaks if I change ${r.name}?`;
+  const others = r.groupSize - 1;
+  return `Yes. ${r.name} [[${r.ref}]] is in a cycle with ${many(others, 'other', 'others')}${r.loop[0].ref.startsWith('d') ? ' domain' + (others === 1 ? '' : 's') : ''}. The shortest loop back to it: ${r.loop.map(cite).join(' → ')}.\n\nTo break it, one of these steps has to stop depending on the next, for example by passing a callback or moving shared code out.\n\nFLOW: ${loopFlow(r.loop)}\nFOLLOWUPS: Are there any dependency cycles? | What breaks if I change ${r.name}?`;
 }
 
 function answerOverview(g, step) {
@@ -150,6 +204,8 @@ export function answerLocally(g, q, { context = null, onStep = () => {} } = {}) 
     if (intent.key === 'overview') return answerOverview(g, onStep);
     if (intent.key === 'route') return answerRoute(g, intent, need, onStep);
     if (intent.key === 'impact') return answerImpact(g, intent, need, onStep);
+    if (intent.key === 'cycles') return answerCycles(g, q, onStep);
+    if (intent.key === 'cycleOf') return answerCycleOf(g, intent, need, onStep);
     const d = describe(g, { ref: need(intent.a) });
     onStep(`Described ${d.name}`);
     if (d.kind === 'repository' || d.kind === 'domain') return answerTerritory(d);

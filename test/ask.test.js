@@ -115,3 +115,15 @@ test('the suggested questions for the Self map all have real answers', () => {
   const qs = ['What breaks if I change routeSearch?', 'Who uses store?', 'How does placeLabels reach requestRender?'];
   for (const q of qs) assert.doesNotMatch(answerLocally(self, q), /couldn't find|aren't connected/, q);
 });
+
+test('cycle questions are recognised and answered with a loop that closes on itself', () => {
+  assert.equal(parseQuestion('Are there any dependency cycles?').key, 'cycles');
+  assert.equal(parseQuestion('any circular imports between modules?').key, 'cycles');
+  assert.deepEqual(parseQuestion('Is requestRender part of a cycle?'), { key: 'cycleOf', a: 'requestRender', b: null });
+  assert.equal(parseQuestion('cycles involving frame').key, 'cycleOf');
+  const text = answerLocally(self, 'Is requestRender part of a cycle?');
+  const flow = text.match(/FLOW: (.*)/)[1].split(' > ');
+  assert.equal(flow[0], flow.at(-1), 'the loop comes back to its start');
+  assert.match(answerLocally(self, 'Is routeSearch in a cycle?'), /isn't part of any dependency cycle/);
+  assert.match(answerLocally(self, 'Are there circular imports between modules?'), /Between modules: 1 cycle/);
+});

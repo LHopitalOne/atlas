@@ -6,6 +6,7 @@
  */
 import { routeSearch } from '../graph/route-search.js';
 import { impactOf, rolesOf } from '../graph/insights.js';
+import { cyclesOf, loopThrough } from '../graph/cycles.js';
 
 const LIMIT = 10;
 
@@ -212,6 +213,42 @@ export function route(g, { from, to }) {
       step: k === 0 ? 'start' : r.fwd[s] ? 'calls' : 'is called by (against the call)',
     })),
   };
+}
+
+/**
+ * Dependency cycles: overall (services and modules/domains), or whether one item is part of one.
+ * Each loop is listed in order and comes back to its start.
+ */
+export function cycles(g, { ref, level } = {}) {
+  const dname = d => ({
+    ref: refOf('d', d),
+    name: g.domName[d],
+    where: g.repoName[g.domRepo[g.svcDom[g.dSs[d]]] ?? g.domRepo[d]],
+  });
+  if (ref) {
+    const e = resolve(g, ref);
+    if (!e) throw new Error(`No item called "${ref}". Search first.`);
+    const svcLevel = e.t === 'n',
+      id = svcLevel ? g.own(e.id) : e.t === 'd' ? e.id : -1;
+    if (id < 0) throw new Error('Cycles are checked for services and domains.');
+    const hit = loopThrough(g, id, svcLevel ? 'service' : 'domain');
+    const item = svcLevel ? brief(g, id) : dname(id);
+    return hit
+      ? { ...item, inCycle: true, groupSize: hit.size, loop: hit.loop.map(i => (svcLevel ? brief(g, i) : dname(i))) }
+      : { ...item, inCycle: false };
+  }
+  const pack = (lvl, toItem) => {
+    const c = cyclesOf(g, lvl);
+    return {
+      count: c.groups.length,
+      members: c.groups.reduce((a, x) => a + x.members.length, 0),
+      groups: c.groups.slice(0, 5).map(x => ({ size: x.members.length, loop: x.loop.map(toItem) })),
+    };
+  };
+  const out = {};
+  if (level !== 'domain') out.services = pack('service', i => brief(g, i));
+  if (level !== 'service') out.domains = pack('domain', dname);
+  return out;
 }
 
 /** The shape of the whole map: repositories, sizes and totals. */

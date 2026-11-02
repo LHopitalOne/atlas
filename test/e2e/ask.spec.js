@@ -144,3 +144,13 @@ test('a route answer is a chain with labelled arrows, and items work from the ke
   await atlas.keyboard.press('Enter');
   await expect(atlas.locator('#insTitle')).toHaveText('placementDue');
 });
+
+test('cycle questions: the loop is drawn as a chain that comes back to its start', async ({ atlas }) => {
+  await atlas.open();
+  await askFromSearch(atlas, 'Is requestRender part of a cycle?');
+  await expect(atlas.locator('#ask .ans-text')).toContainText('is in a cycle');
+  const names = await atlas.locator('#ask .dgm .dn text').allTextContents();
+  expect(names[0]).toBe('requestRender');
+  expect(names.at(-1)).toBe('requestRender');
+  await expect(atlas.locator('#ask [data-show]')).toHaveAttribute('aria-pressed', 'true');
+});
