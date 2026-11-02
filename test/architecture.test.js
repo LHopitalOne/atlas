@@ -25,8 +25,8 @@ test('pure layers (model, graph) import only pure modules', () => {
 
 test('the question-answering core (ask tools, local answers, formatting) stays pure', () => {
   const pure =
-    /^(model|graph|ask\/(tools|local|format))\/?|^(model|graph)\/|^util\/(math|format)\.js$|^ask\/(tools|local|format)\.js$/;
-  for (const m of modules.filter(x => /^ask\/(tools|local|format)\.js$/.test(x.path)))
+    /^(model|graph|ask\/(tools|local|format|diagram|demo))\/?|^(model|graph)\/|^util\/(math|format)\.js$|^ask\/(tools|local|format|diagram|demo)\.js$/;
+  for (const m of modules.filter(x => /^ask\/(tools|local|format|diagram|demo)\.js$/.test(x.path)))
     for (const i of importsOf(m)) assert.match(i, pure, `${m.path} imports ${i}`);
 });
 

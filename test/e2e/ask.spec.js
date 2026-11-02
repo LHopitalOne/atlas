@@ -114,3 +114,22 @@ test('sources start folded to one line and stay open once opened', async ({ atla
   await src.locator('summary').click();
   await expect(src.locator('.src').first()).toBeVisible();
 });
+
+test('ordered answers draw a step line; Copy as Mermaid copies a flowchart', async ({ atlas }) => {
+  await atlas.open();
+  await atlas.evaluate(() => {
+    navigator.clipboard.writeText = t => {
+      window.__copied = t;
+      return Promise.resolve();
+    };
+  });
+  await askFromSearch(atlas, 'How are we rendering the graph?');
+  await expect(atlas.locator('#ask .flow .fs')).toHaveCount(6);
+  await expect(atlas.locator('#ask .flow .ft').first()).toHaveText('Data');
+  await atlas.locator('#ask .flow .fchip', { hasText: 'buildScene' }).click();
+  await expect(atlas.locator('#insTitle')).toHaveText('buildScene');
+  await atlas.locator('#ask [data-mermaid]').click();
+  const text = await atlas.evaluate(() => window.__copied);
+  expect(text).toContain('flowchart TD');
+  expect(text).toContain('subgraph');
+});

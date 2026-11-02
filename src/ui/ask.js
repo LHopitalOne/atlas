@@ -16,7 +16,7 @@ import { select } from '../app/selection.js';
 import { setHover, updateFocus } from '../app/focus.js';
 import { fitNodes, flyTo, flyToTerr } from '../app/camera.js';
 import { requestRender } from '../render/frame.js';
-import { announce } from './feedback.js';
+import { announce, copyText } from './feedback.js';
 import { closeDirections } from './directions.js';
 import { renderAttn, syncLegend } from './attention.js';
 import { dotHTML, ICON_X } from './fragments.js';
@@ -26,6 +26,8 @@ import { reduceMotion } from '../util/dom.js';
 import { ensureReverse } from '../graph/route-search.js';
 import { safeRect } from '../app/camera.js';
 import { cam } from '../state.js';
+import { toMermaid } from '../ask/diagram.js';
+import { answerTrail } from '../graph/insights.js';
 
 /** Conversation: { q, text, steps, status: 'thinking'|'streaming'|'done'|'error', mode: 'claude'|'local', note } */
 let thread = [];
@@ -428,11 +430,38 @@ const withCaret = html => {
   return m ? html.slice(0, m.index) + caret + html.slice(m.index) : html + caret;
 };
 
+/** The step line: one stop per step, connectors solid along calls, dashed against them, neutral between stages. */
+function flowHTML(flow, at) {
+  const cls = { '>': 'l-calls', '<': 'l-against', '|': 'l-seq' };
+  const chip = ref => {
+    const e = resolve(store.G, ref),
+      dot = e.t === 'n' ? dotHTML(e.id) : '';
+    return `<button class="fchip" data-ref="${ref}" title="${esc(nameOf(ref))}">${dot}<span>${esc(nameOf(ref))}</span></button>`;
+  };
+  return `<ol class="flow" aria-label="Steps">${flow.stops
+    .map((st, k) => {
+      const link = k < flow.links.length ? cls[flow.links[k]] : '';
+      const tip = flow.links[k] === '<' ? ' title="The next step calls this one (against the call)"' : '';
+      return `<li class="fs ${link}" data-at="${at + k * 45}"${tip}><span class="fm" aria-hidden="true"></span><div class="fb">${st.title ? `<div class="ft">${esc(st.title)}</div>` : ''}<div class="fi">${st.refs.map(chip).join('')}</div></div></li>`;
+    })
+    .join('')}</ol>`;
+}
+
+/** Mermaid text for an answer: from its step line, or from the trail between the items it cites. */
+function mermaidFor(i) {
+  const t = thread[i],
+    r = renderAnswer(t.text, valid, nameOf),
+    g = store.G;
+  if (r.flow) return toMermaid({ flow: r.flow, title: t.q }, nameOf);
+  const services = r.refs.filter(x => x[0] === 'n').map(x => g.own(+x.slice(1)));
+  return toMermaid({ hops: answerTrail(g, services).hops, title: t.q }, nameOf);
+}
+
 /** Entrance animations resume where they were: each element carries the time it first appeared. */
 function resumeAnimations(el, t) {
   const now = performance.now();
   el.querySelectorAll('[data-at]').forEach(x => {
-    x.style.animationDelay = `${Math.min(0, +x.dataset.at - now)}ms`;
+    x.style.animationDelay = `${+x.dataset.at - now}ms`; // past: resume; future: wait (stagger)
   });
   el.querySelectorAll('.cite').forEach(x => {
     const at = t.appear[x.dataset.ref];
@@ -463,16 +492,17 @@ function renderTurn(i) {
         .join('')}</div></details>`
     : '';
   const done = t.status === 'done' || t.status === 'error';
+  const afterFlow = t.doneAt + (r.flow ? r.flow.stops.length * 45 + 60 : 0);
   const actions =
     done && r.refs.length
-      ? `<div class="ans-actions" data-at="${t.doneAt}"><button class="btn btn-outline btn-sm" data-show="${i}" aria-pressed="${showing === i}">${showing === i ? 'Hide on map' : 'Show on map'}</button></div>`
+      ? `<div class="ans-actions" data-at="${afterFlow}"><button class="btn btn-outline btn-sm" data-show="${i}" aria-pressed="${showing === i}">${showing === i ? 'Hide on map' : 'Show on map'}</button><button class="btn btn-ghost btn-sm" data-mermaid="${i}" title="Copy a Mermaid flowchart of this answer, to paste into docs, pull requests or an AI agent">Copy as Mermaid</button></div>`
       : '';
   const follow =
     done && r.followups.length && i === thread.length - 1
-      ? `<div class="sugg follow" data-at="${t.doneAt}">${r.followups.map(s => `<button class="chip-q" data-q="${esc(s)}">${esc(s)}</button>`).join('')}</div>`
+      ? `<div class="sugg follow" data-at="${afterFlow + 60}">${r.followups.map(s => `<button class="chip-q" data-q="${esc(s)}">${esc(s)}</button>`).join('')}</div>`
       : '';
   el.innerHTML = `<div class="uq" data-at="${t.born}">${esc(t.q)}</div><div>${stepsHTML(t)}${t.note ? `<div class="ans-note">${esc(t.note)}</div>` : ''}
-    <div class="ans-text">${t.status === 'streaming' ? withCaret(r.html) : r.html}</div>${sources}${actions}${follow}
+    <div class="ans-text">${t.status === 'streaming' ? withCaret(r.html) : r.html}</div>${done && r.flow ? flowHTML(r.flow, t.doneAt) : ''}${sources}${actions}${follow}
     ${done && !t.note ? (t.mode === 'demo' ? '<div class="ans-meta">Simulated answer for this prototype.</div>' : t.mode === 'local' ? '<div class="ans-meta">Answered from the index, without AI.</div>' : '') : ''}</div>`;
   resumeAnimations(el, t);
   if (t.status !== 'done') {
@@ -640,6 +670,8 @@ function onClick(e) {
   if (q) return ask(q.dataset.q);
   const mi = e.target.closest('[data-mi]');
   if (mi) return pickMention(+mi.dataset.mi);
+  const mm = e.target.closest('[data-mermaid]');
+  if (mm) return copyText(mermaidFor(+mm.dataset.mermaid), 'Copied as Mermaid');
   const show = e.target.closest('[data-show]');
   if (show) {
     const i = +show.dataset.show;

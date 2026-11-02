@@ -75,15 +75,15 @@ function answerRoute(g, intent, need, step) {
   const r = route(g, { from: a, to: b });
   if (!r.found)
     return `${r.from} and ${r.to} aren't connected on the map, in either direction.\n\nFOLLOWUPS: What does ${r.from} depend on? | Who uses ${r.to}?`;
-  const steps = r.steps
-    .map((s, k) =>
-      k === 0 ? `- Start at ${cite(s)}` : `- ${s.step === 'calls' ? 'calls' : 'is called by'} ${cite(s)}`,
-    )
-    .join('\n');
+  const first = r.steps[0],
+    last = r.steps[r.steps.length - 1],
+    mid = r.steps.slice(1, -1);
+  const through = mid.length ? `, through ${mid.map(cite).join(', ')}` : '';
   const how = r.followsCalls
-    ? ', following calls'
-    : '. No chain of calls exists, so part of this route goes against the call direction';
-  return `${r.hops} hop${r.hops === 1 ? '' : 's'}${how}:\n${steps}\n\nFOLLOWUPS: Show this as directions | What breaks if I change ${r.steps[r.steps.length - 1].name}?`;
+    ? 'following calls'
+    : 'partly against the call direction, because no chain of calls exists';
+  const flow = r.steps.map((s, k) => (k === 0 ? s.ref : `${s.step === 'calls' ? '>' : '<'} ${s.ref}`)).join(' ');
+  return `From ${cite(first)} to ${cite(last)} in ${r.hops} hop${r.hops === 1 ? '' : 's'}${through}, ${how}.\n\nFLOW: ${flow}\nFOLLOWUPS: Show this as directions | What breaks if I change ${r.steps[r.steps.length - 1].name}?`;
 }
 
 function answerImpact(g, intent, need, step) {

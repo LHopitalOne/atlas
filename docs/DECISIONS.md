@@ -83,6 +83,14 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
   chain between each pair (at most three hops), drawn like a route: lines in the route colour, dashed against the call,
   dots flowing along them. The trail grows while the answer streams. When it finishes, the camera moves only if the
   items are off screen or too small to read.
+- **Answers that describe an order get a step line**: a small vertical diagram after the text, one stop per step (a
+  route's services, or a pipeline's stages with their functions). Solid along calls, dashed against them; each stop is
+  clickable and rings on the map; stops appear 45 ms apart when the answer finishes. Why not a rendered Mermaid diagram:
+  the map already shows where things are, a diagram can't link to the map, and the library is heavier than all of Atlas.
+  The step line adds the one thing the map can't show at a glance: order. It comes from a `FLOW:` line in the answer,
+  which Claude is asked for too.
+- **"Copy as Mermaid"** exports an answer as a Mermaid flowchart (stages as subgraphs, calls as labelled edges), to
+  paste into docs, pull requests or an AI agent. Mermaid is for sharing, not for reading inside Atlas.
 - **Sources fold into one line** ("17 sources · build, buildSpec, finish +14") that opens to the list; the numbered
   chips in the text are the main way in.
 - **Selection is context:** an "About …" chip shows what "this" means; `@` mentions items by name.

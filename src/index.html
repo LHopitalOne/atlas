@@ -493,6 +493,28 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 @keyframes ask-spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){ .ask.on,.uq,.src,.steps.running li,.steps.running,.ans-actions,.sugg.follow,.cite{animation:none} .steps.running li.now::before{animation:none} }
 
+
+/* ---------- ask: step line ---------- */
+.flow{list-style:none;margin:12px 0 4px;padding:0}
+.fs{position:relative;display:grid;grid-template-columns:12px minmax(0,1fr);gap:10px;padding-bottom:12px;animation:ask-rise 280ms var(--ease-out) both}
+.fs:last-child{padding-bottom:0}
+.fm{position:relative;z-index:1;width:10px;height:10px;margin-top:6px;border-radius:50%;box-sizing:border-box;border:1.5px solid var(--route);background:var(--card)}
+.fs:first-child .fm,.fs:last-child .fm{background:var(--route)}
+.fs:not(:last-child)::before{content:"";position:absolute;left:4.25px;top:17px;bottom:-5px;border-left:1.5px solid var(--route)}
+.fs.l-against::before{border-left-style:dashed}
+.fs.l-seq::before{border-left-color:color-mix(in srgb,var(--route) 45%,var(--border))}
+.ft{margin-bottom:5px;font-size:12px;font-weight:600;line-height:22px;color:var(--foreground)}
+.fs:not(:has(.ft)) .fi{margin-top:0}
+.fi{display:flex;flex-wrap:wrap;gap:4px}
+.fchip{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;max-width:100%;height:22px;padding:0 7px;border:1px solid var(--border);border-radius:6px;font:400 12px var(--mono);color:var(--foreground);cursor:pointer;transition:background-color .15s ease,border-color .15s ease}
+.fchip span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fchip.hl{background:var(--accent);border-color:var(--ring)}
+.fchip:focus-visible{box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 55%,transparent)}
+.ans-actions{display:flex;flex-wrap:wrap;gap:6px}
+@media (hover:hover) and (pointer:fine){ .fchip:hover{background:var(--accent)} }
+@media (prefers-reduced-motion: reduce){ .fs{animation:ask-fade 200ms ease both} }
+@keyframes ask-fade{from{opacity:0}to{opacity:1}}
+
 /* ---------- source view ---------- */
 .codeview{position:absolute;top:64px;right:384px;bottom:12px;width:min(720px,calc(100vw - 408px));z-index:7;display:flex;flex-direction:column;overflow:hidden;
   opacity:0;transform:translateX(12px);transition:opacity 180ms var(--ease-out),transform 180ms var(--ease-out)}

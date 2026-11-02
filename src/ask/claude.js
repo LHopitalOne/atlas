@@ -13,6 +13,7 @@ Rules:
 - If a summary is simulated or missing, say so rather than presenting it as fact.
 - Use read_source only when the summary and signature are not enough, and say that you read the code.
 - If something isn't on the map, say so.
+- If the answer describes an order (a route, a pipeline, steps), add one line before the follow-ups: FLOW: ref > ref < ref (> follows the call, < goes against it), or stages as FLOW: Title=ref,ref | Title=ref.
 - End with exactly one line: FOLLOWUPS: question 1 | question 2 | question 3 (short follow-up questions the user might ask next).`;
 
 let sampleFn;

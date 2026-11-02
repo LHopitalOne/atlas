@@ -22,6 +22,7 @@ const RENDER_ANSWER = `Rendering is a one-time build per map, followed by a chea
 5. **On top.** {{drawOverlay}} paints the 2D layer: flow dots, rings, pins and labels. {{drawLabels}} shows the labels that {{placeLabels}} placed without collisions.
 6. **After drawing.** UI that follows the camera, such as the breadcrumb and zoom slider, subscribes with {{onFrameDrawn}}.
 
+FLOW: Data={{build}},{{buildSpec}},{{finish}} | Upload once={{buildScene}},{{upload}},{{initGL}} | Render on change={{requestRender}},{{frame}} | Each frame={{render}},{{lod}},{{drawFill}},{{drawEdges}},{{drawNodes}} | On top={{drawOverlay}},{{drawLabels}},{{placeLabels}} | After drawing={{onFrameDrawn}}
 FOLLOWUPS: Why does it only render on change? | How are labels placed? | What breaks if I change buildScene?`;
 
 const RENDER_STEPS = [
@@ -41,11 +42,14 @@ const svcRef = (g, name) => {
 /** The rendering walkthrough, cited against the current map (names not on this map stay as plain code). */
 export function renderingScript(g) {
   let missing = 0;
-  const text = RENDER_ANSWER.replace(/\{\{(\w+)\}\}/g, (_, name) => {
-    const ref = svcRef(g, name);
-    if (!ref) missing++;
-    return ref ? `${name} [[${ref}]]` : `\`${name}\``;
-  });
+  const [prose, control] = RENDER_ANSWER.split('\nFLOW: ');
+  const flowLine = control.replace(/\{\{(\w+)\}\}/g, (_, name) => svcRef(g, name) || '');
+  const text =
+    prose.replace(/\{\{(\w+)\}\}/g, (_, name) => {
+      const ref = svcRef(g, name);
+      if (!ref) missing++;
+      return ref ? `${name} [[${ref}]]` : `\`${name}\``;
+    }) + `\nFLOW: ${flowLine}`;
   return {
     steps: RENDER_STEPS.map(s => ({ ...s, ref: s.ref ? svcRef(g, s.ref) : null })),
     text,
