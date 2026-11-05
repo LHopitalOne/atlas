@@ -3,3 +3,7 @@ dist/
 test-results/
 playwright-report/
 generated/index.scip*
+.claude/
+__pycache__/
+*.egg-info/
+graphify-out/

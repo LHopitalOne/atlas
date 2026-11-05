@@ -1,6 +1,6 @@
 # Atlas
 
-A zoomable map of a service graph: repositories, domains, services and endpoints, and the contracts between them.
+A zoomable map of a codebase or a service graph: repositories, domains, services and endpoints, and the contracts between them.
 Google Maps-style navigation, labels and directions; WebGL2 rendering that stays smooth at 100,000 nodes.
 Builds to a single HTML file. By default it shows its own source code, indexed with tree-sitter and SCIP.
 
@@ -14,6 +14,24 @@ open dist/atlas-offline.html
 
 Show your own graph: `node scripts/build.mjs --offline --graph=my-graph.json` (format: docs/GRAPH_SPEC.md),
 or call `window.Atlas.loadGraph(spec)` in the page.
+
+## Graphify graphs on the map
+
+[Graphify](https://github.com/Graphify-Labs/graphify) turns a repository into `graphify-out/graph.json`.
+`bridge/` (Python 3.10+, no dependencies) draws one or more of those on Atlas:
+
+```bash
+graphify update path/to/repo                                   # writes path/to/repo/graphify-out/graph.json
+python3 -m atlas_bridge spec path/to/repo/graphify-out/graph.json -o graph.json   # run from bridge/
+node scripts/build.mjs --offline --graph=bridge/graph.json
+```
+
+Files become services, functions and classes become leaves, Graphify's communities become domains
+(`--group folder` uses folders instead), and Graphify's EXTRACTED / INFERRED / AMBIGUOUS tags become Atlas's link
+colours. Pass several graphs (`api=a/graph.json web=b/graph.json`), or one built with `graphify merge-graphs`, and
+each repository gets its own territory. Tests: `cd bridge && python3 -m unittest discover -s tests -t .`
+
+Licence: Apache-2.0.
 
 ## Scripts
 

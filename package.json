@@ -13,7 +13,7 @@
     "index:self": "tools/index-self/run.sh",
     "format": "prettier --write \"src/**/*.js\" \"test/**/*.js\" \"scripts/**/*.mjs\""
   },
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@playwright/test": "^1.48.2",
     "@sourcegraph/scip-typescript": "^0.5.2",
