@@ -31,13 +31,43 @@ Files become services, functions and classes become leaves, Graphify's communiti
 colours. Pass several graphs (`api=a/graph.json web=b/graph.json`), or one built with `graphify merge-graphs`, and
 each repository gets its own territory.
 
+## HTTP links between repositories
+
+Graphify maps each repository on its own; `graphify merge-graphs` puts several side by side. `links` finds the HTTP
+requests one repository sends to routes another serves, and adds them as edges:
+
+```bash
+pip install './bridge[links]'                       # tree-sitter and its Python, Rust, JavaScript grammars
+graphify merge-graphs api/graphify-out/graph.json web/graphify-out/graph.json --out merged.json
+python3 -m atlas_bridge links api web --graph merged.json --graphify-out merged-links.json -o links.json
+graphify path "placeOrder()" "POST /orders" --graph merged-links.json   # Graphify now crosses repositories
+python3 -m atlas_bridge spec merged-links.json -o graph.json             # and so does the Atlas map
+```
+
+It reads routes (Django URLconfs with includes, Flask and FastAPI decorators, axum and actix routers, Express) and
+requests (urllib3, requests, httpx, reqwest, fetch, axios, and request types that declare their own path), follows
+wrapper functions back to the literal path, and works out the target service from names near the request
+(`_snuba_pool`, `SymbolicatorSession`, `--alias upstream=sentry`). Each link says how sure it is: **matched** (a
+named service, one route fits), **inferred** (no name, or a URL handed to another service to fetch), **ambiguous**
+(several routes fit) or **unmatched** (the named service has no such route). Requests made only by tests are left
+out unless `--include-tests`.
+
+`eval/sentry/` is an answer key of the real links between four Sentry services; `eval/score.py` scores a run:
+
+```bash
+python3 -m atlas_bridge links sentry relay snuba symbolicator --alias upstream=sentry -o links.json
+python3 eval/score.py eval/sentry/answer-key.json links.json
+```
+
 The bridge follows the dependency rule of clean architecture; `lint-imports` enforces it:
 
 | Ring | Module | May import |
 | --- | --- | --- |
 | Entities | `core/model.py`: files, symbols, links, link certainty | the standard library, no I/O |
+| Entities | `core/http.py`: path templates, routes, requests, how well a request fits a route | the standard library, no I/O |
 | Use cases | `usecases/draw.py`: arrange a code graph as repos > domains > files | `core` |
-| Adapters | `adapters/graphify.py` (graph.json in), `adapters/atlas.py` (Atlas spec out) | `usecases`, `core`; never each other |
+| Use cases | `usecases/link.py`: match requests to other repositories' routes; the `Extractor` port | `core` |
+| Adapters | `adapters/graphify.py` (graph.json in and out), `adapters/atlas.py` (Atlas spec out), `adapters/treesitter/` (routes and requests from source), `adapters/linkfile.py` (links JSON) | `usecases`, `core`; never each other |
 | Driver | `__main__.py`: command line, files, wiring | everything |
 
 ```bash

@@ -9,11 +9,21 @@ description = "Draw Graphify graph.json files on the Atlas map."
 license = "Apache-2.0"
 requires-python = ">=3.10"
 
+[project.optional-dependencies]
+# Finding HTTP routes and requests in source code (python -m atlas_bridge links)
+links = [
+    "tree-sitter>=0.25,<0.26",
+    "tree-sitter-python>=0.25",
+    "tree-sitter-rust>=0.24",
+    "tree-sitter-javascript>=0.25",
+    "tree-sitter-typescript>=0.23",
+]
+
 [project.scripts]
 atlas-bridge = "atlas_bridge.__main__:main"
 
 [tool.setuptools]
-packages = ["atlas_bridge"]
+packages = ["atlas_bridge", "atlas_bridge.core", "atlas_bridge.usecases", "atlas_bridge.adapters", "atlas_bridge.adapters.treesitter"]
 
 [tool.ruff]
 line-length = 120
@@ -42,7 +52,11 @@ layers = [
 [[tool.importlinter.contracts]]
 name = "Adapters do not know each other"
 type = "independence"
-modules = ["atlas_bridge.adapters.graphify", "atlas_bridge.adapters.atlas"]
+modules = [
+    "atlas_bridge.adapters.graphify",
+    "atlas_bridge.adapters.atlas",
+    "atlas_bridge.adapters.treesitter",
+]
 
 [[tool.importlinter.contracts]]
 name = "Core and use cases do no I/O and use no parsers"

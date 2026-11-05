@@ -70,3 +70,25 @@ How the path is known: **literal** string literal at the call site, **constant**
 - **snuba's RPC route is one route with many endpoints.** `/rpc/{name}/{version}` is filled from `RPCEndpoint`
   subclass names; sentry's 13 call sites reach it with different names.
 - `idioms.json` records how each repository declares routes and makes requests, with examples, for building the extractor.
+
+## Score
+
+`python -m atlas_bridge links sentry relay snuba symbolicator --alias upstream=sentry` (tree-sitter only, about
+15 seconds for the four repositories on a laptop), scored with `python3 eval/score.py`:
+
+| | Found |
+| --- | --- |
+| Production links | **20 / 20** |
+| Dev-only links | 3 / 3 |
+| Proxy (catch-all forwarding) | 0 / 1 |
+| False links | **0** (precision 37 / 37) |
+
+- **L19, L20** (symbolicator → sentry) come out as *inferred*: sentry's `reverse()` of the route sits in code that
+  builds sources for symbolicator, which fetches the URL later.
+- **L10** comes out as *inferred*: sentry sends `.../subscriptions/{subscription_id}`, and the id holds
+  `partition/key`, so the last parameter has to stand for two route segments.
+- **L21** is missed: relay forwards any request its router does not know to its upstream. Finding it means modelling
+  router fallbacks, which the extractor does not do yet.
+- Three general rules keep false links out: a catch-all route that would swallow named path segments is a fallback,
+  not a match; a route with fixed words must share at least one with the request; and requests made only by tests,
+  CI and tooling are left out by default.

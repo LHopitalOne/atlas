@@ -64,3 +64,108 @@ def read(graph: CodeGraph, data: dict, repo: str):
         a, b = refs.get(e['source']), refs.get(e['target'])
         if a and b and e.get('relation') not in STRUCTURAL:
             graph.link(a, b, STATUS.get(e.get('confidence'), Status.INFERRED))
+
+
+# ---------------------------------------------------------------- out: HTTP links as Graphify nodes and edges
+
+CONFIDENCE = {
+    Status.MATCHED: ('EXTRACTED', 1.0),
+    Status.INFERRED: ('INFERRED', 0.6),
+    Status.AMBIGUOUS: ('AMBIGUOUS', 0.3),
+}
+
+
+def _enclosing(nodes_by_file, repo, path, line):
+    """The node a call sits in: the last symbol in that file starting at or before the line, else the file node."""
+    best = None
+    for n in nodes_by_file.get((repo, path), []):
+        start = line_of(n)
+        if start <= line and (best is None or start >= line_of(best)):
+            best = n
+    return best
+
+
+def with_links(data, links):
+    """A copy of a Graphify graph (or an empty one) with every linked endpoint as a node and every link as an edge.
+
+    Pass the output of `graphify merge-graphs`, whose node ids are 'repo::id' and whose nodes carry `repo`, and
+    `graphify query/path/explain` then follow requests from one repository into another. Unmatched calls have no
+    endpoint to point at and are left out.
+    """
+    out = {'directed': True, 'multigraph': False, 'graph': {}, 'nodes': [], 'links': [], 'hyperedges': []}
+    if data:
+        out.update({k: v for k, v in data.items() if k not in ('nodes', 'links', 'edges')})
+        out['nodes'] = list(data.get('nodes', []))
+        out['links'] = list(data.get('links') or data.get('edges') or [])
+    by_file = {}
+    for n in out['nodes']:
+        if n.get('source_file'):
+            by_file.setdefault((n.get('repo', ''), n['source_file']), []).append(n)
+    ids = {n['id'] for n in out['nodes']}
+
+    def add(node):
+        if node['id'] not in ids:
+            ids.add(node['id'])
+            out['nodes'].append(node)
+            by_file.setdefault((node['repo'], node['source_file']), []).append(node)
+        return node['id']
+
+    for link in links:
+        if link.route is None:
+            continue
+        c, r = link.call, link.route
+        methods = '|'.join(sorted(r.methods))
+        target = add(
+            {
+                'id': f'{r.repo}::http:{methods} {r.path}',
+                'label': f'{methods} {r.path}',
+                'repo': r.repo,
+                'file_type': 'code',
+                'source_file': r.file,
+                'source_location': f'L{r.line}',
+                'type': 'http_endpoint',
+            }
+        )
+        if c.kind == 'payload':  # the URL is fetched by the target service, from code we cannot see statically
+            source = add(
+                {
+                    'id': f'{link.source}::http-client',
+                    'label': f'{link.source} HTTP client',
+                    'repo': link.source,
+                    'file_type': 'code',
+                    'source_file': '(fetches URLs it is given)',
+                    'type': 'http_client',
+                }
+            )
+        else:
+            enclosing = _enclosing(by_file, c.repo, c.file, c.line)
+            source = (
+                enclosing['id']
+                if enclosing
+                else add(
+                    {
+                        'id': f'{c.repo}::{c.file}::{c.function or "module"}',
+                        'label': c.function or c.file,
+                        'repo': c.repo,
+                        'file_type': 'code',
+                        'source_file': c.file,
+                        'source_location': f'L{c.line}',
+                        '_callable': True,
+                    }
+                )
+            )
+        confidence, weight = CONFIDENCE[link.status]
+        out['links'].append(
+            {
+                'source': source,
+                'target': target,
+                'relation': 'calls_http',
+                'confidence': confidence,
+                'confidence_score': weight,
+                'source_file': c.file,
+                'source_location': f'L{c.line}',
+                'weight': 1.0,
+                'context': link.reason,
+            }
+        )
+    return out
