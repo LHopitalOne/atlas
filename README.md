@@ -90,6 +90,7 @@ test/                unit + architecture tests; test/e2e/ Playwright
 tools/index-self/    tree-sitter + SCIP indexer for the Self graph
 docs/                DECISIONS, ARCHITECTURE, GRAPH_SPEC, INTEGRATION
 bridge/              Python: Graphify graph.json to Atlas (core, usecases, adapters, CLI)
+eval/sentry/         answer key: verified HTTP links between Sentry's repos, for scoring the link finder
 ```
 
 See `CLAUDE.md` for the rules the code follows.

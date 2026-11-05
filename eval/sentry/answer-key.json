@@ -1,0 +1,1273 @@
+{
+ "repos": {
+  "sentry": {
+   "url": "https://github.com/getsentry/sentry",
+   "commit": "c69ccf85ab98d619e650c31bb1daed839deb5d2b"
+  },
+  "relay": {
+   "url": "https://github.com/getsentry/relay",
+   "commit": "de080b7053b5e59826af76528f682fe51fa2ed75"
+  },
+  "snuba": {
+   "url": "https://github.com/getsentry/snuba",
+   "commit": "bd2c5d02e90ace8521074d94ccb22aa4940d966f"
+  },
+  "symbolicator": {
+   "url": "https://github.com/getsentry/symbolicator",
+   "commit": "2abba9028ca896c489a56fc4ead86383a7301b04"
+  }
+ },
+ "scopes": {
+  "prod": "production code path",
+  "proxy": "catch-all forwarding: any path under the prefix",
+  "dev": "runs only in development setups (no Kafka)"
+ },
+ "how_the_path_is_known": {
+  "literal": "string literal at the call site",
+  "constant": "module constant",
+  "template": "format string with variables",
+  "registry": "route parameter filled from a class registry (snuba RPC endpoint class names)",
+  "payload": "URL built by the other service and sent in a request body",
+  "catch-all": "forwarded unchanged to the upstream"
+ },
+ "links": [
+  {
+   "id": "L01",
+   "caller": "relay",
+   "target": "sentry",
+   "method": "GET",
+   "path": "/api/0/relays/live/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "src/sentry/api/urls.py",
+    "line": 1260,
+    "declared_as": "^api/0/ + ^relays/ + ^live/$  => /api/0/relays/live/",
+    "handler": "RelayHealthCheck.get (src/sentry/api/endpoints/relay/health_check.py:10, get at line 27)",
+    "framework": "Django urls.py (re_path + include) + DRF-style sentry Endpoint",
+    "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/api/urls.py#L1260"
+   },
+   "call_sites": [
+    {
+     "file": "relay-server/src/services/upstream.rs",
+     "line": 808,
+     "function": "GetHealthCheck::path",
+     "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/services/upstream.rs#L808"
+    }
+   ]
+  },
+  {
+   "id": "L02",
+   "caller": "relay",
+   "target": "sentry",
+   "method": "POST",
+   "path": "/api/0/relays/projectconfigs/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "src/sentry/api/urls.py",
+    "line": 1250,
+    "declared_as": "^api/0/ + ^relays/ + ^projectconfigs/$  => /api/0/relays/projectconfigs/",
+    "handler": "RelayProjectConfigsEndpoint.post (src/sentry/api/endpoints/relay/project_configs.py:33, post at :42)",
+    "framework": "Django urls.py (re_path/include) + DRF-style Sentry Endpoint",
+    "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/api/urls.py#L1250"
+   },
+   "call_sites": [
+    {
+     "file": "relay-server/src/endpoints/project_configs.rs",
+     "line": 264,
+     "function": "handle",
+     "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/endpoints/project_configs.rs#L264"
+    },
+    {
+     "file": "relay-server/src/services/global_config.rs",
+     "line": 88,
+     "function": "GetGlobalConfig::path",
+     "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/services/global_config.rs#L88"
+    },
+    {
+     "file": "relay-server/src/services/projects/source/upstream.rs",
+     "line": 81,
+     "function": "GetProjectStates::path",
+     "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/services/projects/source/upstream.rs#L81"
+    }
+   ]
+  },
+  {
+   "id": "L03",
+   "caller": "relay",
+   "target": "sentry",
+   "method": "POST",
+   "path": "/api/0/relays/publickeys/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "src/sentry/api/urls.py",
+    "line": 1255,
+    "declared_as": "^api/0/ + ^relays/ + ^publickeys/$  => /api/0/relays/publickeys/",
+    "handler": "RelayPublicKeysEndpoint.post (src/sentry/api/endpoints/relay/public_keys.py:13,22)",
+    "framework": "Django urls.py (re_path/include) + DRF-style sentry Endpoint",
+    "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/api/urls.py#L1255"
+   },
+   "call_sites": [
+    {
+     "file": "relay-server/src/services/relays.rs",
+     "line": 108,
+     "function": "GetRelays::path",
+     "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/services/relays.rs#L108"
+    }
+   ]
+  },
+  {
+   "id": "L04",
+   "caller": "relay",
+   "target": "sentry",
+   "method": "POST",
+   "path": "/api/0/relays/register/challenge/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "src/sentry/api/urls.py",
+    "line": 1240,
+    "declared_as": "^api/0/ + ^relays/ + ^register/challenge/$  => /api/0/relays/register/challenge/",
+    "handler": "RelayRegisterChallengeEndpoint.post (src/sentry/api/endpoints/relay/register_challenge.py:25, post at :36)",
+    "framework": "Django urls.py (re_path/include) + DRF-style sentry Endpoint",
+    "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/api/urls.py#L1240"
+   },
+   "call_sites": [
+    {
+     "file": "relay-server/src/endpoints/register.rs",
+     "line": 11,
+     "function": "challenge",
+     "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/endpoints/register.rs#L11"
+    },
+    {
+     "file": "relay-server/src/services/upstream.rs",
+     "line": 851,
+     "function": "RegisterRequest::path",
+     "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/services/upstream.rs#L851"
+    }
+   ]
+  },
+  {
+   "id": "L05",
+   "caller": "relay",
+   "target": "sentry",
+   "method": "POST",
+   "path": "/api/0/relays/register/response/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "src/sentry/api/urls.py",
+    "line": 1245,
+    "declared_as": "/api/0/relays/register/response/",
+    "handler": "RelayRegisterResponseEndpoint.post (src/sentry/api/endpoints/relay/register_response.py:28, post at ~39)",
+    "framework": "Django urls.py + DRF endpoint",
+    "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/api/urls.py#L1245"
+   },
+   "call_sites": [
+    {
+     "file": "relay-server/src/endpoints/register.rs",
+     "line": 23,
+     "function": "response",
+     "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/endpoints/register.rs#L23"
+    },
+    {
+     "file": "relay-server/src/services/upstream.rs",
+     "line": 875,
+     "function": "RegisterResponse::path",
+     "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/services/upstream.rs#L875"
+    }
+   ]
+  },
+  {
+   "id": "L06",
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/rpc/{name}/{version}",
+   "scope": "prod",
+   "how_the_path_is_known": "registry",
+   "route": {
+    "file": "snuba/web/views.py",
+    "line": 299,
+    "declared_as": "/rpc/<name>/<version>",
+    "handler": "rpc",
+    "framework": "Flask (@application.route on the snuba Flask app)",
+    "url": "https://github.com/getsentry/snuba/blob/bd2c5d02e90ace8521074d94ccb22aa4940d966f/snuba/web/views.py#L299"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/replays/lib/eap/snuba_transpiler.py",
+     "line": 407,
+     "function": "execute_query",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/replays/lib/eap/snuba_transpiler.py#L407"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 138,
+     "function": "get_trace_rpc",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L138"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 164,
+     "function": "_make_rpc_requests",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L164"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 166,
+     "function": "_make_rpc_requests",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L166"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 291,
+     "function": "attribute_names_rpc",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L291"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 309,
+     "function": "attribute_values_rpc",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L309"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 321,
+     "function": "get_traces_rpc",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L321"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 329,
+     "function": "trace_item_stats_rpc",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L329"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 344,
+     "function": "trace_item_details_rpc",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L344"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 356,
+     "function": "delete_trace_items_rpc",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L356"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 410,
+     "function": "export_logs_rpc",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L410"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 465,
+     "function": "_make_rpc_request",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L465"
+    },
+    {
+     "file": "src/sentry/utils/snuba_rpc.py",
+     "line": 522,
+     "function": "create_subscription",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L522"
+    }
+   ]
+  },
+  {
+   "id": "L07",
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/{dataset}/mql",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "route": {
+    "file": "snuba/web/views.py",
+    "line": 325,
+    "declared_as": "/<dataset:dataset>/mql",
+    "handler": "mql_dataset_query_view",
+    "framework": "Flask app routes (application.route) with a custom dataset URL converter",
+    "url": "https://github.com/getsentry/snuba/blob/bd2c5d02e90ace8521074d94ccb22aa4940d966f/snuba/web/views.py#L325"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/utils/snuba.py",
+     "line": 1559,
+     "function": "_raw_mql_query",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba.py#L1559"
+    }
+   ]
+  },
+  {
+   "id": "L08",
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/{dataset}/snql",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "route": {
+    "file": "snuba/web/views.py",
+    "line": 307,
+    "declared_as": "/<dataset:dataset>/snql",
+    "handler": "snql_dataset_query_view",
+    "framework": "Flask app route (application = Flask(...) at snuba/web/views.py:128, custom 'dataset' converter DatasetConverter registered at line 131)",
+    "url": "https://github.com/getsentry/snuba/blob/bd2c5d02e90ace8521074d94ccb22aa4940d966f/snuba/web/views.py#L307"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/utils/snuba.py",
+     "line": 1587,
+     "function": "_raw_snql_query",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba.py#L1587"
+    }
+   ]
+  },
+  {
+   "id": "L09",
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/{dataset}/{entity}/subscriptions",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "route": {
+    "file": "snuba/web/views.py",
+    "line": 530,
+    "declared_as": "/<dataset:dataset>/<entity:entity>/subscriptions",
+    "handler": "create_subscription",
+    "framework": "Flask app (application = Flask(...) in snuba/web/views.py, with custom dataset/entity URL converters)",
+    "url": "https://github.com/getsentry/snuba/blob/bd2c5d02e90ace8521074d94ccb22aa4940d966f/snuba/web/views.py#L530"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/snuba/tasks.py",
+     "line": 316,
+     "function": "_create_snql_in_snuba",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/snuba/tasks.py#L316"
+    }
+   ]
+  },
+  {
+   "id": "L10",
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "DELETE",
+   "path": "/{dataset}/{entity}/subscriptions/{partition}/{key}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "route": {
+    "file": "snuba/web/views.py",
+    "line": 547,
+    "declared_as": "/<dataset:dataset>/<entity:entity>/subscriptions/<int:partition>/<key>",
+    "handler": "delete_subscription",
+    "framework": "Flask app route (application.route) with custom dataset/entity URL converters",
+    "url": "https://github.com/getsentry/snuba/blob/bd2c5d02e90ace8521074d94ccb22aa4940d966f/snuba/web/views.py#L547"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/snuba/tasks.py",
+     "line": 351,
+     "function": "_delete_from_snuba",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/snuba/tasks.py#L351"
+    }
+   ]
+  },
+  {
+   "id": "L11",
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "DELETE",
+   "path": "/{storage}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "route": {
+    "file": "snuba/web/views.py",
+    "line": 336,
+    "declared_as": "/<storage:storage>",
+    "handler": "storage_delete",
+    "framework": "Flask app route (application.route) with custom StorageConverter",
+    "url": "https://github.com/getsentry/snuba/blob/bd2c5d02e90ace8521074d94ccb22aa4940d966f/snuba/web/views.py#L336"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/utils/snuba.py",
+     "line": 1530,
+     "function": "_raw_delete_query",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba.py#L1530"
+    }
+   ]
+  },
+  {
+   "id": "L12",
+   "caller": "sentry",
+   "target": "symbolicator",
+   "method": "POST",
+   "path": "/applecrashreport",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "crates/symbolicator/src/endpoints/mod.rs",
+    "line": 59,
+    "declared_as": "/applecrashreport",
+    "handler": "handle_apple_crash_report_request (crates/symbolicator/src/endpoints/applecrashreport.rs:15, imported as `applecrashreport` in mod.rs:24)",
+    "framework": "axum Router (create_app merges symbolicate_router, large_file_router and misc_router at the root, with no prefix or nest)",
+    "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator/src/endpoints/mod.rs#L59"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/lang/native/symbolicator.py",
+     "line": 321,
+     "function": "Symbolicator.process_applecrashreport",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L321"
+    }
+   ]
+  },
+  {
+   "id": "L13",
+   "caller": "sentry",
+   "target": "symbolicator",
+   "method": "POST",
+   "path": "/minidump",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "crates/symbolicator/src/endpoints/mod.rs",
+    "line": 60,
+    "declared_as": "/minidump",
+    "handler": "handle_minidump_request (crates/symbolicator/src/endpoints/minidump.rs:17), imported as `minidump` at mod.rs:24",
+    "framework": "axum Router (merged sub-routers, no prefix)",
+    "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator/src/endpoints/mod.rs#L60"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/lang/native/symbolicator.py",
+     "line": 277,
+     "function": "Symbolicator.process_minidump",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L277"
+    }
+   ]
+  },
+  {
+   "id": "L14",
+   "caller": "sentry",
+   "target": "symbolicator",
+   "method": "GET",
+   "path": "/requests/{request_id}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "route": {
+    "file": "crates/symbolicator/src/endpoints/mod.rs",
+    "line": 68,
+    "declared_as": "/requests/{request_id}",
+    "handler": "poll_request (imported as `requests`, crates/symbolicator/src/endpoints/requests.rs:15)",
+    "framework": "axum Router",
+    "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator/src/endpoints/mod.rs#L68"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/lang/native/symbolicator.py",
+     "line": 609,
+     "function": "SymbolicatorSession.query_task",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L609"
+    }
+   ]
+  },
+  {
+   "id": "L15",
+   "caller": "sentry",
+   "target": "symbolicator",
+   "method": "POST",
+   "path": "/symbolicate",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "crates/symbolicator/src/endpoints/mod.rs",
+    "line": 51,
+    "declared_as": "/symbolicate",
+    "handler": "symbolicate_frames (crates/symbolicator/src/endpoints/symbolicate.rs:56, imported as `symbolicate` in mod.rs:28)",
+    "framework": "axum Router (Router::new().route(...).merge(...))",
+    "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator/src/endpoints/mod.rs#L51"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/lang/native/symbolicator.py",
+     "line": 365,
+     "function": "Symbolicator.process_payload",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L365"
+    }
+   ]
+  },
+  {
+   "id": "L16",
+   "caller": "sentry",
+   "target": "symbolicator",
+   "method": "POST",
+   "path": "/symbolicate-any",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "crates/symbolicator/src/endpoints/mod.rs",
+    "line": 48,
+    "declared_as": "/symbolicate-any",
+    "handler": "symbolicate_any (crates/symbolicator/src/endpoints/symbolicate_any.rs:49)",
+    "framework": "axum Router (Rust), merged sub-routers in create_app",
+    "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator/src/endpoints/mod.rs#L48"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/lang/native/symbolicator.py",
+     "line": 259,
+     "function": "Symbolicator.process_minidump",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L259"
+    }
+   ]
+  },
+  {
+   "id": "L17",
+   "caller": "sentry",
+   "target": "symbolicator",
+   "method": "POST",
+   "path": "/symbolicate-js",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "crates/symbolicator/src/endpoints/mod.rs",
+    "line": 49,
+    "declared_as": "/symbolicate-js",
+    "handler": "symbolicate_js::handle_symbolication_request (imported as symbolicate_js; crates/symbolicator/src/endpoints/symbolicate_js.rs:61)",
+    "framework": "axum Router (Router::new().route(...) merged into the root router in create_app)",
+    "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator/src/endpoints/mod.rs#L49"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/lang/native/symbolicator.py",
+     "line": 412,
+     "function": "Symbolicator.process_js",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L412"
+    }
+   ]
+  },
+  {
+   "id": "L18",
+   "caller": "sentry",
+   "target": "symbolicator",
+   "method": "POST",
+   "path": "/symbolicate-jvm",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "crates/symbolicator/src/endpoints/mod.rs",
+    "line": 50,
+    "declared_as": "/symbolicate-jvm",
+    "handler": "symbolicate_jvm::handle_symbolication_request (crates/symbolicator/src/endpoints/symbolicate_jvm.rs:53), aliased as symbolicate_jvm",
+    "framework": "axum Router (merged sub-routers, no prefix)",
+    "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator/src/endpoints/mod.rs#L50"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/lang/native/symbolicator.py",
+     "line": 453,
+     "function": "Symbolicator.process_jvm",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L453"
+    }
+   ]
+  },
+  {
+   "id": "L19",
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "GET",
+   "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/artifact-lookup/",
+   "scope": "prod",
+   "how_the_path_is_known": "payload",
+   "route": {
+    "file": "src/sentry/api/urls.py",
+    "line": 3219,
+    "declared_as": "/api/0/projects/(?P<organization_id_or_slug>[^/]+)/(?P<project_id_or_slug>[^/]+)/artifact-lookup/",
+    "handler": "ProjectArtifactLookupEndpoint.get (src/sentry/api/endpoints/artifact_lookup.py:59, get at :133)",
+    "framework": "Django urls.py (re_path + include) + DRF ProjectEndpoint",
+    "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/api/urls.py#L3219"
+   },
+   "call_sites": [
+    {
+     "file": "crates/symbolicator-js/src/api_lookup.rs",
+     "line": 159,
+     "function": "SentryLookupApi::lookup_js_artifacts",
+     "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator-js/src/api_lookup.rs#L159"
+    },
+    {
+     "file": "crates/symbolicator-service/src/download/sentry.rs",
+     "line": 139,
+     "function": "SentryDownloader::fetch_sentry_json",
+     "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator-service/src/download/sentry.rs#L139"
+    },
+    {
+     "file": "crates/symbolicator-service/src/download/sentry.rs",
+     "line": 264,
+     "function": "SentryDownloader::download_source",
+     "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator-service/src/download/sentry.rs#L264"
+    }
+   ]
+  },
+  {
+   "id": "L20",
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "GET",
+   "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/files/dsyms/",
+   "scope": "prod",
+   "how_the_path_is_known": "payload",
+   "route": {
+    "file": "src/sentry/api/urls.py",
+    "line": 3039,
+    "declared_as": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/files/dsyms/",
+    "handler": "DebugFilesEndpoint.get (src/sentry/api/endpoints/debug_files.py:309 class, get at :385)",
+    "framework": "Django urls.py + DRF endpoint",
+    "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/api/urls.py#L3039"
+   },
+   "call_sites": [
+    {
+     "file": "crates/symbolicator-service/src/download/sentry.rs",
+     "line": 139,
+     "function": "SentryDownloader::fetch_sentry_json",
+     "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator-service/src/download/sentry.rs#L139"
+    },
+    {
+     "file": "crates/symbolicator-service/src/download/sentry.rs",
+     "line": 264,
+     "function": "SentryDownloader::download_source",
+     "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator-service/src/download/sentry.rs#L264"
+    }
+   ]
+  },
+  {
+   "id": "L21",
+   "caller": "relay",
+   "target": "sentry",
+   "method": "ANY",
+   "path": "/api/0/{*path}",
+   "scope": "proxy",
+   "how_the_path_is_known": "catch-all",
+   "route": {
+    "file": "src/sentry/web/urls.py",
+    "line": 183,
+    "declared_as": "^api/0/ (include sentry.api.urls; any sub-route, catch-all ^ -> CatchallEndpoint)",
+    "handler": "include(\"sentry.api.urls\") -> any API endpoint; fallback CatchallEndpoint",
+    "framework": "Django urls.py (re_path include) + DRF endpoints",
+    "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/web/urls.py#L183"
+   },
+   "call_sites": [
+    {
+     "file": "relay-server/src/endpoints/forward.rs",
+     "line": 47,
+     "function": "handle",
+     "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/endpoints/forward.rs#L47"
+    }
+   ]
+  },
+  {
+   "id": "L22",
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/{entity}/insert",
+   "scope": "dev",
+   "how_the_path_is_known": "literal",
+   "route": {
+    "file": "snuba/web/views.py",
+    "line": 608,
+    "declared_as": "/tests/entities/<entity:entity>/insert",
+    "handler": "write_json_to_entity",
+    "framework": "Flask application.route",
+    "url": "https://github.com/getsentry/snuba/blob/bd2c5d02e90ace8521074d94ccb22aa4940d966f/snuba/web/views.py#L608"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/issues/attributes.py",
+     "line": 120,
+     "function": "produce_snapshot_to_kafka",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/issues/attributes.py#L120"
+    }
+   ]
+  },
+  {
+   "id": "L23",
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/{entity}/insert_bytes",
+   "scope": "dev",
+   "how_the_path_is_known": "constant",
+   "route": {
+    "file": "snuba/web/views.py",
+    "line": 614,
+    "declared_as": "/tests/entities/<entity:entity>/insert_bytes",
+    "handler": "write_bytes_to_entity",
+    "framework": "Flask app routes (application.route) with custom URL converters",
+    "url": "https://github.com/getsentry/snuba/blob/bd2c5d02e90ace8521074d94ccb22aa4940d966f/snuba/web/views.py#L614"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/eventstream/snuba.py",
+     "line": 517,
+     "function": "SnubaEventStream._send_item",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/eventstream/snuba.py#L517"
+    }
+   ]
+  },
+  {
+   "id": "L24",
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/{entity}/eventstream",
+   "scope": "dev",
+   "how_the_path_is_known": "template",
+   "route": {
+    "file": "snuba/web/views.py",
+    "line": 620,
+    "declared_as": "/tests/<entity:entity>/eventstream",
+    "handler": "eventstream",
+    "framework": "Flask app (application.route), registered only under `if application.debug or application.testing:` (views.py:561)",
+    "url": "https://github.com/getsentry/snuba/blob/bd2c5d02e90ace8521074d94ccb22aa4940d966f/snuba/web/views.py#L620"
+   },
+   "call_sites": [
+    {
+     "file": "src/sentry/eventstream/snuba.py",
+     "line": 496,
+     "function": "SnubaEventStream._send",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/eventstream/snuba.py#L496"
+    }
+   ]
+  }
+ ],
+ "excluded": [
+  {
+   "caller": "symbolicator",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/{project_id}/envelope/",
+   "file": "crates/symbolicator/src/cli.rs",
+   "line": 108,
+   "reason": "SDK error reporting via DSN, not a service integration"
+  },
+  {
+   "caller": "relay",
+   "target": "sentry",
+   "method": "UNKNOWN",
+   "path": "/api/0/relays/{projectconfigs|publickeys|register/challenge|register/response|live}/",
+   "file": "relay-server/src/services/upstream.rs",
+   "line": 1037,
+   "reason": "generic transport plumbing; its concrete endpoints are listed as links"
+  },
+  {
+   "caller": "relay",
+   "target": "sentry",
+   "method": "UNKNOWN",
+   "path": "{UpstreamRequest::path()} (e.g. /api/0/relays/...)",
+   "file": "relay-server/src/services/upstream.rs",
+   "line": 936,
+   "reason": "generic transport plumbing; its concrete endpoints are listed as links"
+  },
+  {
+   "caller": "sentry",
+   "target": "symbolicator",
+   "method": "POST",
+   "path": "/{path}",
+   "file": "src/sentry/lang/native/symbolicator.py",
+   "line": 602,
+   "reason": "generic transport plumbing; its concrete endpoints are listed as links"
+  },
+  {
+   "caller": "sentry",
+   "target": "symbolicator",
+   "method": "UNKNOWN",
+   "path": "/{path}",
+   "file": "src/sentry/lang/native/symbolicator.py",
+   "line": 533,
+   "reason": "generic transport plumbing; its concrete endpoints are listed as links"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "UNKNOWN",
+   "path": "/api/0/relays/outcomes/",
+   "file": "rsbuild.config.ts",
+   "line": 814,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "GET",
+   "path": "/api/relay/healthcheck/ready/",
+   "file": "src/sentry/testutils/pytest/relay.py",
+   "line": 68,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "UNKNOWN",
+   "path": "/api/store/",
+   "file": "rsbuild.config.ts",
+   "line": 812,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "UNKNOWN",
+   "path": "/api/{project_id}/*",
+   "file": "rsbuild.config.ts",
+   "line": 813,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "UNKNOWN",
+   "path": "/api/{project_id}/**",
+   "file": "rsbuild.config.ts",
+   "line": 816,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/{project_id}/envelope/",
+   "file": "bin/send-cell-test-event.py",
+   "line": 60,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/{project_id}/envelope/",
+   "file": "tests/relay_integration/test_sdk.py",
+   "line": 49,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/{project_id}/events/{event_id}/attachments/",
+   "file": "src/sentry/testutils/relay.py",
+   "line": 128,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/{project_id}/minidump/",
+   "file": "src/sentry/testutils/relay.py",
+   "line": 151,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/{project_id}/security/",
+   "file": "src/sentry/testutils/relay.py",
+   "line": 103,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/{project_id}/store/",
+   "file": "src/sentry/testutils/relay.py",
+   "line": 65,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/{project_id}/store/",
+   "file": "tests/relay_integration/test_integration.py",
+   "line": 285,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/{project_id}/unreal/{sentry_key}/",
+   "file": "src/sentry/testutils/relay.py",
+   "line": 169,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "GET",
+   "path": "/health",
+   "file": ".github/workflows/scripts/bootstrap-snuba.py",
+   "line": 94,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/eap_items/insert_bytes",
+   "file": "src/sentry/replays/lib/eap/write.py",
+   "line": 84,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/eap_items/insert_bytes",
+   "file": "src/sentry/testutils/cases.py",
+   "line": 1214,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/eap_items/insert_bytes",
+   "file": "src/sentry/testutils/factories.py",
+   "line": 3413,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/events/insert",
+   "file": "src/sentry/testutils/cases.py",
+   "line": 1374,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/functions/insert",
+   "file": "src/sentry/testutils/cases.py",
+   "line": 2300,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/groupedmessage/insert",
+   "file": "src/sentry/testutils/cases.py",
+   "line": 1196,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/outcomes/insert",
+   "file": "src/sentry/testutils/cases.py",
+   "line": 2238,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/outcomes/insert",
+   "file": "bin/mock-outcomes",
+   "line": 27,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/replays/insert",
+   "file": "src/sentry/testutils/cases.py",
+   "line": 2413,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/replays/insert",
+   "file": "tests/sentry/replays/conftest.py",
+   "line": 11,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/replays/insert",
+   "file": "tests/sentry/replays/endpoints/test_project_replay_summary.py",
+   "line": 60,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/replays/insert",
+   "file": "tests/sentry/replays/usecases/test_summarize.py",
+   "line": 1506,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/replays/insert",
+   "file": "tests/sentry/seer/endpoints/test_organization_agent_token.py",
+   "line": 1480,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/replays/insert",
+   "file": "bin/mock-replay",
+   "line": 34,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/search_issues/insert",
+   "file": "src/sentry/testutils/cases.py",
+   "line": 1298,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/uptime_checks/insert",
+   "file": "src/sentry/testutils/cases.py",
+   "line": 2439,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/entities/{entity}/insert",
+   "file": "src/sentry/testutils/cases.py",
+   "line": 1724,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/events/drop",
+   "file": "src/sentry/testutils/pytest/fixtures.py",
+   "line": 371,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/events_analytics_platform/drop",
+   "file": "src/sentry/testutils/pytest/fixtures.py",
+   "line": 370,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/functions/drop",
+   "file": "src/sentry/testutils/pytest/fixtures.py",
+   "line": 372,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/group_attributes/drop",
+   "file": "src/sentry/testutils/pytest/fixtures.py",
+   "line": 377,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/groupedmessage/drop",
+   "file": "src/sentry/testutils/pytest/fixtures.py",
+   "line": 373,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/metrics/drop",
+   "file": "src/sentry/testutils/pytest/fixtures.py",
+   "line": 375,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/outcomes/drop",
+   "file": "src/sentry/testutils/cases.py",
+   "line": 2226,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/replays/drop",
+   "file": "src/sentry/testutils/cases.py",
+   "line": 2408,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/replays/drop",
+   "file": "tests/sentry/replays/conftest.py",
+   "line": 18,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/search_issues/drop",
+   "file": "src/sentry/testutils/pytest/fixtures.py",
+   "line": 376,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/transactions/drop",
+   "file": "src/sentry/testutils/pytest/fixtures.py",
+   "line": 374,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "sentry",
+   "target": "snuba",
+   "method": "POST",
+   "path": "/tests/{dataset}/drop",
+   "file": "src/sentry/testutils/pytest/fixtures.py",
+   "line": 362,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "POST",
+   "path": "/api/0/organizations/{org}/releases/",
+   "file": "scripts/create-sentry-release",
+   "line": 33,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "PUT",
+   "path": "/api/0/organizations/{org}/releases/{version}/",
+   "file": "scripts/create-sentry-release",
+   "line": 39,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "POST",
+   "path": "/api/0/organizations/{org}/releases/{version}/deploys/",
+   "file": "scripts/create-sentry-release",
+   "line": 37,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "GET",
+   "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/events/{event_id}/attachments/",
+   "file": "crates/symbolicli/src/main.rs",
+   "line": 389,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "GET",
+   "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/events/{event_id}/attachments/{attachment_id}/?download=1",
+   "file": "crates/symbolicli/src/main.rs",
+   "line": 430,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "GET",
+   "path": "/api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/events/{event_id}/json/",
+   "file": "crates/symbolicli/src/main.rs",
+   "line": 473,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "GET",
+   "path": "/api/0/projects/{org}/{project}/artifact-lookup/",
+   "file": "crates/symbolicli/src/main.rs",
+   "line": 274,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "GET",
+   "path": "/api/0/projects/{org}/{project}/artifact-lookup/",
+   "file": "crates/symbolicator-js/tests/integration/sourcemap.rs",
+   "line": 818,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "POST",
+   "path": "/api/0/projects/{org}/{project}/files/difs/assemble/",
+   "file": "scripts/create-sentry-release",
+   "line": 30,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "symbolicator",
+   "target": "sentry",
+   "method": "GET",
+   "path": "/api/0/projects/{org}/{project}/files/dsyms/",
+   "file": "crates/symbolicli/src/main.rs",
+   "line": 228,
+   "reason": "test or tooling only"
+  }
+ ]
+}

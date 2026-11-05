@@ -1,0 +1,432 @@
+[
+ {
+  "repo": "sentry",
+  "route_idioms": [
+   {
+    "framework": "Django URLconf (django.urls.re_path / django.conf.urls.include) + Django REST Framework class-based endpoints",
+    "how_declared": "Routes are only declared with re_path(regex, view, name=...). A search found no bare django path() calls in src/. The root is ROOT_URLCONF = \"sentry.conf.urls\" (src/sentry/conf/server.py:416). That module re-exports urlpatterns from sentry.web.urls (src/sentry/conf/urls.py:3). The view is either `SomeEndpoint.as_view()` (a DRF Endpoint subclass) or a plain function. The HTTP methods are not in the URLconf: they come from the methods defined on the endpoint class (`def get` / `def post` / `def put` / `def delete`), and the `publish_status = {\"POST\": ...}` dict repeats them. Endpoint classes carry silo decorators: @internal_cell_silo_endpoint, @cell_silo_endpoint or @control_silo_endpoint. The path syntax is a Python regex string. It is anchored with ^, usually ends with /$, and names its parameters as `(?P<name>[^/]+)` (sometimes `\\d+`, `\\w+`, `.+`, or a constrained alternation). Some patterns contain non-capturing alternations such as `(?:issues|groups)` or `(?:notes|comments)`, so one pattern matches several literal paths. Optional pieces appear as `/?$` and `(?:...)?`. The route `name=` is significant: other code builds URLs from it with django.urls.reverse().",
+    "examples": [
+     "src/sentry/conf/server.py:416 ROOT_URLCONF = \"sentry.conf.urls\"",
+     "src/sentry/conf/urls.py:3 from sentry.web.urls import handler500, urlpatterns",
+     "src/sentry/web/urls.py:71 urlpatterns: list[URLResolver | URLPattern] = [ re_path(r\"^500/\", Error500View.as_view(), name=\"error-500\"), ...",
+     "src/sentry/web/urls.py:137-139 re_path(r\"^api/client-config/?$\", api.ClientConfigView.as_view(), name=\"sentry-api-client-config\")  (optional trailing slash)",
+     "src/sentry/web/urls.py:143-146 re_path(r\"^api/relay/.*$\", api.not_found, name=\"sentry-api-internal-relay\")  (Sentry explicitly 404s Relay's own /api/relay/* namespace)",
+     "src/sentry/api/urls.py:1238-1269 RELAY_URLS = [ re_path(r\"^register/challenge/$\", RelayRegisterChallengeEndpoint.as_view(), name=\"sentry-api-0-relay-register-challenge\"), r\"^register/response/$\", r\"^projectconfigs/$\", r\"^publickeys/$\", r\"^live/$\", r\"^(?P<relay_id>[^/]+)/$\" ]",
+     "src/sentry/api/endpoints/relay/project_configs.py:32-42 @internal_cell_silo_endpoint class RelayProjectConfigsEndpoint(Endpoint): publish_status = {\"POST\": ApiPublishStatus.PRIVATE} ... def post(self, request)",
+     "src/sentry/api/endpoints/relay/register_challenge.py:24-36 @internal_cell_silo_endpoint class RelayRegisterChallengeEndpoint(Endpoint) ... def post(...)",
+     "src/sentry/api/endpoints/relay/health_check.py:9-27 class RelayHealthCheck(Endpoint) ... def get(...)",
+     "src/sentry/api/urls.py:3038-3041 re_path(r\"^(?P<organization_id_or_slug>[^/]+)/(?P<project_id_or_slug>[^/]+)/files/dsyms/$\", DebugFilesEndpoint.as_view(), name=\"sentry-api-0-dsym-files\")  (inside PROJECT_URLS; full path /api/0/projects/{org}/{project}/files/dsyms/; Symbolicator's 'sentry' source calls it)",
+     "src/sentry/api/endpoints/debug_files.py:308-385 @cell_silo_endpoint class DebugFilesEndpoint(ProjectEndpoint) ... def get(...)  (?id= download branch at ~396)",
+     "src/sentry/api/urls.py:3218-3221 re_path(r\"^(?P<organization_id_or_slug>[^/]+)/(?P<project_id_or_slug>[^/]+)/artifact-lookup/$\", ProjectArtifactLookupEndpoint.as_view(), name=\"sentry-api-0-project-artifact-lookup\")  (Symbolicator JS source)",
+     "src/sentry/api/endpoints/artifact_lookup.py:58-133 @cell_silo_endpoint class ProjectArtifactLookupEndpoint(ProjectEndpoint) ... def get(...)",
+     "src/sentry/api/urls.py:1424-1427 re_path(r\"^(?P<organization_id_or_slug>[^/]+)/(?:issues|groups)/\", include(create_group_urls(\"sentry-api-0-organization-group\")))  (alternation in a prefix)",
+     "src/sentry/api/urls.py:3750-3752 re_path(r\"^rpc/(?P<service_name>\\w+)/(?P<method_name>\\w+)/$\", InternalRpcServiceEndpoint.as_view(), name=\"sentry-api-0-rpc-service\")",
+     "src/sentry/api/urls.py:3764-3767 re_path(r\"^seer-rpc/(?P<method_name>\\w+)/$\", SeerRpcServiceEndpoint.as_view(), ...)",
+     "src/sentry/api/urls.py:4004-4012 catch-all routes r\"^$\" IndexEndpoint and r\"^\" CatchallEndpoint (unmatched /api/0/* goes here)",
+     "src/sentry/integrations/github/urls.py:7-23 module-level urlpatterns = [ re_path(r\"^webhook/$\", ...), re_path(r\"^installation/(?P<installation_id>\\d+)/$\", ...) ]"
+    ],
+    "prefix_rules": "Full path = the concatenation of every enclosing re_path regex, each stripped of its leading ^ and with the trailing $ only on the leaf. The include forms are:\n(1) include(\"dotted.module\"). The string names a module whose `urlpatterns` is used. Examples: src/sentry/web/urls.py:183-184 r\"^api/0/\" -> include(\"sentry.api.urls\"); src/sentry/web/urls.py:1335 r\"^extensions/\" -> include([... r\"^github/\" (1364) -> include(\"sentry.integrations.github.urls\") ...]).\n(2) include([...inline list...]). Examples: src/sentry/web/urls.py:204 r\"^oauth/\"; src/sentry/api/urls.py:2780 scim/v2; src/sentry/api/urls.py:2839 profiling.\n(3) include(MODULE_LEVEL_VAR). The variable names a list literal in the same file. In src/sentry/api/urls.py:3809-3977: r\"^relays/\" -> RELAY_URLS (3812-3813), r\"^organizations/\" -> ORGANIZATION_URLS (1414), r\"^projects/\" -> PROJECT_URLS (2942), plus TEAM_URLS, USER_URLS, SENTRY_APP_URLS, AUTH_URLS, BROADCAST_URLS, r\"^internal/\" -> INTERNAL_URLS (3695), RELOCATION_URLS. AUTH_V2_URLS is imported from src/sentry/auth_v2/urls.py (api/urls.py:94).\n(4) Splatting lists from other modules into a list literal: *preprod_urls.preprod_organization_urlpatterns (api/urls.py:2939), *preprod_urls.preprod_project_urlpatterns (3528), *preprod_urls.preprod_internal_urlpatterns (3790), *notification_platform_urls.internal_urlpatterns (3791), *workflow_urls.organization_urlpatterns (2928). These come from `from sentry.preprod.api.endpoints import urls as preprod_urls` (api/urls.py:520) and similar imports; the lists are defined in src/sentry/preprod/api/endpoints/urls.py:89/153/264 and src/sentry/workflow_engine/endpoints/urls.py:25.\n(5) A function that generates a list: include(create_group_urls(name_prefix, is_legacy_path=...)), defined at src/sentry/api/urls.py:947. It is mounted at r\"^(?:issues|groups)/\" (3817-3818) and at org-scoped r\"^(?P<organization_id_or_slug>[^/]+)/(?:issues|groups)/\" (1426-1427). Route names inside it are f-strings (f\"{name_prefix}-group-details\").\n(6) Conditional `urlpatterns += [...]` guarded by settings: debug_urls when DEBUG_VIEWS (web/urls.py:89-92), media serving (98-107) with a regex built at runtime as rf\"^{re.escape(settings.MEDIA_URL...)}...\", and r\"^manage/\" when SENTRY_MODE != SAAS (118-125).\nExample of a fully resolved cross-service path: /api/0/relays/projectconfigs/ = web/urls.py:183 \"api/0/\" + api/urls.py:3812 \"relays/\" + api/urls.py:1250 \"projectconfigs/\"."
+   },
+   {
+    "framework": "Frontend SPA routes (static/app, React Router)",
+    "how_declared": "Browser routes for the React app are not HTTP API routes. On the Django side many of them fall through to react_page_view or GenericReactPageView, for example src/sentry/web/urls.py:118-125 and the org/issue patterns near line 1417. None of these are called by relay, snuba or symbolicator, so the answer key can ignore them.",
+    "examples": [
+     "src/sentry/web/urls.py:118-125 re_path(r\"^manage/\", react_page_view, name=\"sentry-admin-overview\")"
+    ],
+    "prefix_rules": "Not relevant for inter-service links."
+   }
+  ],
+  "client_idioms": [
+   {
+    "library": "urllib3 HTTPConnectionPool via sentry.net.http.connection_from_url (Snuba client)",
+    "how_url_is_built": "A module-level pool is bound to the Snuba base URL: `_snuba_pool = connection_from_url(settings.SENTRY_SNUBA, ...)` (src/sentry/utils/snuba.py:590-603). Every call is `_snuba_pool.urlopen(METHOD, path, body=..., headers=...)` with a path relative to the host. The path is usually an f-string whose segments are known only at runtime (dataset, entity, storage name, protobuf class name and version). snuba_rpc imports the same pool (src/sentry/utils/snuba_rpc.py:56). The RPC path is f\"/rpc/{endpoint_name}/{class_version}\", where endpoint_name = req.__class__.__name__ and class_version = cls.__module__.split(\".\", 3)[2]. Both come from the sentry_protos message class, for example EndpointTraceItemTable/v1 (snuba_rpc.py:400-401, 520-521). The batch path hardcodes the names \"EndpointTraceItemTable\" and \"EndpointTimeSeries\" (163-167).",
+    "base_url_config": "settings.SENTRY_SNUBA = os.environ.get(\"SNUBA\", \"http://127.0.0.1:1218\") (src/sentry/conf/server.py:1784); timeout SENTRY_SNUBA_TIMEOUT = 30 (server.py:1785).",
+    "examples": [
+     "src/sentry/utils/snuba.py:1587 _snuba_pool.urlopen(\"POST\", f\"/{request.dataset}/snql\", body=body, headers=headers)  -> Snuba POST /{dataset}/snql",
+     "src/sentry/utils/snuba.py:1559 _snuba_pool.urlopen(\"POST\", f\"/{request.dataset}/mql\", ...)  -> Snuba POST /{dataset}/mql",
+     "src/sentry/utils/snuba.py:1530 _snuba_pool.urlopen(\"DELETE\", f\"/{query.storage_name}\", ...)  -> Snuba DELETE /{storage}",
+     "src/sentry/utils/snuba_rpc.py:465-467 _snuba_pool.urlopen(\"POST\", f\"/rpc/{endpoint_name}/{class_version}\", body=req.SerializeToString(), ...)  -> Snuba POST /rpc/{Endpoint}/{version}",
+     "src/sentry/utils/snuba_rpc.py:518-521 create_subscription(): endpoint_name = cls.__name__ (CreateSubscriptionRequest) -> /rpc/CreateSubscriptionRequest/{v}",
+     "src/sentry/snuba/tasks.py:316-319 _snuba_pool.urlopen(\"POST\", f\"/{snuba_query.dataset}/{entity_key.value}/subscriptions\", body=post_body)",
+     "src/sentry/snuba/tasks.py:351-353 _snuba_pool.urlopen(\"DELETE\", f\"/{dataset.value}/{entity_key.value}/subscriptions/{subscription_id}\")",
+     "src/sentry/replays/lib/eap/snuba_transpiler.py:388-412 request_url = \"/rpc/EndpointTraceItemTable/v1\"; a local pool `_snuba_pool = connection_from_url(settings.SENTRY_SNUBA, ...)`; then _snuba_pool.urlopen(method=request_method, url=request_url, ...)  (method and url passed by keyword through local variables)",
+     "src/sentry/eventstream/snuba.py:496-499 snuba._snuba_pool.urlopen(\"POST\", f\"/tests/{entity}/eventstream\", ...)  (dev/test eventstream backend)",
+     "src/sentry/eventstream/snuba.py:517-519 snuba._snuba_pool.urlopen(\"POST\", EAP_ITEMS_INSERT_ENDPOINT, ...); src/sentry/utils/eap.py:2 EAP_ITEMS_INSERT_ENDPOINT = \"/tests/entities/eap_items/insert_bytes\"",
+     "src/sentry/issues/attributes.py:120-122 _snuba_pool.urlopen(\"POST\", \"/tests/entities/group_attributes/insert\", ...)  (non-Kafka dev path)",
+     "src/sentry/testutils/cases.py:1196-1198 _snuba_pool.urlopen(\"POST\", \"/tests/entities/groupedmessage/insert\", ...)"
+    ]
+   },
+   {
+    "library": "requests (module-level requests.post / requests.get) with settings.SENTRY_SNUBA + path string concatenation (mostly test and dev tooling)",
+    "how_url_is_built": "The URL is built by concatenation: settings.SENTRY_SNUBA + \"/literal/path\", or + a constant, or + a template.format(entity=...). Some calls receive the path through a fixture argument instead.",
+    "base_url_config": "settings.SENTRY_SNUBA (src/sentry/conf/server.py:1784)",
+    "examples": [
+     "src/sentry/replays/lib/eap/write.py:84-85 requests.post(settings.SENTRY_SNUBA + EAP_ITEMS_INSERT_ENDPOINT, files=...)",
+     "src/sentry/testutils/cases.py:1544 snuba_endpoint = \"/tests/entities/{entity}/insert\"; cases.py:1725 settings.SENTRY_SNUBA + cls.snuba_endpoint.format(entity=entity)",
+     "src/sentry/testutils/cases.py:2226 requests.post(settings.SENTRY_SNUBA + \"/tests/outcomes/drop\", timeout=30)",
+     "src/sentry/testutils/cases.py:2239 settings.SENTRY_SNUBA + \"/tests/entities/outcomes/insert\"",
+     "src/sentry/testutils/cases.py:2414 settings.SENTRY_SNUBA + \"/tests/entities/replays/insert\"",
+     "src/sentry/testutils/cases.py:2440 settings.SENTRY_SNUBA + \"/tests/entities/uptime_checks/insert\"",
+     "src/sentry/testutils/pytest/fixtures.py:360-362 call_snuba fixture: requests.post(settings.SENTRY_SNUBA + endpoint, timeout=30), with endpoint taken from a list at fixtures.py:369-378 (\"/tests/events/drop\", \"/tests/transactions/drop\", \"/tests/metrics/drop\", ...)",
+     "bin/mock-outcomes:28 settings.SENTRY_SNUBA + \"/tests/entities/outcomes/insert\"",
+     "bin/mock-replay:35 settings.SENTRY_SNUBA + \"/tests/entities/replays/insert\""
+    ]
+   },
+   {
+    "library": "requests.Session wrapped in SymbolicatorSession (Symbolicator client)",
+    "how_url_is_built": "Symbolicator.__init__ chooses base_url from settings.SYMBOLICATOR_POOL_URLS[pool] or URLS[\"default\"], falling back to options.get(\"symbolicator.options\")[\"url\"], and strips any trailing \"/\" (src/sentry/lang/native/symbolicator.py:134-146). The public methods call self._process(task_name, path) with a literal relative path. SymbolicatorSession.create_task(path) issues POST through _request (602). query_task builds f\"requests/{task_id}\" and issues GET (606-609). _request builds url = urljoin(self.url, path) (518) and calls self.session.request(method, url, ...) (533). The method is passed as a lowercase string (\"post\" or \"get\"). Query params always include timeout and scope (596, 605).",
+    "base_url_config": "Option \"symbolicator.options\" defaults to {\"url\": \"http://127.0.0.1:3021\"} (src/sentry/options/defaults.py:517-518). SENTRY_SYMBOLICATOR_OPTIONS (src/sentry/conf/server.py:2821). The per-pool override is SYMBOLICATOR_POOL_URLS, empty by default (server.py:3247-3251).",
+    "examples": [
+     "src/sentry/lang/native/symbolicator.py:365 self._process(\"symbolicate_stacktraces\", \"symbolicate\", json=json)  -> POST /symbolicate",
+     "src/sentry/lang/native/symbolicator.py:412 self._process(\"symbolicate_js_stacktraces\", \"symbolicate-js\", json=json)  -> POST /symbolicate-js",
+     "src/sentry/lang/native/symbolicator.py:453 self._process(\"symbolicate_jvm_stacktraces\", \"symbolicate-jvm\", json=json)  -> POST /symbolicate-jvm",
+     "src/sentry/lang/native/symbolicator.py:259 and :308 self._process(..., \"symbolicate-any\", kwargs_cb=cb)  -> POST /symbolicate-any (minidump and applecrashreport stored in objectstore)",
+     "src/sentry/lang/native/symbolicator.py:277 self._process(\"process_minidump\", \"minidump\", data=data, files=files)  -> POST /minidump (multipart)",
+     "src/sentry/lang/native/symbolicator.py:321 self._process(\"process_applecrashreport\", \"applecrashreport\", ...)  -> POST /applecrashreport",
+     "src/sentry/lang/native/symbolicator.py:606 task_url = f\"requests/{task_id}\" -> GET /requests/{task_id} (polling)",
+     "src/sentry/lang/native/symbolicator.py:518 url = urljoin(cast(str, self.url), path); :533 self.session.request(method, url, timeout=..., **kwargs)",
+     "Instantiations: src/sentry/tasks/symbolication.py:172, src/sentry/profiles/task.py:843 and :1146 `symbolicator = Symbolicator(...)`"
+    ]
+   },
+   {
+    "library": "django.urls.reverse() + internal URL prefix, passed as data to Symbolicator (Symbolicator calls back into Sentry)",
+    "how_url_is_built": "Sentry does not make this request itself. It builds absolute URLs to its own routes and puts them in the JSON body sent to Symbolicator as a source of \"type\": \"sentry\" together with a system token. Symbolicator then calls Sentry. The URL is get_internal_url_prefix() + reverse(<route name>, kwargs={org, project}). The prefix comes from the system.internal-url-prefix option or system.url-prefix (src/sentry/lang/native/sources.py:325-342). This builds a reverse edge symbolicator -> sentry, and it can only be resolved by matching the route name used in reverse() to name= in the URLconf.",
+    "base_url_config": "options system.internal-url-prefix, falling back to system.url-prefix (src/sentry/lang/native/sources.py:330-332)",
+    "examples": [
+     "src/sentry/lang/native/sources.py:348-357 get_internal_url_prefix() + reverse(\"sentry-api-0-dsym-files\", kwargs={\"organization_id_or_slug\": ..., \"project_id_or_slug\": ...}); returned as {\"type\": \"sentry\", \"url\": ..., \"token\": get_system_token()} (366-371) -> Symbolicator GETs /api/0/projects/{org}/{project}/files/dsyms/ (route at src/sentry/api/urls.py:3038-3041)",
+     "src/sentry/lang/native/sources.py:374-387 get_internal_artifact_lookup_source_url(): reverse(\"sentry-api-0-project-artifact-lookup\", ...) -> Symbolicator GETs /api/0/projects/{org}/{project}/artifact-lookup/ (route at src/sentry/api/urls.py:3218-3221)",
+     "src/sentry/api/endpoints/artifact_lookup.py:312-326 UrlConstructor returns f\"{self.base_url}?download={download_id}\", so Symbolicator follows up on the same artifact-lookup route with ?download=",
+     "src/sentry/api/endpoints/debug_files.py:395-397 the dsyms GET serves a download when ?id= is present"
+    ]
+   },
+   {
+    "library": "requests (test fixtures that post to a Relay docker container; this is the only direct sentry -> relay HTTP)",
+    "how_url_is_built": "A pytest fixture returns closures that call \"{}/api/{}/store/\".format(relay_server[\"url\"], project_id) and similar. relay_server[\"url\"] = f\"http://127.0.0.1:{relay_port}\" (src/sentry/testutils/pytest/relay.py:180). The closures are injected into a test mixin as attributes (src/sentry/testutils/relay.py:186-204) and called there as self.get_relay_store_url(...) followed by requests.post(url, ...).",
+    "base_url_config": "Runtime docker port in the test fixture (src/sentry/testutils/pytest/relay.py:180). There is also SENTRY_RELAY_PORT = 7899 (src/sentry/conf/server.py:2555).",
+    "examples": [
+     "src/sentry/testutils/pytest/relay.py:253 readiness_url = f\"{url}/api/relay/healthcheck/ready/\" -> GET relay /api/relay/healthcheck/ready/",
+     "src/sentry/testutils/pytest/relay.py:301 \"{}/api/{}/store/\".format(relay_server[\"url\"], project_id)",
+     "src/sentry/testutils/pytest/relay.py:311 \"{}/api/{}/security/?sentry_key={}\"",
+     "src/sentry/testutils/pytest/relay.py:321 \"{}/api/{}/minidump/?sentry_key={}\"",
+     "src/sentry/testutils/pytest/relay.py:331 \"{}/api/{}/unreal/{}/\"",
+     "src/sentry/testutils/pytest/relay.py:341 \"{}/api/{}/events/{}/attachments/\"",
+     "src/sentry/testutils/relay.py:63-66 url = self.get_relay_store_url(self.project.id); requests.post(url, ...)",
+     "src/sentry/testutils/relay.py:128 requests.post(url, files=files, headers={\"x-sentry-auth\": ...})"
+    ]
+   },
+   {
+    "library": "Other outbound idioms (intra-Sentry or to services outside the four; listed so an extractor does not misattribute them)",
+    "how_url_is_built": "(a) Hybrid-cloud RPC between control and cell silos: path = django.urls.reverse(\"sentry-api-0-rpc-service\", kwargs={service_name, method_name}) (src/sentry/hybridcloud/rpc/service.py:562-566), then url = self.address + self.path and http.post(url, ...) (service.py:770-774). This is sentry -> sentry. (b) Integration ApiClients: BaseApiClient.base_url plus build_url(path) (src/sentry/shared_integrations/client/base.py:55-56, 153-159) for GitHub, Jira and similar. (c) Seer and the profiling service: module-level connection_from_url(settings.SEER_..._URL) pools used with make_signed_seer_api_request(pool, path, body) (src/sentry/seer/signed_seer_api.py:158). Pools are declared at src/sentry/profiles/utils.py:75, src/sentry/seer/agent/client_utils.py:54 and elsewhere. (d) sentry.http.safe_urlopen(url, method=...) for user-supplied URLs such as webhooks (src/sentry/http.py:68). (e) The frontend TS Client prefixes baseUrl '/api/0' (static/app/api.tsx:317, 184) and calls getApiUrl('/organizations/$organizationIdOrSlug/...') (static/app/actionCreators/dashboards.tsx:35). That is browser -> sentry, not inter-service.",
+    "examples": [
+     "src/sentry/hybridcloud/rpc/service.py:563 django.urls.reverse(\"sentry-api-0-rpc-service\", ...)",
+     "src/sentry/hybridcloud/rpc/service.py:770 url = self.address + self.path",
+     "src/sentry/shared_integrations/client/base.py:153-159 def build_url(self, path) -> f\"{base_url}/{path}\"",
+     "src/sentry/net/http.py:295 def connection_from_url(endpoint, **kw)",
+     "src/sentry/http.py:68 def safe_urlopen(url, method=None, ...)",
+     "static/app/api.tsx:317 this.baseUrl = options.baseUrl ?? '/api/0'"
+    ]
+   }
+  ],
+  "extractor_notes": "INTER-SERVICE EDGES FOUND FROM SENTRY'S SIDE (the answer-key candidates)\n(1) relay -> sentry. Sentry serves /api/0/relays/{register/challenge, register/response, projectconfigs, publickeys, live, <relay_id>}/. The path composes from web/urls.py:183 + api/urls.py:3812 + RELAY_URLS at api/urls.py:1238-1269. Methods: POST for challenge, response, projectconfigs and publickeys; GET for live. Sentry 404s /api/relay/.* (web/urls.py:144) and no longer serves the ingest routes (store, envelope). Those live in relay.\n(2) sentry -> snuba. POST /{dataset}/snql, POST /{dataset}/mql, DELETE /{storage}, POST /rpc/{EndpointClassName}/{version}, POST and DELETE /{dataset}/{entity}/subscriptions[/{id}]. Test and dev only: /tests/{entity}/eventstream, /tests/entities/{entity}/insert, /tests/entities/eap_items/insert_bytes, /tests/{dataset}/drop.\n(3) sentry -> symbolicator. POST /symbolicate, /symbolicate-js, /symbolicate-jvm, /symbolicate-any, /minidump, /applecrashreport. GET /requests/{task_id}.\n(4) symbolicator -> sentry, via URLs that Sentry passes in the payload. GET /api/0/projects/{org}/{project}/files/dsyms/ (with ?id=) and /api/0/projects/{org}/{project}/artifact-lookup/ (with ?download=).\n(5) sentry -> relay, tests only. /api/{project_id}/store|security|minidump|unreal/{key}|events/{id}/attachments/ and /api/relay/healthcheck/ready/.\n\nEASY (single-file, tree-sitter-local)\n- Leaf re_path(r\"...\", X.as_view(), name=\"...\") calls. Read the first string argument (a raw string; remember the r prefix), the view class from the attribute call `.as_view()`, and the name= keyword.\n- HTTP methods. Find the class named in as_view() and collect its method_definitions named get/post/put/patch/delete/head/options. The keys of `publish_status = {...}` give the same answer. Resolving the class needs the import map of urls.py, which has thousands of `from x import Y` lines, but that is a mechanical lookup.\n- Nesting with an inline include([...]) list, and include(VAR) where VAR is a module-level list literal in the same file (RELAY_URLS, ORGANIZATION_URLS, PROJECT_URLS, INTERNAL_URLS). Walk the assignment and concatenate the prefixes.\n- Regex-to-template normalisation. Strip ^ and $. Turn (?P<name>...) into {name}. Turn `/?` into `/`. Expand (?:a|b) into one route per alternative. Mark .* and .+ tails as wildcards. Use a real regex parser for this: the patterns contain nested parentheses inside named groups, for example event_id at api/urls.py:~967.\n- Snuba and Symbolicator call sites whose path argument is a string literal: \"/tests/entities/group_attributes/insert\", \"symbolicate\", \"symbolicate-js\", \"/rpc/EndpointTraceItemTable/v1\".\n- Concatenations of the form settings.SENTRY_SNUBA + \"literal\". The left operand identifies the service; the right operand is the path.\n\nNEEDS CROSS-FILE RESOLUTION\n- include(\"dotted.module.path\"). Resolve the module to a file and read its `urlpatterns` (the integrations, for example web/urls.py:1364 -> src/sentry/integrations/github/urls.py:7).\n- ROOT_URLCONF (conf/server.py:416) -> sentry.conf.urls, which re-exports sentry.web.urls.urlpatterns (conf/urls.py:3). You need this re-export to find the root.\n- Splatted lists from imported modules: *preprod_urls.preprod_project_urlpatterns and others at api/urls.py:2928/2939/3528/3790/3791. Follow the module alias (`import ... urls as preprod_urls`) to the attribute's list literal. The splat inherits the enclosing include's prefix (organizations/, projects/, internal/).\n- AUTH_V2_URLS is imported from sentry.auth_v2.urls (api/urls.py:94).\n- create_group_urls(...) at api/urls.py:947. It is a function that returns list literals, and route names are f-strings. Evaluate the function body's returned lists and substitute name_prefix. It is mounted twice, at 1426 and 3818.\n- Constants used as paths: EAP_ITEMS_INSERT_ENDPOINT, defined in sentry/utils/eap.py:2 and imported into eventstream/snuba.py, replays/lib/eap/write.py and testutils. The class attribute snuba_endpoint = \"/tests/entities/{entity}/insert\" (testutils/cases.py:1544) is used through cls.snuba_endpoint.format(...).\n- Base-URL identity for pools. `_snuba_pool` is defined once in utils/snuba.py:590 from settings.SENTRY_SNUBA and imported elsewhere: `from sentry.utils.snuba import _snuba_pool`, or used as snuba._snuba_pool. Track the binding variable -> base-setting -> service across imports and module attributes. snuba_transpiler.py:393 creates a separate local pool from the same setting. Settings values live in conf/server.py: SENTRY_SNUBA at 1784, the symbolicator URL at 2821, plus options/defaults.py:517. Map these setting names to services: SENTRY_SNUBA/SNUBA -> snuba (default port 1218); symbolicator.options/SYMBOLICATOR_POOL_URLS -> symbolicator (port 3021).\n- Symbolicator wrapper chain. Symbolicator._process(task, path) -> SymbolicatorSession.create_task(path) -> _request(\"post\", path) -> urljoin(self.url, path) -> session.request(method, url). The literal path is two or three calls away from the actual requests call. The extractor must treat `_process`'s second argument (or create_task's first) as the endpoint, and treat the class as bound to the symbolicator base URL. Method strings are lowercase (\"post\", \"get\").\n- Reverse edges through django reverse(). sources.py:351 and :381 build URLs from route names, and those URLs are handed to symbolicator in JSON. Resolving them needs the global route-name -> composed path index built from the URLconf (name=\"sentry-api-0-dsym-files\" -> /api/0/projects/{organization_id_or_slug}/{project_id_or_slug}/files/dsyms/). The caller is really Symbolicator's 'sentry' source downloader, so model this as a symbolicator -> sentry edge whose evidence sits in sentry. Hybrid-cloud RPC uses reverse(\"sentry-api-0-rpc-service\") the same way (hybridcloud/rpc/service.py:563), but that is sentry -> sentry.\n- Test fixtures whose URLs are built inside pytest fixture closures and injected as attributes (testutils/pytest/relay.py:299-341 -> testutils/relay.py:186-204 -> self.get_relay_store_url(...) at testutils/relay.py:63). Static resolution requires following the fixture name to the attribute assignment and then to the closure's .format template.\n\nONLY KNOWABLE AT RUNTIME (best case: emit a parameterised template)\n- Snuba dataset, entity and storage segments: f\"/{request.dataset}/snql\", f\"/{query.storage_name}\", f\"/{snuba_query.dataset}/{entity_key.value}/subscriptions\". Emit /{dataset}/snql and similar, and let the matcher unify them with snuba's own parameterised routes.\n- The Snuba RPC endpoint name and version come from the protobuf request class: cls.__name__ and cls.__module__.split(\".\", 3)[2] (snuba_rpc.py:400-401, 520-521). Emit /rpc/{name}/{version}. Only the hardcoded \"EndpointTraceItemTable\"/\"EndpointTimeSeries\" (snuba_rpc.py:163-167) and \"/rpc/EndpointTraceItemTable/v1\" (snuba_transpiler.py:388) are concrete.\n- The Symbolicator base URL is chosen per pool from settings or options at runtime (symbolicator.py:134-143). urljoin semantics mean a base URL with a path component but no trailing slash would replace the last segment. Statically, assume the paths sit at the root.\n- The internal URL prefix for the reverse() source URLs comes from runtime options (sources.py:325-342), and the query strings ?_last_upload= and ?download= are appended dynamically.\n- Routes added conditionally on settings (DEBUG_VIEWS, SERVE_UPLOADED_FILES, SENTRY_MODE at web/urls.py:89-125). The MEDIA_URL route regex is built with rf\"^{re.escape(settings.MEDIA_URL...)}\" (web/urls.py:101). Mark these as conditional or skip them.\n- The test Relay URL port is a docker runtime value (pytest/relay.py:180).\n\nLIKELY MISSES AND FALSE-POSITIVE RISKS\n- Lists built with `urlpatterns += [...]` across if-blocks. The extractor must merge these augmented assignments, not just read the first assignment.\n- Catch-all routes r\"^\" (CatchallEndpoint, api/urls.py:4009-4011) and pattern r\"^(?P<organization_slug>[^/]+)/...\" on the web side match almost anything. Rank exact matches above them, or exclude them, when matching inbound calls.\n- Hundreds of connection_from_url pools point at Seer, the profiling service and others. Without base-setting resolution they would be mislabelled as snuba. Integration clients (base_url = \"https://api.github.com\" and similar) and safe_urlopen of user URLs are external, not inter-service.\n- mock.patch strings like \"sentry.utils.snuba_rpc._snuba_pool.urlopen\" in tests are not calls. Ignore string occurrences inside mock.patch.\n- Relay sends query strings such as ?version=3 to projectconfigs. Sentry's route regex has no query part, so strip query strings before matching."
+ },
+ {
+  "repo": "relay",
+  "route_idioms": [
+   {
+    "framework": "axum 0.8 (Rust): Router builder chain",
+    "how_declared": "Routes are method-chained calls on `Router::new()`: `.route(PATH, METHOD_ROUTER)`. Every top-level route is in relay-server/src/endpoints/mod.rs, inside the functions `internal_routes` (L54-60), `public_routes` (L65-68) and `public_routes_raw` (L71-138). METHOD_ROUTER takes one of two forms. It can be inline, as in `get(health_check::handle)`, `post(...)` or `any(...)` (imported from axum::routing at L33). Or it can be a call to a per-endpoint factory such as `store::route(config)`, which returns `MethodRouter<ServiceState>`. In the factory case the HTTP verb is only visible inside the factory body in the endpoint file. Examples: `post(handle)`; `post(handle_post).get(handle_get)` (store.rs:157); `on(MethodFilter::GET.or(MethodFilter::POST), handle)` (monitor.rs:81); `patch(handle_patch)` / `axum_head(handle_head)` (upload.rs:62-70). Path params use brace syntax `{name}`, and catch-alls use `{*name}`. Trailing-slash variants are registered as separate duplicate .route calls.",
+    "prefix_rules": "There is no global prefix: each top-level path is an absolute literal starting with /api/.\n\nComposition rules:\n- `.merge(r)` unions routers with no prefix (mod.rs:47, 132-135).\n- `.nest(PREFIX, sub::routes(config))` prepends PREFIX to the literals of a sub-router defined in another file (mod.rs:120-122). Example: `/api/{project_id}/integration/otlp` + `/v1/traces` (otlp.rs:25) gives `/api/{project_id}/integration/otlp/v1/traces`.\n- A path can be a const imported from another module: `.route(UPLOAD_PATCH_PATH, ...)` at mod.rs:106-107. The const is defined at services/upload.rs:48 as `/api/{project_id}/upload/{key}/`.\n\nConditional routes:\n- `#[cfg(sentry)]` adds the playstation route (mod.rs:109-110).\n- Integration routes exist only when `RelayMode::Managed`; Proxy mode uses an empty Router (mod.rs:117-126).\n\nFallback and serving:\n- `.fallback(forward::forward)` (mod.rs:137) proxies any other /api/ path to the upstream.\n- The routers are served by services/server/mod.rs:208-217. With an internal listener, public_routes and internal_routes go on two ports; otherwise all_routes is served.\n- They are wrapped in NormalizePath (middlewares/normalize_path.rs:37-44), which collapses duplicate slashes before routing.",
+    "examples": [
+     "relay-server/src/endpoints/mod.rs:56 .route(\"/api/relay/healthcheck/{kind}/\", get(health_check::handle))  [internal]",
+     "relay-server/src/endpoints/mod.rs:57 .route(\"/api/relay/autoscaling/\", get(autoscaling::handle))  [internal]",
+     "relay-server/src/endpoints/mod.rs:59 .route(\"/api/relay/{*not_found}\", any(statics::not_found))",
+     "relay-server/src/endpoints/mod.rs:74 .route(\"/api/0/relays/projectconfigs/\", post(project_configs::handle))",
+     "relay-server/src/endpoints/mod.rs:75 .route(\"/api/0/relays/publickeys/\", post(public_keys::handle))",
+     "relay-server/src/endpoints/mod.rs:76-77 .route(\"/api/0/relays/register/challenge/\", post(register::challenge)) / .route(\"/api/0/relays/register/response/\", post(register::response))",
+     "relay-server/src/endpoints/mod.rs:79 .route(\"/api/0/relays/live/\", get(health_check::handle_live))",
+     "relay-server/src/endpoints/mod.rs:83 .route(\"/api/0/relays/metrics/\", post(batch_metrics::handle))",
+     "relay-server/src/endpoints/mod.rs:89 .route(\"/api/store/\", store::route(config))  -> store.rs:157 post(handle_post).get(handle_get)",
+     "relay-server/src/endpoints/mod.rs:91-94 .route(\"/api/{project_id}/cron/{monitor_slug}/{sentry_key}\", monitor::route(config)) (+ trailing-slash and no-sentry_key variants) -> monitor.rs:81 on(GET|POST)",
+     "relay-server/src/endpoints/mod.rs:96 .route(\"/api/{project_id}/store/\", store::route(config))",
+     "relay-server/src/endpoints/mod.rs:97 .route(\"/api/{project_id}/envelope/\", envelope::route(config)) -> envelope.rs:128 post(handle)",
+     "relay-server/src/endpoints/mod.rs:98-99 /api/{project_id}/security/ and /api/{project_id}/csp-report/ -> security_report.rs:110 post",
+     "relay-server/src/endpoints/mod.rs:101-102 /api/{project_id}/minidump and /minidump/ -> minidump.rs:700 post",
+     "relay-server/src/endpoints/mod.rs:103 .route(\"/api/{project_id}/events/{event_id}/attachments/\", attachments::route(config)) -> attachments.rs:80 post",
+     "relay-server/src/endpoints/mod.rs:104 .route(\"/api/{project_id}/unreal/{sentry_key}/\", unreal::route(config)) -> unreal.rs:48 post",
+     "relay-server/src/endpoints/mod.rs:105 .route(\"/api/{project_id}/upload/\", upload::route_post(config)) -> upload.rs:56 post",
+     "relay-server/src/endpoints/mod.rs:106-107 .route(UPLOAD_PATCH_PATH, upload::route_patch(config)) / .route(UPLOAD_PATCH_PATH, upload::route_head()); const at relay-server/src/services/upload.rs:48 = \"/api/{project_id}/upload/{key}/\"",
+     "relay-server/src/endpoints/mod.rs:110 #[cfg(sentry)] store_routes.route(\"/api/{project_id}/playstation/\", playstation::route(config)) -> playstation.rs:264 post",
+     "relay-server/src/endpoints/mod.rs:119 .route(\"/api/{project_id}/nel/\", nel::route(config)) -> nel.rs:45 post",
+     "relay-server/src/endpoints/mod.rs:120 .nest(\"/api/{project_id}/integration/browser\", integrations::browser_reports::routes(config)) -> browser_reports.rs:44-45 .route(\"/reporting\"|\"/reporting/\", route(config)) post (L39)",
+     "relay-server/src/endpoints/mod.rs:121 .nest(\"/api/{project_id}/integration/otlp\", integrations::otlp::routes(config)) -> otlp.rs:25-28 .route(\"/v1/traces\"|\"/v1/traces/\"|\"/v1/logs\"|\"/v1/logs/\", ...) post (L60, L94)",
+     "relay-server/src/endpoints/mod.rs:122 .nest(\"/api/{project_id}/integration/vercel\", integrations::vercel::routes(config)) -> vercel.rs:19-20 .route(\"/logs\"|\"/logs/\", logs::route(config)) post (L49)",
+     "relay-server/src/endpoints/mod.rs:137 .fallback(forward::forward) -> forward.rs:43 only /api/* (excluding exactly /api/) is proxied upstream, gated by config http_forward"
+    ]
+   }
+  ],
+  "client_idioms": [
+   {
+    "library": "Relay's internal UpstreamRelay service, built on reqwest::Client: the trait objects UpstreamRequest and UpstreamQuery",
+    "how_url_is_built": "Relay sends no URLs from call sites. A request is a struct that implements one of two traits:\n- `UpstreamRequest`: a raw request (trait at services/upstream.rs:378-389).\n- `UpstreamQuery`: a JSON-body, signed query (trait at services/upstream.rs:494-510).\n\nThe struct provides `fn method(&self) -> Method` and `fn path(&self) -> Cow<str>`, which return the verb and a path relative to the upstream. It is sent with `upstream_relay.send(SendRequest(x))` or `upstream_relay.send(SendQuery(x))`. UpstreamQueryRequest delegates path and method to the query (upstream.rs:613-618).\n\nThe single place a URL is built is UpstreamRelay `build_request`, at services/upstream.rs:931-936:\n`request.upstream().unwrap_or_else(|| config.upstream()).get_url(request.path())`\nfollowed by `self.reqwest.request(request.method(), url)`.\n\n`UpstreamDescriptor::get_url` (relay-config/src/upstream.rs:77-80) is `format!(\"{self}{}\", path.trim_start_matches('/'))`, which joins scheme://host:port/ with the path.\n\nPaths are mostly string literals returned via Cow::Borrowed or `.into()`. Two are format! strings that interpolate project_id. Two are fully dynamic: the forward proxy passes the incoming URI through, and the upload PATCH/HEAD reuses a stored Location uri.",
+    "base_url_config": "Base URL is the `relay.upstream` config key: `pub upstream: UpstreamDescriptor` (relay-config/src/config.rs:497). It defaults to https://sentry.io/ (relay-config/src/config.rs:551 and relay-config/src/upstream.rs:104) and is read through Config::upstream() (config.rs:2209). Local dev sets it in devservices/config/relay.yml:3 as `upstream: \"http://host.docker.internal:8001/\"`, which is the Sentry web server. A per-request override is possible via `fn upstream() -> Option<&UpstreamDescriptor>` (for example SendEnvelope.upstream, ForwardRequest .with_upstream(None)). The upstream is either Sentry or another Relay, so the target service can only be known at runtime/config time.",
+    "examples": [
+     "relay-server/src/services/projects/source/upstream.rs:73-81 impl UpstreamQuery for GetProjectStates: POST Cow::Borrowed(\"/api/0/relays/projectconfigs/?version=3\"); sent at L422 upstream_relay.send(SendQuery(query)) -> sentry src/sentry/api/urls.py:1250 r\"^projectconfigs/$\" under r\"^relays/\" (urls.py:3812) under api/0/ (src/sentry/web/urls.py:183)",
+     "relay-server/src/services/global_config.rs:80-88 impl UpstreamQuery for GetGlobalConfig: POST \"/api/0/relays/projectconfigs/?version=3\"; sent at L274",
+     "relay-server/src/services/relays.rs:100-108 impl UpstreamQuery for GetRelays: POST \"/api/0/relays/publickeys/\"; sent at L247 -> sentry urls.py:1255",
+     "relay-server/src/services/upstream.rs:843-851 impl UpstreamQuery for RegisterRequest: POST \"/api/0/relays/register/challenge/\" -> sentry urls.py:1240",
+     "relay-server/src/services/upstream.rs:867-875 impl UpstreamQuery for RegisterResponse: POST \"/api/0/relays/register/response/\" -> sentry urls.py:1245",
+     "relay-server/src/services/upstream.rs:797-808 impl UpstreamRequest for GetHealthCheck: GET \"/api/0/relays/live/\" -> sentry urls.py:1260 r\"^live/$\"",
+     "relay-server/src/services/processor/bucket.rs:718-736 impl UpstreamRequest for SendMetricsRequest: POST \"/api/0/relays/metrics/\"; sent at L415. No matching route in sentry's RELAY_URLS (urls.py:1238-1269); it only matches relay's own mod.rs:83, so this is relay-to-relay.",
+     "relay-server/src/services/processor/common.rs:263-273 impl UpstreamRequest for SendEnvelope: POST format!(\"/api/{}/envelope/\", project_id); sent at common.rs:200 and services/proxy_processor.rs:100. Matches relay's own mod.rs:97, so this is relay-to-relay.",
+     "relay-server/src/services/upload.rs:1160-1176 impl UpstreamRequest for UploadRequest: method by enum (POST/PATCH/HEAD). Path is format!(\"/api/{project_id}/upload/\") for Create, or a stored uri for Upload/Head. The uri is built at upload.rs:857-858 format!(\"/api/{project_id}/upload/{key}/...\"). Sent at L456/550/655. Matches relay's own routes, so this is relay-to-relay.",
+     "relay-server/src/endpoints/register.rs:11 and :23 ForwardRequest::builder(Method::POST, \"/api/0/relays/register/challenge/\" | \"/api/0/relays/register/response/\").with_upstream(None)...send_to(state.upstream_relay()) \u2014 the inbound route proxies to the same path upstream",
+     "relay-server/src/endpoints/forward.rs:47 ForwardRequest::builder(method, uri.to_string()): a fully dynamic pass-through of the incoming URI. It is reached via the fallback at mod.rs:137 and from endpoints/project_configs.rs:264 when the version is incompatible. ForwardRequest's impl is at utils/forward.rs:153-163 (path = self.path), sent at utils/forward.rs:327."
+    ]
+   },
+   {
+    "library": "reqwest::blocking::Client (CLI healthcheck subcommand)",
+    "how_url_is_built": "format! of the address taken from CLI args or config: format!(\"http://{addr}/api/relay/healthcheck/{mode}/\")",
+    "base_url_config": "addr comes from the local relay's listen/internal address, so this is a self-call",
+    "examples": [
+     "relay/src/healthcheck.rs:26-33 Client::builder()...; client.get(format!(\"http://{addr}/api/relay/healthcheck/{mode}/\")).send() -> relay's own mod.rs:56 (not cross-service)"
+    ]
+   },
+   {
+    "library": "objectstore_client crate (Client::builder(objectstore_url)), which wraps reqwest",
+    "how_url_is_built": "An opaque client library. Relay never builds URL paths itself; it calls session/upload methods on the client.",
+    "base_url_config": "objectstore_url: Option<String> in ObjectstoreServiceConfig (relay-config/src/config.rs:1305-1309)",
+    "examples": [
+     "relay-server/src/services/objectstore.rs:501-506 let Some(objectstore_url) = objectstore_url ...; Client::builder(objectstore_url) \u2014 target is objectstore, which is not one of the four repos"
+    ]
+   },
+   {
+    "library": "reqwest::Client in tests only",
+    "how_url_is_built": "literal",
+    "base_url_config": "none",
+    "examples": [
+     "relay-server/src/services/processor/bucket.rs:1089-1090 reqwest::Client::new(); client.post(\"http://localhost/\") \u2014 unit test, ignore"
+    ]
+   }
+  ],
+  "extractor_notes": "ROUTES (tree-sitter-rust)\n\nEasy:\n- Match `call_expression` where the function is a `field_expression` whose field is `route`, and the first argument is a `string_literal`. All top-level paths are absolute literals in one file (relay-server/src/endpoints/mod.rs).\n- Treat `{x}` and `{*x}` as params.\n- Normalize duplicate trailing-slash variants (e.g. otlp.rs:25-28, mod.rs:91-94, 101-102) into one route, or keep both.\n- The verb is easy when the second arg is an inline call `get|post|any(...)` (mod.rs:56-83).\n\nNeeds cross-file resolution:\n(1) The verb, when the second arg is `module::route(config)` / `route_post` / `route_patch` / `route_head`.\n- Resolve the function in endpoints/<module>.rs.\n- Read the method-router expression it returns: `post(..)`, `post(..).get(..)` chains, `patch`, `axum_head` (an alias for `head` via `use ... head as axum_head`, upload.rs:14), and `on(MethodFilter::GET.or(MethodFilter::POST), ..)` (monitor.rs:81).\n- A fallback is to emit the route with method ANY.\n(2) `.nest(PREFIX_LITERAL, integrations::X::routes(config))`.\n- Follow to endpoints/integrations/X.rs.\n- Concatenate PREFIX with each inner `.route` literal.\n- The sub-router's `routes` fn uses `axum::Router::new()` fully qualified.\n(3) `.route(UPLOAD_PATCH_PATH, ..)`: resolve a `const` imported via `use crate::services::upload::UPLOAD_PATCH_PATH` (mod.rs:38) to services/upload.rs:48.\n(4) Router variables.\n- `let web_routes = Router::new()...; ... .merge(web_routes)`, plus shadowing (`let store_routes = store_routes.route(...)`, mod.rs:110-111).\n- `.merge` adds no prefix, so collecting every .route in the file is sufficient.\n- It is also safe to ignore `route_layer`, `match config.relay_mode()` arms, and `#[cfg(sentry)]` attributes. Optionally tag those routes conditional (Managed-mode only / sentry cfg).\n\nRuntime only:\n- `.fallback(forward::forward)` serves arbitrary /api/* paths by proxying them. Model it as a catch-all `/api/{*path}` proxy edge rather than a concrete route.\n- Which listener (public vs internal port) serves a router depends on config (services/server/mod.rs:207-217).\n- Ignore `.merge(` / `.route(` hits outside endpoints/: rate_limits.merge, upstream.rs `request.route()`, and the matchit::Router::new() in services/upload.rs:1023 are not HTTP route declarations. Scope the extractor to receivers built from `Router::new()` / `axum::Router::new()`.\n\nCLIENT CALLS\n\nPattern:\n- There are no URL strings at call sites. The extractor must find `impl UpstreamRequest for T` and `impl UpstreamQuery for T` blocks.\n- Within each block, read `fn method` (returns `Method::POST`, `reqwest::Method::POST`, or a match on an enum) and `fn path` (returns `Cow::Borrowed(\"...\")`, `\"...\".into()`, or `format!(...)`).\n- Pair them as one outbound call. Call sites are `.send(SendRequest(T{..}))` / `.send(SendQuery(T{..}))`, which only matter for linking the caller function.\n\nPath handling:\n- Easy literal paths: GetProjectStates, GetGlobalConfig, GetRelays, RegisterRequest, RegisterResponse, GetHealthCheck, SendMetricsRequest.\n- Strip query strings (`?version=3`).\n- format! paths (SendEnvelope `/api/{}/envelope/`, UploadRequest Create `/api/{project_id}/upload/`): convert `{}` / `{ident}` placeholders into wildcard params.\n- Fully dynamic paths: UploadRequest Upload/Head (uri from a stored Location built at upload.rs:857), ForwardRequest::builder(method, uri.to_string()) (forward.rs:47).\n- ForwardRequest::builder with literal paths (register.rs:11, :23) is easy: treat the builder's second arg as the path and its first arg as the verb.\n\nBase URL:\n- Never in code. It is always config `relay.upstream` (default https://sentry.io/; devservices/config/relay.yml:3 points to the Sentry web server at host.docker.internal:8001).\n- An extractor should hard-code the rule 'relay upstream = sentry (or another relay)'. Matching then works by path only against sentry's routes.\n- Sentry composes these routes as api/0/ (src/sentry/web/urls.py:183) + ^relays/ (src/sentry/api/urls.py:3812) + RELAY_URLS (urls.py:1238-1269).\n\nAnswer-key edges (relay -> sentry), which match by path:\n- POST /api/0/relays/projectconfigs/ (projects/source/upstream.rs:81, global_config.rs:88)\n- POST /api/0/relays/publickeys/ (relays.rs:108)\n- POST /api/0/relays/register/challenge/ (upstream.rs:851, register.rs:11)\n- POST /api/0/relays/register/response/ (upstream.rs:875, register.rs:23)\n- GET /api/0/relays/live/ (upstream.rs:808)\n\nCalls with no sentry match (relay-to-relay or a self-call; exclude from cross-service edges):\n- /api/0/relays/metrics/ (bucket.rs:736)\n- /api/{id}/envelope/ (common.rs:273)\n- /api/{id}/upload/ and /upload/{key}/ (upload.rs:1176, 857)\n- /api/relay/healthcheck/{mode}/ (relay/src/healthcheck.rs:32)\n\nOther notes:\n- I found no relay code that calls snuba or symbolicator over HTTP.\n- objectstore_client (services/objectstore.rs:506) goes to objectstore, which is not one of the four repos.\n- Relay's outcomes and processing output go over Kafka, not HTTP.\n- The glob strings in endpoints/forward.rs:70-79 (`/api/0/projects/*/*/releases/*/files/`, `/api/0/organizations/*/chunk-upload/`) only set body-size limits for the forward proxy. They are not outbound calls, though they hint at sentry routes that are proxied at runtime.\n- The tests/ directory holds Python integration tests that call relay. They are test-only and should be excluded."
+ },
+ {
+  "repo": "snuba",
+  "route_idioms": [
+   {
+    "framework": "Flask (Werkzeug routing), public query API app `snuba.web.views:application`",
+    "how_declared": "A single module-level `application = Flask(__name__, static_url_path=\"\")` object (snuba/web/views.py:128). Routes are declared with the `@application.route(\"<path>\", methods=[...])` decorator directly on module-level functions. There are no Blueprints, no `add_url_rule`, no `url_prefix`, and no MethodView anywhere in the repo (git grep for Blueprint/add_url_rule/url_prefix/MethodView returns nothing). When `methods` is omitted Flask defaults to GET (and HEAD/OPTIONS). Multi-line decorators occur (views.py:547-550). Some routes are declared inside an `if application.debug or application.testing:` block (views.py:589 onward) and are therefore conditionally registered at runtime (test/dev only).",
+    "prefix_rules": "No prefixes: the decorator string is the full path. The app is served at root by granian via `server.serve(\"snuba.web.wsgi:application\", f\"{host}:{port}\", ...)` (snuba/cli/api.py:60-68) or `application.run(host, port)` in debug (snuba/cli/api.py:46-51); default HOST 0.0.0.0 / PORT 1218 (snuba/settings/__init__.py:26-27). snuba/web/wsgi.py:8 just re-exports `application`. Path parameters use Werkzeug syntax `<name>` (string), `<int:name>`, and three CUSTOM converters registered on the url_map: `<dataset:...>`, `<entity:...>`, `<storage:...>` (views.py:131-133, classes in snuba/web/converters.py:13-34). The converters accept any single path segment and resolve it at request time to a Dataset/Entity/Storage (names come from YAML configs under snuba/datasets/configuration/*, e.g. dataset names events, discover, transactions, search_issues, metrics, outcomes, replays, profiles, functions, group_attributes, events_analytics_platform...). For matching purposes treat them as wildcards `{dataset}`, `{entity}`, `{storage}`.",
+    "examples": [
+     "snuba/web/views.py:222 @application.route(\"/health_envoy\")  -> GET /health_envoy",
+     "snuba/web/views.py:233 @application.route(\"/health\")  -> GET /health",
+     "snuba/web/views.py:286 @application.route(\"/query\", methods=[\"GET\", \"POST\"])  (GET redirects to f\"/{settings.DEFAULT_DATASET_NAME}/query\" at 290, a path with no matching route)",
+     "snuba/web/views.py:299 @application.route(\"/rpc/<name>/<version>\", methods=[\"POST\"])  -> POST /rpc/{name}/{version}, protobuf body; dispatched via run_rpc_handler (snuba/web/rpc/__init__.py:374-376)",
+     "snuba/web/views.py:307 @application.route(\"/<dataset:dataset>/snql\", methods=[\"GET\", \"POST\"])  -> /{dataset}/snql (main SnQL query endpoint used by sentry/snuba-sdk)",
+     "snuba/web/views.py:325 @application.route(\"/<dataset:dataset>/mql\", methods=[\"GET\", \"POST\"])",
+     "snuba/web/views.py:336 @application.route(\"/<storage:storage>\", methods=[\"DELETE\"])  -> DELETE /{storage} (bulk delete; single-segment catch-all)",
+     "snuba/web/views.py:530 @application.route(\"/<dataset:dataset>/<entity:entity>/subscriptions\", methods=[\"POST\"])",
+     "snuba/web/views.py:547-550 @application.route(\"/<dataset:dataset>/<entity:entity>/subscriptions/<int:partition>/<key>\", methods=[\"DELETE\"])",
+     "snuba/web/views.py:608 (debug/testing only) @application.route(\"/tests/entities/<entity:entity>/insert\", methods=[\"POST\"])",
+     "snuba/web/views.py:614 (debug/testing only) @application.route(\"/tests/entities/<entity:entity>/insert_bytes\", methods=[\"POST\"])",
+     "snuba/web/views.py:620 (debug/testing only) @application.route(\"/tests/<entity:entity>/eventstream\", methods=[\"POST\"])",
+     "snuba/web/views.py:693 (debug/testing only) @application.route(\"/tests/<dataset:dataset>/drop\", methods=[\"POST\"])",
+     "snuba/web/views.py:712 (debug/testing only) @application.route(\"/tests/error\")"
+    ]
+   },
+   {
+    "framework": "Snuba RPC registry (second-level dispatch behind POST /rpc/<name>/<version>)",
+    "how_declared": "The concrete RPC 'routes' are not strings anywhere: each endpoint is a subclass of `RPCEndpoint` (snuba/web/rpc/__init__.py:103) whose metaclass `RegisteredClass` registers it under `config_key() = f\"{cls.__name__}__{cls.version()}\"` (rpc/__init__.py:121-122). `get_from_name(name, version)` looks up `f\"{name}__{version}\"` (rpc/__init__.py:133-137). Modules are auto-imported with `import_submodules_in_directory(module_path, f\"snuba.web.rpc.{v}\")` (rpc/__init__.py:371). So the URL segment {name} is the Python CLASS NAME and {version} is the string returned by `version()`.",
+    "prefix_rules": "Full URL = \"/rpc/\" + ClassName + \"/\" + version(). All current endpoints return \"v1\". Derived concrete paths: /rpc/EndpointTraceItemTable/v1, /rpc/EndpointTimeSeries/v1, /rpc/EndpointTraceItemStats/v1, /rpc/EndpointTraceItemDetails/v1, /rpc/EndpointTraceItemAttributeNames/v1, /rpc/AttributeValuesRequest/v1, /rpc/EndpointGetTrace/v1, /rpc/EndpointGetTraces/v1, /rpc/EndpointDeleteTraceItems/v1, /rpc/EndpointExportTraceItems/v1, /rpc/CreateSubscriptionRequest/v1.",
+    "examples": [
+     "snuba/web/rpc/v1/endpoint_trace_item_table.py:1071 class EndpointTraceItemTable(RPCEndpoint[TraceItemTableRequest, TraceItemTableResponse]); version() returns \"v1\" at :1074",
+     "snuba/web/rpc/v1/endpoint_time_series.py:552 class EndpointTimeSeries(RPCEndpoint[...]); \"v1\" at :555",
+     "snuba/web/rpc/v1/endpoint_trace_item_stats.py:290 class EndpointTraceItemStats",
+     "snuba/web/rpc/v1/endpoint_trace_item_details.py:206 class EndpointTraceItemDetails",
+     "snuba/web/rpc/v1/endpoint_trace_item_attribute_names.py:558 class EndpointTraceItemAttributeNames",
+     "snuba/web/rpc/v1/trace_item_attribute_values.py:228 class AttributeValuesRequest(RPCEndpoint[TraceItemAttributeValuesRequest, TraceItemAttributeValuesResponse])",
+     "snuba/web/rpc/v1/endpoint_get_trace.py:616 class EndpointGetTrace",
+     "snuba/web/rpc/v1/endpoint_get_traces.py:461 class EndpointGetTraces",
+     "snuba/web/rpc/v1/endpoint_delete_trace_items.py:100 class EndpointDeleteTraceItems",
+     "snuba/web/rpc/v1/endpoint_export_trace_items.py:509 class EndpointExportTraceItems",
+     "snuba/web/rpc/v1/create_subscription.py:15 class CreateSubscriptionRequest(RPCEndpoint[CreateSubscriptionRequestProto, CreateSubscriptionResponse]); \"v1\" at :20"
+    ]
+   },
+   {
+    "framework": "Flask, internal snuba-admin app `snuba.admin.views:application`",
+    "how_declared": "Separate Flask app `application = Flask(__name__, static_url_path=\"/static\", static_folder=\"dist\")` (snuba/admin/views.py:84), same `@application.route(...)` decorator idiom, usually stacked with `@check_tool_perms(...)`. Served by snuba/admin/wsgi.py:9 / snuba/cli/admin.py:34-42 on ADMIN_PORT 1219 (snuba/settings/__init__.py:34). Only consumed by its own React frontend (same repo) and humans; not called by sentry/relay/symbolicator.",
+    "prefix_rules": "No prefixes. Werkzeug `<param>` path params (plain strings).",
+    "examples": [
+     "snuba/admin/views.py:148 @application.route(\"/\")",
+     "snuba/admin/views.py:153 @application.route(\"/health\")",
+     "snuba/admin/views.py:203 @application.route(\"/migrations/<group>/list\")",
+     "snuba/admin/views.py:225-228 @application.route(\"/migrations/<group>/run/<migration_id>\", methods=[\"POST\"]) (multi-line)",
+     "snuba/admin/views.py:234-237 @application.route(\"/migrations/<group>/reverse/<migration_id>\", methods=[\"POST\"])",
+     "snuba/admin/views.py:990 @application.route(\"/rpc_execute/<endpoint_name>/<version>\", methods=[\"POST\"]) (calls run_rpc_handler in-process, not over HTTP)",
+     "snuba/admin/views.py:1023 @application.route(\"/production_snql_query\", methods=[\"POST\"])",
+     "snuba/admin/views.py:1044 @application.route(\"/admin_regions\", methods=[\"GET\"])",
+     "snuba/admin/views.py:1117 @application.route(\"/job-types/<job_type>/run\", methods=[\"POST\"])"
+    ]
+   }
+  ],
+  "client_idioms": [
+   {
+    "library": "urllib3 HTTPConnectionPool / HTTPSConnectionPool (legacy ClickHouse HTTP writer)",
+    "how_url_is_built": "Pool is created against a ClickHouse host/port; the request path is always \"/?\" + urlencode({...options, \"query\": statement}) with method POST. Target is ClickHouse, not one of the four services.",
+    "base_url_config": "Cluster config: settings.CLUSTERS entries, host from env CLICKHOUSE_HOST (default 127.0.0.1) and CLICKHOUSE_HTTP_PORT (default 8123) at snuba/settings/__init__.py:99-100; mapped through snuba/clusters/cluster.py:514 (`port=cluster.get(\"http_port\", cluster[\"port\"])`).",
+    "examples": [
+     "snuba/clickhouse/http.py:288 self.__pool = HTTPSConnectionPool(...)",
+     "snuba/clickhouse/http.py:297 self.__pool = HTTPConnectionPool(...)",
+     "snuba/clickhouse/http.py:181-184 executor.submit(pool.urlopen, \"POST\", \"/?\" + urlencode({**options, \"query\": statement.build_statement()}), ...)"
+    ]
+   },
+   {
+    "library": "clickhouse_connect (wraps urllib3 PoolManager) for ClickHouse reads",
+    "how_url_is_built": "Library-internal; snuba passes host/port/user/etc. Target is ClickHouse only.",
+    "base_url_config": "Same cluster settings as above (snuba/clusters/cluster.py:514-527, 555-561).",
+    "examples": [
+     "snuba/clickhouse/connect.py:16 import clickhouse_connect",
+     "snuba/clickhouse/connect.py:445 client = clickhouse_connect.get_client(...)"
+    ]
+   },
+   {
+    "library": "reqwest (Rust consumer, ClickHouse inserts)",
+    "how_url_is_built": "format!(\"{scheme}://{host}:{port}?insert_distributed_sync=1&decompress=1\") then build_url() appends load-balancing/block-size query params; client.post(self.build_url()). Target is ClickHouse.",
+    "base_url_config": "ClickHouse cluster config passed into ClickhouseClient::new (rust_snuba/src/pull_consumer/factories.rs:106,116).",
+    "examples": [
+     "rust_snuba/src/strategies/clickhouse/writer_v2.rs:283 let base_url = format!(\"{scheme}://{host}:{port}?insert_distributed_sync=1&decompress=1\");",
+     "rust_snuba/src/strategies/clickhouse/writer_v2.rs:312-324 fn build_url(&self) -> String { format!(... self.base_url, lb_config.load_balancing) ... }",
+     "rust_snuba/src/strategies/clickhouse/writer_v2.rs:336 .post(self.build_url())"
+    ]
+   },
+   {
+    "library": "requests (third-party SaaS endpoints, literal URLs)",
+    "how_url_is_built": "Hard-coded absolute https URL string literals passed as first positional arg. None target sentry/relay/symbolicator.",
+    "base_url_config": "Literals in code.",
+    "examples": [
+     "snuba/admin/jwt.py:20 requests.get(\"https://www.gstatic.com/iap/verify/public_key\")",
+     "snuba/admin/notifications/slack/client.py:28-29 requests.post(\"https://slack.com/api/chat.postMessage\", ...)",
+     "snuba/admin/notifications/slack/client.py:71-72 requests.post(\"https://slack.com/api/files.upload\", ...)",
+     "scripts/check-migrations.py:52-64 pull_request_url = \"https://api.github.com/repos/getsentry/snuba/commits/\" + commit_sha + \"/pulls\"; requests.get(pull_request_url, ...)",
+     "scripts/load_uptime_checks.py:49-50 requests.post(\"http://localhost:8123\", ...) (ClickHouse)"
+    ]
+   },
+   {
+    "library": "urllib.request (CI script)",
+    "how_url_is_built": "f-string on env-provided base: f\"{GO_SERVER_URL}/api/pipelines/{pipeline_name}/history\", then follows data[\"_links\"][\"next\"][\"href\"] pagination.",
+    "base_url_config": "os.environ[\"GO_SERVER_URL\"] (scripts/fetch_service_refs.py:13). GoCD, not one of the four services.",
+    "examples": [
+     "scripts/fetch_service_refs.py:36 fetch_url = f\"{GO_SERVER_URL}/api/pipelines/{pipeline_name}/history\"",
+     "scripts/fetch_service_refs.py:40-48 urllib.request.Request(fetch_url, ...); urllib.request.urlopen(req)"
+    ]
+   },
+   {
+    "library": "browser fetch() in snuba-admin React frontend (intra-repo only)",
+    "how_url_is_built": "`const baseUrl = \"/\"` then string concatenation `baseUrl + \"settings\"` or template literals `${baseUrl}rpc_execute/${endpointName}/${version}`; these hit snuba-admin's own Flask routes (same repo, same origin).",
+    "base_url_config": "Relative to page origin (snuba/admin/static/api_client.tsx:79).",
+    "examples": [
+     "snuba/admin/static/api_client.tsx:83-84 const url = baseUrl + \"settings\"; return fetch(url)",
+     "snuba/admin/static/api_client.tsx:139-140 const url = baseUrl + \"admin_regions\"; fetch(url)",
+     "snuba/admin/static/api_client.tsx:234 const url = `${baseUrl}rpc_execute/${endpointName}/${version}`;",
+     "snuba/admin/static/api_client.tsx:356 const url: string = `/migrations/${req.group}/${req.action}/${req.migration_id}?`;"
+    ]
+   },
+   {
+    "library": "sentry_sdk (implicit, runtime-only)",
+    "how_url_is_built": "sentry_sdk.init(dsn=settings.SENTRY_DSN) - the SDK derives the ingest URL (Relay/Sentry envelope endpoint) from the DSN at runtime. This is the ONLY way snuba talks HTTP to the Sentry/Relay family, and it is not statically visible as a URL.",
+    "base_url_config": "settings.SENTRY_DSN default None (snuba/settings/__init__.py:216), overridden by deployment config.",
+    "examples": [
+     "snuba/environment.py:181-182 sentry_sdk.init(dsn=settings.SENTRY_DSN, ...)"
+    ]
+   }
+  ],
+  "extractor_notes": "Summary for the answer key: snuba is a SERVER-side endpoint in the cross-service graph. Within this tree I found no code-level outbound HTTP call from snuba to sentry, relay or symbolicator. Every client call site targets ClickHouse, Slack, GitHub, GoCD, Google IAP certs, or snuba-admin's own backend. The one exception is sentry_sdk event reporting via DSN (snuba/environment.py:181), which is runtime-only and usually excluded. Cross-repo edges into snuba therefore come from sentry (snuba_sdk / sentry.utils.snuba) calling /{dataset}/snql, /{dataset}/mql, /rpc/{Name}/v1, /{dataset}/{entity}/subscriptions, DELETE /{dataset}/{entity}/subscriptions/{partition}/{key}, DELETE /{storage}, /query, /health, and the /tests/... routes (used by sentry's test harness; registered only when debug/testing).\n\nEASY (single-file, purely syntactic):\n- Python decorator `decorated_definition > decorator > call(attribute(object=identifier 'application', attr 'route'))` with a string first argument and an optional `methods=[...]` keyword list. Handle decorators that span several lines (views.py:547-550, admin/views.py:225-228). Handle stacked decorators: @util.time_request at views.py:287 and @check_tool_perms in the admin app. Use GET as the default when `methods` is absent.\n- Normalize Werkzeug params: `<name>`, `<int:partition>`, and the custom converters `<dataset:dataset>`, `<entity:entity>`, `<storage:storage>` become `{name}` wildcards. The converters are registered via `application.url_map.converters[...]` (views.py:131-133). Each one matches a single segment, so treat it like the default string converter.\n- No prefixes or blueprints exist, so the decorator string is the full path. The extractor only needs to tag which Flask app a route belongs to: snuba/web/views.py:128 is the public API on port 1218, snuba/admin/views.py:84 is the internal admin on port 1219. Only the former is a cross-service target. Key the app by the module that defines `application`, or by the wsgi entrypoint string \"snuba.web.wsgi:application\" (snuba/cli/api.py:61).\n- Literal-URL client calls such as requests.get/post(\"https://...\") are trivial, but none of them point at the four services.\n\nNEEDS CROSS-FILE OR SEMANTIC RESOLUTION:\n- RPC endpoints: the HTTP route is the generic `/rpc/<name>/<version>` (views.py:299). The concrete names exist only as Python class names of `RPCEndpoint` subclasses plus the string returned by `version()`, registered through a metaclass (rpc/__init__.py:103-137) and an auto-importer (rpc/__init__.py:371). An extractor that wants concrete edges such as sentry -> /rpc/EndpointTraceItemTable/v1 must:\n  - find every class whose bases include `RPCEndpoint[...]` (subscript generic base, sometimes on a wrapped line, e.g. create_subscription.py:15-17, trace_item_attribute_values.py:228-230);\n  - read the `return \"v1\"` inside `def version`;\n  - synthesize `/rpc/{ClassName}/{version}`.\n  This is doable with tree-sitter but is a snuba-specific rule. On the sentry side, callers usually name the endpoint by class/proto name through a helper and do not use literal URL strings, so matching also needs a rule there.\n- Conditional registration: the /tests/* routes sit inside `if application.debug or application.testing:` (views.py ~589). A purely syntactic extractor will find them, which is fine, but they should be flagged as test-only.\n- ClickHouse client URLs come from settings dicts (settings/__init__.py:99-100 -> clusters/cluster.py:514) and Rust format! strings (writer_v2.rs:283). Resolving them needs settings and env propagation, but they are irrelevant to the four-service graph and should be classified as external (ClickHouse).\n\nONLY KNOWABLE AT RUNTIME:\n- Which values the dataset, entity and storage segments accept: they come from YAML configs under snuba/datasets/configuration and the EntityKey/StorageKey enums, resolved by the converters at request time (converters.py:13-34). An extractor should match them as wildcards rather than enumerate them.\n- The GET /query handler redirects to f\"/{settings.DEFAULT_DATASET_NAME}/query\" (views.py:290; DEFAULT_DATASET_NAME=\"events\" at settings:86). No route serves /{dataset}/query, so this redirect is dead. Do not create an edge from it.\n- sentry_sdk DSN target (settings.SENTRY_DSN), env-provided GO_SERVER_URL and ADMIN_URL, and the admin region URLs built in admin/views.py:1053 (f\"https://snuba-admin{subdomain}.getsentry.net/\"). That last one is returned as JSON data, not requested.\n- Rust: rust_snuba runs no HTTP server. hyper and reqwest in rust_snuba/Cargo.toml:32,49 are only used for the ClickHouse writer, and the TcpListener at writer_v2.rs:766 is inside a test.\n\nLikely misses or false positives: the admin frontend fetch() calls (api_client.tsx) match the admin routes inside the same repo, so filter out intra-repo edges. A naive \"any string starting with /api/0/\" scan would pick up querylog fixture strings in rust_snuba/src/processors/querylog.rs:330,439,548, which are test data, not calls."
+ },
+ {
+  "repo": "symbolicator",
+  "route_idioms": [
+   {
+    "framework": "axum 0.8 (Rust), served via axum_server; production HTTP API of the symbolicator binary",
+    "how_declared": "Method-chained builder on axum::Router in a single function, crates/symbolicator/src/endpoints/mod.rs::create_app. Each route is `.route(\"<literal path>\", <method_fn>(<handler>))`. The method helpers `get`/`post` come from `axum::routing` (imported at mod.rs:3). One route uses a chained second method (`get(proxy).head(proxy)`). Handlers are imported under local aliases (mod.rs:24-31, e.g. `use proxy::proxy_symstore_request as proxy;`), so the identifier in `.route()` is an alias, not the real fn name. The handler's real path and query parameters are taken in the handler signature through extractors: `extract::Path<T>` (requests.rs:17, proxy.rs:47), `extract::Query<T>` (symbolicate.rs:58), `extract::Json<T>` (symbolicate.rs:59), `extract::Multipart` (minidump.rs:20, applecrashreport.rs:18). Path-parameter syntax is axum 0.8 brace style: `{name}` for one segment and `{*name}` for a catch-all wildcard.",
+    "prefix_rules": "There are no prefixes and no `.nest()` in production code. Three sub-routers (symbolicate_router mod.rs:47-54, large_file_router mod.rs:58-63, misc_router mod.rs:66-68) are combined with `Router::new().merge(..)` (mod.rs:70-73). `merge` adds no prefix, so every path is the literal string at the root. `.layer(DefaultBodyLimit::max(..))` changes only body limits. `/healthcheck` is added after `.layer(middleware)` (mod.rs:77) so it skips the middleware but keeps the same path. The app is mounted at the root of the bound socket: server.rs:47 `endpoints::create_app(service).into_make_service()`, then server.rs:53 `axum_server::from_tcp(socket_http).serve(svc.clone())`. The bind address comes from config `bind` (server.rs:49). Full served route set: POST /symbolicate-any, POST /symbolicate-js, POST /symbolicate-jvm, POST /symbolicate, POST /applecrashreport (multipart), POST /minidump (multipart), GET+HEAD /proxy/{*path}, GET /requests/{request_id}, GET /healthcheck. Sentry is the caller of these routes: sentry src/sentry/lang/native/symbolicator.py:259/277/308/321/365/412/453 pass \"symbolicate-any\", \"minidump\", \"applecrashreport\", \"symbolicate\", \"symbolicate-js\", \"symbolicate-jvm\" to `self._process(...)`, and symbolicator.py:606 builds `f\"requests/{task_id}\"`.",
+    "examples": [
+     "crates/symbolicator/src/endpoints/mod.rs:47-51 let symbolicate_router = Router::new().route(\"/symbolicate-any\", post(symbolicate_any)).route(\"/symbolicate-js\", post(symbolicate_js)).route(\"/symbolicate-jvm\", post(symbolicate_jvm)).route(\"/symbolicate\", post(symbolicate))",
+     "crates/symbolicator/src/endpoints/mod.rs:59 .route(\"/applecrashreport\", post(applecrashreport))",
+     "crates/symbolicator/src/endpoints/mod.rs:60 .route(\"/minidump\", post(minidump))",
+     "crates/symbolicator/src/endpoints/mod.rs:67 .route(\"/proxy/{*path}\", get(proxy).head(proxy))",
+     "crates/symbolicator/src/endpoints/mod.rs:68 .route(\"/requests/{request_id}\", get(requests))",
+     "crates/symbolicator/src/endpoints/mod.rs:70-73 Router::new().merge(symbolicate_router).merge(large_file_router).merge(misc_router)",
+     "crates/symbolicator/src/endpoints/mod.rs:77 .route(\"/healthcheck\", get(healthcheck))",
+     "crates/symbolicator/src/endpoints/mod.rs:24 use self::minidump::handle_minidump_request as minidump;",
+     "crates/symbolicator/src/endpoints/requests.rs:15-18 pub async fn poll_request(extract::State(service).., extract::Path(request_id): extract::Path<RequestId>, extract::Query(query)..)",
+     "crates/symbolicator/src/server.rs:47 let svc = endpoints::create_app(service).into_make_service();",
+     "crates/symbolicator/src/server.rs:53 let server_http = axum_server::from_tcp(socket_http).serve(svc.clone());"
+    ]
+   },
+   {
+    "framework": "axum test/dev-only routers (not part of the production service)",
+    "how_declared": "The same `Router::new().route(..)` style, plus `.nest_service(\"/prefix\", ServeDir)` for static file trees. symbolicli runs an in-process local server that imitates Sentry's artifact-lookup endpoint. The symbolicator-test crate runs mock servers that imitate Sentry, the Microsoft symbol server and others.",
+    "prefix_rules": "`.nest_service(prefix, svc)` puts the prefix in front of everything the static service serves. Those paths come from the filesystem and cannot be found statically. These routers bind to 127.0.0.1 on port 0 (random port). Their URLs are built with `index.url(\"lookup\")` or `server.url(path)` (`format!(\"http://localhost:{}/{}\", port, path)` at symbolicator-test/src/lib.rs:284). They imitate Sentry routes such as /lookup and /files/dsyms/ but are fakes, so the answer key and the extractor must exclude them.",
+    "examples": [
+     "crates/symbolicli/src/js_local_source.rs:31-33 Router::new().route(\"/lookup\", get(lookup)).nest_service(\"/bundles\", get_service(ServeDir::new(path)))",
+     "crates/symbolicator-test/src/lib.rs:227-264 Router::new().route(..)...nest_service(\"/symbols\", serve_dir) (mock symbol servers)",
+     "crates/symbolicator-test/src/lib.rs:440 url: server.url(\"/files/dsyms/\") (fake Sentry dsym endpoint)",
+     "crates/symbolicator-service/src/download/mod.rs:1425-1426 axum::Router::new().route(\"/file\", get(serve_range)) (unit test)"
+    ]
+   }
+  ],
+  "client_idioms": [
+   {
+    "library": "reqwest 0.12 async (workspace git fork getsentry/reqwest, Cargo.toml:38). The client is built by symbolicator_service::utils::http::create_client, which wraps reqwest::ClientBuilder",
+    "how_url_is_built": "For the main inter-service link, symbolicator -> sentry, the URL comes entirely from the request payload. Sentry sends a symbol source `{\"type\":\"sentry\",\"url\":...,\"token\":...}`, deserialized into `SourceConfig::Sentry(SentrySourceConfig)` (symbolicator-sources/src/sources.rs:58 `#[serde(tag = \"type\", rename_all = \"snake_case\")]`, :71 `Sentry(Arc<SentrySourceConfig>)`; SentrySourceConfig.url is a `url::Url` at symbolicator-sources/src/sources/sentry.rs:16). The /symbolicate-js body takes a single `source: SentrySourceConfig` (symbolicator/src/endpoints/symbolicate_js.rs:19). Symbolicator then only appends query pairs to that opaque URL with `Url::query_pairs_mut().append_pair(..)` and sends GET. There are four call sites. (1) Debug-file index listing: download/sentry.rs:173-185 clones `source.url` and appends `debug_id` and `code_id`; the GET is at sentry.rs:139 and `.send()` at :148. (2) Debug-file download: SentryRemoteFile::new at symbolicator-sources/src/sources/sentry.rs:56-59 appends `id=<file_id>`, and download/sentry.rs:264 runs `self.client.get(url)`. (3) JS artifact lookup: symbolicator-js/src/api_lookup.rs:113-131 appends `release`, `url` (repeated), `dist` and `debug_id` to source.url, then calls `SentryDownloader::fetch_sentry_json` at :159. Lookup results carry absolute URLs, and api_lookup.rs:224-234 `make_remote_file` sends credentials only if `url.starts_with(source.url)`. (4) Attachment download: download/sentry.rs:280, where the URL is the `storage_url` from the /symbolicate-any body (symbolicate_any.rs:38/43, wrapped by symbolicator-native/src/symbolication/attachments.rs:26). That storage_url is a pre-signed Objectstore URL (sentry src/sentry/objectstore/__init__.py:247 get_internal_download_url), so it is NOT one of the four repos. Auth is the `authenticate()` helper at sentry.rs:305-310, either a bearer token or a Cookie header. On the Sentry side, the URLs symbolicator calls are built from Django `reverse()`. sentry src/sentry/lang/native/sources.py:349-358 does `get_internal_url_prefix() + reverse(\"sentry-api-0-dsym-files\")`, which is route src/sentry/api/urls.py:3039-3041 `^{org}/{project}/files/dsyms/$`. sources.py:379-387 does the same with reverse(\"sentry-api-0-project-artifact-lookup\"), which is urls.py:3219-3221 `^{org}/{project}/artifact-lookup/$`.",
+    "base_url_config": "Runtime only. The base URL is whatever sentry puts into the request JSON (`sources[].url` / `source.url`). No symbolicator config file contains a Sentry base URL. Clients are built in DownloadService::new (download/mod.rs:147-192, sentry client settings at :170-173 with connect_to_reserved_ips: true), all via utils/http.rs:88 `create_client`.",
+    "examples": [
+     "crates/symbolicator-service/src/download/sentry.rs:139 let mut request = authenticate(client.get(query.index_url.clone()), &query.credentials)",
+     "crates/symbolicator-service/src/download/sentry.rs:148 let response = request.send().await?;",
+     "crates/symbolicator-service/src/download/sentry.rs:173-184 let mut index_url = source.url.clone(); index_url.query_pairs_mut().append_pair(\"debug_id\", ..) / (\"code_id\", ..)",
+     "crates/symbolicator-service/src/download/sentry.rs:264 let mut builder = self.client.get(url);",
+     "crates/symbolicator-service/src/download/sentry.rs:280 let mut builder = self.client.get(file.url.clone());",
+     "crates/symbolicator-sources/src/sources/sentry.rs:57-58 let mut url = source.url.clone(); url.query_pairs_mut().append_pair(\"id\", &file_id.0);",
+     "crates/symbolicator-js/src/api_lookup.rs:113 let mut lookup_url = source.url.clone(); (query pairs added at :115-130)",
+     "crates/symbolicator-js/src/api_lookup.rs:159 retry(|| SentryDownloader::fetch_sentry_json(&client, &query, propagate_traces))"
+    ]
+   },
+   {
+    "library": "reqwest 0.12 async in symbolicli (developer CLI that talks to the Sentry public API)",
+    "how_url_is_built": "`Url::join` with `format!` path templates relative to a base that already ends in `/api/0/`. settings.rs:255-262 resolves the Sentry URL from the CLI flag, then the project config file, then the global config file, then `DEFAULT_URL = \"https://sentry.io/\"` (settings.rs:18), and joins `\"/api/0/\"`. main.rs then joins relative templates: main.rs:227-228 `projects/{org}/{project}/files/dsyms/` (a SentrySourceConfig URL fetched later by the downloader; sentry urls.py:3039). main.rs:273-274 `projects/{org}/{project}/artifact-lookup/` (sentry urls.py:3219). main.rs:381-384 `projects/{org}/{project}/events/{event_id}/attachments/`, GET at :389-391 (sentry urls.py:2994). main.rs:421-422 joins `{minidump_id}/` and adds `?download=1`, GET at :430-431 (sentry urls.py:3004). main.rs:468-469 `projects/{org}/{project}/events/{event_id}/json/`, GET at :473-474 (sentry urls.py:3014).",
+    "base_url_config": "CLI flag, symbolicli config files, or DEFAULT_URL \"https://sentry.io/\" (crates/symbolicli/src/settings.rs:18, 255-262). The client is built at main.rs:113 `reqwest::Client::builder()` with a default Bearer auth header (main.rs:105).",
+    "examples": [
+     "crates/symbolicli/src/settings.rs:262 let url = sentry_url.join(\"/api/0/\").unwrap();",
+     "crates/symbolicli/src/main.rs:227-228 url: base_url.join(&format!(\"projects/{org}/{project}/files/dsyms/\"))",
+     "crates/symbolicli/src/main.rs:273-274 url: base_url.join(&format!(\"projects/{org}/{project}/artifact-lookup/\"))",
+     "crates/symbolicli/src/main.rs:381-384 base_url.join(&format!(\"projects/{org}/{project}/events/{event_id}/attachments/\"))",
+     "crates/symbolicli/src/main.rs:389-391 client.get(attachments_url.clone()).send()",
+     "crates/symbolicli/src/main.rs:421-422 attachments_url.join(&format!(\"{minidump_id}/\")) + append_pair(\"download\", \"1\")",
+     "crates/symbolicli/src/main.rs:468-474 base_url.join(&format!(\"projects/{org}/{project}/events/{event_id}/json/\")) ... client.get(event_url.clone())"
+    ]
+   },
+   {
+    "library": "reqwest::blocking (self-calls into symbolicator's own API; same repo, not inter-service)",
+    "how_url_is_built": "`format!` string concatenation of a base and a literal path.",
+    "base_url_config": "healthcheck.rs:10-13 uses the CLI `addr` or else `config.bind`. process-event main.rs:49 uses the CLI arg or else the literal \"http://127.0.0.1:3021\".",
+    "examples": [
+     "crates/symbolicator/src/healthcheck.rs:15 let url = format!(\"http://{addr}/healthcheck\"); (GET at :18 client.get(url).send())",
+     "crates/process-event/src/main.rs:58 client.post(format!(\"{symbolicator}/minidump\"))",
+     "crates/process-event/src/main.rs:69 client.post(format!(\"{symbolicator}/symbolicate\"))"
+    ]
+   },
+   {
+    "library": "reqwest to third-party / object storage (none of these reach sentry, relay or snuba)",
+    "how_url_is_built": "The URL comes from the source config in the request payload or from service config. HTTP symbol servers: download/http.rs:38 `file_source.url()`, which is `location.to_url(&self.source.url)` (symbolicator-sources/src/sources/http.rs:108-110). S3 uses presigned URIs. Shared cache uses GCS. JS source scraping of arbitrary web URLs is in symbolicator-js/src/lookup.rs:768 `scrape`. Attachment storage_url points to Objectstore.",
+    "base_url_config": "Request payload `sources[]` (type http/s3/gcs/azure) or symbolicator config (shared cache, default sources).",
+    "examples": [
+     "crates/symbolicator-service/src/download/http.rs:44 self.no_ssl_client.get(download_url)",
+     "crates/symbolicator-service/src/download/http.rs:46 self.client.get(download_url)",
+     "crates/symbolicator-service/src/download/s3.rs:159 self.http_client.get(presigned.uri())",
+     "crates/symbolicator-service/src/caching/shared_cache/mod.rs:182 self.client.get(url).bearer_auth(token.as_str()).send()"
+    ]
+   }
+  ],
+  "extractor_notes": "Routes, easy case. Every production route sits in one function (crates/symbolicator/src/endpoints/mod.rs:38-78). A tree-sitter-rust query can match a `call_expression` whose callee is `field_expression` with field `route` (receiver chain rooted at `Router::new()`). The first arg is a `string_literal` path. The second arg is a call whose function identifier is get/post/put/delete/patch/head/options. That call can itself be the receiver of a further `.head(...)` / `.post(...)` method chain (mod.rs:67), so walk the method chain to collect every HTTP method. `.merge(x)` adds no prefix, so take paths literally. Still resolve `x` back to its `let x = Router::new()...` binding in the same function so routes on sub-routers are not lost. To find the handler function, resolve the `use ... as alias` lines at mod.rs:24-31; the identifier in `.route()` is the alias. Path params: `{name}` and `{*name}` (axum 0.8). Normalize them to a common placeholder so they match the Sentry side (for example requests/{task_id}). If a future version uses `.nest(\"/p\", r)`, concatenate the prefix. `.nest_service` with ServeDir serves filesystem-derived paths and cannot be enumerated.\n\nRoutes to exclude. Routers in `crates/*/tests/**`, in `#[cfg(test)] mod tests`, in crates/symbolicator-test, and in crates/symbolicli/src/js_local_source.rs (a local fake of Sentry's /lookup, bound to 127.0.0.1:0). Several of these fake Sentry endpoints (`/files/dsyms/`, `/lookup`), so including them would create false sentry<->symbolicator matches. Production can be told apart by crate: only `crates/symbolicator` is the server binary. A useful heuristic: the router is reached from a fn called by `axum_server::from_tcp(..).serve(..)` (server.rs:47-53).\n\nOutbound calls, the hard case. The real cross-service traffic is symbolicator -> sentry (dsym index listing, dsym download, JS artifact-lookup). In the service code it is fully runtime-determined. The call sites are `client.get(<Url variable>)` at download/sentry.rs:139/264/280. The Url comes from `SentrySourceConfig.url`, which serde deserializes from the request JSON that Sentry sends. The only static operations are `query_pairs_mut().append_pair(..)`, which change query strings, not the path. A tree-sitter extractor can find these `client.get(x)` / `.send()` calls and tag them \"base URL from request body field `url` of a `type: sentry` source\". It cannot recover a path from symbolicator alone. To link them, you need a cross-repo rule: sentry builds that URL with `get_internal_url_prefix() + reverse(\"sentry-api-0-dsym-files\")` (sentry src/sentry/lang/native/sources.py:349-358, urls.py:3039) and `reverse(\"sentry-api-0-project-artifact-lookup\")` (sources.py:379-388, urls.py:3219). Then it passes the URL as a JSON field to symbolicator. In other words, the edge is sentry-route-URL -> payload -> symbolicator GET. An extractor should either emit these as synthetic edges from a hand-written rule, or follow the URL as a value through the HTTP payload (very hard).\n\nMedium case, statically resolvable with local data flow. symbolicli builds URLs with `base_url.join(&format!(\"projects/{org}/{project}/...\"))` (main.rs:227, 273, 381, 421, 468). The format string literal gives the path template. It is relative to a base that settings.rs:262 joined with \"/api/0/\", so resolving it means tracing `base_url` through the `EventKey`/`Mode::Online` struct fields across functions in the same crate. Treat `{org}` etc. inside format! as path params. Note `Url::join` semantics: a leading \"/\" replaces the path, and no leading slash appends relative to the last \"/\". The literal on the second join (main.rs:421) is relative to the attachments URL. symbolicli is a developer CLI, not a deployed service, so decide whether such edges belong in the answer key (they hit real sentry routes: urls.py:2994, 3004, 3014, 3039, 3219).\n\nEasy but intra-repo. healthcheck.rs:15 `format!(\"http://{addr}/healthcheck\")` and process-event main.rs:58/69 `format!(\"{symbolicator}/minidump\"|\"/symbolicate\")` are literal format strings and easy to extract. They target symbolicator itself, so they are not inter-service edges.\n\nIgnore. reqwest calls to S3/GCS/Azure/HTTP symbol servers, the shared cache, JS scraping and Objectstore storage_url. All their URLs come from runtime config or payloads and none reaches relay, snuba or sentry routes.\n\nInbound edges to symbolicator are best found from the caller side. Sentry src/sentry/lang/native/symbolicator.py passes bare path strings (\"symbolicate\", \"symbolicate-js\", \"symbolicate-jvm\", \"symbolicate-any\", \"minidump\", \"applecrashreport\", f\"requests/{task_id}\") to a `_process`/`_request` wrapper (symbolicator.py:602, 606-609) that prepends a configured symbolicator base URL. That needs cross-function resolution on the Python side, not in symbolicator.\n\nRelay and snuba. Symbolicator makes no HTTP calls to either (grep for snuba/relay in crates/**/*.rs finds only comments), and neither appears as a caller in symbolicator code."
+ }
+]
