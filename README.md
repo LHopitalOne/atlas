@@ -77,6 +77,19 @@ coverage run -m unittest discover -s tests -t . && coverage report      # fails 
 ATLAS_INTEGRATION=1 python -m unittest discover -s tests/integration -t .  # real Graphify, pinned version
 ```
 
+### Code rules (Python)
+
+`bridge/tests/test_architecture.py` and ruff enforce them in CI:
+
+- `__init__.py` files only import and export (a docstring, imports, `__all__`).
+- Modules stay under 300 lines, classes under 250, functions under 50, cyclomatic complexity at most 10.
+- Object-oriented: abstract bases with concrete subclasses (`Command`, `Presenter`, `Grouping`, `LinkRule`,
+  `LanguageExtractor`, `Workspace`, `RouteCollector`, `CallCollector`, `ValueResolver`, `TestPathPolicy`), state kept
+  private behind methods.
+- Every error is a subclass of `BridgeError` from `core/errors.py`; the command line turns them into a message and
+  an exit code (2 for input the user can fix).
+- Every regex is a named, compiled, commented constant; nothing calls `re.sub(r'...')` inline.
+
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs on every push to `master` and every pull request:

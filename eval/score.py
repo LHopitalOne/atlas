@@ -14,8 +14,11 @@ import re
 import sys
 
 
+PARAMETER = re.compile(r'\{[^}]*\}')  # '{name}' or '{*rest}': names differ between a route and the key
+
+
 def norm(path):
-    p = re.sub(r'\{[^}]*\}', '{}', (path or '').lower()).rstrip('/')
+    p = PARAMETER.sub('{}', (path or '').lower()).rstrip('/')
     return p or '/'
 
 

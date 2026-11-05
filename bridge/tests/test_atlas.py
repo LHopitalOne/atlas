@@ -3,17 +3,17 @@ import shutil
 import subprocess
 import unittest
 
-from atlas_bridge.adapters import atlas, graphify
+from atlas_bridge.adapters import AtlasSpecPresenter, GraphifyReader
 from atlas_bridge.core.model import CodeGraph, Kind, Symbol
-from atlas_bridge.usecases.draw import by_folder, draw
+from atlas_bridge.usecases.draw import FolderGrouping, MapDrawer
 
 from .helpers import ATLAS, GRAPH
 
 
 def spec(**kw):
     g = CodeGraph()
-    graphify.read(g, GRAPH, 'shop')
-    return atlas.present(draw(g, **kw))
+    GraphifyReader(g).read(GRAPH, 'shop')
+    return AtlasSpecPresenter().present(MapDrawer(**kw).draw(g))
 
 
 def validate(s):
@@ -52,13 +52,13 @@ class PresentTest(unittest.TestCase):
         self.assertEqual(spec()['edges'], [[0, 1, 0], [2, 5, 0], [3, 4, 3]])
 
     def test_grouping_is_passed_through(self):
-        self.assertEqual([d['name'] for d in spec(grouping=by_folder)['repos'][0]['domains']], ['(root)', 'lib'])
+        self.assertEqual([d['name'] for d in spec(grouping=FolderGrouping())['repos'][0]['domains']], ['(root)', 'lib'])
 
     def test_same_names_get_numbered(self):
         g = CodeGraph()
         a, b = g.file('r', 'a/index.js'), g.file('r', 'b/index.js')
         a.symbols += [Symbol('f1', 'f()', Kind.FUNCTION, 2), Symbol('f2', 'f()', Kind.FUNCTION, 8)]
-        svcs = atlas.present(draw(g))['repos'][0]['domains'][0]['services']
+        svcs = AtlasSpecPresenter().present(MapDrawer().draw(g))['repos'][0]['domains'][0]['services']
         self.assertEqual([s['name'] for s in svcs], ['index.js', 'index.js (2)'])
         self.assertEqual([lf['name'] for lf in svcs[0]['leaves']], ['f()', 'f() (2)'])
         self.assertEqual(b.symbols, [])

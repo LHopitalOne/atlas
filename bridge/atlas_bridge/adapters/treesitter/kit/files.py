@@ -1,0 +1,60 @@
+"""The files of a repository: which to read, reading them, and which are tests or tooling."""
+
+import os
+import re
+import subprocess
+
+from ....core.errors import SourceReadError
+from .grammar import Grammar
+
+
+class TestPathPolicy:
+    """Decides from a path alone whether a file is test or tooling code. Languages subclass it to add their own
+    conventions."""
+
+    TEST_DIRS = frozenset(
+        {'tests', 'test', 'testutils', 'testing', 'fixtures', '__tests__', '__mocks__', 'e2e', 'benches', 'examples'}
+    )
+    TEST_FILE = re.compile(r'(^test_.*\.py$|_test\.py$|^conftest\.py$|\.(spec|test)\.[jt]sx?$|_test\.rs$)')
+
+    def is_test(self, path: str) -> bool:
+        parts = path.replace('\\', '/').split('/')
+        return any(p in self.TEST_DIRS for p in parts[:-1]) or bool(self.TEST_FILE.search(parts[-1]))
+
+
+class RepositoryFiles:
+    """Source files under a repository folder that some grammar can read."""
+
+    SKIP_DIRS = frozenset(
+        {'.git', 'node_modules', '.venv', 'venv', 'target', 'dist', 'build', '__pycache__', '.tox', 'vendor'}
+    )
+    MAX_BYTES = 2_000_000  # generated or minified files are not worth parsing
+
+    def __init__(self, root: str):
+        self.root = root
+
+    def paths(self) -> list[str]:
+        """Relative paths, sorted. Uses git when the folder is a repository (honours .gitignore)."""
+        try:
+            out = subprocess.run(['git', 'ls-files', '-z'], cwd=self.root, capture_output=True, check=True).stdout
+            paths = [p for p in out.decode('utf-8', 'replace').split('\0') if p]
+        except (OSError, subprocess.CalledProcessError):
+            paths = self._walk()
+        return sorted(p for p in paths if os.path.splitext(p)[1] in Grammar.BY_EXTENSION)
+
+    def read(self, path: str) -> bytes:
+        full = os.path.join(self.root, path)
+        try:
+            if os.path.getsize(full) > self.MAX_BYTES:
+                raise SourceReadError(path, f'larger than {self.MAX_BYTES} bytes')
+            with open(full, 'rb') as f:
+                return f.read()
+        except OSError as e:
+            raise SourceReadError(path, e.strerror or str(e)) from e
+
+    def _walk(self):
+        paths = []
+        for d, dirs, files in os.walk(self.root):
+            dirs[:] = [x for x in dirs if x not in self.SKIP_DIRS]
+            paths += [os.path.relpath(os.path.join(d, f), self.root) for f in files]
+        return paths

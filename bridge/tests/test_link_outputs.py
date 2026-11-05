@@ -2,10 +2,10 @@ import importlib.util
 import os
 import unittest
 
-from atlas_bridge.adapters import graphify, linkfile
+from atlas_bridge.adapters import GraphifyLinkWriter, GraphifyReader, LinkFilePresenter
 from atlas_bridge.core.http import Call, Extraction, PathTemplate, Route
 from atlas_bridge.core.model import CodeGraph, Status
-from atlas_bridge.usecases.link import Link
+from atlas_bridge.usecases.link import Link, LinkReport
 
 from .helpers import ATLAS
 
@@ -46,7 +46,7 @@ MERGED = {
 
 class WithLinksTest(unittest.TestCase):
     def test_adds_endpoints_and_edges_to_a_merged_graph(self):
-        out = graphify.with_links(MERGED, LINKS)
+        out = GraphifyLinkWriter(MERGED).present(LINKS)
         edges = [(e['source'], e['target'], e['confidence']) for e in out['links']]
         self.assertEqual(
             edges,
@@ -59,11 +59,11 @@ class WithLinksTest(unittest.TestCase):
         self.assertEqual(len(MERGED['nodes']), 3)  # input untouched
 
     def test_without_a_graph_and_through_to_atlas(self):
-        out = graphify.with_links(None, LINKS[:1])
+        out = GraphifyLinkWriter().present(LINKS[:1])
         caller = [n for n in out['nodes'] if n['repo'] == 'web'][0]
         self.assertEqual(caller['id'], 'web::src/api.js::placeOrder')
         g = CodeGraph()
-        graphify.read(g, out, 'unused')
+        GraphifyReader(g).read(out, 'unused')
         self.assertEqual(sorted(g.files), [('api', 'app/main.py'), ('web', 'src/api.js')])
         self.assertEqual(list(g.links.values()), [Status.MATCHED])
 
@@ -71,7 +71,7 @@ class WithLinksTest(unittest.TestCase):
 class LinkFileTest(unittest.TestCase):
     def test_present(self):
         ex = Extraction([ROUTE], [CALL, Call('web', 't.js', 1, P('/x'), test=True)])
-        out = linkfile.present(LINKS, ex, ['api', 'web'])
+        out = LinkFilePresenter().present(LinkReport(['api', 'web'], ex, LINKS))
         self.assertEqual(out['repos']['web'], {'routes': 0, 'calls': 1, 'test_calls': 1})
         self.assertEqual(out['links'][0]['route']['methods'], ['POST'])
         self.assertEqual(out['links'][1]['route'], None)
@@ -114,7 +114,7 @@ class ScoreTest(unittest.TestCase):
             ],
             'excluded': [{'caller': 'web', 'file': 'test/x.js', 'line': 2}],
         }
-        found = linkfile.present(LINKS[:2], Extraction(), ['api', 'web'])
+        found = LinkFilePresenter().present(LinkReport(['api', 'web'], Extraction(), LINKS[:2]))
         found['links'].append(
             {
                 **found['links'][0],

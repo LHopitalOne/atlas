@@ -22,15 +22,19 @@ links = [
 [project.scripts]
 atlas-bridge = "atlas_bridge.__main__:main"
 
-[tool.setuptools]
-packages = ["atlas_bridge", "atlas_bridge.core", "atlas_bridge.usecases", "atlas_bridge.adapters", "atlas_bridge.adapters.treesitter"]
+[tool.setuptools.packages.find]
+include = ["atlas_bridge*"]
 
 [tool.ruff]
 line-length = 120
 extend-exclude = ["tests/fixtures"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "C90"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10  # see tests/test_architecture.py for the size limits
+
 
 [tool.ruff.format]
 quote-style = "single"
@@ -44,6 +48,7 @@ name = "Dependency rule: outer rings depend on inner rings only"
 type = "layers"
 layers = [
     "atlas_bridge.__main__",
+    "atlas_bridge.cli",
     "atlas_bridge.adapters",
     "atlas_bridge.usecases",
     "atlas_bridge.core",
@@ -71,3 +76,12 @@ branch = true
 [tool.coverage.report]
 fail_under = 75
 show_missing = true
+
+[[tool.importlinter.contracts]]
+name = "Tree-sitter languages build on the kit, never on each other"
+type = "layers"
+layers = [
+    "atlas_bridge.adapters.treesitter.extractor",
+    "atlas_bridge.adapters.treesitter.python | atlas_bridge.adapters.treesitter.rust | atlas_bridge.adapters.treesitter.javascript",
+    "atlas_bridge.adapters.treesitter.kit",
+]

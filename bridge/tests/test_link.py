@@ -2,7 +2,7 @@ import unittest
 
 from atlas_bridge.core.http import Call, Extraction, PathTemplate, Route
 from atlas_bridge.core.model import Status
-from atlas_bridge.usecases.link import ServiceNames, find_links
+from atlas_bridge.usecases.link import LinkFinder, ServiceNames
 
 P = PathTemplate.parse
 SNQL = Route('snuba', 'views.py', 10, P('/{dataset}/snql'), frozenset({'GET', 'POST'}))
@@ -17,7 +17,7 @@ def call(path, method='ANY', hints=(), repo='sentry', **kw):
 
 
 def links(*calls, routes=(SNQL, STORAGE, HEALTH, DSYMS, OWN), aliases=None, **kw):
-    return find_links(Extraction(list(routes), list(calls)), ['sentry', 'snuba', 'symbolicator'], aliases, **kw)
+    return LinkFinder(['sentry', 'snuba', 'symbolicator'], aliases, **kw).find(Extraction(list(routes), list(calls)))
 
 
 def summary(found):

@@ -4,7 +4,7 @@ import os
 import tempfile
 import unittest
 
-from atlas_bridge.__main__ import main, split_repo
+from atlas_bridge.cli import RepositoryInput, main
 
 from .helpers import FIXTURES, load
 
@@ -41,8 +41,8 @@ class LinksCliTest(unittest.TestCase):
         self.assertEqual(sum(e['relation'] == 'calls_http' for e in graph['links']), 2)
 
     def test_split_repo(self):
-        self.assertEqual(split_repo('core=/x/y'), ('core', '/x/y'))
-        self.assertEqual(split_repo('/x/shop/'), ('shop', '/x/shop/'))
+        self.assertEqual(RepositoryInput.parse('core=/x/y'), RepositoryInput('core', '/x/y'))
+        self.assertEqual(RepositoryInput.parse('/x/shop/'), RepositoryInput('shop', '/x/shop/'))
 
 
 if __name__ == '__main__':

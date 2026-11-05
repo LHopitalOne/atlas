@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 import unittest
 
-from atlas_bridge.__main__ import main
+from atlas_bridge.cli import main
 
 from ..helpers import FIXTURES, GOLDEN, load
 from ..test_atlas import validate

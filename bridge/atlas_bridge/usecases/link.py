@@ -1,18 +1,16 @@
 """Use case: find the HTTP links between repositories by matching the requests each sends to the routes others serve.
 
-Extractors (adapters) implement the `Extractor` port; this module never parses code or reads files.
+Extractors (adapters) implement the `Extractor` port; this module never parses code or reads files. Each kind of
+evidence is a LinkRule; LinkFinder asks the first rule that applies to a call.
 """
 
-import re
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Protocol
 
-from ..core.http import Call, Extraction, Route, methods_match, score, stretch_score, swallows_literals
+from ..core.errors import AliasError
+from ..core.http import Call, Extraction, Route
 from ..core.model import Status
-
-
-class Extractor(Protocol):
-    def extract(self, repo: str, root: str) -> Extraction: ...
+from ..core.words import Words
 
 
 @dataclass(frozen=True)
@@ -25,100 +23,178 @@ class Link:
     reason: str
 
 
-def _words(text):
-    """'SymbolicatorSession' / 'snuba_pool' / 'SENTRY_SNUBA' -> lower-case words."""
-    spaced = re.sub(r'(?<=[a-z0-9])(?=[A-Z])', ' ', text)
-    return {w for w in re.split(r'[^a-z0-9]+', spaced.lower()) if w}
+@dataclass(frozen=True)
+class LinkReport:
+    """Everything one run found: the links, and the extraction they came from, for the repositories asked about."""
+
+    repos: list[str]
+    extraction: Extraction
+    links: list[Link]
 
 
 class ServiceNames:
     """Turns hints into repository names: a repo's own name, or an alias (`upstream` -> `sentry`)."""
 
     def __init__(self, repos, aliases=None):
-        self.names = {r.lower(): r for r in repos}
-        self.aliases = {a.lower(): r for a, r in (aliases or {}).items()}
+        self._names = {r.lower(): r for r in repos}
+        self._aliases = {}
+        for word, repo in (aliases or {}).items():
+            if repo not in repos:
+                raise AliasError(f'{word}={repo}', f'{repo} is not one of the repositories: {", ".join(repos)}')
+            self._aliases[word.lower()] = repo
 
     def resolve(self, hints, exclude):
         found = set()
-        for h in hints:
-            for w in _words(h):
-                repo = self.names.get(w) or self.aliases.get(w)
+        for hint in hints:
+            for word in Words.of(hint):
+                repo = self._names.get(word) or self._aliases.get(word)
                 if repo and repo != exclude:
                     found.add(repo)
         return found
 
 
-def find_links(extraction: Extraction, repos, aliases=None, include_tests=False):
-    """Match every call against the routes of the other repositories. Returns a list of Link."""
-    names = ServiceNames(repos, aliases)
-    routes_by_repo = {}
-    for r in extraction.routes:
-        routes_by_repo.setdefault(r.repo, []).append(r)
-    by_name = {(r.repo, r.name): r for r in extraction.routes if r.name}
-    links = []
-    for call in extraction.calls:
-        if call.test and not include_tests:
-            continue
-        if call.kind == 'payload':
-            links += _payload_links(call, by_name, names)
-        else:
-            links += _request_links(call, routes_by_repo, names)
-    return links
+class RouteIndex:
+    """Routes by repository and by name, and which of them fit a request best."""
+
+    def __init__(self, routes):
+        self._by_repo = {}
+        for r in routes:
+            self._by_repo.setdefault(r.repo, []).append(r)
+        self._by_name = {(r.repo, r.name): r for r in routes if r.name}
+
+    def repos(self):
+        return list(self._by_repo)
+
+    def routes(self, repo):
+        return self._by_repo.get(repo, [])
+
+    def named(self, repo, name):
+        return self._by_name.get((repo, name))
+
+    def best(self, call, repo, stretch=False):
+        """(top score, routes with it) among `repo`'s routes, leaving out catch-alls that would swallow literal
+        segments of the call. With stretch, the call's last parameter may stand for several route segments."""
+        scored = []
+        for r in self.routes(repo):
+            if not r.accepts(call.method) or call.path.swallowed_by(r.path):
+                continue
+            s = call.path.stretch_fit(r.path) if stretch else call.path.fit(r.path)
+            if s is not None:
+                scored.append((s, r))
+        if not scored:
+            return 0, []
+        top = max(s for s, _ in scored)
+        return top, [r for s, r in scored if s == top]
+
+    def catch_all(self, call, repo):
+        return next(
+            (r for r in self.routes(repo) if r.accepts(call.method) and call.path.fit(r.path) is not None), None
+        )
 
 
-def _payload_links(call, by_name, names):
-    route = by_name.get((call.repo, call.route_name))
-    if not route:
-        return []
-    return [
-        Link(call, t, call.repo, route, Status.INFERRED, f'{t} fetches a URL {call.repo} builds for it')
-        for t in sorted(names.resolve(call.hints, exclude=call.repo))
-    ]
+class LinkRule(ABC):
+    """One kind of evidence that a call reaches another repository."""
+
+    def __init__(self, names: ServiceNames, routes: RouteIndex):
+        self._names = names
+        self._routes = routes
+
+    @abstractmethod
+    def applies(self, call: Call) -> bool: ...
+
+    @abstractmethod
+    def links(self, call: Call) -> list[Link]: ...
+
+    @staticmethod
+    def _each(call, source, target, routes, status, reason):
+        return [Link(call, source, target, r, status, reason) for r in routes]
 
 
-def _best(call, routes, fit=score):
-    """The routes that fit the call best, leaving out catch-alls that would swallow literal segments of the call."""
-    scored = [(fit(call.path, r.path), r) for r in routes if methods_match(call.method, r.methods)]
-    scored = [(s, r) for s, r in scored if s is not None and not swallows_literals(call.path, r.path)]
-    if not scored:
-        return 0, []
-    top = max(s for s, _ in scored)
-    return top, [r for s, r in scored if s == top]
+class PayloadRule(LinkRule):
+    """A URL to one of this repository's routes, handed to the services the hints name; they fetch it later."""
 
+    def applies(self, call):
+        return call.is_payload
 
-def _named_target_links(call, t, routes):
-    top, best = _best(call, routes)
-    if len(best) == 1:
-        return [Link(call, call.repo, t, best[0], Status.MATCHED, 'named target, one route fits')]
-    if best:
-        return [Link(call, call.repo, t, r, Status.AMBIGUOUS, f'{len(best)} routes fit equally') for r in best]
-    _, stretched = _best(call, routes, stretch_score)
-    if stretched:
-        status = Status.INFERRED if len(stretched) == 1 else Status.AMBIGUOUS
+    def links(self, call):
+        route = self._routes.named(call.repo, call.route_name)
+        if not route:
+            return []
+        targets = sorted(self._names.resolve(call.hints, exclude=call.repo))
         return [
-            Link(call, call.repo, t, r, status, 'fits if its last parameter holds several segments') for r in stretched
+            Link(call, t, call.repo, route, Status.INFERRED, f'{t} fetches a URL {call.repo} builds for it')
+            for t in targets
         ]
-    catch_alls = [r for r in routes if methods_match(call.method, r.methods) and score(call.path, r.path) is not None]
-    why = f'only the catch-all {catch_alls[0].path} would take it' if catch_alls else 'no route fits'
-    return [Link(call, call.repo, t, None, Status.UNMATCHED, f'{t}: {why} ({call.method} {call.path})')]
 
 
-def _request_links(call, routes_by_repo, names):
-    if call.path is None:
-        return []
-    targets = names.resolve(call.hints, exclude=call.repo)
-    if targets:
-        return [lk for t in sorted(targets) for lk in _named_target_links(call, t, routes_by_repo.get(t, []))]
-    # No hint names a service: only a call that fits a route literally, and fits none in its own repo, counts.
-    if call.path.literals < 2:
-        return []
-    own, _ = _best(call, routes_by_repo.get(call.repo, []))
-    candidates = []
-    for repo, routes in routes_by_repo.items():
-        if repo == call.repo:
-            continue
-        top, best = _best(call, routes)
-        if best and top >= 3 * call.path.literals and top > own:
-            candidates += [(repo, r) for r in best]
-    status = Status.INFERRED if len(candidates) == 1 else Status.AMBIGUOUS
-    return [Link(call, call.repo, t, r, status, 'no service named; the path fits this route') for t, r in candidates]
+class NamedTargetRule(LinkRule):
+    """A request whose hints name the service it goes to."""
+
+    def applies(self, call):
+        return call.path is not None and bool(self._names.resolve(call.hints, exclude=call.repo))
+
+    def links(self, call):
+        return [lk for t in sorted(self._names.resolve(call.hints, exclude=call.repo)) for lk in self._to(call, t)]
+
+    def _to(self, call, target):
+        _, best = self._routes.best(call, target)
+        if len(best) == 1:
+            return self._each(call, call.repo, target, best, Status.MATCHED, 'named target, one route fits')
+        if best:
+            return self._each(call, call.repo, target, best, Status.AMBIGUOUS, f'{len(best)} routes fit equally')
+        _, stretched = self._routes.best(call, target, stretch=True)
+        if stretched:
+            status = Status.INFERRED if len(stretched) == 1 else Status.AMBIGUOUS
+            return self._each(
+                call, call.repo, target, stretched, status, 'fits if its last parameter holds several segments'
+            )
+        catch_all = self._routes.catch_all(call, target)
+        why = f'only the catch-all {catch_all.path} would take it' if catch_all else 'no route fits'
+        return [Link(call, call.repo, target, None, Status.UNMATCHED, f'{target}: {why} ({call.method} {call.path})')]
+
+
+class PathOnlyRule(LinkRule):
+    """A request that names no service: it counts only if its path fits another repository's route literally and
+    fits nothing in its own repository."""
+
+    MIN_LITERALS = 2  # one fixed word ('/health') proves too little
+    LITERAL_POINTS = 3  # what a literal-on-literal segment scores in PathTemplate.fit
+
+    def applies(self, call):
+        return call.path is not None and call.path.literals >= self.MIN_LITERALS
+
+    def links(self, call):
+        own, _ = self._routes.best(call, call.repo)
+        candidates = []
+        for repo in self._routes.repos():
+            if repo == call.repo:
+                continue
+            top, best = self._routes.best(call, repo)
+            if best and top >= self.LITERAL_POINTS * call.path.literals and top > own:
+                candidates += [(repo, r) for r in best]
+        status = Status.INFERRED if len(candidates) == 1 else Status.AMBIGUOUS
+        return [
+            Link(call, call.repo, t, r, status, 'no service named; the path fits this route') for t, r in candidates
+        ]
+
+
+class LinkFinder:
+    """Matches every call against the routes of the other repositories."""
+
+    RULES = (PayloadRule, NamedTargetRule, PathOnlyRule)  # asked in this order; the first that applies decides
+
+    def __init__(self, repos, aliases=None, include_tests=False):
+        self._names = ServiceNames(repos, aliases)
+        self._include_tests = include_tests
+
+    def find(self, extraction: Extraction) -> list[Link]:
+        routes = RouteIndex(extraction.routes)
+        rules = [rule(self._names, routes) for rule in self.RULES]
+        links = []
+        for call in extraction.calls:
+            if call.test and not self._include_tests:
+                continue
+            rule = next((r for r in rules if r.applies(call)), None)
+            if rule:
+                links += rule.links(call)
+        return links

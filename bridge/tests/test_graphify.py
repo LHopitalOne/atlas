@@ -1,7 +1,7 @@
 import copy
 import unittest
 
-from atlas_bridge.adapters import graphify
+from atlas_bridge.adapters import GraphifyReader
 from atlas_bridge.core.model import CodeGraph, Community, Kind, Ref, Status
 
 from .helpers import GRAPH, node
@@ -9,7 +9,7 @@ from .helpers import GRAPH, node
 
 def read(data=GRAPH, repo='shop'):
     g = CodeGraph()
-    graphify.read(g, data, repo)
+    GraphifyReader(g).read(data, repo)
     return g
 
 
