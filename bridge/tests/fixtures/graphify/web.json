@@ -1,0 +1,187 @@
+{
+ "directed": false,
+ "graph": {
+  "graphify_version": "0.9.102",
+  "schema_version": 1
+ },
+ "hyperedges": [],
+ "links": [
+  {
+   "_origin": "ast",
+   "confidence": "EXTRACTED",
+   "confidence_score": 1.0,
+   "context": "call",
+   "relation": "calls",
+   "source": "src_checkout_checkout",
+   "source_file": "src/checkout.js",
+   "source_location": "L5",
+   "target": "src_api_placeorder",
+   "weight": 1.0
+  },
+  {
+   "_origin": "ast",
+   "confidence": "EXTRACTED",
+   "confidence_score": 1.0,
+   "context": "call",
+   "relation": "calls",
+   "source": "src_checkout_checkout",
+   "source_file": "src/checkout.js",
+   "source_location": "L6",
+   "target": "src_api_loadorder",
+   "weight": 1.0
+  },
+  {
+   "_origin": "ast",
+   "confidence": "EXTRACTED",
+   "confidence_score": 1.0,
+   "context": "import",
+   "relation": "imports",
+   "source": "src_checkout",
+   "source_file": "src/checkout.js",
+   "source_location": "L2",
+   "target": "src_api_loadorder",
+   "weight": 1.0
+  },
+  {
+   "_origin": "ast",
+   "confidence": "EXTRACTED",
+   "confidence_score": 1.0,
+   "context": "import",
+   "relation": "imports",
+   "source": "src_checkout",
+   "source_file": "src/checkout.js",
+   "source_location": "L2",
+   "target": "src_api_placeorder",
+   "weight": 1.0
+  },
+  {
+   "_origin": "ast",
+   "confidence": "EXTRACTED",
+   "confidence_score": 1.0,
+   "context": "import",
+   "relation": "imports_from",
+   "source": "src_checkout",
+   "source_file": "src/checkout.js",
+   "source_location": "L2",
+   "target": "src_api",
+   "weight": 1.0
+  },
+  {
+   "_origin": "ast",
+   "confidence": "EXTRACTED",
+   "confidence_score": 1.0,
+   "relation": "contains",
+   "source": "src_api",
+   "source_file": "src/api.js",
+   "source_location": "L13",
+   "target": "src_api_loaduser",
+   "weight": 1.0
+  },
+  {
+   "_origin": "ast",
+   "confidence": "EXTRACTED",
+   "confidence_score": 1.0,
+   "relation": "contains",
+   "source": "src_api",
+   "source_file": "src/api.js",
+   "source_location": "L4",
+   "target": "src_api_placeorder",
+   "weight": 1.0
+  },
+  {
+   "_origin": "ast",
+   "confidence": "EXTRACTED",
+   "confidence_score": 1.0,
+   "relation": "contains",
+   "source": "src_api",
+   "source_file": "src/api.js",
+   "source_location": "L9",
+   "target": "src_api_loadorder",
+   "weight": 1.0
+  },
+  {
+   "_origin": "ast",
+   "confidence": "EXTRACTED",
+   "confidence_score": 1.0,
+   "relation": "contains",
+   "source": "src_checkout",
+   "source_file": "src/checkout.js",
+   "source_location": "L4",
+   "target": "src_checkout_checkout",
+   "weight": 1.0
+  }
+ ],
+ "multigraph": false,
+ "nodes": [
+  {
+   "_callable": true,
+   "_origin": "ast",
+   "community": 0,
+   "community_name": "checkout.js",
+   "file_type": "code",
+   "id": "src_api_loadorder",
+   "label": "loadOrder()",
+   "norm_label": "loadorder()",
+   "source_file": "src/api.js",
+   "source_location": "L9"
+  },
+  {
+   "_callable": true,
+   "_origin": "ast",
+   "community": 0,
+   "community_name": "checkout.js",
+   "file_type": "code",
+   "id": "src_api_placeorder",
+   "label": "placeOrder()",
+   "norm_label": "placeorder()",
+   "source_file": "src/api.js",
+   "source_location": "L4"
+  },
+  {
+   "_callable": true,
+   "_origin": "ast",
+   "community": 0,
+   "community_name": "checkout.js",
+   "file_type": "code",
+   "id": "src_checkout_checkout",
+   "label": "checkout()",
+   "norm_label": "checkout()",
+   "source_file": "src/checkout.js",
+   "source_location": "L4"
+  },
+  {
+   "_callable": true,
+   "_origin": "ast",
+   "community": 1,
+   "community_name": "api.js",
+   "file_type": "code",
+   "id": "src_api_loaduser",
+   "label": "loadUser()",
+   "norm_label": "loaduser()",
+   "source_file": "src/api.js",
+   "source_location": "L13"
+  },
+  {
+   "_origin": "ast",
+   "community": 0,
+   "community_name": "checkout.js",
+   "file_type": "code",
+   "id": "src_checkout",
+   "label": "checkout.js",
+   "norm_label": "checkout.js",
+   "source_file": "src/checkout.js",
+   "source_location": "L1"
+  },
+  {
+   "_origin": "ast",
+   "community": 1,
+   "community_name": "api.js",
+   "file_type": "code",
+   "id": "src_api",
+   "label": "api.js",
+   "norm_label": "api.js",
+   "source_file": "src/api.js",
+   "source_location": "L1"
+  }
+ ]
+}

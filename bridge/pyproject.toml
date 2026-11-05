@@ -14,3 +14,46 @@ atlas-bridge = "atlas_bridge.__main__:main"
 
 [tool.setuptools]
 packages = ["atlas_bridge"]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["tests/fixtures"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.importlinter]
+root_package = "atlas_bridge"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Dependency rule: outer rings depend on inner rings only"
+type = "layers"
+layers = [
+    "atlas_bridge.__main__",
+    "atlas_bridge.adapters",
+    "atlas_bridge.usecases",
+    "atlas_bridge.core",
+]
+
+[[tool.importlinter.contracts]]
+name = "Adapters do not know each other"
+type = "independence"
+modules = ["atlas_bridge.adapters.graphify", "atlas_bridge.adapters.atlas"]
+
+[[tool.importlinter.contracts]]
+name = "Core and use cases do no I/O and use no parsers"
+type = "forbidden"
+source_modules = ["atlas_bridge.core", "atlas_bridge.usecases"]
+forbidden_modules = ["json", "argparse", "subprocess", "shutil", "tree_sitter"]
+
+[tool.coverage.run]
+source = ["atlas_bridge"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 75
+show_missing = true

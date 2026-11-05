@@ -1,0 +1,5 @@
+# Tools for linting, import contracts, coverage and the Graphify integration test. Pinned for CI.
+ruff==0.17.3
+import-linter==2.15
+coverage==7.17.2
+graphifyy==0.9.102

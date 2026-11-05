@@ -29,4 +29,3 @@ export const ASK_ENGINE = 'demo';
 
 /** Ask Atlas playback timing (ms). */
 export const ASK_PLAYBACK = { think: 520, tick: 28, tokensPerTick: 2 };
-

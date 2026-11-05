@@ -29,7 +29,35 @@ node scripts/build.mjs --offline --graph=bridge/graph.json
 Files become services, functions and classes become leaves, Graphify's communities become domains
 (`--group folder` uses folders instead), and Graphify's EXTRACTED / INFERRED / AMBIGUOUS tags become Atlas's link
 colours. Pass several graphs (`api=a/graph.json web=b/graph.json`), or one built with `graphify merge-graphs`, and
-each repository gets its own territory. Tests: `cd bridge && python3 -m unittest discover -s tests -t .`
+each repository gets its own territory.
+
+The bridge follows the dependency rule of clean architecture; `lint-imports` enforces it:
+
+| Ring | Module | May import |
+| --- | --- | --- |
+| Entities | `core/model.py`: files, symbols, links, link certainty | the standard library, no I/O |
+| Use cases | `usecases/draw.py`: arrange a code graph as repos > domains > files | `core` |
+| Adapters | `adapters/graphify.py` (graph.json in), `adapters/atlas.py` (Atlas spec out) | `usecases`, `core`; never each other |
+| Driver | `__main__.py`: command line, files, wiring | everything |
+
+```bash
+cd bridge && pip install -r requirements-dev.txt
+ruff check . && ruff format --check . && lint-imports
+coverage run -m unittest discover -s tests -t . && coverage report      # fails under 75%
+ATLAS_INTEGRATION=1 python -m unittest discover -s tests/integration -t .  # real Graphify, pinned version
+```
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every push to `master` and every pull request:
+
+| Job | Checks |
+| --- | --- |
+| JS lint and import rules | ESLint, Prettier, the layer rules in `test/architecture.test.js` |
+| JS unit tests | Node's test runner; fails under 75% line, branch or function coverage |
+| Bridge | Ruff lint and format, import-linter contracts, unit tests; fails under 75% coverage |
+| Integration | Real Graphify on `bridge/tests/fixtures/shop`, through the bridge, into Atlas's validator, equal to the golden spec |
+| E2E | Playwright on the built page, including a Graphify graph drawn from the golden spec |
 
 Licence: Apache-2.0.
 
@@ -39,9 +67,11 @@ Licence: Apache-2.0.
 | --- | --- |
 | `npm run build` | Bundle `src/` with esbuild into the two single-file pages |
 | `npm test` | Unit and architecture tests (Node's test runner) |
+| `npm run test:coverage` | Unit tests with 75% line, branch and function coverage gates |
+| `npm run lint:imports` | The layer rules only (`test/architecture.test.js`) |
 | `npm run test:e2e` | Browser tests with Playwright (set `CHROMIUM_PATH` to use a specific Chromium) |
 | `npm run lint` | ESLint |
-| `npm run check` | Lint, unit tests, build, end-to-end tests |
+| `npm run check` | Lint, import rules, unit tests with coverage, build, end-to-end tests |
 | `npm run index:self` | Re-index Atlas's own code into `generated/self-graph.json` |
 
 ## Layout
@@ -59,6 +89,7 @@ src/
 test/                unit + architecture tests; test/e2e/ Playwright
 tools/index-self/    tree-sitter + SCIP indexer for the Self graph
 docs/                DECISIONS, ARCHITECTURE, GRAPH_SPEC, INTEGRATION
+bridge/              Python: Graphify graph.json to Atlas (core, usecases, adapters, CLI)
 ```
 
 See `CLAUDE.md` for the rules the code follows.

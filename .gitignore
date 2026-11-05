@@ -7,3 +7,4 @@ generated/index.scip*
 __pycache__/
 *.egg-info/
 graphify-out/
+.coverage

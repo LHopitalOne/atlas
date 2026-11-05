@@ -15,6 +15,8 @@ npm run build        # dist/atlas.html (d3 from CDN) and dist/atlas-offline.html
 npm test             # unit tests, node:test, ~1 s
 npm run test:e2e     # Playwright against dist/atlas-offline.html (run `npm run build` first)
 npm run lint         # ESLint: no-undef, complexity <= 25, max 80 lines per function
+npm run lint:imports # the layer rules below (test/architecture.test.js)
+npm run test:coverage # unit tests; fails under 75% line, branch or function coverage
 npm run check        # all of the above, in order
 npm run index:self   # regenerate generated/self-graph.json (needs Python + the scip CLI, see tools/index-self/run.sh)
 ```
@@ -55,6 +57,13 @@ E2E uses your Playwright browsers; set `CHROMIUM_PATH` to use another Chromium. 
 | Panels | `src/ui/*.js` |
 | Styles and markup | `src/index.html` (shadcn-style tokens on `:root`) |
 | Public JS API | `loadGraph(spec)` in `src/main.js`, exposed as `window.Atlas` |
+
+## The Python bridge (bridge/)
+
+Turns Graphify graph.json files into a graph spec. Clean-architecture rings, enforced by `lint-imports`
+(contracts in `bridge/pyproject.toml`): `core` (entities, no I/O) < `usecases` < `adapters` (graphify in, atlas out,
+independent of each other) < `__main__` (CLI, files, wiring). `test/fixtures/graphify-shop.json` is the bridge's
+golden output; regenerate it with the command in `bridge/tests/test_cli.py` when the mapping changes on purpose.
 
 ## After a change
 

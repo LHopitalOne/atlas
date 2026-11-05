@@ -7,15 +7,17 @@
   "scripts": {
     "build": "node scripts/build.mjs && node scripts/build.mjs --offline",
     "test": "node --test test/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include='src/**' --test-coverage-lines=75 --test-coverage-branches=75 --test-coverage-functions=75 test/*.test.js",
     "test:e2e": "playwright test",
     "lint": "eslint src test scripts && prettier --check \"src/**/*.js\" \"test/**/*.js\" \"scripts/**/*.mjs\"",
-    "check": "npm run lint && npm test && npm run build && npm run test:e2e",
+    "lint:imports": "node --test test/architecture.test.js",
+    "check": "npm run lint && npm run lint:imports && npm run test:coverage && npm run build && npm run test:e2e",
     "index:self": "tools/index-self/run.sh",
     "format": "prettier --write \"src/**/*.js\" \"test/**/*.js\" \"scripts/**/*.mjs\""
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@playwright/test": "^1.48.2",
+    "@playwright/test": "^1.64.1",
     "@sourcegraph/scip-typescript": "^0.5.2",
     "d3-hierarchy": "^3.1.2",
     "esbuild": "^0.24.0",
