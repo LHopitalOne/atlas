@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from ..core.errors import AliasError
+from ..core.evidence import Verification
 from ..core.http import Call, Extraction, Route
 from ..core.model import Status
 from ..core.words import Words
@@ -21,6 +22,8 @@ class Link:
     route: Route | None  # None when nothing in the target serves it
     status: Status
     reason: str
+    verification: Verification = Verification.UNVERIFIED  # set by LinkVerifier when a precise index is given
+    verdicts: tuple = ()  # (Assumption, Verdict) for each name the call rests on
 
 
 @dataclass(frozen=True)

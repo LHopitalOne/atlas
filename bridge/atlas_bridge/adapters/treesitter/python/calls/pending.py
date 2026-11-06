@@ -60,6 +60,7 @@ class PendingRequest(NamedTuple):
     depth: int = 0
     evidence: Evidence = Evidence()
     stack: frozenset = frozenset()
+    assumptions: tuple = ()  # Assumptions made on the way: the receiver's origin, each wrapper call followed
 
     def says_more(self, reading: Reading) -> bool:
         """At the request itself: any literal, or nothing left open. At a caller: more than the levels below."""
@@ -75,9 +76,11 @@ class PendingRequest(NamedTuple):
         """The key under which forwarding this request through `wrapper` is done once."""
         return (wrapper, self.url, self.method, self.evidence)
 
-    def forwarded(self, url, method, hints, wrapper) -> 'PendingRequest':
-        """The request one level up, at a caller of `wrapper` that filled in `url`, `method` and `hints`."""
-        return PendingRequest(url, method, hints, self.depth + 1, self.evidence, self.stack | {wrapper})
+    def forwarded(self, url, method, hints, wrapper, hop=None) -> 'PendingRequest':
+        """The request one level up, at a caller of `wrapper` that filled in `url`, `method` and `hints`; `hop` is
+        the Assumption that the caller's call reaches the wrapper."""
+        assumptions = (*self.assumptions, hop) if hop is not None else self.assumptions
+        return PendingRequest(url, method, hints, self.depth + 1, self.evidence, self.stack | {wrapper}, assumptions)
 
 
 class RequestRun:

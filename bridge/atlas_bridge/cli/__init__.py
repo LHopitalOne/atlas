@@ -2,6 +2,6 @@
 
 from .app import App, main
 from .command import Command
-from .inputs import Aliases, GraphInput, JsonFile, NamedInput, RepositoryInput
+from .inputs import Aliases, GraphInput, JsonFile, NamedInput, RepositoryInput, ScipInput
 
-__all__ = ['Aliases', 'App', 'Command', 'GraphInput', 'JsonFile', 'NamedInput', 'RepositoryInput', 'main']
+__all__ = ['Aliases', 'App', 'Command', 'GraphInput', 'JsonFile', 'NamedInput', 'RepositoryInput', 'ScipInput', 'main']

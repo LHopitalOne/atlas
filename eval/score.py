@@ -54,6 +54,7 @@ def score(key, found):
             hits = [i for i, f in enumerate(links) if same_route(k, f)]
             matched.update(hits)
             statuses = sorted({links[i]['status'] for i in hits})
+            verified = sorted({links[i].get('verification', 'unverified') for i in hits})
             rows.append(
                 {
                     'id': k['id'],
@@ -61,6 +62,7 @@ def score(key, found):
                     'found': bool(hits),
                     'status': statuses,
                     'how': k['how_the_path_is_known'],
+                    'verification': verified,
                 }
             )
         report['scopes'][scope] = rows
@@ -82,6 +84,7 @@ def score(key, found):
         'precision': f'{len(matched)}/{len(matched) + false}' if matched or false else 'n/a',
         'false_links': false,
         'links_to_excluded_calls': len(report['excluded']),
+        'prod_confirmed_by_scip': f"{sum('confirmed' in r['verification'] for r in prod)}/{len(prod)}",
     }
     return report
 
@@ -100,9 +103,9 @@ def main(argv):
         print(f'\n{scope}: {hit}/{len(rows)} found')
         for r in rows:
             mark = 'x' if r['found'] else ' '
-            print(
-                f'  [{mark}] {r["id"]} {r["link"]}  ({r["how"]}{", " + "/".join(r["status"]) if r["status"] else ""})'
-            )
+            status = ', ' + '/'.join(r['status']) if r['status'] else ''
+            scip = ', SCIP ' + '/'.join(r['verification']) if r['verification'] else ''
+            print(f'  [{mark}] {r["id"]} {r["link"]}  ({r["how"]}{status}{scip})')
     for name in ('false', 'excluded'):
         title = 'false links' if name == 'false' else 'links from call sites the key excludes (tests, tooling)'
         print(f'\n{title}: {len(report[name])}')

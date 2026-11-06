@@ -1,5 +1,6 @@
 """Requests declared by implementing a request trait: `fn path(&self) -> Cow<str> { "/api/x/".into() }`."""
 
+from .....core.evidence import Assumption
 from ...kit import UrlTemplate
 from ..blocks import Blocks
 from .base import RustCallCollector
@@ -17,6 +18,9 @@ class TraitPathCalls(RustCallCollector):
             return []
         test = self.workspace.is_test(file, impl)
         names = request.hints() | {file.path}
+        trait = impl.child_by_field_name('trait')
+        # the trait is matched by name: SCIP can confirm it is the repository's own, not one of the same name
+        assumptions = (Assumption(file.path, file.line(trait), request.trait_name),)
         out = []
         for name, fn in request.path_fns():
             for r in Blocks.returns(fn):
@@ -27,6 +31,15 @@ class TraitPathCalls(RustCallCollector):
                     hints = {h for h in names | {*base, *url.hints} if h}
                     function = f'{request.type_name}::{name}'
                     out.append(
-                        self.call(file, file.line(node), url.path, request.method_of(node), function, hints, test)
+                        self.call(
+                            file,
+                            file.line(node),
+                            url.path,
+                            request.method_of(node),
+                            function,
+                            hints,
+                            test,
+                            assumptions=assumptions,
+                        )
                     )
         return out

@@ -5,18 +5,25 @@ from .errors import (
     BridgeError,
     ExtractionError,
     GraphFormatError,
+    IndexerFailedError,
+    IndexerUnavailableError,
     InputError,
     NamedInputError,
     ParserUnavailableError,
     RepositoryNotFoundError,
+    ScipFormatError,
     SourceReadError,
 )
+from .evidence import Assumption, Verdict, Verification
 from .http import ANY, Call, Extraction, PathTemplate, Route, Segment
 from .model import CodeGraph, Community, Kind, Ref, SourceFile, Status, Symbol
 from .words import Words
 
 __all__ = [
     'ANY',
+    'Assumption',
+    'Verdict',
+    'Verification',
     'AliasError',
     'BridgeError',
     'Call',
@@ -25,6 +32,8 @@ __all__ = [
     'Extraction',
     'ExtractionError',
     'GraphFormatError',
+    'IndexerFailedError',
+    'IndexerUnavailableError',
     'InputError',
     'Kind',
     'NamedInputError',
@@ -32,6 +41,7 @@ __all__ = [
     'PathTemplate',
     'Ref',
     'RepositoryNotFoundError',
+    'ScipFormatError',
     'Route',
     'Segment',
     'SourceFile',

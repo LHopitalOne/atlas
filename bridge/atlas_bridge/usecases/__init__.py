@@ -2,11 +2,13 @@
 
 from .draw import GROUPINGS, CommunityGrouping, FolderGrouping, Grouping, MapDrawer, MapView
 from .link import Link, LinkFinder, LinkReport, LinkRule, ServiceNames
-from .ports import Extractor
+from .ports import DefinitionOracle, Extractor
+from .verify import LinkVerifier
 
 __all__ = [
     'GROUPINGS',
     'CommunityGrouping',
+    'DefinitionOracle',
     'Extractor',
     'FolderGrouping',
     'Grouping',
@@ -14,6 +16,7 @@ __all__ = [
     'LinkFinder',
     'LinkReport',
     'LinkRule',
+    'LinkVerifier',
     'MapDrawer',
     'MapView',
     'ServiceNames',

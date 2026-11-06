@@ -41,6 +41,25 @@ class GraphInput(NamedInput):
         return JsonFile.read(self.path)
 
 
+class ScipInput(NamedInput):
+    """A SCIP index for one repository: 'name=index.scip', or a file named '<repo>[.<language>].scip'."""
+
+    SUFFIX = '.scip'
+
+    @staticmethod
+    def default_name(path):
+        return os.path.basename(path).split('.')[0]
+
+    @classmethod
+    def in_folder(cls, folder):
+        """Every index in a folder, named after its file."""
+        try:
+            names = sorted(os.listdir(folder))
+        except OSError as e:
+            raise RepositoryNotFoundError(folder) from e
+        return [cls.parse(os.path.join(folder, n)) for n in names if n.endswith(cls.SUFFIX)]
+
+
 class RepositoryInput(NamedInput):
     """A repository folder."""
 

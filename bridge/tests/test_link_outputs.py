@@ -129,7 +129,13 @@ class ScoreTest(unittest.TestCase):
         self.assertEqual([r['found'] for r in report['scopes']['prod']], [True, False])
         self.assertEqual(
             report['summary'],
-            {'prod_recall': '1/2', 'precision': '1/2', 'false_links': 1, 'links_to_excluded_calls': 1},
+            {
+                'prod_recall': '1/2',
+                'precision': '1/2',
+                'false_links': 1,
+                'links_to_excluded_calls': 1,
+                'prod_confirmed_by_scip': '0/2',
+            },
         )
         self.assertEqual(report['unmatched_calls'], 1)
 

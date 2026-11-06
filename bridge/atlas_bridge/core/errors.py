@@ -5,10 +5,13 @@ BridgeError
 │   ├── NamedInputError         'name=path' arguments
 │   ├── AliasError              '--alias word=repo'
 │   ├── RepositoryNotFoundError a repository folder that does not exist
-│   └── GraphFormatError        a file that is not a Graphify graph.json
+│   ├── GraphFormatError        a file that is not a Graphify graph.json
+│   └── ScipFormatError         a file that is not a SCIP index
 └── ExtractionError             reading source code failed
     ├── ParserUnavailableError  a tree-sitter grammar is not installed
-    └── SourceReadError         a source file cannot be read
+    ├── SourceReadError         a source file cannot be read
+    ├── IndexerUnavailableError a SCIP indexer is not installed
+    └── IndexerFailedError      a SCIP indexer ran but did not produce an index
 """
 
 
@@ -50,6 +53,11 @@ class GraphFormatError(InputError):
         super().__init__(f'{source} is not a Graphify graph: {problem}', 'pass graphify-out/graph.json')
 
 
+class ScipFormatError(InputError):
+    def __init__(self, source: str, problem: str):
+        super().__init__(f'{source} is not a SCIP index: {problem}', 'pass the index.scip an indexer wrote')
+
+
 class ExtractionError(BridgeError):
     pass
 
@@ -62,3 +70,13 @@ class ParserUnavailableError(ExtractionError):
 class SourceReadError(ExtractionError):
     def __init__(self, path: str, problem: str):
         super().__init__(f'cannot read {path}: {problem}')
+
+
+class IndexerUnavailableError(ExtractionError):
+    def __init__(self, tool: str, install: str):
+        super().__init__(f'{tool} is not installed', install)
+
+
+class IndexerFailedError(ExtractionError):
+    def __init__(self, tool: str, repo: str, problem: str):
+        super().__init__(f'{tool} could not index {repo}: {problem}')

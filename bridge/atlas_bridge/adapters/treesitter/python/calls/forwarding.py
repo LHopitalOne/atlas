@@ -4,6 +4,7 @@ import itertools
 from dataclasses import dataclass
 from types import MappingProxyType
 
+from .....core.evidence import Assumption
 from .....core.http import ANY
 from ..scope import Scope
 from ..syntax import PythonSyntax
@@ -56,8 +57,24 @@ class Forwarder:
             if site.splat:
                 continue
             decided = self._methods.decide(pending.method, func, site.bound, defaults)
+            hop = self.hop(source, call, scope.source, func)
             for url, method, hints in self._combinations(scope, site, pending, decided, defaults):
-                self._settler.settle(site.scope, call, pending.forwarded(url, method, hints, wrapper), run)
+                self._settler.settle(site.scope, call, pending.forwarded(url, method, hints, wrapper, hop), run)
+
+    @staticmethod
+    def hop(source, call, wrapper_source, func):
+        """The Assumption that `call` (found by name) runs `func`: the callee's name, where it is written, and the
+        lines of the definition the finder matched it to."""
+        fn = call.child_by_field_name('function')
+        name = fn.child_by_field_name('attribute') if fn.type == 'attribute' else fn
+        return Assumption(
+            source.path,
+            PythonSyntax.line(name),
+            PythonSyntax.text(name),
+            wrapper_source.path,
+            PythonSyntax.line(func),
+            func.end_point[0] + 1,
+        )
 
     @staticmethod
     def _params(func):

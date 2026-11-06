@@ -116,4 +116,5 @@ class GraphifyLinkWriter(Presenter):
             'source_location': f'L{link.call.line}',
             'weight': 1.0,
             'context': link.reason,
+            'verified': link.verification.value,
         }

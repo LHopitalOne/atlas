@@ -21,7 +21,7 @@ class Settler:
         reading = Reading.from_request(pending.url, pending.method, run.client)
         if reading.pathlike and pending.says_more(reading):
             method = ANY if reading.method_open else pending.method
-            self._book.add(scope, site, reading.path, method, pending.hints | reading.bases)
+            self._book.add(scope, site, reading.path, method, pending.hints | reading.bases, pending.assumptions)
         forwardable = reading.pathlike or run.client
         if reading.open and scope.func is not None and pending.depth < self.MAX_FORWARD and forwardable:
             self._forwarder.forward(scope, pending.seen_with(reading), run)

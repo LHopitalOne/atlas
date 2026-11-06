@@ -37,6 +37,19 @@ class LinkFilePresenter(Presenter):
                 'test': c.test,
             },
             'route': self.route(link.route) if link.route else None,
+            'verification': link.verification.value,
+            'assumptions': [self.assumption(a, verdict) for a, verdict in link.verdicts]
+            or [self.assumption(a, None) for a in c.assumptions],
+        }
+
+    @staticmethod
+    def assumption(a, verdict):
+        target = f'{a.target_file}:{a.target_start}-{a.target_end}' if a.has_target else '(defined in the repository)'
+        return {
+            'at': f'{a.file}:{a.line}',
+            'name': a.name,
+            'means': target,
+            'verdict': verdict.value if verdict else None,
         }
 
     @staticmethod

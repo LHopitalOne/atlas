@@ -4,12 +4,13 @@ import argparse
 import sys
 
 from ..core.errors import BridgeError
+from .index import IndexCommand
 from .links import LinksCommand
 from .spec import SpecCommand
 
 
 class App:
-    COMMANDS = (SpecCommand, LinksCommand)
+    COMMANDS = (SpecCommand, LinksCommand, IndexCommand)
 
     def __init__(self):
         self._commands = [c() for c in self.COMMANDS]

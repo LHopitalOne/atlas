@@ -82,7 +82,13 @@ How the path is known: **literal** string literal at the call site, **constant**
 | Dev-only links | 3 / 3 |
 | Proxy (catch-all forwarding) | 0 / 1 |
 | False links | **0** (precision 37 / 37) |
+| Production links confirmed by SCIP | **17 / 20** (0 contradicted) |
 
+- **SCIP** (`index`, then `links --scip-dir`) confirms every name the 17 matched production links rest on (60 name
+  lookups confirmed across the run's 30 confirmed links, none contradicted), among them each hop of sentry's symbolicator chain (`_process` → `create_task` → `_request` →
+  `self.session`), every `_snuba_pool` reference across modules, and relay's `UpstreamQuery` trait. L10, L19 and L20
+  are inferred links, which SCIP cannot settle. Indexing took about 3 minutes for sentry (6 GB of memory) and 4 for
+  relay.
 - **L19, L20** (symbolicator → sentry) come out as *inferred*: sentry's `reverse()` of the route sits in code that
   builds sources for symbolicator, which fetches the URL later.
 - **L10** comes out as *inferred*: sentry sends `.../subscriptions/{subscription_id}`, and the id holds

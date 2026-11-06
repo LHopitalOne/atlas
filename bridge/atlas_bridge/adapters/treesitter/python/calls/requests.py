@@ -46,7 +46,10 @@ class RequestCalls(CallCollector):
         if methods is None:
             methods = self._methods.options(scope, target.method_node) if target.method_node is not None else [ANY]
         hints = self._sites.hints_for(scope, receiver)
+        origin = self._sites.origin_assumption(scope, receiver)
+        assumptions = (origin,) if origin is not None else ()
         run = RequestRun(target.client)
         for v in self._values.resolve(target.url, scope)[: self.MAX_ALTS]:
             for m in methods:
-                self._settler.settle(scope, call, PendingRequest(v.text, m, hints | v.hints), run)
+                pending = PendingRequest(v.text, m, hints | v.hints, assumptions=assumptions)
+                self._settler.settle(scope, call, pending, run)

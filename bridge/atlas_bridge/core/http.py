@@ -7,6 +7,8 @@ Adapters translate Django regexes, Flask converters, axum captures and format st
 import re
 from dataclasses import dataclass, field
 
+from .evidence import Assumption
+
 ANY = 'ANY'
 
 
@@ -172,6 +174,7 @@ class Call:
     kind: str = REQUEST
     route_name: str = ''
     test: bool = False  # only in tests, fixtures or tooling
+    assumptions: tuple[Assumption, ...] = ()  # names resolved on the way here; a precise index can check them
 
     @property
     def is_payload(self):

@@ -52,6 +52,24 @@ named service, one route fits), **inferred** (no name, or a URL handed to anothe
 (several routes fit) or **unmatched** (the named service has no such route). Requests made only by tests are left
 out unless `--include-tests`.
 
+### Confirming links with SCIP
+
+A link rests on names the finder resolved without a compiler: the client a request goes through
+(`_snuba_pool` here is the pool defined at `snuba.py:590`), each wrapper call it followed back to the literal path,
+the request trait a Rust type implements. [SCIP](https://github.com/sourcegraph/scip) indexes record where every name
+really points, so they can check those guesses:
+
+```bash
+python3 -m atlas_bridge index sentry relay snuba symbolicator -o scip      # scip-python, rust-analyzer, scip-typescript
+python3 -m atlas_bridge links sentry relay snuba symbolicator --alias upstream=sentry --scip-dir scip -o links.json
+```
+
+Each matched link is then **confirmed** (every name it rests on resolves where the finder assumed), **syntax** (it
+rests on no name lookup: read straight from the code), **contradicted** (a name resolves elsewhere) or **unverified**.
+The indexers never run the repositories' code: scip-python and scip-typescript only type-check, and rust-analyzer runs
+with build scripts and procedural macros switched off. SCIP files are read without a protobuf dependency. What no
+index can confirm is configuration: which host a base URL points to when the code runs.
+
 `eval/sentry/` is an answer key of the real links between four Sentry services; `eval/score.py` scores a run:
 
 ```bash
