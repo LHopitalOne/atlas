@@ -61,6 +61,11 @@ class PendingRequest(NamedTuple):
     evidence: Evidence = Evidence()
     stack: frozenset = frozenset()
     assumptions: tuple = ()  # Assumptions made on the way: the receiver's origin, each wrapper call followed
+    guards: tuple = ()  # Guards: branches on a wrapper's parameters the request is sent in
+
+    def guarded(self, guards) -> 'PendingRequest':
+        """The same request, sent only in these branches too."""
+        return self._replace(guards=self.guards + guards) if guards else self
 
     def says_more(self, reading: Reading) -> bool:
         """At the request itself: any literal, or nothing left open. At a caller: more than the levels below."""
@@ -80,7 +85,8 @@ class PendingRequest(NamedTuple):
         """The request one level up, at a caller of `wrapper` that filled in `url`, `method` and `hints`; `hop` is
         the Assumption that the caller's call reaches the wrapper."""
         assumptions = (*self.assumptions, hop) if hop is not None else self.assumptions
-        return PendingRequest(url, method, hints, self.depth + 1, self.evidence, self.stack | {wrapper}, assumptions)
+        depth, stack = self.depth + 1, self.stack | {wrapper}
+        return PendingRequest(url, method, hints, depth, self.evidence, stack, assumptions, self.guards)
 
 
 class RequestRun:

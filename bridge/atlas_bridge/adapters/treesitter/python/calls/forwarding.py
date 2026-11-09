@@ -10,6 +10,7 @@ from ..scope import Scope
 from ..syntax import PythonSyntax
 from ..values import Marker, Value
 from ..verbs import HttpVerbs
+from .guards import Guards
 
 
 @dataclass(frozen=True, slots=True, eq=False)
@@ -54,7 +55,7 @@ class Forwarder:
         defaults = dict(params)
         for source, call in self._workspace.callers.callers_of(scope.source, func):
             site = CallSite.at(source, call, params)
-            if site.splat:
+            if site.splat or not Guards.allow(pending.guards, func, site.bound, defaults):
                 continue
             decided = self._methods.decide(pending.method, func, site.bound, defaults)
             hop = self.hop(source, call, scope.source, func)

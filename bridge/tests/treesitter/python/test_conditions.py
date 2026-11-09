@@ -37,6 +37,12 @@ class ConditionTest(unittest.TestCase):
         self.assertIsNone(cond.truth(expr('c is None')))
         self.assertIsNone(cond.truth(expr('()')))
         self.assertIsNone(cond.truth(expr('1 + 1')))
+        self.assertTrue(cond.truth(expr("d == 'x'")))
+        self.assertFalse(cond.truth(expr("'y' == d")))
+        self.assertTrue(cond.truth(expr("d != 'y'")))
+        self.assertIsNone(cond.truth(expr("b == 'x'")))  # not a string argument
+        self.assertIsNone(cond.truth(expr("c == 'x'")))  # no value
+        self.assertIsNone(cond.truth(expr('d == e')))
         self.assertTrue(Condition.over(expr('a and b'), {'a', 'b'}))
         self.assertFalse(Condition.over(None, {'a'}))
 

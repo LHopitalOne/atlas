@@ -75,11 +75,19 @@ class VerbIdiom(RequestIdiom):
     """`requests.get(url)`, `client.post(url=...)`: the verb names the method."""
 
     NAMES = frozenset(HttpVerbs.NAMES)
+    SPLATS = frozenset({'list_splat', 'dictionary_splat'})
 
     def target(self, name, scope, receiver, pos, kw):
         if receiver is None:
             return None
         client = self.is_client(receiver)
-        if name == 'get' and not client and len(pos) > 1:
-            return None  # mapping.get(key, default)
+        if name == 'get' and not client and self._mapping_get(pos, kw):
+            return None
         return RequestTarget(kw.get('url', pos[0] if pos else None), None, [name.upper()], client)
+
+    @classmethod
+    def _mapping_get(cls, pos, kw):
+        """`mapping.get(key, default)`: two plain positional arguments and no `url=`; `*args, **kwargs` passed on
+        are not a key and a default."""
+        plain = [a for a in pos if a.type not in cls.SPLATS]
+        return 'url' not in kw and len(plain) > 1

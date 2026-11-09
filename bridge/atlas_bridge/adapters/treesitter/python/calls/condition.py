@@ -1,17 +1,20 @@
 """A condition over a wrapper's parameters, evaluated with the arguments of one call site."""
 
+from ...kit import StringTemplate
 from ..syntax import PythonSyntax
 
 
 class Condition:
-    """Evaluates `x is None`, `not x`, `a and b`, `a or b` and bare parameters with the arguments one call site binds
-    (else the parameters' defaults). truth() is True, False, or None when the call site does not decide it."""
+    """Evaluates `x is None`, `x == 'text'`, `not x`, `a and b`, `a or b` and bare parameters with the arguments one
+    call site binds (else the parameters' defaults). truth() is True, False, or None when the call site does not
+    decide it."""
 
     FALSY = ('none', 'false')
     NUMBERS = ('integer', 'float')
     CONTAINERS = ('string', 'concatenated_string', 'list', 'tuple', 'dictionary', 'set')
     DELIMITERS = ('string_start', 'string_end')
     IDENTITY = ('is', 'is not')
+    EQUALITY = ('==', '!=')
     HANDLERS = {
         'parenthesized_expression': '_parenthesized',
         'not_operator': '_not',
@@ -71,12 +74,28 @@ class Condition:
     def _comparison(self, node):
         kids = node.named_children
         op = next((c.type for c in node.children if not c.is_named), '')
-        if len(kids) != 2 or kids[1].type != 'none' or kids[0].type != 'identifier' or op not in self.IDENTITY:
+        if len(kids) != 2:
+            return None
+        if op in self.EQUALITY:
+            return self._equality(kids, op)
+        if kids[1].type != 'none' or kids[0].type != 'identifier' or op not in self.IDENTITY:
             return None
         known, arg = self._argument(PythonSyntax.text(kids[0]))
         if not known:
             return None
         return (arg.type == 'none') != (op == 'is not')
+
+    def _equality(self, kids, op):
+        """`method == 'POST'` (either side): the argument's string literal against the other side's."""
+        param, literal = kids if kids[0].type == 'identifier' else kids[::-1]
+        expected = StringTemplate.of(literal)
+        if param.type != 'identifier' or expected is None or '{' in expected:
+            return None
+        known, arg = self._argument(PythonSyntax.text(param))
+        given = StringTemplate.of(arg) if known else None
+        if given is None or '{' in given:
+            return None
+        return (given == expected) == (op == '==')
 
     def _identifier(self, node):
         known, arg = self._argument(PythonSyntax.text(node))

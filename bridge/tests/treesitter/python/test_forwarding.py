@@ -162,6 +162,44 @@ class ForwardingTest(unittest.TestCase):
             },
         )
 
+    def test_branches_on_a_parameter_are_decided_per_caller(self):
+        ex = extract(
+            {
+                'ml/api.py': """
+                class MLApi(BaseHTTPAPI):
+                    def _request(self, suffix, request=None, method='POST', *args, **kwargs):
+                        url = f'{self._url}/{suffix}'
+                        if method == 'POST':
+                            return self.post(url=url, json=request, *args, **kwargs)
+                        elif method == 'PUT':
+                            return self.put(url, json=request)
+                        else:
+                            return self.get(url=url, *args, **kwargs)
+
+                    def health(self):
+                        return self._request('health', method='GET', timeout=1)
+
+                    def predict(self, tasks):
+                        return self._request('predict', {'tasks': tasks})
+
+                    def replace(self, key):
+                        return self._request(f'models/{key}', method='PUT')
+
+                    def either(self, verb):
+                        return self._request('either', method=verb)
+
+                    def lookup(self, mapping):
+                        return mapping.get('key', 'default')
+                """,
+            }
+        )
+        found = requests_(ex)
+        self.assertEqual(
+            {r for r in found if r[1] != '/either'},
+            {('GET', '/health'), ('POST', '/predict'), ('PUT', '/models/{key}')},
+        )
+        self.assertEqual({m for m, p in found if p == '/either'}, {'GET', 'POST', 'PUT'})  # not decided here
+
     def test_fan_out_is_forwarded_once_per_function(self):
         lines = ['import requests', 'def f0(p, q):', "    return requests.get('/a/' + p + '/' + q)"]
         for k in range(1, 4):

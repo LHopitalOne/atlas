@@ -2,6 +2,7 @@
 
 from .....core.http import ANY
 from .forwarding import Forwarder
+from .guards import Guards
 from .pending import PendingRequest, Reading
 
 
@@ -24,4 +25,5 @@ class Settler:
             self._book.add(scope, site, reading.path, method, pending.hints | reading.bases, pending.assumptions)
         forwardable = reading.pathlike or run.client
         if reading.open and scope.func is not None and pending.depth < self.MAX_FORWARD and forwardable:
+            pending = pending.guarded(Guards.around(scope, site))
             self._forwarder.forward(scope, pending.seen_with(reading), run)

@@ -4,6 +4,7 @@ from .absolute import AbsoluteUrl
 from .book import CallBook
 from .condition import Condition
 from .forwarding import CallSite, Forwarder
+from .guards import Guard, Guards
 from .hints import PayloadHints
 from .idioms import RequestIdiom, RequestMethodIdiom, RequestTarget, UrlopenIdiom, VerbIdiom
 from .methods import MethodOptions
@@ -20,6 +21,8 @@ __all__ = [
     'Condition',
     'Evidence',
     'Forwarder',
+    'Guard',
+    'Guards',
     'MethodOptions',
     'PayloadCalls',
     'PayloadHints',
