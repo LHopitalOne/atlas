@@ -23,6 +23,7 @@ class ModuleTable:
         self._functions = {}  # name -> function_definition
         self._classes = {}  # name -> class_definition
         self._imports = {}  # name -> Import
+        self._stars = {}  # start byte of a `from module import *` statement -> its ModuleRef
         for st in PythonSyntax.module_statements(source.root):
             self._read(st)
 
@@ -38,6 +39,10 @@ class ModuleTable:
 
     def imported(self, name) -> Import | None:
         return self._imports.get(name)
+
+    def star_import(self, statement):
+        """The ModuleRef a module-level `from module import *` statement of this file imports, or None."""
+        return self._stars.get(statement.start_byte)
 
     def _read(self, st):
         t = st.type
@@ -74,6 +79,8 @@ class ModuleTable:
     def _import_from(self, st):
         text = PythonSyntax.text
         ref = self._module_ref(st.child_by_field_name('module_name'))
+        if any(c.type == 'wildcard_import' for c in st.children):
+            self._stars[st.start_byte] = ref
         for n in st.children_by_field_name('name'):
             if n.type == 'aliased_import':
                 self._imports[text(n.child_by_field_name('alias'))] = Import(ref, text(n.child_by_field_name('name')))

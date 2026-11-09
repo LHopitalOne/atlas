@@ -3,6 +3,7 @@ import unittest
 from atlas_bridge.adapters.treesitter.python.routes.django import (
     Composition,
     DrfRouters,
+    LoopValues,
     UrlComposer,
     UrlEntries,
     UrlLists,
@@ -180,6 +181,117 @@ class DjangoRouteTest(unittest.TestCase):
             }
         )
         self.assertEqual({str(r.path) for r in ex.routes}, {'/v', '/w', '/x', '/new'})
+
+
+HELPERS = {
+    'proj/settings.py': """
+    ROOT_URLCONF = 'proj.urls'
+    if RUNNING_EVENTS:
+        ROOT_URLCONF = 'proj.event_urls'
+    """,
+    'proj/rest.py': """
+    from django.urls import path
+
+    def rest_path(route, **handlers):
+        return path(route, dispatch, handlers)
+
+    def api_path(route, **handlers):
+        return rest_path(f'api/{route}', **handlers)
+
+    def make_urls(prefix):
+        return [path(f'{prefix}/list/', listing)]
+    """,
+    'proj/urls.py': """
+    from django.urls import include, path
+    from proj.rest import api_path, make_urls, rest_path
+
+    v1_patterns = [
+        rest_path('users', GET=list_users, POST=(add_user, {'flag'})),
+        rest_path('users/<int:user_id>', PATCH=update_user, DELETE=delete_user),
+        rest_path(ROUTE, GET=dynamic),
+        api_path('nested', PUT=nested_view),
+        path('plain/', plain_view),
+    ]
+    pages: list[object] = [path('home/', home)]
+    urls: list[object] = list(pages)
+    urls += [path('v1/', include(v1_patterns)), path('json/', include(v1_patterns))]
+    urls.extend([path('built/', include(make_urls('b')))])
+    if DEBUG:
+        urls += [path('debug/', debug_view)]
+    urls += [path('const/', include(CONST_MODULE)), path('fmt/', include(f'{PACKAGE}.urls'))]
+    for app in ['proj.billing', 'proj.missing']:
+        urls += [path('', include(f'{app}.urls'))]
+    for app in settings.EXTRA_APPS:
+        urls += [path('extra/', include(f'{app}.urls'))]
+    for old in REDIRECTS:
+        urls += [path(old, redirect_view)]
+    for name in ['a', 'b']:
+        urls += [path(name_route, redirect_view)]
+    urlpatterns = i18n_patterns(*pages) + urls
+    CONST_MODULE = 'proj.const_urls'
+    PACKAGE = 'proj.fmt'
+    """,
+    'proj/event_urls.py': """
+    from proj.rest import rest_path
+    urlpatterns = [rest_path('events', GET=get_events, DELETE=cleanup)]
+    """,
+    'proj/const_urls.py': "urlpatterns = [path('c/', c_view)]\n",
+    'proj/fmt/urls.py': "urlpatterns = [path('f/', f_view)]\n",
+    'proj/billing/urls.py': """
+    from proj.rest import rest_path as helper
+    urlpatterns = [helper('billing/plan', PATCH=update_plan)]
+    """,
+    'proj/plugin/urls.py': "urlpatterns = [path('p/', p_view)]\n",
+    'proj/conf/settings.py': """
+    from .defaults import *
+    from .dev import *
+    """,
+    'proj/conf/defaults.py': "EXTRA_APPS = ['nowhere']\n",
+    'proj/conf/dev.py': "EXTRA_APPS = ['proj.plugin']\n",
+}
+
+
+class RouteHelperTest(unittest.TestCase):
+    def setUp(self):
+        self.routes = extract(HELPERS).routes
+
+    def found(self, path):
+        return {(sorted(r.methods)[0], r.handler, r.file, r.line) for r in self.routes if str(r.path) == path}
+
+    def test_helper_calls_declare_one_route_per_method_keyword(self):
+        self.assertEqual(
+            self.found('/v1/users'),
+            {('GET', 'list_users', 'proj/urls.py', 6), ('POST', 'add_user', 'proj/urls.py', 6)},
+        )
+        self.assertEqual(
+            self.found('/json/users/{user_id}'),
+            {('PATCH', 'update_user', 'proj/urls.py', 7), ('DELETE', 'delete_user', 'proj/urls.py', 7)},
+        )
+        self.assertEqual(self.found('/v1/api/nested'), {('PUT', 'nested_view', 'proj/urls.py', 9)})
+        self.assertEqual(self.found('/v1/plain'), {(ANY, 'plain_view', 'proj/urls.py', 10)})
+        self.assertEqual(self.found('/v1/{param}'), {('GET', 'dynamic', 'proj/urls.py', 8)})
+
+    def test_every_root_urlconf_assignment_is_a_root(self):
+        self.assertEqual(
+            self.found('/events'),
+            {('GET', 'get_events', 'proj/event_urls.py', 3), ('DELETE', 'cleanup', 'proj/event_urls.py', 3)},
+        )
+        self.assertEqual(self.found('/billing/plan'), {('PATCH', 'update_plan', 'proj/billing/urls.py', 3)})
+
+    def test_composed_lists_and_included_modules(self):
+        got = {str(r.path) for r in self.routes}
+        for p in ('/home', '/built/b/list', '/debug', '/const/c', '/fmt/f', '/billing/plan', '/extra/p'):
+            self.assertIn(p, got)
+        self.assertFalse(any(p.startswith(('/{', '/extra/{')) for p in got), got)
+        self.assertNotIn('/', got)
+
+    def test_loop_values_need_literal_strings(self):
+        ws = workspace({'m.py': "APPS = ('a', f'{x}', 3)\nfor app in APPS:\n    pass\nfor a, b in APPS:\n    pass\n"})
+        source = ws.source('m.py')
+        loops = list(source.root.named_children)[1:]
+        found = LoopValues(ws, PythonValueResolver(ws))
+        self.assertEqual(found.values(source, loops[0]), [{'app': 'a'}])
+        self.assertEqual(found.values(source, loops[1]), [])
 
 
 class ComposerTest(unittest.TestCase):
