@@ -13,6 +13,7 @@ class ScipSymbol:
     TYPE_PARAMETER = re.compile(r'\[([^\]]+)\]$')  # '...#[T]': a type parameter descriptor
     TERMINAL = re.compile(r'(`(?:[^`]|``)+`|[^\s/#.`()\[\]!:]+)(?:\([^()]*\)\.|[/#.:!])$')  # 'name' + its suffix
     CALLABLE = re.compile(r'\([^()]*\)\.$')  # a method or function descriptor ends in '().'
+    METHOD = re.compile(r'#[^#/]+\([^()]*\)\.$')  # 'Class#name().': a method, not a module-level function
     SOURCE_ROOT = re.compile(r'^(`?)(?:src|lib)\.')  # a src/ layout's module path, as its own index writes it
     PARTS = 5  # scheme, manager, package, version, descriptors
 
@@ -29,6 +30,16 @@ class ScipSymbol:
     @classmethod
     def is_callable(cls, symbol: str) -> bool:
         return not symbol.startswith(cls.LOCAL) and bool(cls.CALLABLE.search(symbol))
+
+    @classmethod
+    def package(cls, symbol: str) -> str:
+        """The package a symbol belongs to; the indexers name a repository's own package after the repository."""
+        parts = symbol.split(' ', cls.PARTS - 1)
+        return parts[2] if len(parts) == cls.PARTS else ''
+
+    @classmethod
+    def is_method(cls, symbol: str) -> bool:
+        return cls.is_callable(symbol) and cls.METHOD.search(symbol) is not None
 
     @classmethod
     def key(cls, symbol: str) -> str:

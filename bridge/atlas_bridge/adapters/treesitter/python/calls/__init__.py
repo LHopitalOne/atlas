@@ -11,6 +11,7 @@ from .methods import MethodOptions
 from .payloads import PayloadCalls
 from .pending import Evidence, PendingRequest, Reading, RequestRun
 from .requests import RequestCalls
+from .senders import Senders
 from .settle import Settler
 from .sites import SiteHints
 
@@ -33,6 +34,7 @@ __all__ = [
     'RequestMethodIdiom',
     'RequestRun',
     'RequestTarget',
+    'Senders',
     'Settler',
     'SiteHints',
     'UrlopenIdiom',

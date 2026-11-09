@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 
-from ..core.callgraph import Function, Site
+from ..core.callgraph import Function, Site, Target
 from ..core.evidence import Assumption, Verdict
 from ..core.http import Extraction
 
@@ -41,4 +41,8 @@ class CallGraph(ABC):
 
     @abstractmethod
     def callers(self, function: Function) -> list[Site]:
-        """Every line, in any indexed repository, that calls the function."""
+        """Every line, in any indexed repository, that calls the function (a function of a library read alongside)."""
+
+    @abstractmethod
+    def resolves(self, repo: str, file: str, line: int, name: str) -> frozenset[Target]:
+        """What `name`, used on that line, refers to; empty when the index does not know."""

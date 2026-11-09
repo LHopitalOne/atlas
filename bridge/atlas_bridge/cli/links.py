@@ -45,6 +45,11 @@ class LinksCommand(Command):
             '--scip-dir', help='a folder of <repo>[.<language>].scip files, as the index command writes'
         )
         parser.add_argument(
+            '--no-scip-search',
+            action='store_true',
+            help='with SCIP indexes, still read requests and their callers by name only (the indexes then only verify)',
+        )
+        parser.add_argument(
             '--within',
             action='store_true',
             help="also link browser code to its own repository's server routes (a monorepo's frontend and backend)",
@@ -62,13 +67,16 @@ class LinksCommand(Command):
         from ..adapters.treesitter import TreeSitterExtractor  # needs the optional tree-sitter packages
 
         repos = [RepositoryInput.parse(item).checked() for item in args.repos]
+        libraries = [RepositoryInput.parse(item).checked() for item in args.library]
         names = [r.name for r in repos]
+        indexes = self._indexes(args)
+        graph = ScipCallGraph(indexes, {lib.name for lib in libraries}) if indexes else None
+        extractor = TreeSitterExtractor(None if args.no_scip_search else graph)
         finder = LinkFinder(names, Aliases.parse(args.alias), args.include_tests, self._rules(args.within))
-        extraction, extractor = Extraction(), TreeSitterExtractor()
+        extraction = Extraction()
         for repo in repos:
             extraction.extend(extractor.extract(repo.name, repo.path))
-        indexes = self._indexes(args)
-        extraction.calls += self._through_libraries(args, extractor, indexes)
+        extraction.calls += self._through_libraries(libraries, extractor, graph)
         links = self._verified(finder.find(extraction), indexes)
         report = LinkReport(names, extraction, links)
         JsonFile.write(args.out, LinkFilePresenter().present(report), indent=1)
@@ -78,18 +86,17 @@ class LinksCommand(Command):
             base = GraphifyLinkWriter(GraphInput.parse(args.graph).load() if args.graph else None)
             JsonFile.write(args.graphify_out, base.present(report.links))
 
-    def _through_libraries(self, args, extractor, indexes):
+    def _through_libraries(self, libraries, extractor, graph):
         """The requests the --library repositories send, moved to the service lines that call into them."""
-        libraries = [RepositoryInput.parse(item).checked() for item in args.library]
         if not libraries:
             return []
-        if not indexes:
+        if graph is None:
             raise LibraryIndexError([lib.name for lib in libraries])
         sent = Extraction()
         for lib in libraries:
             sent.extend(extractor.extract(lib.name, lib.path))
         names = {lib.name for lib in libraries}
-        moved = LibraryHops(ScipCallGraph(indexes, names), names).calls(sent.calls)
+        moved = LibraryHops(graph, names).calls(sent.calls)
         self.report(f'libraries: {len(moved)} requests reach the services through {", ".join(sorted(names))}')
         return [replace(call, test=extractor.is_test(call.file)) for call in moved]
 
