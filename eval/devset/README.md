@@ -25,3 +25,20 @@ as unjudged, not false.
 | Finder | Immich | Plane | Zulip | All | False links (judged) |
 | --- | --- | --- | --- | --- | --- |
 | commit f9d3d98 | 0 / 46 | 32 / 41 | 0 / 47 | 32 / 134 | 0 |
+| + background tasks, route helpers, JavaScript request helpers, NestJS and generated clients | 24 / 46 | 39 / 41 | 31 / 47 | **94 / 134** | 0 |
+
+The four mechanisms came from a diagnosis of every miss (by agents that saw the code, the key and what the finder
+extracted, not the finder's code), each needed by at least two of the three projects except generated clients, and
+each implemented in its own branch and reviewed by a second agent whose job was to reject rules naming these
+projects rather than a language, library or framework:
+
+- Background tasks (a new `task` protocol): Celery tasks (`@shared_task`, `.delay()`, `.apply_async()`, signatures,
+  `send_task`) and BullMQ queues and workers, linked within the repository that sends and handles them.
+- Route helpers: a function returning Django's `path()`/`re_path()` built from its parameters declares a route at each
+  call; methods given as keyword arguments named like HTTP methods; URLconf lists combined with `+`/`+=`.
+- JavaScript request helpers: jQuery `$.ajax`/`$.get`/`$.post`, helpers reading `options.url` from their parameter, a
+  request helper passed by reference, a URL variable assigned in branches.
+- NestJS controllers with the global prefix, the oazapfts runtime of generated clients, and imports followed into the
+  monorepo's own packages.
+
+Links outside every key are not judged by the sampled keys; a fixed sample of them is audited separately.

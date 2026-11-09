@@ -7,6 +7,7 @@ from ..adapters.linkfile import LinkFilePresenter
 from ..adapters.scip import ScipCallGraph, ScipIndex, ScipOracle
 from ..core.errors import LibraryIndexError
 from ..core.http import Extraction
+from ..usecases.channels import OwnChannelRule
 from ..usecases.hops import LibraryHops
 from ..usecases.link import LinkFinder, LinkReport
 from ..usecases.mentions import NamedChannels
@@ -105,11 +106,11 @@ class LinksCommand(Command):
 
     @staticmethod
     def _rules(within):
-        """Within a repository, a frontend's own routes are asked about before a path is matched across repositories."""
-        if not within:
-            return LinkFinder.RULES
+        """Before a channel is matched across repositories: a task or work queue its own repository handles, and
+        (with --within) browser code calling its own server."""
         *before, path_only = LinkFinder.RULES
-        return (*before, WithinRepoRule, path_only)
+        mine = (OwnChannelRule, WithinRepoRule) if within else (OwnChannelRule,)
+        return (*before, *mine, path_only)
 
     @staticmethod
     def _indexes(args):

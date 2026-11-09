@@ -63,12 +63,12 @@ def excused(truth, f):
 
 def judged(truth, f):
     """Whether the key can judge a finder link. A full key judges every link; a sampled one (it has `sampling`) only
-    links made at a call site it covers: the other sites were never traced, so a link there is unjudged, not false."""
+    links made at a call site it covers (the same line: a neighbouring call was not sampled): the other sites were
+    never traced, so a link there is unjudged, not false."""
     if 'sampling' not in truth:
         return True
-    near = lambda file, line: file == f['call']['file'] and abs(line - f['call']['line']) <= 2  # noqa: E731
     sites = [s for t in truth['links'] if t['caller'] == f['caller'] for s in t['send']]
-    return any(near(s['file'], s['line']) for s in sites)
+    return any(s['file'] == f['call']['file'] and s['line'] == f['call']['line'] for s in sites)
 
 
 def score(truth, found):

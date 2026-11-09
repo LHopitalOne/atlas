@@ -2,6 +2,7 @@
 
 from .addresses import AddressBook
 from .bases import BaseHints
+from .channels import OwnChannelRule
 from .draw import GROUPINGS, CommunityGrouping, FolderGrouping, Grouping, MapDrawer, MapView
 from .hops import LibraryHops
 from .link import Link, LinkFinder, LinkReport, LinkRule, ServiceNames
@@ -30,6 +31,7 @@ __all__ = [
     'MapDrawer',
     'MapView',
     'NamedChannels',
+    'OwnChannelRule',
     'ServiceNames',
     'WithinRepoRule',
 ]
