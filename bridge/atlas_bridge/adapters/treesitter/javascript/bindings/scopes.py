@@ -6,13 +6,15 @@ from .binding import Binding, ParamBinding, ValueBinding
 
 
 class Scopes:
-    """The const/let/var declarations and parameters of one file. Each scope's names are read once and kept."""
+    """The const/let/var and function declarations and parameters of one file. Each scope's names are read once and
+    kept."""
 
     BLOCKS = frozenset({'statement_block', 'program'})
     BINDERS = Functions.FUNCTIONS | {'for_in_statement', 'catch_clause'}  # nodes that bind names without a declaration
     DEFAULTED = frozenset({'assignment_pattern', 'object_assignment_pattern'})
     NAMES = frozenset({'identifier', 'shorthand_property_identifier_pattern'})
     PATTERNS = frozenset({'object_pattern', 'array_pattern', 'rest_pattern'})
+    FUNCTION_DECLARATION = 'function_declaration'  # `function name() {}`: bound like a const, to the function
 
     def __init__(self):
         self._blocks = {}  # block node id -> {name: Binding}
@@ -47,6 +49,8 @@ class Scopes:
                     child = child.child_by_field_name('declaration') or child
                 if child.type in JsSyntax.DECLARATIONS:
                     self._declare(found, child)
+                elif child.type == self.FUNCTION_DECLARATION and child.child_by_field_name('name') is not None:
+                    found.setdefault(JsSyntax.text(child.child_by_field_name('name')), ValueBinding(child))
             self._blocks[block.id] = found
         return found
 

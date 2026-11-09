@@ -21,15 +21,20 @@ class PayloadTest(unittest.TestCase):
                     return [get_internal_source(project)]
 
                 def lookup_url(project):
-                    return reverse('artifact-lookup')
+                    return settings.BASE + reverse('artifact-lookup')
 
                 def lookup_source(project):
                     return {'url': lookup_url(project)}
 
                 reverse(name_var)
-                urls.reverse(viewname='module-level')
+                urljoin(BASE, urls.reverse(viewname='module-level'))
                 items.reverse()
                 reverse(f'{prefix}-x')
+                FROM_F_STRING = f"{BASE}{reverse('f-string')}"
+                BUILT = request.build_absolute_uri(reverse('built'))
+                redirect(reverse('dashboard'))
+                PAGE = {'next': reverse('relative')}
+                QUERY = '{}?next=x'.format(reverse('first-argument'))
                 """,
                 'src/app/native/symbolicator.py': """
                 from app.native.sources import lookup_source
@@ -42,7 +47,7 @@ class PayloadTest(unittest.TestCase):
                 from app.native.sources import lookup_source
 
                 def test_view(client):
-                    client.get(reverse('dsym-files'))
+                    client.get(request.build_absolute_uri(reverse('dsym-files')))
 
                 def test_lookup():
                     lookup_source(None)
@@ -50,9 +55,8 @@ class PayloadTest(unittest.TestCase):
             }
         )
         payloads = {(c.route_name, c.test) for c in ex.calls if c.kind == 'payload'}
-        self.assertEqual(
-            payloads, {('dsym-files', False), ('artifact-lookup', False), ('module-level', False), ('dsym-files', True)}
-        )
+        made_absolute = {'dsym-files', 'artifact-lookup', 'module-level', 'f-string', 'built'}
+        self.assertEqual(payloads, {(name, False) for name in made_absolute} | {('dsym-files', True)})
         dsym = next(c for c in ex.calls if c.route_name == 'dsym-files' and not c.test)
         self.assertIsNone(dsym.path)
         self.assertIn('symbolicator-source', dsym.hints)

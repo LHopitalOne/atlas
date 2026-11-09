@@ -2,6 +2,7 @@ import unittest
 
 from atlas_bridge.adapters.treesitter.python.routes.django import (
     Composition,
+    DrfRouters,
     UrlComposer,
     UrlEntries,
     UrlLists,
@@ -196,7 +197,9 @@ class ComposerTest(unittest.TestCase):
             made.append((source.path, path, handler, name))
             return path
 
-        composer = UrlComposer(route, ws.names, values, UrlEntries(ws, values, UrlLists()), ViewMethods(ws))
+        routers = DrfRouters(ws, values)
+        entries = UrlEntries(ws, values, UrlLists(), routers)
+        composer = UrlComposer(route, ws.names, values, entries, ViewMethods(ws), routers)
         out = composer.compose(ws.source('proj/urls.py'), 'urlpatterns')
         self.assertEqual(out.routes, ['/api/ping/', '/top/'])
         self.assertEqual(out.included, frozenset({'proj/api.py'}))

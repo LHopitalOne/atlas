@@ -23,7 +23,7 @@ class TestPathPolicy:
 
 
 class RepositoryFiles:
-    """Source files under a repository folder that some grammar can read."""
+    """The files under a repository folder: those some grammar can read, and every file (for configuration)."""
 
     SKIP_DIRS = frozenset(
         {'.git', 'node_modules', '.venv', 'venv', 'target', 'dist', 'build', '__pycache__', '.tox', 'vendor'}
@@ -32,15 +32,22 @@ class RepositoryFiles:
 
     def __init__(self, root: str):
         self.root = root
+        self._all = None
 
     def paths(self) -> list[str]:
-        """Relative paths, sorted. Uses git when the folder is a repository (honours .gitignore)."""
-        try:
-            out = subprocess.run(['git', 'ls-files', '-z'], cwd=self.root, capture_output=True, check=True).stdout
-            paths = [p for p in out.decode('utf-8', 'replace').split('\0') if p]
-        except (OSError, subprocess.CalledProcessError):
-            paths = self._walk()
-        return sorted(p for p in paths if os.path.splitext(p)[1] in Grammar.BY_EXTENSION)
+        """Relative paths of the files a grammar reads, sorted."""
+        return [p for p in self.all_paths() if os.path.splitext(p)[1] in Grammar.BY_EXTENSION]
+
+    def all_paths(self) -> list[str]:
+        """Every relative path, sorted. Uses git when the folder is a repository (honours .gitignore); read once."""
+        if self._all is None:
+            try:
+                out = subprocess.run(['git', 'ls-files', '-z'], cwd=self.root, capture_output=True, check=True).stdout
+                paths = [p for p in out.decode('utf-8', 'replace').split('\0') if p]
+            except (OSError, subprocess.CalledProcessError):
+                paths = self._walk()
+            self._all = sorted(paths)
+        return self._all
 
     def read(self, path: str) -> bytes:
         full = os.path.join(self.root, path)

@@ -22,7 +22,9 @@ class ScopeResolver(ValueResolver):
         'conditional_expression': 'conditional',
         'identifier': 'identifier',
         'attribute': 'attribute',
+        'subscript': 'subscript',
     }
+    SETTINGS = 'settings'  # `settings.NAME`: django.conf's settings object
     MAX_DEPTH = 14
     MAX_ALTS = 4  # alternatives one expression may resolve to
 
@@ -107,6 +109,11 @@ class ScopeResolver(ValueResolver):
         return vs
 
     def attribute(self, node, scope, depth):
+        setting = self._setting(node)
+        if setting is not None:
+            text = PythonSyntax.text(node)
+            values = self.resolve(setting[1], Scope.module(setting[0]), depth + 1)
+            return [Value(v.text, v.hints | {text}, v.kind) for v in values]
         if PythonSyntax.is_self(node.child_by_field_name('object')):
             attr = PythonSyntax.text(node.child_by_field_name('attribute'))
             cls = scope.cls
@@ -116,3 +123,36 @@ class ScopeResolver(ValueResolver):
         if found is not None:
             return self.resolve(found.node, Scope.module(found.source), depth + 1)
         return self.unknown(node)
+
+    def _setting(self, node):
+        """(source, value node) of `settings.NAME`, or None for any other attribute."""
+        owner = node.child_by_field_name('object')
+        if owner.type != 'identifier' or PythonSyntax.text(owner) != self.SETTINGS:
+            return None
+        return self._workspace.settings.value(PythonSyntax.text(node.child_by_field_name('attribute')))
+
+    def subscript(self, node, scope, depth):
+        """`MAPPING['key']` of a dict literal bound to a module-level name or a setting: that entry's value."""
+        found = self._mapping(node.child_by_field_name('value'), scope)
+        key = node.child_by_field_name('subscript')
+        if found is None or key is None or key.type != 'string':
+            return self.unknown(node)
+        source, mapping = found
+        wanted = self.string(key, scope).text
+        for pair in mapping.named_children:
+            k = pair.child_by_field_name('key') if pair.type == 'pair' else None
+            if k is not None and k.type == 'string' and self.string(k, Scope.module(source)).text == wanted:
+                text = PythonSyntax.text(node)
+                values = self.resolve(pair.child_by_field_name('value'), Scope.module(source), depth + 1)
+                return [Value(v.text, v.hints | {text}, v.kind) for v in values]
+        return self.unknown(node)
+
+    def _mapping(self, node, scope):
+        """(source, dict literal node) a name, `module.NAME` or `settings.NAME` is bound to, or None."""
+        if node is None:
+            return None
+        found = self._setting(node) if node.type == 'attribute' else None
+        if found is None and node.type in ('identifier', 'attribute'):
+            symbol = self._workspace.names.value(scope.source, node)
+            found = (symbol.source, symbol.node) if symbol is not None else None
+        return found if found is not None and found[1] is not None and found[1].type == 'dictionary' else None

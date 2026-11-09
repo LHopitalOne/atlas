@@ -1,17 +1,18 @@
-"""PayloadCalls: Django `reverse('route-name')` URLs, handed to another service rather than requested."""
+"""PayloadCalls: Django `reverse('route-name')` URLs made absolute and handed to another service, not requested."""
 
 from .....core.http import ANY, Call, Extraction
 from ...kit import CallCollector
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from ..values import Marker, PythonValueResolver
+from .absolute import AbsoluteUrl
 from .book import CallBook
 from .hints import PayloadHints
 
 
 class PayloadCalls(CallCollector):
-    """A `reverse()` / `reverse_lazy()` of a literal route name is a payload call: no path, the route's name, and
-    hints naming the service that will fetch the URL."""
+    """A `reverse()` / `reverse_lazy()` of a literal route name, joined to a base URL (AbsoluteUrl), is a payload
+    call: no path, the route's name, and hints naming the service that will fetch the URL."""
 
     NAMES = frozenset({'reverse', 'reverse_lazy'})
     MODULES = ('urls', 'urlresolvers')  # `urls.reverse(...)`: other receivers' reverse() is list.reverse()
@@ -32,6 +33,8 @@ class PayloadCalls(CallCollector):
     def _payload(self, source, call):
         receiver = PythonSyntax.receiver(call)
         if receiver is not None and not PythonSyntax.text(receiver).endswith(self.MODULES):
+            return
+        if not AbsoluteUrl.made_absolute(call):
             return
         pos, kw = PythonSyntax.call_args(call)
         node = kw.get('viewname', pos[0] if pos else None)

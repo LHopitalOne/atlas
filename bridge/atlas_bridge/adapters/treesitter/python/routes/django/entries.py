@@ -17,25 +17,31 @@ class ListBinding(NamedTuple):
 
 
 class Entry(NamedTuple):
-    """One path()/re_path()/url() call, the file it is in, and the binding it was built under (or None)."""
+    """One path()/re_path()/url() call (or a DRF `router.register()` call, kind ROUTER), the file it is in, and the
+    binding it was built under (or None)."""
+
+    PATH, ROUTER = 'path', 'router'
 
     source: object
     call: object
     binding: ListBinding | None
+    kind: str = PATH
 
 
 class UrlEntries:
     """Walks URL list expressions down to their entries: list literals, `+`, `*splat`, names of lists (in this module
-    or imported), `module.LIST`, `patterns('', ...)`, `list(...)`, and calls of functions that return lists."""
+    or imported), `module.LIST`, `router.urls`, `patterns('', ...)`, `list(...)`, and calls of functions that return
+    lists."""
 
     MAX_DEPTH = 30
     CONTAINERS = frozenset({'list', 'tuple', 'expression_list', 'set', 'list_splat', 'parenthesized_expression'})
     ENTRIES = frozenset({'path', 're_path', 'url'})
 
-    def __init__(self, workspace, values, lists):
+    def __init__(self, workspace, values, lists, routers):
         self._workspace = workspace
         self._values = values
         self._lists = lists  # UrlLists
+        self._routers = routers  # DrfRouters
 
     def list_ref(self, source, name, depth=0):
         """(file, name) of the module-level list a name refers to, following `from x import name`; or None."""
@@ -76,7 +82,7 @@ class UrlEntries:
         elif t == 'identifier':
             yield from self._name(source, node, binding, seen, depth)
         elif t == 'attribute':
-            yield from self._module_attribute(source, node, seen, depth)
+            yield from self._attribute(source, node, seen, depth)
 
     def _name(self, source, node, binding, seen, depth):
         name = PythonSyntax.text(node)
@@ -88,6 +94,16 @@ class UrlEntries:
         ref = self.list_ref(source, name)
         if ref is not None:
             yield from self.list_entries(ref[0], ref[1], seen, depth)
+
+    def _attribute(self, source, node, seen, depth):
+        """`router.urls` of a DRF router in this file, else `module.LIST`."""
+        owner = node.child_by_field_name('object')
+        name = PythonSyntax.text(owner) if owner.type == 'identifier' else ''
+        if PythonSyntax.text(node.child_by_field_name('attribute')) == 'urls' and self._routers.is_router(source, name):
+            for register in self._routers.registrations(source, name):
+                yield Entry(source, register, None, Entry.ROUTER)
+            return
+        yield from self._module_attribute(source, node, seen, depth)
 
     def _module_attribute(self, source, node, seen, depth):
         found = self._workspace.names.expression(source, node.child_by_field_name('object'))

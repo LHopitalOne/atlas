@@ -1,9 +1,10 @@
-"""The Python workspace: modules, names, locals, class attributes and callers, indexed once per repository."""
+"""The Python workspace: modules, names, locals, class attributes, callers and settings, indexed once per repository."""
 
 from .callers import CallerIndex
 from .locals import ClassAttributes, LocalAssignment, LocalIndex
 from .modules import AbsoluteModule, ModuleIndex, ModuleRef, RelativeModule
 from .names import NameLookup, Symbol
+from .settings import DjangoSettings
 from .table import Import, ModuleTable
 from .workspace import PythonWorkspace
 
@@ -11,6 +12,7 @@ __all__ = [
     'AbsoluteModule',
     'CallerIndex',
     'ClassAttributes',
+    'DjangoSettings',
     'Import',
     'LocalAssignment',
     'LocalIndex',

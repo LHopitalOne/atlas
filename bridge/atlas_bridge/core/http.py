@@ -19,6 +19,7 @@ class Segment:
     LITERAL = 'literal'
     PARAM = 'param'
     REST = 'rest'
+    PLACEHOLDERS = re.compile(r'\{[^{}]*\}')  # the dynamic parts of a partly dynamic segment
 
     text: str  # the literal text, or the parameter's name
     kind: str = LITERAL
@@ -35,6 +36,30 @@ class Segment:
     def is_rest(self):
         return self.kind == self.REST
 
+    @property
+    def skeleton(self):
+        """The fixed text of a segment with its dynamic parts blanked: 'swagger.{format}' -> 'swagger.{}'."""
+        return self.PLACEHOLDERS.sub('{}', self.text) if self.is_param and '{' in self.text else self.text
+
+    def admits(self, text):
+        """Whether literal text fits this partly literal segment: its fixed pieces, in order ('swagger.json' fits
+        'swagger.{format}', 'accounts' does not)."""
+        pieces = self.skeleton.split('{}')
+        if not text.startswith(pieces[0]) or not text.endswith(pieces[-1]):
+            return False
+        at = len(pieces[0])
+        for piece in pieces[1:-1]:
+            at = text.find(piece, at)
+            if at < 0:
+                return False
+            at += len(piece)
+        return at <= len(text) - len(pieces[-1])
+
+    @property
+    def is_partly_literal(self):
+        """A parameter with fixed text around it: 'v{version}', 'swagger.{format}'."""
+        return self.is_param and '{' in self.text and bool(self.PLACEHOLDERS.sub('', self.text))
+
     def __str__(self):
         if self.is_param and '{' in self.text:  # partly dynamic, like 'v{version}'
             return self.text
@@ -46,6 +71,8 @@ class PathTemplate:
     """A request or route path. Request paths are matched against route paths with fit() and its variants."""
 
     PLACEHOLDER = re.compile(r'^\{(\*?)([^{}]*)\}$')  # a whole segment '{name}' or '{*name}'
+    VERSION = re.compile(r'^v\d+$')  # an API version segment: 'v1', 'v2'
+    API = 'api'
     # How much one aligned pair of segments proves, as (request kind, route kind) -> points. A pair not listed
     # (a literal on a different literal) cannot be served; a request parameter on a route literal proves nothing.
     POINTS = {
@@ -83,12 +110,29 @@ class PathTemplate:
     def literals(self):
         return sum(s.is_literal for s in self.segments)
 
+    @property
+    def fixed(self):
+        """Segments with fixed text: literals and partly literal ones ('swagger.{format}')."""
+        return sum(s.is_literal or s.is_partly_literal for s in self.segments)
+
+    @property
+    def has_rest(self):
+        return any(s.is_rest for s in self.segments)
+
+    @property
+    def is_api(self):
+        """A path under an API prefix: an 'api' segment or a version ('/api/0', '/v2/grades')."""
+        return any(s.is_literal and (s.text == self.API or self.VERSION.match(s.text)) for s in self.segments)
+
     def fit(self, route: 'PathTemplate'):
         """How well this request path fits a route path, or None if the route cannot serve it.
 
         A route's `{*rest}` takes every remaining segment. A route with fixed words must share at least one of
-        them with the request: '/api/{id}/envelope' is not a request for '/{org}/issues/{id}'.
+        them with the request: '/api/{id}/envelope' is not a request for '/{org}/issues/{id}'. A route of parameters
+        only ('/{slug}') does not take a request with fixed words ('/accounts'): that would be a fallback, not a match.
         """
+        if self.literals and not route.fixed and not route.has_rest:
+            return None
         total = self._aligned_points(route)
         if total is None:
             return None
@@ -104,6 +148,18 @@ class PathTemplate:
             return None
         head = PathTemplate(self.segments[:-1]).fit(PathTemplate(route.segments[: n - 1]))
         return None if head is None else head + self.POINTS[Segment.PARAM, Segment.PARAM]
+
+    def prefixed_fit(self, route: 'PathTemplate', max_prefix: int):
+        """(points, prefix) when the route is this path behind 1 to `max_prefix` fixed segments ('/api/v1' +
+        '/courses'): the part a base URL like 'http://catalog/api/v1' carries. None when it is not."""
+        extra = route.size - self.size
+        if not self.literals or not 1 <= extra <= max_prefix:
+            return None
+        head, tail = PathTemplate(route.segments[:extra]), PathTemplate(route.segments[extra:])
+        if head.literals != extra or not head.is_api or not self._shares_a_word(tail) or self.swallowed_by(tail):
+            return None
+        points = self.fit(tail)
+        return None if points is None else (points, head)
 
     def swallowed_by(self, route: 'PathTemplate'):
         """True when the route's `{*rest}` takes literal segments this path names: a catch-all fallback (often a 404
@@ -129,6 +185,10 @@ class PathTemplate:
     def _pair_points(self, mine, route):
         if mine.is_literal and route.is_literal and mine.text != route.text:
             return None
+        if route.is_partly_literal and not (
+            mine.skeleton == route.skeleton or mine.is_literal and route.admits(mine.text)
+        ):
+            return None  # '{name}' or 'accounts' is not 'swagger.{format}'; 'swagger.json' and '{a},{b}' fit
         return self.POINTS[mine.kind, route.kind]
 
     def _shares_a_word(self, route):
@@ -183,12 +243,15 @@ class Call:
 
 @dataclass
 class Extraction:
-    """What an extractor found in one repository: the routes it serves and the requests it sends."""
+    """What an extractor found in one repository: the routes it serves, the requests it sends, and the service URLs
+    its configuration names (core.addresses.ServiceUrl)."""
 
     routes: list[Route] = field(default_factory=list)
     calls: list[Call] = field(default_factory=list)
+    urls: list = field(default_factory=list)
 
     def extend(self, other: 'Extraction'):
         self.routes += other.routes
         self.calls += other.calls
+        self.urls += other.urls
         return self

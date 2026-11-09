@@ -1,6 +1,7 @@
 """Base classes and shared helpers every language extractor builds on."""
 
 from .collector import CallCollector, Collector, RouteCollector
+from .config import ComposeFile, ConfigFiles, EnvFile
 from .files import RepositoryFiles, TestPathPolicy
 from .grammar import Grammar
 from .language import LanguageExtractor
@@ -13,6 +14,9 @@ from .workspace import Workspace
 __all__ = [
     'CallCollector',
     'Collector',
+    'ComposeFile',
+    'ConfigFiles',
+    'EnvFile',
     'Grammar',
     'LanguageExtractor',
     'RepositoryFiles',

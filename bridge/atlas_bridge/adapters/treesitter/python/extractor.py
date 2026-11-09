@@ -5,12 +5,14 @@ URLconfs (`path` / `re_path` / `url` lists composed through `include` from the r
 Requests: verb calls on requests/httpx/aiohttp/session/client-like receivers, `.request(method, url)`, urllib3
 `.urlopen(METHOD, path)` and `urllib.request.urlopen`. URLs are resolved through literals, f-strings, `.format`, `%`,
 `+`, `urljoin`, local variables and module constants, and through the parameters of wrapper functions up to the
-callers that supply them. Payloads: `reverse('route-name')` URLs handed to another service.
+callers that supply them. Payloads: `reverse('route-name')` URLs handed to another service. Service URLs:
+module-level names bound to absolute URLs (settings).
 """
 
 from ....core.http import Extraction
 from ..kit import LanguageExtractor
 from .calls import PayloadCalls, RequestCalls
+from .config import SettingUrls
 from .files import SlashedFiles
 from .policy import PythonTestPolicy
 from .routes import DecoratorRoutes, DjangoRoutes, Registrations, UrlRuleRoutes
@@ -23,7 +25,7 @@ class PythonExtractor(LanguageExtractor):
     GRAMMARS = frozenset({'python'})
     POLICY = PythonTestPolicy
     PREFIXED = (DecoratorRoutes, UrlRuleRoutes)  # share one read of the blueprint and router registrations
-    OTHERS = (DjangoRoutes, RequestCalls, PayloadCalls)
+    OTHERS = (DjangoRoutes, RequestCalls, PayloadCalls, SettingUrls)
 
     def workspace(self, repo, sources):
         return PythonWorkspace(repo, sources)
@@ -37,7 +39,7 @@ class PythonExtractor(LanguageExtractor):
         """The kit's extraction over '/'-separated paths, with routes made unique and sorted."""
         slashed = SlashedFiles(files, paths)
         found = super().extract(repo, slashed, slashed.listed())
-        return Extraction(routes=self.unique_routes(found.routes), calls=found.calls)
+        return Extraction(routes=self.unique_routes(found.routes), calls=found.calls, urls=found.urls)
 
     @staticmethod
     def unique_routes(routes):

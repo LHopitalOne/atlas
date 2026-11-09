@@ -1,5 +1,6 @@
 """Entities: the code graph, HTTP routes and requests, errors. Imports nothing outside the standard library."""
 
+from .addresses import Address, ServiceUrl
 from .errors import (
     AliasError,
     BridgeError,
@@ -21,6 +22,8 @@ from .words import Words
 
 __all__ = [
     'ANY',
+    'Address',
+    'ServiceUrl',
     'Assumption',
     'Verdict',
     'Verification',

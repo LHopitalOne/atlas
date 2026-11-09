@@ -34,12 +34,13 @@ class UrlComposer:
 
     MAX_ALTS = DjangoRegex.MAX_ALTS
 
-    def __init__(self, route, names, values, entries, views):
+    def __init__(self, route, names, values, entries, views, routers):
         self._route = route  # the route factory: (source, line, path, methods, handler, name) -> Route
         self._names = names  # NameLookup, for the modules include('dotted.name') names
         self._values = values
         self._entries = entries  # UrlEntries
         self._views = views  # ViewMethods
+        self._routers = routers  # DrfRouters
 
     def compose(self, source, name) -> Composition:
         """Every route a module-level URL list composes to, with no prefix."""
@@ -50,13 +51,23 @@ class UrlComposer:
                 self._entry(entry, [''], frozenset(), out, False)
         return out
 
+    def compose_mounted(self, source, regex) -> Composition:
+        """Every route of a module's `urlpatterns`, mounted at a regex (a plugin's URL config)."""
+        out = Composition()
+        for entry in self._entries.module_entries(source):
+            self._entry(entry, DjangoRegex.templates(regex), frozenset(), out, True)
+        return out
+
     def _entry(self, entry, prefixes, stack, out, nested):
-        source, pat, binding = entry
+        source, pat, binding, kind = entry
         key = (source.path, pat.start_byte)
         if key in stack:
             return
         if nested:
             out.include(source.path)
+        if kind == entry.ROUTER:
+            self._router_entry(source, pat, prefixes, out)
+            return
         pos, kw = PythonSyntax.call_args(pat)
         view = pos[1] if len(pos) > 1 else kw.get('view')
         full = [p + a for p in prefixes for a in self._patterns(source, pat, pos, kw)][: self.MAX_ALTS]
@@ -71,6 +82,12 @@ class UrlComposer:
         line = PythonSyntax.line(pat)
         for p in full:
             out.add_route(self._route(source, line, '/' + p, methods, handler, name))
+
+    def _router_entry(self, source, register, prefixes, out):
+        line = PythonSyntax.line(register)
+        for r in self._routers.routes(source, register):
+            for p in prefixes:
+                out.add_route(self._route(source, line, '/' + p + r.pattern, r.methods, r.handler, ''))
 
     def _patterns(self, source, pat, pos, kw):
         """The path templates one entry's pattern stands for: a path() route, or a regex's alternatives."""

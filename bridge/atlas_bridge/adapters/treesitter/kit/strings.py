@@ -71,6 +71,8 @@ class UrlTemplate:
         m = cls.SCHEME.match(v)
         if m:
             hints.append(m.group(1).split(':')[0])
+            if ':' in m.group(1):
+                hints.append(m.group(1))  # 'localhost:18381': the port tells local services apart
             v = v[m.end() :] or '/'
         else:
             m = cls.LEADING_PLACEHOLDER.match(v)

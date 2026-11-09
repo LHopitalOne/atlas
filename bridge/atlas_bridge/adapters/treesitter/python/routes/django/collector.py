@@ -7,12 +7,15 @@ from ...values import PythonValueResolver
 from .compose import UrlComposer
 from .entries import UrlEntries
 from .lists import UrlLists
+from .plugins import PluginMounts
+from .routers import DrfRouters
 from .views import ViewMethods
 
 
 class DjangoRoutes(RouteCollector):
     """`ROOT_URLCONF = 'proj.urls'` in a settings module names the root (production settings win over test ones).
-    Without one, every module with `urlpatterns` that no other such module includes is a root."""
+    Without one, every module with `urlpatterns` that no other such module includes is a root. Plugin apps
+    (PluginMounts) add their URLconfs at the prefix their `plugin_app` names."""
 
     framework = 'django'
     ROOT_SETTING = 'ROOT_URLCONF'
@@ -22,15 +25,21 @@ class DjangoRoutes(RouteCollector):
         super().__init__(workspace)
         self._values = PythonValueResolver(workspace)
         self._lists = UrlLists()
-        entries = UrlEntries(workspace, self._values, self._lists)
-        self._composer = UrlComposer(self.route, workspace.names, self._values, entries, ViewMethods(workspace))
+        routers = DrfRouters(workspace, self._values)
+        entries = UrlEntries(workspace, self._values, self._lists, routers)
+        views = ViewMethods(workspace)
+        self._composer = UrlComposer(self.route, workspace.names, self._values, entries, views, routers)
+        self._plugins = PluginMounts(workspace, self._values)
 
     def collect(self) -> Extraction:
         roots = self._roots()
         if roots:
             routes = [r for root in roots for r in self._composer.compose(root, self.PATTERNS).routes]
-            return Extraction(routes=routes)
-        return Extraction(routes=self._unincluded())
+        else:
+            routes = self._unincluded()
+        for module_file, regex in self._plugins.mounts():
+            routes += self._composer.compose_mounted(module_file, regex).routes
+        return Extraction(routes=routes)
 
     def _roots(self):
         """The modules ROOT_URLCONF names, from the settings least likely to be test settings."""

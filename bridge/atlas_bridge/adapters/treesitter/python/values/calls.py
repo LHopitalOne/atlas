@@ -7,8 +7,8 @@ from .value import Value
 
 
 class CallHandlers:
-    """Mixed into a ScopeResolver that also reads strings: a call that builds a URL resolves to what it builds, any
-    other call is unknown."""
+    """Mixed into a ScopeResolver that also reads strings and helper calls (HelperHandlers): a call that builds a URL
+    resolves to what it builds, a call of a helper that returns one to what it returns, any other call is unknown."""
 
     HANDLERS = {'call': 'call'}
     JOINS = frozenset({'urljoin', 'url_join'})
@@ -17,7 +17,7 @@ class CallHandlers:
     CONVERSIONS = frozenset({'str', 'cast'})
 
     def call(self, node, scope, depth):
-        found = self._call_value(node, scope, depth)
+        found = self._call_value(node, scope, depth) or self.helper_value(node, scope, depth)
         return found if found else self.unknown(node)
 
     def _call_value(self, node, scope, depth):

@@ -12,6 +12,8 @@ from ..core.evidence import Verification
 from ..core.http import Call, Extraction, Route
 from ..core.model import Status
 from ..core.words import Words
+from .addresses import AddressBook
+from .bases import BaseHints
 
 
 @dataclass(frozen=True)
@@ -36,7 +38,8 @@ class LinkReport:
 
 
 class ServiceNames:
-    """Turns hints into repository names: a repo's own name, or an alias (`upstream` -> `sentry`)."""
+    """Turns hints into repository names: a repo's own name, an alias (`upstream` -> `sentry`), or what configuration
+    says (AddressBook): an address, a host or a configured URL name."""
 
     def __init__(self, repos, aliases=None):
         self._names = {r.lower(): r for r in repos}
@@ -45,13 +48,34 @@ class ServiceNames:
             if repo not in repos:
                 raise AliasError(f'{word}={repo}', f'{repo} is not one of the repositories: {", ".join(repos)}')
             self._aliases[word.lower()] = repo
+        self._book = AddressBook([], self.owner)
+
+    def learn(self, urls):
+        """Learn the addresses, hosts and URL names configuration gives (core.addresses.ServiceUrl)."""
+        self._book = AddressBook(urls, self.owner)
+
+    def owner(self, hints):
+        """The one repository the hints' words name, or None when they name none or several."""
+        found = self._by_words(hints)
+        return found.pop() if len(found) == 1 else None
 
     def resolve(self, hints, exclude):
+        found = self._by_words(hints)
+        for hint in hints:
+            found |= self._book.repos_for(hint)
+        found.discard(exclude)
+        return found
+
+    def prefixes(self, repo):
+        """API path prefixes ('/api/v1') configured URLs to `repo` carry."""
+        return self._book.prefixes(repo)
+
+    def _by_words(self, hints):
         found = set()
         for hint in hints:
             for word in Words.of(hint):
                 repo = self._names.get(word) or self._aliases.get(word)
-                if repo and repo != exclude:
+                if repo:
                     found.add(repo)
         return found
 
@@ -88,6 +112,25 @@ class RouteIndex:
             return 0, []
         top = max(s for s, _ in scored)
         return top, [r for s, r in scored if s == top]
+
+    def best_prefixed(self, call, repo, max_prefix, known=frozenset()):
+        """(prefix, routes) that fit the call behind a few fixed leading segments ('.../api/v1'), or (None, []).
+        Prefixes configuration gives for the repository (`known`) come first, then those the call's hints mention
+        ('lms_coursemode_api_url' -> '/api/course_modes/v1'), then the shortest, then the best fit."""
+        bases = BaseHints(call.hints)
+        scored = []
+        for r in self.routes(repo):
+            if not r.accepts(call.method):
+                continue
+            found = call.path.prefixed_fit(r.path, max_prefix)
+            if found is not None:
+                points, prefix = found
+                text = str(prefix)
+                scored.append((text not in known, -bases.mentions(prefix), prefix.size, -points, text, r))
+        if not scored:
+            return None, []
+        top = min(s[:5] for s in scored)
+        return top[4], [s[5] for s in scored if s[:5] == top]
 
     def catch_all(self, call, repo):
         return next(
@@ -131,7 +174,10 @@ class PayloadRule(LinkRule):
 
 
 class NamedTargetRule(LinkRule):
-    """A request whose hints name the service it goes to."""
+    """A request whose hints name the service it goes to. A route fits exactly, or with the request's last parameter
+    standing for several segments, or behind a few fixed segments its base URL may carry ('/api/v1')."""
+
+    MAX_PREFIX = 3  # fixed leading segments a base URL may hold: '/api', '/api/v1', '/api/courses/v1'
 
     def applies(self, call):
         return call.path is not None and bool(self._names.resolve(call.hints, exclude=call.repo))
@@ -141,16 +187,20 @@ class NamedTargetRule(LinkRule):
 
     def _to(self, call, target):
         _, best = self._routes.best(call, target)
-        if len(best) == 1:
-            return self._each(call, call.repo, target, best, Status.MATCHED, 'named target, one route fits')
-        if best:
+        prefix, prefixed = self._routes.best_prefixed(call, target, self.MAX_PREFIX, self._names.prefixes(target))
+        if best and not (prefixed and BaseHints(call.hints).names_an_api() and not any(r.path.is_api for r in best)):
+            if len(best) == 1:
+                return self._each(call, call.repo, target, best, Status.MATCHED, 'named target, one route fits')
             return self._each(call, call.repo, target, best, Status.AMBIGUOUS, f'{len(best)} routes fit equally')
         _, stretched = self._routes.best(call, target, stretch=True)
-        if stretched:
+        if stretched and not prefixed:
             status = Status.INFERRED if len(stretched) == 1 else Status.AMBIGUOUS
             return self._each(
                 call, call.repo, target, stretched, status, 'fits if its last parameter holds several segments'
             )
+        if prefixed:
+            status = Status.INFERRED if len(prefixed) == 1 else Status.AMBIGUOUS
+            return self._each(call, call.repo, target, prefixed, status, f'fits if the base URL ends in {prefix}')
         catch_all = self._routes.catch_all(call, target)
         why = f'only the catch-all {catch_all.path} would take it' if catch_all else 'no route fits'
         return [Link(call, call.repo, target, None, Status.UNMATCHED, f'{target}: {why} ({call.method} {call.path})')]
@@ -191,6 +241,7 @@ class LinkFinder:
         self._include_tests = include_tests
 
     def find(self, extraction: Extraction) -> list[Link]:
+        self._names.learn(extraction.urls)
         routes = RouteIndex(extraction.routes)
         rules = [rule(self._names, routes) for rule in self.RULES]
         links = []

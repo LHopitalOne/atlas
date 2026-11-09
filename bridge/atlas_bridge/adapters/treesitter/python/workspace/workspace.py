@@ -6,13 +6,15 @@ from .callers import CallerIndex
 from .locals import ClassAttributes, LocalIndex
 from .modules import ModuleIndex
 from .names import NameLookup
+from .settings import DjangoSettings
 
 
 class PythonWorkspace(Workspace):
     """Reads each file once with one query, and indexes modules, functions, classes and the calls collectors want.
 
     Collectors reach the shared lookups through `names` (module-level names and imports), `locals` (assignments in
-    functions), `attributes` (class and self attributes) and `callers` (who calls a function).
+    functions), `attributes` (class and self attributes), `callers` (who calls a function) and `settings` (what
+    `settings.NAME` is bound to).
     """
 
     QUERY = """
@@ -37,6 +39,7 @@ class PythonWorkspace(Workspace):
         self.locals = LocalIndex()
         self.attributes = ClassAttributes()
         self.callers = CallerIndex(self.sources, self._functions)
+        self.settings = DjangoSettings(self.sources)
 
     def _read(self, source):
         caps = source.captures(self.QUERY)
