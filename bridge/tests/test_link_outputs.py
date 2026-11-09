@@ -68,6 +68,29 @@ class WithLinksTest(unittest.TestCase):
         self.assertEqual(list(g.links.values()), [Status.MATCHED])
 
 
+class SingleRepoGraphTest(unittest.TestCase):
+    """A graph from `graphify update` on one repository: its nodes carry no `repo`."""
+
+    def test_each_call_starts_at_its_own_function(self):
+        base = {'nodes': [{k: v for k, v in n.items() if k != 'repo'} for n in MERGED['nodes']], 'links': []}
+        later = Call('web', 'src/api.js', 2, P('/orders'), 'POST', 'later')  # the graph is older: lines moved
+        handler = Call('web', 'src/api.js', 12, P('/orders'), 'POST', '')  # an anonymous callback
+        unknown = Call('web', 'src/other.js', 3, P('/orders'), 'POST', 'one')
+        other = Call('web', 'src/other.js', 7, P('/orders'), 'POST', 'two')
+        links = [Link(c, 'web', 'api', ROUTE, Status.MATCHED, 'r') for c in (CALL, later, handler, unknown, other)]
+        out = GraphifyLinkWriter(base).present(links)
+        self.assertEqual(
+            [e['source'] for e in out['links']],
+            [
+                'web::src_api_placeorder',
+                'web::src_api_later',
+                'web::src_api',
+                'web::src/other.js::one',
+                'web::src/other.js::two',
+            ],
+        )
+
+
 class LinkFileTest(unittest.TestCase):
     def test_present(self):
         ex = Extraction([ROUTE], [CALL, Call('web', 't.js', 1, P('/x'), test=True)])

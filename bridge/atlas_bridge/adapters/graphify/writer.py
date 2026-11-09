@@ -11,7 +11,11 @@ from .node import GraphifyNode
 
 class GraphifyLinkWriter(Presenter):
     """A copy of a Graphify graph (or an empty one) with every linked endpoint as a node and every link as an edge.
-    Unmatched calls have no endpoint to point at and are left out. The input graph is never modified."""
+    Unmatched calls have no endpoint to point at and are left out. The input graph is never modified.
+
+    A call starts at the input graph's node it sits in. A graph of one repository (`graphify update`) has no `repo` on
+    its nodes, so its nodes are found by file alone; a call in a file the graph does not know gets a node of its own
+    function."""
 
     CONFIDENCE = {
         Status.MATCHED: ('EXTRACTED', 1.0),
@@ -27,7 +31,7 @@ class GraphifyLinkWriter(Presenter):
         """result: the links (usecases.link.Link) to add."""
         self._out = self._copy(self._base)
         self._ids = {n['id'] for n in self._out['nodes']}
-        self._by_file = {}
+        self._by_file = {}  # only the input graph's nodes: a node added here encloses no other call
         for n in self._out['nodes']:
             self._index(n)
         for link in result:
@@ -45,13 +49,12 @@ class GraphifyLinkWriter(Presenter):
 
     def _index(self, node):
         if node.get('source_file'):
-            self._by_file.setdefault((node.get('repo', ''), node['source_file']), []).append(GraphifyNode(node))
+            self._by_file.setdefault((node.get('repo') or '', node['source_file']), []).append(GraphifyNode(node))
 
     def _add(self, node):
         if node['id'] not in self._ids:
             self._ids.add(node['id'])
             self._out['nodes'].append(node)
-            self._index(node)
         return node['id']
 
     def _endpoint(self, route):
@@ -97,12 +100,26 @@ class GraphifyLinkWriter(Presenter):
         )
 
     def _enclosing(self, call):
-        """The node a call sits in: the last symbol in its file starting at or before its line, else the file node."""
+        """The node a call sits in: its function's node by name (line numbers in a graph built from an older checkout
+        drift), the file node for a call outside any named function, else the last symbol starting at or before its
+        line."""
+        nodes = self._by_file.get((call.repo, call.file)) or self._by_file.get(('', call.file), [])
+        named = [n for n in nodes if not n.is_file and self._name(n.label) == call.function]
+        if named:
+            return min(named, key=lambda n: abs(n.line - call.line))
+        files = [n for n in nodes if n.is_file]
+        if not call.function and files:
+            return files[0]
         best = None
-        for n in self._by_file.get((call.repo, call.file), []):
+        for n in nodes:
             if n.line <= call.line and (best is None or n.line >= best.line):
                 best = n
         return best
+
+    @staticmethod
+    def _name(label):
+        """'placeOrder()' and '.placeOrder()' -> 'placeOrder'."""
+        return label.removesuffix('()').lstrip('.')
 
     def _edge(self, link, source, target):
         confidence, weight = self.CONFIDENCE[link.status]
