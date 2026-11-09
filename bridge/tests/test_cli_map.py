@@ -170,6 +170,22 @@ class PartsTest(unittest.TestCase):
         self.assertIsInstance(e.exception, OutputError)
         self.assertIn('npm run build:page', str(e.exception))
 
+    @unittest.skipUnless(os.name == 'posix', 'the fake graphify is a script with a shebang')
+    def test_runner_reports_progress_while_graphify_runs(self):
+        seen = []
+        with tempfile.TemporaryDirectory() as d:
+            exe = os.path.join(d, 'graphify')
+            with open(exe, 'w', encoding='utf-8') as f:
+                f.write('#!/bin/sh\nsleep 0.3\nmkdir -p graphify-out && echo "{}" > graphify-out/graph.json\n')
+            os.chmod(exe, 0o755)
+            runner = GraphifyRunner(seen.append)
+            with (
+                mock.patch.object(GraphifyRunner, 'executable', return_value=exe),
+                mock.patch.object(GraphifyRunner, 'HEARTBEAT', 0.1),
+            ):
+                self.assertEqual(runner.update('r', d), os.path.join(d, 'graphify-out', 'graph.json'))
+        self.assertTrue(seen and all(s > 0 for s in seen))
+
     def test_runner_errors(self):
         self.assertIsInstance(GraphifyFailedError('api', 'x'), ExtractionError)
         with mock.patch('os.path.isfile', return_value=False), mock.patch('shutil.which', return_value=None):

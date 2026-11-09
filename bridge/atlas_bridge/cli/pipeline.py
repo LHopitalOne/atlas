@@ -22,7 +22,8 @@ class MapPipeline:
         """options: parsed map arguments (out_dir, refresh, aliases, include_tests, verify, sandbox, group, title)."""
         self._o = options
         self._report = report
-        self._runner = GraphifyRunner()
+        self._runner = GraphifyRunner(self._still_mapping)
+        self._current = ''
 
     def run(self, repos) -> str:
         """Every step for these repositories (cli.inputs.RepositoryInput); returns the page's path."""
@@ -41,6 +42,7 @@ class MapPipeline:
         try:
             if self._o.refresh or not self._runner.has_graph(repo.path):
                 self._report(f'  graphify  {repo.name}: mapping {repo.path} ...')
+                self._current = repo.name
                 self._runner.update(repo.name, repo.path)
             path = self._runner.graph_path(repo.path)
             data = GraphInput(repo.name, path).load()
@@ -51,6 +53,10 @@ class MapPipeline:
             return {'nodes': [], 'links': []}
         self._report(f'  graphify  {repo.name}: {len(data["nodes"]):,} nodes ({os.path.relpath(path)})')
         return data
+
+    def _still_mapping(self, seconds):
+        hint = ', large repositories take Graphify a while; map a subfolder for a quicker look' if seconds > 100 else ''
+        self._report(f'  graphify  {self._current}: still mapping, {seconds / 60:.0f} min so far{hint}')
 
     def _links(self, repos):
         names = [r.name for r in repos]
