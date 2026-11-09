@@ -27,15 +27,30 @@ def operation_fits(truth_op, found_methods, found_method):
     return not truth_op or 'ANY' in ops or truth_op.upper() in ops
 
 
+def channel(protocol, name):
+    """A channel as both sides can be compared: an HTTP path normalised; a gRPC 'Service/Method' without its package
+    (a servicer names only the service); a topic, queue or port as its bare name."""
+    name = re.sub(r'^(tcp|udp):', '', (name or '').strip())
+    if protocol in HTTP_LIKE:
+        return norm(name)
+    name = name.strip('/').lower()
+    if protocol == 'grpc' and '/' in name:
+        service, method = name.rsplit('/', 1)
+        return f'{service.rsplit(".", 1)[-1]}/{method}'
+    return name
+
+
 def same_link(t, f):
     r = f.get('route')
     if not r or t['caller'] != f['caller'] or t['target'] != f['target']:
         return False
+    if r.get('protocol', 'http') != t['protocol'] and not (t['protocol'] == 'graphql' and r.get('protocol') == 'http'):
+        return False
     rec = t['receive']
     if rec['file'] == r['file'] and abs(rec['line'] - r['line']) <= 2:
         return True
-    if t['protocol'] in HTTP_LIKE and norm(t['channel']) == norm(r['path']):
-        return operation_fits(t.get('operation'), r.get('methods'), f['call'].get('method'))
+    if channel(t['protocol'], t['channel']) == channel(t['protocol'], r['path']):
+        return t['protocol'] not in HTTP_LIKE or operation_fits(t.get('operation'), r.get('methods'), f['call'].get('method'))
     return False
 
 

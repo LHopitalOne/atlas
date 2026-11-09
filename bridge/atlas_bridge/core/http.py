@@ -1,7 +1,9 @@
-"""Entities for HTTP links between services: path templates, routes a service serves, requests it sends.
+"""Entities for links between services: path templates, routes a service serves, requests it sends.
 
 Paths use one canonical syntax whatever the framework: `/rpc/{name}/{version}`, `{*rest}` for a tail wildcard.
-Adapters translate Django regexes, Flask converters, axum captures and format strings into it.
+Adapters translate Django regexes, Flask converters, axum captures and format strings into it. A link over another
+protocol uses the same model: its channel is the path (a topic or queue `/orders.created`, a gRPC method
+`/Service/Method`, a port `/41210`), and a route and a call only meet on the same protocol.
 """
 
 import re
@@ -10,6 +12,22 @@ from dataclasses import dataclass, field
 from .evidence import Assumption
 
 ANY = 'ANY'
+
+
+class Protocol:
+    """What a route or call travels over. HTTP is the default; the others name their channel as a one- or two-segment
+    path (see the module docstring)."""
+
+    HTTP = 'http'
+    WEBSOCKET = 'websocket'
+    GRPC = 'grpc'
+    GRAPHQL = 'graphql'
+    KAFKA = 'kafka'
+    AMQP = 'amqp'
+    REDIS = 'redis'
+    TCP = 'tcp'
+    UDP = 'udp'
+    ALL = frozenset({HTTP, WEBSOCKET, GRPC, GRAPHQL, KAFKA, AMQP, REDIS, TCP, UDP})
 
 
 @dataclass(frozen=True)
@@ -197,7 +215,7 @@ class PathTemplate:
 
 @dataclass(frozen=True)
 class Route:
-    """An HTTP route a repository serves."""
+    """A route a repository serves: an HTTP route, or a channel it receives on (protocol)."""
 
     repo: str
     file: str
@@ -207,6 +225,7 @@ class Route:
     handler: str = ''
     name: str = ''  # a route name other code can look it up by (Django's `name=`)
     framework: str = ''
+    protocol: str = Protocol.HTTP
 
     def accepts(self, method: str):
         return method == ANY or ANY in self.methods or method.upper() in self.methods
@@ -235,6 +254,7 @@ class Call:
     route_name: str = ''
     test: bool = False  # only in tests, fixtures or tooling
     assumptions: tuple[Assumption, ...] = ()  # names resolved on the way here; a precise index can check them
+    protocol: str = Protocol.HTTP
 
     @property
     def is_payload(self):

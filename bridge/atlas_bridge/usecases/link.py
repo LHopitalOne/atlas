@@ -9,7 +9,7 @@ from dataclasses import dataclass
 
 from ..core.errors import AliasError
 from ..core.evidence import Verification
-from ..core.http import Call, Extraction, Route
+from ..core.http import Call, Extraction, Protocol, Route
 from ..core.model import Status
 from ..core.words import Words
 from .addresses import AddressBook
@@ -121,7 +121,7 @@ class RouteIndex:
         segments of the call. With stretch, the call's last parameter may stand for several route segments."""
         scored = []
         for r in self.routes(repo):
-            if not r.accepts(call.method) or call.path.swallowed_by(r.path):
+            if r.protocol != call.protocol or not r.accepts(call.method) or call.path.swallowed_by(r.path):
                 continue
             s = call.path.stretch_fit(r.path) if stretch else call.path.fit(r.path)
             if s is not None:
@@ -228,11 +228,13 @@ class PathOnlyRule(LinkRule):
     """A request that names no service: it counts only if its path fits another repository's route literally and
     fits nothing in its own repository."""
 
-    MIN_LITERALS = 2  # one fixed word ('/health') proves too little
+    MIN_LITERALS = 2  # one fixed word ('/health') proves too little for an HTTP path
+    MIN_CHANNEL_LITERALS = 1  # a topic, queue, gRPC method or port names one channel on its own
     LITERAL_POINTS = 3  # what a literal-on-literal segment scores in PathTemplate.fit
 
     def applies(self, call):
-        return call.path is not None and call.path.literals >= self.MIN_LITERALS
+        least = self.MIN_LITERALS if call.protocol == Protocol.HTTP else self.MIN_CHANNEL_LITERALS
+        return call.path is not None and call.path.literals >= least
 
     def links(self, call):
         own, _ = self._routes.best(call, call.repo)

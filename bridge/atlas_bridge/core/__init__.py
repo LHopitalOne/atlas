@@ -18,7 +18,7 @@ from .errors import (
     SourceReadError,
 )
 from .evidence import Assumption, Verdict, Verification
-from .http import ANY, Call, Extraction, PathTemplate, Route, Segment
+from .http import ANY, Call, Extraction, PathTemplate, Protocol, Route, Segment
 from .model import CodeGraph, Community, Kind, Ref, SourceFile, Status, Symbol
 from .words import Words
 
@@ -46,6 +46,7 @@ __all__ = [
     'NamedInputError',
     'ParserUnavailableError',
     'PathTemplate',
+    'Protocol',
     'Ref',
     'RepositoryNotFoundError',
     'ScipFormatError',
