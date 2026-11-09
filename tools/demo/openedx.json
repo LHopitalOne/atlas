@@ -1,0 +1,5 @@
+{
+ "how": "A second key, built the same way after the finder was tuned on Sentry. The finder's first, frozen run on it found 12 of 71 with 31 false links. 68 of 71 is after general fixes made while looking at those misses, so it is no longer a held-out number.",
+ "missed": "E07 and E17 (the base URL arrives through a constructor argument or a model property) and E28 (the path gains a segment in one branch of a conditional).",
+ "key": "eval/openedx/README.md"
+}

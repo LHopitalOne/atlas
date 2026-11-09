@@ -7,6 +7,7 @@ import { requestRender } from '../render/frame.js';
 import { LY, patch, upload } from '../render/gl.js';
 import { put4, theme } from '../render/theme.js';
 import { answerTrail, impactOf, pairContract } from '../graph/insights.js';
+import { httpImpact } from '../model/http.js';
 import { fitNodes, flyTo } from './camera.js';
 import { announce } from '../ui/feedback.js';
 
@@ -50,6 +51,26 @@ export function computeFocus(id) {
       if (e >= 0) store.focusEdges.push(e);
     }
   }
+  if (g.http && store.httpImpact === 'n' + id) addHttpImpact(g, { t: 'n', id }, add);
+  paintFocus(id < g.S ? id : -1);
+}
+
+/** Everything in other repositories that calls a target, and the contracts they call it through. */
+function addHttpImpact(g, target, add) {
+  const im = httpImpact(g, g.http, target);
+  for (const i of im.groups) {
+    const gr = g.http.groups[i];
+    for (const n of [gr.from, gr.to]) {
+      add(n);
+      add(g.own(n));
+    }
+    if (gr.e >= 0) store.focusEdges.push(gr.e);
+  }
+}
+
+/** Light the focus list on the GPU and draw the focus edges (plus spokes to a focused service's leaves). */
+function paintFocus(id) {
+  const g = store.G;
   for (let j = 0; j < store.A.svcs.n; j++) store.A.svcs.fl[j * 2] = 0;
   for (let j = 0; j < store.A.leaves.n; j++) store.A.leaves.fl[j * 2] = 0;
   for (const i of store.focusList) {
@@ -59,7 +80,7 @@ export function computeFocus(id) {
   patch(LY.svcs, 2, store.A.svcs.fl);
   patch(LY.leaves, 2, store.A.leaves.fl);
   const fe = store.focusEdges.slice(0, 20000),
-    spokes = id < g.S ? g.sLe[id] - g.sLs[id] : 0,
+    spokes = id >= 0 ? g.sLe[id] - g.sLs[id] : 0,
     n = fe.length + spokes;
   const seg = new Float32Array(n * 4),
     prm = new Float32Array(n * 4),
@@ -106,15 +127,51 @@ export const same = (a, b) => (!a && !b) || (a && b && a.t === b.t && a.id === b
 export const ROUTE_FOCUS = 2 ** 30;
 /** Focus id for the items an Ask answer is showing on the map. */
 export const ASK_FOCUS = 2 ** 30 + 1;
+/** Focus ids for an HTTP link's proof and for a repository's impact view. */
+export const LINK_FOCUS = 2 ** 30 + 2;
+export const HTTP_FOCUS = 2 ** 30 + 3;
 export const routeActive = () => route.path.length > 1;
+/** Which focus an HTTP view wants, if any: an open link, else a repository's impact view. */
+const httpFocusId = () => (store.linkId >= 0 ? LINK_FOCUS : store.httpImpact && store.G.http ? HTTP_FOCUS : -1);
+
+/** Light up an open link's two ends and, with an impact view on, everything in other repositories calling its target. */
+export function computeHttpFocus() {
+  const g = store.G;
+  for (const i of store.focusList) store.inF[i] = 0;
+  store.focusList = [];
+  store.focusEdges = [];
+  const add = i => {
+    if (i >= 0 && !store.inF[i]) {
+      store.inF[i] = 1;
+      store.focusList.push(i);
+    }
+  };
+  if (store.linkId >= 0) {
+    const gr = g.http.groups[store.linkId];
+    for (const n of [gr.from, gr.to]) {
+      add(n);
+      add(g.own(n));
+    }
+    if (gr.e >= 0) store.focusEdges.push(gr.e);
+  }
+  if (store.httpImpact) addHttpImpact(g, { t: store.httpImpact[0], id: +store.httpImpact.slice(1) }, add);
+  paintFocus(-1);
+}
 export function updateFocus() {
   const hid = store.hover && store.hover.t === 'n' ? store.hover.id : -1,
     // while a route or an answer is on the map, hovering only rings items; it never takes over the focus
-    id = store.selectedId >= 0 ? store.selectedId : routeActive() || store.askSet.length ? -1 : hid;
+    hf = store.selectedId >= 0 ? -1 : httpFocusId(),
+    id = store.selectedId >= 0 ? store.selectedId : hf >= 0 || routeActive() || store.askSet.length ? -1 : hid;
   if (id >= 0) {
     if (id !== store.focusId) {
       computeFocus(id);
       store.focusId = id;
+    }
+    store.focusGoal = 1;
+  } else if (hf >= 0) {
+    if (store.focusId !== hf) {
+      computeHttpFocus();
+      store.focusId = hf;
     }
     store.focusGoal = 1;
   } else if (routeActive()) {
@@ -132,6 +189,7 @@ export function updateFocus() {
   } else store.focusGoal = 0;
   store.dimGoal =
     store.selectedId >= 0 ||
+    hf >= 0 ||
     (store.focusId === ROUTE_FOCUS && routeActive()) ||
     (store.focusId === ASK_FOCUS && store.askSet.length)
       ? 1

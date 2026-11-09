@@ -10,6 +10,7 @@ export const oc = ov.getContext('2d');
 export const RT = $('#route');
 export const ASK = $('#ask');
 export const ATTN = $('#attn');
+export const LINKS = $('#links');
 export const INSP = $('#insp');
 export const Q = $('#q');
 export const RES = $('#results');

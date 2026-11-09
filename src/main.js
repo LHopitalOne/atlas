@@ -23,6 +23,7 @@ import { init as init_ui_ask } from './ui/ask.js';
 import { init as init_ui_legend } from './ui/legend.js';
 import { init as init_ui_inspector } from './ui/inspector.js';
 import { init as init_ui_attention } from './ui/attention.js';
+import { init as init_ui_links } from './ui/links.js';
 import { init as init_ui_directions } from './ui/directions.js';
 import { init as init_ui_search } from './ui/search.js';
 import { init as init_app_keys } from './app/keys.js';
@@ -48,6 +49,7 @@ export function start() {
   init_ui_legend();
   init_ui_inspector();
   init_ui_attention();
+  init_ui_links();
   init_ui_directions();
   init_ui_search();
   init_app_keys();

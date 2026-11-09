@@ -3,10 +3,11 @@
  */
 import { cam, expanded, route, store } from '../state.js';
 import { fitBox, flyTo, viewCenter } from './camera.js';
-import { computeFocus, computeRouteFocus, ROUTE_FOCUS } from './focus.js';
+import { computeFocus, computeHttpFocus, computeRouteFocus, LINK_FOCUS, ROUTE_FOCUS } from './focus.js';
 import { computeRoute } from './route.js';
 import { applyHashState, writeHash } from './url.js';
 import { app, BLD, glc, ov } from '../dom.js';
+import { isMap, mapLabel, mapList, mapSpec } from '../model/maps.js';
 import { selfSpec } from '../model/self.js';
 import { buildSpec } from '../model/spec.js';
 import { build } from '../model/synthetic.js';
@@ -19,19 +20,35 @@ import { buildAttn, renderAttn } from '../ui/attention.js';
 import { setGroup, syncThumb } from '../ui/controls.js';
 import { renderRoute } from '../ui/directions.js';
 import { announce, toast } from '../ui/feedback.js';
-import { openInspector } from '../ui/inspector.js';
+import { openInspector, openLinkInspector } from '../ui/inspector.js';
 import { renderLegend } from '../ui/legend.js';
 import { renderPerf } from '../ui/perf.js';
 import { loadRecent } from '../ui/search.js';
 import { $ } from '../util/dom.js';
 import { fmt } from '../util/format.js';
 import { resetAsk } from '../ui/ask.js';
+import { autoOpenLinks } from '../ui/links.js';
+
+/** The dataset to show for a requested one: an embedded map, Self, or a synthetic size. */
+export function resolveDataset(n) {
+  const maps = mapList();
+  if (typeof n === 'number' || isMap(n)) return n;
+  return maps.length ? maps[0].key : 'self';
+}
+/** How a dataset is named in messages. */
+const datasetName = n => (n === 'self' ? 'Atlas’s own code' : typeof n === 'string' ? mapLabel(n) : fmt(n) + ' nodes');
 
 export function loadDataset(n, state) {
+  n = resolveDataset(n);
   const hadState = store.G && (store.selectedId >= 0 || !!route.from || !!route.to);
   setGroup($('#scale'), n);
   $('#scaleSel').value = String(n);
-  $('#buildMsg').textContent = n === 'self' ? 'Loading Atlas’s own code graph…' : `Building ${fmt(n)} nodes…`;
+  $('#buildMsg').textContent =
+    n === 'self'
+      ? 'Loading Atlas’s own code graph…'
+      : typeof n === 'string'
+        ? `Laying out ${mapLabel(n)}…`
+        : `Building ${fmt(n)} nodes…`;
   BLD.classList.add('on');
   setTimeout(() => {
     requestAnimationFrame(() => {
@@ -55,7 +72,9 @@ export function loadDataset(n, state) {
       store.labelA = new Map();
       store.labelSide.clear();
       store.placeDirty = true;
-      store.G = n === 'self' ? buildSpec(selfSpec()) : build(n);
+      store.linkId = -1;
+      store.httpImpact = '';
+      store.G = n === 'self' ? buildSpec(selfSpec()) : typeof n === 'string' ? buildSpec(mapSpec(n)) : build(n);
       store.G.src = n;
       resetAsk();
       store.inF = new Uint8Array(store.G.N);
@@ -78,6 +97,7 @@ export function loadDataset(n, state) {
       renderPerf();
       renderRoute();
       renderAttn();
+      autoOpenLinks(); // before fitting: the panel covers part of the map
       const B = store.G.bounds,
         t = fitBox(B.x0, B.y0, B.x1, B.y1, 1e-4, 2.2);
       store.KMIN = t.k * 0.5;
@@ -95,10 +115,7 @@ export function loadDataset(n, state) {
       BLD.classList.remove('on');
       if (state) applyHashState(state);
       else writeHash();
-      if (hadState && !state)
-        toast(
-          `Switched to ${n === 'self' ? 'Atlas’s own code' : fmt(n) + ' nodes'}. Selection and route were cleared.`,
-        );
+      if (hadState && !state) toast(`Switched to ${datasetName(n)}. Selection and route were cleared.`);
       else announce(`Showing ${fmt(store.G.N)} nodes and ${fmt(store.G.L + store.G.C)} edges.`);
     });
   }, 30);
@@ -132,7 +149,8 @@ export const onTheme = () => {
     const f = store.focusId;
     store.focusId = -1;
     if (f === ROUTE_FOCUS) computeRouteFocus();
-    else computeFocus(f);
+    else if (f >= LINK_FOCUS) computeHttpFocus();
+    else if (f < ROUTE_FOCUS) computeFocus(f);
     store.focusId = f;
   }
   if (route.path.length) computeRoute();
@@ -140,4 +158,5 @@ export const onTheme = () => {
   renderAttn();
   renderRoute();
   if (store.selectedId >= 0) openInspector(store.selectedId);
+  else if (store.linkId >= 0) openLinkInspector(store.linkId);
 };

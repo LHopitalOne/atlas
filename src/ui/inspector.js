@@ -13,6 +13,8 @@ import { esc, fmt } from '../util/format.js';
 import { aboutHTML, copyForAI, impactHTML } from './about.js';
 import { hasSource, openSource } from './code-view.js';
 import { toggleImpact } from '../app/focus.js';
+import { openLink, toggleHttpImpact } from '../app/http.js';
+import { httpSectionHTML, linkInspectorHTML } from './proof.js';
 
 export function openInspector(id) {
   const g = store.G,
@@ -35,7 +37,8 @@ export function openInspector(id) {
     `<span class="ic">${IC.dir}</span>Directions</button><button class="act" data-fitconn><span class="ic">${IC.conn}</span>Connections</button><button class="act" data-source${hasSource(id) ? '' : ' disabled title="No source code for this item"'}><span class="ic">${IC.source}</span>Source</button><button class="act" data-copy-ai title="Copy a description of this item for an AI agent"><span class="ic">${IC.ai}</span>Copy for AI</button></div>`;
   h +=
     `<button class="btn btn-ghost btn-icon close" data-close aria-label="Close panel">${ICON_X}</button></div><div class="ins-body scroll">` +
-    aboutHTML(id);
+    aboutHTML(id) +
+    httpSectionHTML(id);
   const c = [0, 0, 0, 0],
     cap = key => (expanded.has(key) ? 240 : 40);
   if (svc) {
@@ -110,6 +113,12 @@ export function openInspector(id) {
   app.classList.add('has-insp');
 }
 
+/** Show the proof of HTTP link group gid in the inspector. */
+export function openLinkInspector(gid) {
+  INSP.innerHTML = linkInspectorHTML(gid);
+  app.classList.add('has-insp');
+}
+
 /** Wire this module to the DOM. Called once from main.js. */
 export function init() {
   INSP.addEventListener('click', e => {
@@ -121,7 +130,7 @@ export function init() {
     if (mb) {
       expanded.add(mb.dataset.more);
       const sc = INSP.querySelector('.ins-body').scrollTop;
-      openInspector(store.selectedId);
+      if (store.selectedId >= 0) openInspector(store.selectedId);
       INSP.querySelector('.ins-body').scrollTop = sc;
       return;
     }
@@ -132,6 +141,10 @@ export function init() {
     const src = e.target.closest('[data-source]');
     if (src && !src.disabled) return openSource(store.selectedId, src);
     if (e.target.closest('[data-impact]')) return toggleImpact(store.selectedId);
+    const hi = e.target.closest('[data-http-impact]');
+    if (hi) return toggleHttpImpact(hi.dataset.httpImpact);
+    const lk = e.target.closest('[data-link]');
+    if (lk) return openLink(+lk.dataset.link, 'list');
     const tb = e.target.closest('[data-terr]');
     if (tb) {
       const v = tb.dataset.terr;

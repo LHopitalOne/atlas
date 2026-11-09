@@ -50,7 +50,9 @@ test('routes between territories and services round-trip', () => {
 test('unset route end and unknown tokens', () => {
   assert.deepEqual(parseHash('#25k-route-x-d7').from, null);
   assert.deepEqual(parseHash('#25k-route-x-d7').to, { t: 'd', id: 7 });
-  assert.equal(parseHash('#nonsense').n, 'self');
+  assert.equal(parseHash('#Not_A-map!').n, 'self');
+  // a lowercase word may name an embedded map; loadDataset falls back when no such map exists
+  assert.equal(parseHash('#nonsense').n, 'nonsense');
   assert.equal(parseHash('#self-node-abc').node, -1);
 });
 
@@ -60,4 +62,10 @@ test('only letters, digits and hyphens (survives artifact links)', () => {
     route: { from: { t: 'd', id: 1 }, to: null, avoid: false, links: 'calls', detail: 'service', detailSet: false },
   });
   assert.match(h, /^[A-Za-z0-9-]+$/);
+});
+
+test('embedded map keys round-trip', () => {
+  const h = formatHash({ ...base, dataset: 'sentry', selectedId: 42 });
+  assert.equal(h, 'sentry-node-42');
+  assert.deepEqual([parseHash('#' + h).n, parseHash('#' + h).node], ['sentry', 42]);
 });

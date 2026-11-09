@@ -1,0 +1,4 @@
+{
+ "how": "The answer key lists every HTTP request between Sentry's four repositories at pinned commits. Claude agents that never saw the link finder built it: two independent searches per repository, a trace of each request to its route, two skeptics per link, and a re-read of every cited line. The finder was developed against this key, so this is its training score, not a held-out one.",
+ "key": "eval/sentry/README.md"
+}

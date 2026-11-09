@@ -3,14 +3,17 @@
  * Keyboard-initiated moves are instant; pointer and UI moves use the ease-in-out flight curve.
  */
 import { cam, store } from '../state.js';
-import { app, ATTN, RT, ASK } from '../dom.js';
+import { app, ATTN, RT, ASK, LINKS } from '../dom.js';
 import { requestRender } from '../render/frame.js';
 import { reduceMotion } from '../util/dom.js';
 import { clamp, easeMove } from '../util/math.js';
 
 export const inspOpen = () => app.classList.contains('has-insp');
 export const leftOpen = () =>
-  RT.classList.contains('on') || ATTN.classList.contains('on') || ASK.classList.contains('on');
+  RT.classList.contains('on') ||
+  ATTN.classList.contains('on') ||
+  ASK.classList.contains('on') ||
+  LINKS.classList.contains('on');
 export function viewCenter() {
   const R = safeRect();
   return { x: (R.l + R.r) / 2, y: (R.t + R.b) / 2 };

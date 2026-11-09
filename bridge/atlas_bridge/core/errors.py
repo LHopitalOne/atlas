@@ -6,7 +6,8 @@ BridgeError
 │   ├── AliasError              '--alias word=repo'
 │   ├── RepositoryNotFoundError a repository folder that does not exist
 │   ├── GraphFormatError        a file that is not a Graphify graph.json
-│   └── ScipFormatError         a file that is not a SCIP index
+│   ├── ScipFormatError         a file that is not a SCIP index
+│   └── LinkFormatError         a file that is not the links JSON the links command writes
 └── ExtractionError             reading source code failed
     ├── ParserUnavailableError  a tree-sitter grammar is not installed
     ├── SourceReadError         a source file cannot be read
@@ -80,3 +81,8 @@ class IndexerUnavailableError(ExtractionError):
 class IndexerFailedError(ExtractionError):
     def __init__(self, tool: str, repo: str, problem: str):
         super().__init__(f'{tool} could not index {repo}: {problem}')
+
+
+class LinkFormatError(InputError):
+    def __init__(self, source: str, problem: str):
+        super().__init__(f'{source} is not a links file: {problem}', 'pass the JSON that atlas_bridge links wrote')

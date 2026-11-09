@@ -85,6 +85,50 @@ On `meta`:
 | `sourceBundle` | id of a `<script type="application/json">` holding `{ commit, files: { path: text } }`. Prototype only: stands in for fetching lines live from GitHub |
 | `label`, `title`, `source` | scale-button name, title, and the "Indexed with ..." line in the Key |
 
+## HTTP links between repositories (optional)
+
+A spec can carry the proof of every HTTP request one repository sends to a route another serves. The bridge writes
+this with `atlas_bridge spec ... --links links.json --repo name=folder --accuracy accuracy.json`. Atlas then draws
+each link as an arc from the function that sends the request to the endpoint that serves it, at every zoom, and
+clicking one shows its proof.
+
+On each repo, `url` (its web address, e.g. `https://github.com/getsentry/relay`) and `commit` (the commit the map
+was built from) turn every cited line into a link to that line at that commit.
+
+Endpoints are leaves (usually `kind` 2, named `"POST /orders"`) on the file that declares the route. Each link is
+also an edge, so routing, impact and search see it.
+
+```json
+"links": [
+  { "from": 12, "to": 40, "method": "POST", "path": "/orders", "proof": "scip",
+    "reason": "named target, one route fits",
+    "call":  { "repo": 1, "file": "src/api.js", "line": 5, "function": "placeOrder",
+               "start": 3, "code": ["…", "…", "  const res = await fetch(`${BASE}/orders`, …);", "…"] },
+    "route": { "repo": 0, "file": "app/main.py", "line": 10, "handler": "post_order", "framework": "fastapi",
+               "methods": ["POST"], "start": 8, "code": ["…"] },
+    "checks": [ { "at": "src/api.js:5", "name": "BASE", "means": "src/api.js:2-2", "verdict": "confirmed" } ] }
+],
+"unmatched": [
+  { "from": 14, "method": "GET", "path": "/users/{id}", "target": -1, "reason": "no route fits",
+    "call": { "repo": 1, "file": "src/api.js", "line": 14, "function": "loadUser" } }
+]
+```
+
+| field | meaning |
+| --- | --- |
+| `from`, `to` | node ids: the function (or file) that sends the request, and the endpoint leaf that serves it |
+| `method`, `path` | the request as the caller sends it, and the route's path |
+| `proof` | `scip` (every name it rests on resolves, in a SCIP index, to the assumed definition), `syntax` (the method and path are written at the call site: nothing to resolve), `matched` (read from code, names unchecked), `inferred` (fits only under an assumption, such as a base URL prefix), `ambiguous`, or `contradicted` |
+| `call`, `route` | the two cited sites: `repo` is an index into `repos`; `start` and `code` are the lines shown (optional) |
+| `checks` | what SCIP said of each name the link rests on |
+| `unmatched` | requests no route was found for: listed in the links panel, not drawn |
+
+`meta.accuracy` says how the links scored on an answer key built without the tool, and is shown with them:
+`{ "found": 20, "of": 20, "falseLinks": 0, "scip": 17, "how": "…", "missed": "…", "key": "https://…" }`
+(production links found, links in the key, links drawn that the key says are wrong, found links SCIP confirmed, and
+plain text on how the key was built, what was missed, and where the key is). Without it the panel says the links
+are unmeasured.
+
 ## Producing a spec
 
 - From code: `tools/index-self/index_self.py` shows how to build one with tree-sitter and SCIP (it indexes Atlas
