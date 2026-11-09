@@ -1,0 +1,99 @@
+"""ChannelValues: the Python value resolver, reading further for channel names and ports: environment defaults,
+number conversions, fields of this repository's objects and `self` attributes set from constructor arguments."""
+
+from ..scope import Scope
+from ..syntax import PythonSyntax
+from ..values import Marker, PythonValueResolver, Value
+from .flask import FlaskConfig
+from .objects import Field, ObjectFields
+from .origins import Origins
+from .qualified import QualifiedNames
+from .sites import FunctionSites
+
+
+class ChannelValues(PythonValueResolver):
+    """The URL resolver with what a channel's value is often read through. `os.getenv(name, default)` and
+    `os.environ.get(name, default)` read as their default, `int(x)` and `float(x)` as x. An attribute the URL resolver
+    cannot read is a field of an object (ObjectFields) or, on `self`, what a method assigned it; a parameter there is
+    settled with what the function's call sites pass (settle()). An integer literal (a port) is its digits."""
+
+    HANDLERS = {**PythonValueResolver.HANDLERS, 'integer': 'integer'}
+    ENVIRONMENT = frozenset({'os.getenv', 'os.environ.get'})  # (name, default): the default when the name is unset
+    NUMBERS = frozenset({'int', 'float'})
+    MAX_ALTS = 4
+
+    def __init__(self, workspace):
+        super().__init__(workspace)
+        self.origins = Origins(workspace)
+        self._names = QualifiedNames(workspace)
+        self._objects = ObjectFields(workspace, self.origins)
+        self._config = FlaskConfig(workspace)
+        self._sites = FunctionSites(workspace)
+
+    @staticmethod
+    def integer(node, scope, depth):
+        return [Value(PythonSyntax.text(node))]
+
+    def call(self, node, scope, depth):
+        fn = node.child_by_field_name('function')
+        pos, kw = PythonSyntax.call_args(node)
+        if self._names.of(scope.source, fn) in self.ENVIRONMENT:
+            default = pos[1] if len(pos) > 1 else kw.get('default')
+            return self.resolve(default, scope, depth + 1) if default is not None else self.unknown(node)
+        if fn.type == 'identifier' and PythonSyntax.text(fn) in self.NUMBERS and len(pos) == 1:
+            return self.resolve(pos[0], scope, depth + 1)
+        return super().call(node, scope, depth)
+
+    def attribute(self, node, scope, depth):
+        found = super().attribute(node, scope, depth)
+        if any(v.is_known for v in found) or depth >= self.MAX_DEPTH:
+            return found
+        if PythonSyntax.is_self(node.child_by_field_name('object')):
+            fields = self._self_fields(node, scope)
+        else:
+            fields = self._objects.of(node, scope)
+        out = [v for f in fields for v in self.settled(f.node, f.scope, depth + 1)]
+        return [v for v in out if v.is_literal][: self.MAX_ALTS] or found
+
+    def _self_fields(self, node, scope):
+        attr = PythonSyntax.text(node.child_by_field_name('attribute'))
+        if scope.cls is None:
+            return []
+        return [Field(v, Scope.at(scope.source, v)) for v, _ in self.origins.assignments(scope.cls, attr) if v]
+
+    def subscript(self, node, scope, depth):
+        found = super().subscript(node, scope, depth)
+        if any(v.is_known for v in found) or depth >= self.MAX_DEPTH:
+            return found
+        value = self._config.value(node, scope)
+        return self.resolve(value.node, value.scope, depth + 1) if value is not None else found
+
+    def settled(self, node, scope, depth=0) -> list[Value]:
+        """The values of `node` with the parameters of the function around `scope` replaced by what its call sites
+        pass, followed up while the depth lasts. A value still holding a parameter is dropped."""
+        return self.settle(self.resolve(node, scope, depth), scope, depth)
+
+    def settle(self, values, scope, depth) -> list[Value]:
+        out = []
+        for v in values:
+            names = sorted(Marker.names(v.text))
+            if not names:
+                out.append(v)
+            elif scope.func is not None and depth < self.MAX_DEPTH:
+                for site in self._sites.of(scope):
+                    out += self._at_site(v, names, site, scope, depth)
+        return out[: self.MAX_ALTS]
+
+    def _at_site(self, value, names, site, scope, depth):
+        """The value with each parameter filled with what one call site passes (or the parameter's default)."""
+        texts = [value.text]
+        defaults = dict(FunctionSites.params(scope.func))
+        for name in names:
+            if name in site.bound:
+                options = self.settled(site.bound[name], site.scope, depth + 1)
+            elif defaults.get(name) is not None:
+                options = self.resolve(defaults[name], scope.without_function(), depth + 1)
+            else:
+                return []
+            texts = [t.replace(Marker.wrap(name), o.text) for t in texts for o in options if o.is_literal]
+        return [Value(t, value.hints) for t in texts[: self.MAX_ALTS]]

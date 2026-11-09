@@ -34,6 +34,16 @@ class CallerIndex:
         inside = PythonSyntax.FUNCTION
         return [(g, c) for g, c in sites if PythonSyntax.ancestor(c, inside) != func][: self.MAX_SITES]
 
+    def constructions_of(self, source, cls, unique):
+        """[(source, call node)] that call the class `cls` by its name: in its own file, and in the other files that
+        call that name when the class is the only one so named (`unique`). At most MAX_SITES."""
+        name = PythonSyntax.name(cls)
+        sites = [(source, c) for c in self._file_calls(source).get(name, ())]
+        for other in self._mentioning(name) if unique else ():
+            if other is not source:
+                sites += [(other, c) for c in self._file_calls(other).get(name, ())]
+        return sites[: self.MAX_SITES]
+
     def _by_name(self, source, name):
         """Calls by name in the same file, and in other files for a uniquely named, not generic function."""
         sites = [(source, c) for c in self._file_calls(source).get(name, ())]

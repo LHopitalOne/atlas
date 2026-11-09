@@ -1,5 +1,6 @@
 """Flask and FastAPI routes: `@app.route(...)`, `@router.get(...)` decorators and `app.add_url_rule(...)`."""
 
+from .....core.http import ANY, Protocol
 from ..syntax import PythonSyntax
 from ..verbs import HttpVerbs
 from .prefixed import PrefixedRoutes, RouteDeclaration
@@ -7,9 +8,11 @@ from .prefixed import PrefixedRoutes, RouteDeclaration
 
 class DecoratorRoutes(PrefixedRoutes):
     """`@app.route('/p', methods=[...])`, `@bp.get('/p')`, `@router.api_route(...)`, `@app.websocket(...)` on a
-    function: the function is the handler, the verb (GET for route) the method unless `methods=` says otherwise."""
+    function: the function is the handler, the verb (GET for route) the method unless `methods=` says otherwise.
+    `websocket` and `websocket_route` (FastAPI, Starlette) declare a WebSocket endpoint: any operation on its path."""
 
-    ROUTE_DECORATORS = frozenset({'route', 'api_route', 'websocket'})
+    WEBSOCKETS = frozenset({'websocket', 'websocket_route'})
+    ROUTE_DECORATORS = frozenset({'route', 'api_route'}) | WEBSOCKETS
 
     def _declarations(self):
         for source, decorated in self.workspace.decorated():
@@ -35,6 +38,8 @@ class DecoratorRoutes(PrefixedRoutes):
         node = pos[0] if pos else kw.get('path', kw.get('rule'))
         verb = [attr.upper()] if attr in HttpVerbs.NAMES else ['GET']
         receiver = fn.child_by_field_name('object')
+        if attr in self.WEBSOCKETS:
+            return RouteDeclaration(source, decorator, receiver, node, None, [ANY], handler, Protocol.WEBSOCKET)
         return RouteDeclaration(source, decorator, receiver, node, kw.get('methods'), verb, handler)
 
 
