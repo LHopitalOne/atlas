@@ -5,7 +5,6 @@ from dataclasses import dataclass
 
 from ..syntax.nodes import JsSyntax
 from ..syntax.site import CallSite
-from ..values.urls import UrlText
 from .base import RequestCollector
 
 
@@ -47,6 +46,8 @@ class JQueryRequests(RequestCollector):
         first, second = site.args[0], site.args[1] if len(site.args) > 1 else None
         if second is None and self._settings(builder, first):
             return builder.from_settings(site.node, first, default, self.METHOD_KEYS, require_path=True)
+        if second is None and self._parameter(builder, first):  # a URL or a settings object: its callers tell
+            builder.from_settings(site.node, first, default, self.METHOD_KEYS, require_path=True)
         method = builder.method(second, default, self.METHOD_KEYS) if site.name == 'ajax' else default
         keys = self.METHOD_KEYS
         return builder.build(site.node, None, first, method, require_path=True, options=second, method_keys=keys)
@@ -72,13 +73,18 @@ class JQueryRequests(RequestCollector):
     @staticmethod
     def _settings(builder, node):
         """The only argument is a settings object (`$.get({ url })`, `$.ajax(settings)`), not a URL: an object
-        literal, a const bound to one, or a parameter not named like a URL."""
+        literal or a const bound to one."""
         node = JsSyntax.unwrap(node)
         if node.type == 'object':
             return True
         if node.type != 'identifier':
             return False
         bound = JsSyntax.unwrap(builder.module.scopes.lookup(node, JsSyntax.text(node)))
-        if bound is not None:
-            return bound.type == 'object'
-        return builder.params.is_parameter(node) and not UrlText.PATH_NAME.search(JsSyntax.text(node))
+        return bound is not None and bound.type == 'object'
+
+    @staticmethod
+    def _parameter(builder, node):
+        """The only argument is a parameter of the enclosing function: a URL string or a settings object, which
+        only its callers tell, so the request is opened both ways (an argument fills in only the reading it fits)."""
+        node = JsSyntax.unwrap(node)
+        return node.type == 'identifier' and builder.params.is_parameter(node)

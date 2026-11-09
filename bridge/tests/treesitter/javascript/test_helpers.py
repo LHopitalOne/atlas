@@ -76,6 +76,21 @@ export function load(id) {
   fetch(url);
 }
 """
+REBUILT = """
+export function load(id, q) {
+  let url = '/api/items';
+  url = url + '/' + id;
+  fetch(url);
+}
+"""
+REPLACED = """
+export function load(id, all) {
+  let url = '/api/old';
+  url = '/api/items/' + id;
+  if (all) url = '/api/all';
+  fetch(url);
+}
+"""
 
 
 class HelperTest(unittest.TestCase):
@@ -114,6 +129,13 @@ class HelperTest(unittest.TestCase):
 
     def test_a_let_changed_in_place_reads_as_before(self):
         self.assertEqual({('GET', '/api/items', 'src/items.js', 5)}, self.calls({'src/items.js': UPDATED}))
+
+    def test_a_let_rebuilt_from_itself_reads_as_before(self):
+        self.assertEqual({('GET', '/api/items', 'src/items.js', 5)}, self.calls({'src/items.js': REBUILT}))
+
+    def test_a_value_replaced_unconditionally_is_not_a_request(self):
+        found = {(m, p) for m, p, _, _ in self.calls({'src/items.js': REPLACED})}
+        self.assertEqual({('GET', '/api/items/{id}'), ('GET', '/api/all')}, found)
 
 
 if __name__ == '__main__':

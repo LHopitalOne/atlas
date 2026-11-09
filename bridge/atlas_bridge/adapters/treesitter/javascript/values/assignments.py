@@ -30,17 +30,19 @@ class Assignments:
         declarator = self._declarator(node, name)
         if declarator is None:
             return [node]
-        found = []
         initial = declarator.child_by_field_name('value')
-        if initial is not None:
-            found.append(initial)
-        for n in self._assignments(self._scope(declarator)).get(name, ()):
+        found = [initial] if initial is not None else []
+        scope = self._scope(declarator)
+        for n in self._assignments(scope).get(name, ()):
             if n.start_byte >= node.start_byte or not self._same(n, name, declarator):
                 continue
-            if n.type != self.ASSIGN:
-                return [node]  # changed in place: none of the values is the whole URL
-            found.append(n.child_by_field_name('right'))
-        return found[: self.MAX_VALUES] if len(found) > 1 else [node]
+            right = n.child_by_field_name('right')
+            if n.type != self.ASSIGN or self._reads(right, name, declarator):
+                return [node]  # changed in place (`url += x`, `url = url + x`): none of the values is the whole URL
+            if self._unconditional(n, scope):
+                found = []  # a statement of the variable's own block: the earlier values are gone by the read
+            found.append(right)
+        return found[: self.MAX_VALUES] if found and found != [initial] else [node]
 
     def _assignments(self, scope):
         """{name: the assignments and updates of that name} under a block."""
@@ -53,6 +55,25 @@ class Assignments:
                     found.setdefault(JsSyntax.text(left), []).append(n)
         return found
 
+    @classmethod
+    def _reads(cls, right, name, declarator):
+        """The assigned value reads the variable itself."""
+        return any(
+            JsSyntax.text(i) == name and cls._same_name(i, name, declarator)
+            for i in JsSyntax.walk(right, {'identifier'})
+        )
+
+    @staticmethod
+    def _unconditional(n, scope):
+        """The assignment is a statement of the block the variable is declared in (no branch or loop around it)."""
+        statement = n.parent
+        return statement is not None and statement.type == 'expression_statement' and statement.parent.id == scope.id
+
+    @classmethod
+    def _same_name(cls, identifier, name, declarator):
+        found = cls._declarator(identifier, name)
+        return found is not None and found.id == declarator.id
+
     @staticmethod
     def _target(n):
         return JsSyntax.unwrap(n.child_by_field_name('left') or n.child_by_field_name('argument'))
@@ -60,8 +81,7 @@ class Assignments:
     @classmethod
     def _same(cls, n, name, declarator):
         """The assignment is to the variable of `declarator` (not to another one of the same name)."""
-        found = cls._declarator(cls._target(n), name)
-        return found is not None and found.id == declarator.id
+        return cls._same_name(cls._target(n), name, declarator)
 
     @classmethod
     def _declarator(cls, node, name):
