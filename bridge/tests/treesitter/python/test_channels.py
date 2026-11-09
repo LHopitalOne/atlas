@@ -187,6 +187,66 @@ class AmqpRedisTest(unittest.TestCase):
         self.assertEqual(sends(ex), {(Protocol.AMQP, '/orders.ready')})
         self.assertEqual(receives(ex), {(Protocol.AMQP, '/orders.ready')})
 
+    def test_pika_publish_helper_followed_to_every_literal_queue(self):
+        """A queue client's channel is annotated with a type variable over pika's channels, the queue name reaches
+        basic_publish as a closure variable of a nested callback, and the helper is called with many queues."""
+        callers = ''.join(f"\ndef send_{i}(event):\n    publish_event('queue_{i}', event)\n" for i in range(6))
+        ex = extract(
+            {
+                'app/queue.py': """
+                from typing import Generic, TypeVar
+                from pika.adapters.blocking_connection import BlockingChannel
+                from pika.channel import Channel
+
+                ChannelT = TypeVar('ChannelT', Channel, BlockingChannel)
+
+                class Broker(Generic[ChannelT]):
+                    def with_queue(self, queue, callback):
+                        callback(self.channel)
+
+                    def publish(self, queue: str, body: bytes) -> None:
+                        def deliver(channel: ChannelT) -> None:
+                            channel.basic_publish(exchange='', routing_key=queue, body=body)
+
+                        self.with_queue(queue, deliver)
+
+                    def send_json(self, queue, body):
+                        self.publish(queue, body)
+
+                    def consume_forever(self, channel: BlockingChannel):
+                        for method, properties, body in channel.consume('replies'):
+                            pass
+
+                def get_broker() -> Broker:
+                    return Broker()
+
+                def publish_event(queue, event):
+                    get_broker().send_json(queue, event)
+                """,
+                'app/senders.py': 'from app.queue import publish_event\n' + callers,
+            }
+        )
+        self.assertEqual(sends(ex), {(Protocol.AMQP, f'/queue_{i}') for i in range(6)})
+        self.assertEqual(receives(ex), {(Protocol.AMQP, '/replies')})
+
+    def test_a_type_variable_bound_to_a_library_type(self):
+        ex = extract(
+            {
+                'bus.py': """
+                from typing import TypeVar
+                import redis
+
+                R = TypeVar('R', bound=redis.Redis)
+                S = TypeVar('S')
+
+                def announce(client: R, other: S):
+                    client.publish('announcements', b'x')
+                    other.publish('elsewhere', b'x')
+                """,
+            }
+        )
+        self.assertEqual(sends(ex), {(Protocol.REDIS, '/announcements')})
+
     def test_redis_publish_through_flask_config_and_subscribe(self):
         ex = extract(
             {

@@ -4,6 +4,7 @@ from ...kit import UrlTemplate
 from ..syntax.functions import Functions
 from ..syntax.nodes import JsSyntax
 from ..values.urls import UrlText
+from .jobs import JobReadings
 from .table import Reading
 
 
@@ -17,6 +18,7 @@ class ChannelReadings:
     def __init__(self, file):
         self._file = file
         self._values = file.values
+        self._jobs = JobReadings(file)
 
     def of(self, match, hints) -> list[str]:
         """The channel paths of a match, in the order found, without repeats; hints gathers the names read."""
@@ -28,8 +30,27 @@ class ChannelReadings:
             Reading.SERVICE: self._service,
             Reading.RPC: self._rpcs,
             Reading.IMPLEMENTATION: self._implementations,
+            Reading.JOB: lambda m, h: self._queued(self.of(m.origin, h), self._names(m, h)),
+            Reading.JOBS: lambda m, h: self._queued(self.of(m.origin, h), self._jobs.bulk(self._first(m), h)),
+            Reading.WORKER: lambda m, h: self._queued(self._names(m, h), self._jobs.of_processor(self._second(m), h)),
+            Reading.PROCESSOR: lambda m, h: self._queued(self._names(m, h), self._jobs.of_class(m.node, h)),
         }.get(match.entry.reading)
         return list(dict.fromkeys(reader(match, hints))) if reader is not None else []
+
+    @staticmethod
+    def _queued(queues, jobs):
+        """'/<queue>/<job>' for each queue and job (both read as '/<name>')."""
+        return [q + j for q in queues for j in jobs]
+
+    @staticmethod
+    def _first(match):
+        args = JsSyntax.args(match.node)
+        return args[0] if args else None
+
+    @staticmethod
+    def _second(match):
+        args = JsSyntax.args(match.node)
+        return args[1] if len(args) > 1 else None
 
     def _urls(self, match, hints):
         for value in self._raw(match, hints):

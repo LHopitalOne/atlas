@@ -1,29 +1,30 @@
 """The value of a channel expression: what UrlValues reads in one file, plus where channels are usually kept."""
 
 from ..bindings.binding import ParamBinding
-from ..syntax.functions import Functions
 from ..syntax.members import Members
 from ..syntax.nodes import JsSyntax
 from ..values.resolver import UrlValues
 from ..values.urls import UrlText
 from .callers import Callers
+from .enums import EnumMembers
+from .properties import ParameterProperties
 
 
 class ChannelValues(UrlValues):
     """UrlValues (literals, templates, `+`, `process.env.X ?? 'default'`, local consts and helpers) of one file, also
     following a name to where the channel is kept: a constant or config object another file of the repository
-    exports, `this.field` (a class field, an assignment, a constructor parameter property), a parameter (its default,
-    or what its callers pass), `Number(...)` around a port. A value that depends on which caller it came from is only
-    taken when every caller agrees; `candidates` gives one per caller instead."""
+    exports, a TypeScript enum's member, `this.field` (a class field, an assignment, a constructor parameter property),
+    a parameter (its default, or what its callers pass), `Number(...)` around a port. A value that depends on which
+    caller it came from is only taken when every caller agrees; `candidates` gives one per caller instead."""
 
     HANDLERS = {**UrlValues.HANDLERS, 'shorthand_property_identifier': '_identifier'}
     CONVERSIONS = frozenset({'Number', 'parseInt', 'parseFloat', 'String'})
-    PROPERTY_MODIFIERS = frozenset({'accessibility_modifier', 'readonly', 'override_modifier'})
 
     def __init__(self, scopes, file):
         super().__init__(scopes)
         self._file = file
         self._callers = Callers(file)
+        self._enums = EnumMembers(file)
 
     def candidates(self, node, hints) -> list[str]:
         """The literal values `node` holds: its value, or, for a parameter, each value its callers pass."""
@@ -73,7 +74,8 @@ class ChannelValues(UrlValues):
         if obj is not None and obj.type == 'this':
             found = [(self._file, v) for v in Members.of_this(node, key)] + self._parameter_property(node, key)
         else:
-            found = self._props(self.objects(obj, depth + 1), key)
+            member = self._enums.member(obj, key)
+            found = [member] if member is not None else self._props(self.objects(obj, depth + 1), key)
         value = self._first(found, hints, depth)
         return value if value is not None else super()._member(node, hints, depth)
 
@@ -106,17 +108,8 @@ class ChannelValues(UrlValues):
 
     def _parameter_property(self, node, key):
         """The constructor parameter that declares `this.key` (`constructor(private url = WS_URL)`)."""
-        owner = JsSyntax.ancestor(node, Functions.CLASSES)
-        body = owner.child_by_field_name('body') if owner is not None else None
-        for method in body.named_children if body is not None else ():
-            if method.type != 'method_definition' or JsSyntax.text(method.child_by_field_name('name')) != 'constructor':
-                continue
-            for param in method.child_by_field_name('parameters').named_children:
-                pattern = param.child_by_field_name('pattern')
-                declares = any(c.type in self.PROPERTY_MODIFIERS for c in param.children)
-                if declares and pattern is not None and JsSyntax.text(pattern) == key:
-                    return self._callers.arguments(param)
-        return []
+        param = ParameterProperties.of(node, key)
+        return self._callers.arguments(param) if param is not None else []
 
     @staticmethod
     def _props(objects, key):

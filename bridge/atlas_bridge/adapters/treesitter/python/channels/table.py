@@ -38,12 +38,14 @@ class Argument(NamedTuple):
 
 class LibraryType(NamedTuple):
     """An object a library makes. `creators`: the dotted names (the end of the qualified name) of the calls that make
-    it; `factories`: (type, method) pairs, a method of another object of the same library that returns one."""
+    it; `factories`: (type, method) pairs, a method of another object of the same library that returns one;
+    `classes`: other classes of the library an annotation may name it by (a subclass the library hands out)."""
 
     library: str  # the top-level module: 'kafka', 'confluent_kafka', 'redis'
     name: str
     creators: tuple = ()
     factories: tuple = ()
+    classes: tuple = ()
 
 
 class Wrapper(NamedTuple):
@@ -111,7 +113,8 @@ class ChannelTable:
         LibraryType('arroyo', 'Producer'),  # arroyo.backends.abstract: the interfaces, only ever annotated
         LibraryType('arroyo', 'Consumer'),
         LibraryType('pika', 'Connection', ('BlockingConnection', 'SelectConnection')),
-        LibraryType('pika', 'Channel', factories=(('Connection', 'channel'),)),
+        # BlockingConnection.channel() returns a BlockingChannel; the asynchronous connections a pika.channel.Channel
+        LibraryType('pika', 'Channel', factories=(('Connection', 'channel'),), classes=('BlockingChannel',)),
         LibraryType('redis', 'Redis', ('Redis', 'StrictRedis', 'Redis.from_url', 'redis.from_url')),
         LibraryType('redis', 'PubSub', factories=(('Redis', 'pubsub'),)),
         LibraryType('socket', 'socket', ('socket.socket',)),
@@ -144,9 +147,10 @@ class ChannelTable:
         Endpoint('arroyo', MODULE, 'Produce', SEND, KAFKA, TOPIC_OBJECT),
         Endpoint('arroyo', MODULE, 'KafkaDlqProducer', SEND, KAFKA, TOPIC_OBJECT),
         # pika: basic_publish(exchange, routing_key) on the default exchange '' reaches the queue the key names;
-        # basic_consume(queue, on_message_callback)
+        # basic_consume(queue, on_message_callback), and a BlockingChannel's consume(queue) generator
         Endpoint('pika', 'Channel', 'basic_publish', SEND, AMQP, Argument(1, 'routing_key'), requires=DEFAULT_EXCHANGE),
         Endpoint('pika', 'Channel', 'basic_consume', RECEIVE, AMQP, Argument(0, 'queue')),
+        Endpoint('pika', 'Channel', 'consume', RECEIVE, AMQP, Argument(0, 'queue')),
         # redis-py: Redis.publish(channel, message); PubSub.subscribe(*channels) and psubscribe(*patterns)
         Endpoint('redis', 'Redis', 'publish', SEND, REDIS, Argument(0, 'channel')),
         Endpoint('redis', 'PubSub', 'subscribe', RECEIVE, REDIS, EVERY_NAME),
