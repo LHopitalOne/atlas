@@ -4,7 +4,7 @@ import dataclasses
 from abc import abstractmethod
 from typing import NamedTuple
 
-from .....core.http import ANY, Extraction
+from .....core.http import ANY, Extraction, Protocol
 from ...kit import RouteCollector
 from ..scope import Scope
 from ..syntax import PythonSyntax
@@ -23,6 +23,7 @@ class RouteDeclaration(NamedTuple):
     methods: object  # the `methods=` expression, or None
     default: list  # the methods without `methods=`
     handler: str
+    protocol: str = Protocol.HTTP  # WEBSOCKET for a WebSocket endpoint
 
 
 class PrefixedRoutes(RouteCollector):
@@ -71,7 +72,8 @@ class PrefixedRoutes(RouteCollector):
         if not raw and not prefix:
             return None  # '' names a router's own prefix; without one it is more likely some other decorator
         line = PythonSyntax.line(d.site)
-        return self.route(d.source, line, FlaskPath.template(prefix + raw), methods, d.handler, '', framework)
+        route = self.route(d.source, line, FlaskPath.template(prefix + raw), methods, d.handler, '', framework)
+        return dataclasses.replace(route, protocol=d.protocol)
 
     @staticmethod
     def _reads_as_path(raw):

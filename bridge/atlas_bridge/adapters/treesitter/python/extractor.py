@@ -6,12 +6,15 @@ Requests: verb calls on requests/httpx/aiohttp/session/client-like receivers, `.
 `.urlopen(METHOD, path)` and `urllib.request.urlopen`. URLs are resolved through literals, f-strings, `.format`, `%`,
 `+`, `urljoin`, local variables and module constants, and through the parameters of wrapper functions up to the
 callers that supply them. Payloads: `reverse('route-name')` URLs handed to another service. Service URLs:
-module-level names bound to absolute URLs (settings).
+module-level names bound to absolute URLs (settings). Channels (channels/): Kafka, RabbitMQ, Redis pub/sub, socket,
+asyncio and websockets sends and receives from one table of library entry points, gRPC servicers and stubs, and
+Strawberry GraphQL root fields.
 """
 
 from ....core.http import Extraction
 from ..kit import LanguageExtractor
 from .calls import PayloadCalls, RequestCalls
+from .channels import ChannelEndpoints, GrpcServicers, GrpcStubs, StrawberryFields
 from .config import SettingUrls
 from .files import SlashedFiles
 from .policy import PythonTestPolicy
@@ -25,7 +28,8 @@ class PythonExtractor(LanguageExtractor):
     GRAMMARS = frozenset({'python'})
     POLICY = PythonTestPolicy
     PREFIXED = (DecoratorRoutes, UrlRuleRoutes)  # share one read of the blueprint and router registrations
-    OTHERS = (DjangoRoutes, RequestCalls, PayloadCalls, SettingUrls)
+    CHANNELS = (ChannelEndpoints, GrpcServicers, GrpcStubs, StrawberryFields)  # links over other protocols
+    OTHERS = (DjangoRoutes, RequestCalls, PayloadCalls, SettingUrls, *CHANNELS)
 
     def workspace(self, repo, sources):
         return PythonWorkspace(repo, sources, self.graph)
