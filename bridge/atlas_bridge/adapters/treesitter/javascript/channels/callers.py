@@ -13,6 +13,7 @@ class Callers:
     MAX_SITES = 50
     CONSTRUCTOR = 'constructor'
     CALLS = frozenset({'call_expression', 'new_expression'})
+    NAMES = frozenset({'identifier', 'shorthand_property_identifier'})
 
     def __init__(self, file):
         self._file = file
@@ -74,7 +75,7 @@ class Callers:
         return fn is not None and fn.type == 'identifier' and self._names_this(file, fn, name)
 
     def _is_method_call(self, file, call, name, owner):
-        """`this.name(...)` in the class, or `x.name(...)` on an instance this file imports or makes."""
+        """`this.name(...)` in the class, or `x.name(...)` on an instance of the class this file makes or imports."""
         fn = JsSyntax.unwrap(call.child_by_field_name('function')) if call.type == 'call_expression' else None
         if fn is None or fn.type != 'member_expression' or JsSyntax.text(fn.child_by_field_name('property')) != name:
             return False
@@ -85,16 +86,24 @@ class Callers:
             return False
         if file is not self._file:
             found = file.imported(obj)
-            return found is not None and found[0] is self._file
-        made = JsSyntax.unwrap(file.module.scopes.lookup(obj, JsSyntax.text(obj)))
-        return made is not None and made.type == 'new_expression' and self._is_new(file, made, owner)
+            return found is not None and found[0] is self._file and self._instance(self._file, found[1], owner)
+        return self._instance(file, obj, owner)
+
+    def _instance(self, file, node, owner):
+        """`node` of `file` is `new <owner>(...)`, or a const bound to it."""
+        node = JsSyntax.unwrap(node)
+        if node is not None and node.type in self.NAMES:
+            node = JsSyntax.unwrap(file.module.scopes.lookup(node, JsSyntax.text(node)))
+        return node is not None and node.type == 'new_expression' and self._is_new(file, node, owner)
 
     def _names_this(self, file, ident, name):
         """`ident` is `name` of this file: in this file by name, elsewhere imported from this file (by that name, or
-        as its default export)."""
+        as its default export when that is `name`)."""
         if file is self._file:
             return JsSyntax.text(ident) == name
         found = file.libraries.source_of(ident)
         if found is None or found[1] not in (name, file.libraries.DEFAULT):
             return False
-        return file.graph.file_for(file.path, found[0]) is self._file
+        if file.graph.file_for(file.path, found[0]) is not self._file:
+            return False
+        return found[1] == name or self._file.exports_as_default(name)

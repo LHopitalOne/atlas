@@ -45,6 +45,18 @@ class ChannelFile:
                 return found
         return None
 
+    def exports_as_default(self, name) -> bool:
+        """The file's default export is what it declares or binds as `name` (`module.exports = name`,
+        `export default name`, `export default function name() {}`)."""
+        node = JsSyntax.unwrap(self.exported(LibraryNames.DEFAULT))
+        if node is not None:
+            return name in (JsSyntax.text(node), JsSyntax.text(node.child_by_field_name('name')))
+        for child in self.module.source.root.named_children:
+            if child.type == 'export_statement' and any(c.type == LibraryNames.DEFAULT for c in child.children):
+                declaration = child.child_by_field_name('declaration')
+                return declaration is not None and JsSyntax.text(declaration.child_by_field_name('name')) == name
+        return False
+
     def _export(self, child, name):
         if child.type == 'export_statement':
             value = child.child_by_field_name('value')

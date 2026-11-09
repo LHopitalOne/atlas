@@ -53,6 +53,18 @@ class DgramTest(unittest.TestCase):
         self.assertEqual([(p, path) for p, _, path, _, _ in found.calls], [(UDP, '/8125'), (UDP, '/8126')])
         self.assertEqual([(p, path) for p, _, path, _, _ in found.routes], [(UDP, '/8125'), (UDP, '/8127')])
 
+    def test_offset_and_length_without_an_address_and_port_zero(self):
+        found = Channels.of(
+            "const dgram = require('node:dgram');\n"
+            "const socket = dgram.createSocket('udp4');\n"
+            'socket.send(buf, 0, buf.length, 8130);\n'  # send(msg, offset, length, port): not port 0
+            "socket.send(buf, 8131, 'statsd', (err) => {});\n"  # send(msg, port, address, callback)
+            'socket.bind(0);\n'  # any free port: no channel
+            'socket.bind();\n',
+        )
+        self.assertEqual([path for _, _, path, _, _ in found.calls], ['/8130', '/8131'])
+        self.assertEqual(found.routes, [])
+
 
 if __name__ == '__main__':
     unittest.main()

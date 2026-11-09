@@ -1,6 +1,7 @@
 """The channels a matched call names, as paths: read from its arguments the way its table entry says."""
 
 from ...kit import UrlTemplate
+from ..syntax.functions import Functions
 from ..syntax.nodes import JsSyntax
 from ..values.urls import UrlText
 from .table import Reading
@@ -11,6 +12,7 @@ class ChannelReadings:
 
     SERVICE = 'service'  # `<pkg>.<Service>.service`: the definition a gRPC server adds
     IMPLEMENTATIONS = frozenset({'pair', 'method_definition', 'shorthand_property_identifier'})
+    PORTS = range(1, 65536)  # 0 asks the system for any free port: no channel
 
     def __init__(self, file):
         self._file = file
@@ -44,13 +46,14 @@ class ChannelReadings:
 
     def _ports(self, match, hints):
         for value in self._raw(match, hints):
-            if value.strip().isdigit():
-                yield '/' + value.strip()
+            value = value.strip()
+            if value.isdigit() and int(value) in self.PORTS:
+                yield f'/{int(value)}'
 
     def _raw(self, match, hints):
         """The literal values the entry's argument holds (one per caller when it is a parameter)."""
         arg, args = match.entry.arg, JsSyntax.args(match.node)
-        index = arg.at(len(args))
+        index = self._index(arg, args)
         if index >= len(args):
             return [arg.default] if arg.default else []
         hints.update(JsSyntax.names_in(args[index]))
@@ -61,6 +64,14 @@ class ChannelReadings:
             return []
         nodes = args[index:] if arg.every else args[index : index + 1]
         return [v for n in nodes for v in self._values.candidates(n, hints)]
+
+    @staticmethod
+    def _index(arg, args):
+        """The argument's position: `long_index` when the call has an argument there that is not a callback."""
+        long = arg.long_index
+        if 0 <= long < len(args) and JsSyntax.unwrap(args[long]).type not in Functions.FUNCTIONS:
+            return long
+        return arg.index
 
     @staticmethod
     def _options(arg, found, hints):

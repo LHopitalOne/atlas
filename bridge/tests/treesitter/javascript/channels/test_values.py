@@ -72,6 +72,46 @@ class ImportedValuesTest(unittest.TestCase):
         )
         self.assertEqual([(p, f, line) for _, _, p, f, line in found.routes], [('/feed', 'src/hub.js', 3)])
 
+    def test_callers_are_calls_of_that_function_or_an_instance_of_that_class(self):
+        found = Channels(
+            {
+                'src/events.js': (
+                    "const { Kafka } = require('kafkajs');\n"
+                    'const producer = new Kafka({}).producer();\n'
+                    'function publish(topic) { return producer.send({ topic, messages: [] }); }\n'
+                    'class Emitter { emit(topic) { return producer.send({ topic, messages: [] }); } }\n'
+                    'const helper = { emit: (name) => name };\n'
+                    'const emitter = new Emitter();\n'
+                    'module.exports = Object.assign(() => {}, { publish, helper, emitter });\n'
+                ),
+                'src/other.js': 'export function publish(topic) { return topic; }\nexport default publish;\n',
+                'src/a.js': (
+                    "const { helper, emitter } = require('./events');\n"
+                    "helper.emit('not.a.topic');\n"  # another object's method of the same name
+                    "emitter.emit('orders.created');\n"
+                ),
+                'src/b.js': (
+                    "import send from './other.js';\nimport { publish } from './events.js';\n"
+                    "send('not.a.topic.either');\n"  # the default export of another file
+                    "publish('orders.paid');\n"
+                ),
+            }
+        )
+        self.assertEqual(sorted(p for _, _, p, _, _ in found.calls), ['/orders.created', '/orders.paid'])
+
+    def test_a_default_export_is_called_by_any_name(self):
+        found = Channels(
+            {
+                'src/publish.js': (
+                    "import { Kafka } from 'kafkajs';\n"
+                    'const producer = new Kafka({}).producer();\n'
+                    'export default function publish(topic) { return producer.send({ topic, messages: [] }); }\n'
+                ),
+                'src/a.js': "import publish from './publish.js';\npublish('orders.created');\n",
+            }
+        )
+        self.assertEqual([p for _, _, p, _, _ in found.calls], ['/orders.created'])
+
     def test_each_caller_of_a_wrapper_names_its_own_channel(self):
         found = Channels.of(
             "const { WebSocketServer } = require('ws');\n"

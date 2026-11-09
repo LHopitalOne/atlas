@@ -66,6 +66,7 @@ class WebSocketServerTest(unittest.TestCase):
             "  new WebSocket.Server({ port: 8080, path: '/admin/ws' });\n"
             '  new WebSocketServer({ port: 8081 });\n'
             '  new WebSocketServer({ noServer: true });\n'
+            "  new WebSocket.WebSocketServer({ port: 8082, path: '/feed' });\n"
             '}\n',
         )
         methods = ['CONNECT', 'SEND']
@@ -75,6 +76,7 @@ class WebSocketServerTest(unittest.TestCase):
                 (WS, methods, '/events', 'src/a.js', 5),
                 (WS, methods, '/admin/ws', 'src/a.js', 6),
                 (WS, methods, '/', 'src/a.js', 7),  # without a path, a server takes the root
+                (WS, methods, '/feed', 'src/a.js', 9),
             ],
         )
         self.assertEqual(found.extraction.routes[0].framework, 'ws')

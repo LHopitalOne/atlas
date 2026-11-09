@@ -48,15 +48,11 @@ class Arg:
     many: str = ''  # a property that holds a list of channels
     default: str = ''  # the channel when the argument (or key) is left out
     every: bool = False  # every argument from `index` on names a channel
-    long_index: int = -1  # the index to read instead when the call has at least LONG arguments
+    # the index to read instead when the call has an argument there that is not a callback: dgram's
+    # send(msg, offset, length, port[, address][, callback]) against send(msg, port[, address][, callback])
+    long_index: int = -1
     unless: str = ''  # an option that means the channel is not given here (`noServer`)
     positional: bool = True  # the argument itself names the channel when it is not an options object
-
-    LONG = 5
-
-    def at(self, count):
-        """The argument index for a call with `count` arguments."""
-        return self.long_index if self.long_index >= 0 and count >= self.LONG else self.index
 
 
 @dataclass(frozen=True)
@@ -82,7 +78,7 @@ class Entry:
 GLOBAL = ''
 ANY_NAME = '*'
 WS = frozenset({GLOBAL, 'ws', 'isomorphic-ws'})
-WS_SERVER = frozenset({'ws'})
+WS_SERVER = frozenset({'ws', 'isomorphic-ws'})  # isomorphic-ws re-exports ws in Node
 KAFKA = frozenset({'kafkajs'})
 AMQP = frozenset({'amqplib', 'amqplib/callback_api'})
 REDIS = frozenset({'ioredis', 'redis', '@redis/client'})
@@ -104,15 +100,17 @@ ENTRIES = (
     Entry(WS, Form.ON_CALL, 'send', Role.SEND, Protocol.WEBSOCKET, Reading.ORIGIN, methods=('SEND',), on=SOCKET),
     *(
         Entry(WS_SERVER, Form.NEW, name, Role.RECEIVE, Protocol.WEBSOCKET, Reading.URL, SERVER_PATH, CONNECT_SEND)
-        for name in ('WebSocketServer', 'WebSocket.Server', 'Server')
+        for name in ('WebSocketServer', 'WebSocket.WebSocketServer', 'WebSocket.Server', 'Server')
     ),
     # kafkajs: producer.send({ topic, messages }), consumer.subscribe({ topic } | { topics: [...] })
     Entry(KAFKA, Form.METHOD, 'send', Role.SEND, Protocol.KAFKA, Reading.NAME, TOPIC),
     Entry(KAFKA, Form.METHOD, 'subscribe', Role.RECEIVE, Protocol.KAFKA, Reading.NAME, TOPICS),
-    # amqplib: channel.sendToQueue(queue, ...), channel.publish(exchange, routingKey, content), channel.consume(queue)
+    # amqplib: channel.sendToQueue(queue, ...), channel.publish(exchange, routingKey, content), channel.consume(queue);
+    # channel.bindQueue(queue, exchange, pattern) receives what is published with that routing key
     Entry(AMQP, Form.METHOD, 'sendToQueue', Role.SEND, Protocol.AMQP, Reading.NAME, Arg(0), min_args=2),
     Entry(AMQP, Form.METHOD, 'publish', Role.SEND, Protocol.AMQP, Reading.NAME, Arg(1), min_args=3),
     Entry(AMQP, Form.METHOD, 'consume', Role.RECEIVE, Protocol.AMQP, Reading.NAME, Arg(0), min_args=2),
+    Entry(AMQP, Form.METHOD, 'bindQueue', Role.RECEIVE, Protocol.AMQP, Reading.NAME, Arg(2), min_args=3),
     # ioredis / node-redis: publish(channel, message), subscribe(channel, ...)
     Entry(REDIS, Form.METHOD, 'publish', Role.SEND, Protocol.REDIS, Reading.NAME, Arg(0), min_args=2, max_args=2),
     Entry(REDIS, Form.METHOD, 'subscribe', Role.RECEIVE, Protocol.REDIS, Reading.NAME, Arg(0, every=True)),
@@ -130,7 +128,7 @@ ENTRIES = (
     Entry(NET, Form.CALL, 'createServer', Role.MAKE, makes='net.server'),
     Entry(NET, Form.ON_CALL, 'listen', Role.RECEIVE, Protocol.TCP, Reading.PORT, PORT, on='net.server'),
     # dgram: dgram.createSocket(...), socket.send(msg, port, host) / send(msg, offset, length, port, host),
-    # socket.bind(port)
+    # socket.bind(port); a port of 0 (any free port) is no channel
     Entry(DGRAM, Form.CALL, 'createSocket', Role.MAKE, makes='dgram.socket'),
     Entry(DGRAM, Form.ON_CALL, 'send', Role.SEND, Protocol.UDP, Reading.PORT, Arg(1, long_index=3), on='dgram.socket'),
     Entry(DGRAM, Form.ON_CALL, 'bind', Role.RECEIVE, Protocol.UDP, Reading.PORT, PORT, on='dgram.socket'),

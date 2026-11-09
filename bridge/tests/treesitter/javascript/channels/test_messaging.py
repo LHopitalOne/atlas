@@ -61,10 +61,14 @@ class AmqpTest(unittest.TestCase):
             "  ch.publish('billing', 'invoice.paid', Buffer.from(body));\n"
             "  ch.publish('billing', 'x');\n"  # too few arguments for amqplib's publish
             "  await ch.consume('receipts', (msg) => ch.ack(msg));\n"
+            "  await ch.bindQueue('receipts', 'billing', 'invoice.paid');\n"  # receives what is published with the key
             '}\n',
         )
         a = Protocol.AMQP
-        self.assertEqual(channels(found), ([(a, ANY, '/invoices'), (a, ANY, '/invoice.paid')], [(a, '/receipts')]))
+        self.assertEqual(
+            channels(found),
+            ([(a, ANY, '/invoices'), (a, ANY, '/invoice.paid')], [(a, '/receipts'), (a, '/invoice.paid')]),
+        )
 
 
 class RedisTest(unittest.TestCase):
