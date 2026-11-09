@@ -7,7 +7,8 @@ BridgeError
 │   ├── RepositoryNotFoundError a repository folder that does not exist
 │   ├── GraphFormatError        a file that is not a Graphify graph.json
 │   ├── ScipFormatError         a file that is not a SCIP index
-│   └── LinkFormatError         a file that is not the links JSON the links command writes
+│   ├── LinkFormatError         a file that is not the links JSON the links command writes
+│   └── LibraryIndexError       a library to follow calls into, with no SCIP indexes to follow them
 └── ExtractionError             reading source code failed
     ├── ParserUnavailableError  a tree-sitter grammar is not installed
     ├── SourceReadError         a source file cannot be read
@@ -57,6 +58,14 @@ class GraphFormatError(InputError):
 class ScipFormatError(InputError):
     def __init__(self, source: str, problem: str):
         super().__init__(f'{source} is not a SCIP index: {problem}', 'pass the index.scip an indexer wrote')
+
+
+class LibraryIndexError(InputError):
+    def __init__(self, libraries: list[str]):
+        super().__init__(
+            f'following calls into {", ".join(libraries)} needs SCIP indexes',
+            'index the services and libraries with `index --sandbox`, then pass --scip-dir',
+        )
 
 
 class ExtractionError(BridgeError):

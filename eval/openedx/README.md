@@ -214,6 +214,12 @@ false link after every step. The fixes are general rules, not Open edX exception
 | Configuration: `settings.NAME` and settings dicts, and the address book (settings, `.env` and docker-compose URLs: `localhost:port`, IPs, Docker DNS names, and the prefixes they carry) | 64 / 71 | 0 |
 | Python: helpers and methods that return a URL (`self._make_studio_url(path)`), filled with the caller's arguments | **68 / 71** | **0** |
 
+**Correction (scorer).** These counts let a key link be credited when a found link's route was within 3 lines of its
+route. `eval/score.py` no longer does that when the found link's route is another key link's, and the last row is
+**61 / 71**: E55-E59 (catalogs) were credited for the course route two lines below, and E60 and E62 (the course-run and
+course lists) for the detail routes the finder sends those list requests to (it reads `f'{resource}/{id}/' if id else
+f'{resource}/'` as always having an id). 0 false links either way.
+
 Of the 68, 44 are matched and 24 inferred (a route behind an assumed prefix). With SCIP, 8 are confirmed, 36 rest
 on no name lookup, and the 24 inferred ones are not checked (SCIP confirms names, not which prefix a base URL has);
 none is contradicted. The run takes about 10 seconds for the four repositories.

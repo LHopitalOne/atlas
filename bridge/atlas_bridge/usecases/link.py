@@ -43,6 +43,7 @@ class ServiceNames:
 
     def __init__(self, repos, aliases=None):
         self._names = {r.lower(): r for r in repos}
+        self._phrases = {tuple(Words.ordered(r)): r for r in repos if len(Words.ordered(r)) > 1}
         self._aliases = {}
         for word, repo in (aliases or {}).items():
             if repo not in repos:
@@ -77,7 +78,24 @@ class ServiceNames:
                 repo = self._names.get(word) or self._aliases.get(word)
                 if repo:
                     found.add(repo)
+            found |= self._by_phrase(Words.ordered(hint))
         return found
+
+    def _by_phrase(self, words):
+        """Repositories with names of several words ('label-studio') whose words run together in the hint
+        ('label_studio_sdk'). A name loses to a longer one whose first words run further in the hint:
+        'label_studio_ml' starts 'label-studio-ml-backend', so it names neither."""
+        hits = [p for p in self._phrases if self._runs(p, words)]
+        return {self._phrases[p] for p in hits if not self._outrun(p, words)}
+
+    def _outrun(self, phrase, words):
+        n = len(phrase)
+        return any(len(o) > n and o[:n] == phrase and self._runs(o[: n + 1], words) for o in self._phrases)
+
+    @staticmethod
+    def _runs(phrase, words):
+        n = len(phrase)
+        return any(tuple(words[i : i + n]) == phrase for i in range(len(words) - n + 1))
 
 
 class RouteIndex:
@@ -236,14 +254,15 @@ class LinkFinder:
 
     RULES = (PayloadRule, NamedTargetRule, PathOnlyRule)  # asked in this order; the first that applies decides
 
-    def __init__(self, repos, aliases=None, include_tests=False):
+    def __init__(self, repos, aliases=None, include_tests=False, rules=RULES):
         self._names = ServiceNames(repos, aliases)
         self._include_tests = include_tests
+        self._rules = rules
 
     def find(self, extraction: Extraction) -> list[Link]:
         self._names.learn(extraction.urls)
         routes = RouteIndex(extraction.routes)
-        rules = [rule(self._names, routes) for rule in self.RULES]
+        rules = [rule(self._names, routes) for rule in self._rules]
         links = []
         for call in extraction.calls:
             if call.test and not self._include_tests:

@@ -1,6 +1,7 @@
 """Adapter: SCIP indexes (github.com/sourcegraph/scip) read without a protobuf dependency, the DefinitionOracle
-port answered from them, and the indexers that write them (optionally in a Docker sandbox)."""
+and CallGraph ports answered from them, and the indexers that write them (optionally in a Docker sandbox)."""
 
+from .callgraph import ScipCallGraph
 from .dependencies import PythonDependencies
 from .document import Occurrence, ScipDocument
 from .index import ScipIndex
@@ -18,6 +19,7 @@ __all__ = [
     'PythonScipIndexer',
     'RustScipIndexer',
     'SandboxedPythonIndexer',
+    'ScipCallGraph',
     'ScipDocument',
     'ScipIndex',
     'ScipIndexer',

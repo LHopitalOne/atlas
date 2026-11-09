@@ -1,6 +1,7 @@
 """Entities: the code graph, HTTP routes and requests, errors. Imports nothing outside the standard library."""
 
 from .addresses import Address, ServiceUrl
+from .callgraph import Function, Site
 from .errors import (
     AliasError,
     BridgeError,
@@ -9,6 +10,7 @@ from .errors import (
     IndexerFailedError,
     IndexerUnavailableError,
     InputError,
+    LibraryIndexError,
     LinkFormatError,
     NamedInputError,
     ParserUnavailableError,
@@ -34,12 +36,14 @@ __all__ = [
     'CodeGraph',
     'Community',
     'Extraction',
+    'Function',
     'ExtractionError',
     'GraphFormatError',
     'IndexerFailedError',
     'IndexerUnavailableError',
     'InputError',
     'Kind',
+    'LibraryIndexError',
     'NamedInputError',
     'ParserUnavailableError',
     'PathTemplate',
@@ -49,6 +53,7 @@ __all__ = [
     'LinkFormatError',
     'Route',
     'Segment',
+    'Site',
     'SourceFile',
     'SourceReadError',
     'Status',

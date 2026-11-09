@@ -3,19 +3,23 @@
 from .addresses import AddressBook
 from .bases import BaseHints
 from .draw import GROUPINGS, CommunityGrouping, FolderGrouping, Grouping, MapDrawer, MapView
+from .hops import LibraryHops
 from .link import Link, LinkFinder, LinkReport, LinkRule, ServiceNames
-from .ports import DefinitionOracle, Extractor
+from .ports import CallGraph, DefinitionOracle, Extractor
 from .verify import LinkVerifier
+from .within import WithinRepoRule
 
 __all__ = [
     'GROUPINGS',
     'AddressBook',
     'BaseHints',
+    'CallGraph',
     'CommunityGrouping',
     'DefinitionOracle',
     'Extractor',
     'FolderGrouping',
     'Grouping',
+    'LibraryHops',
     'Link',
     'LinkFinder',
     'LinkReport',
@@ -24,4 +28,5 @@ __all__ = [
     'MapDrawer',
     'MapView',
     'ServiceNames',
+    'WithinRepoRule',
 ]

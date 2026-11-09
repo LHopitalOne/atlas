@@ -59,14 +59,17 @@ class UrlopenIdiom(RequestIdiom):
 
 
 class RequestMethodIdiom(RequestIdiom):
-    """`session.request(method, url)` on any receiver."""
+    """`session.request(method, url)` on any receiver, and generated clients' `client.request(path, method=...)`."""
 
     NAMES = frozenset({'request'})
 
     def target(self, name, scope, receiver, pos, kw):
         if receiver is None:
             return None
-        method_node = kw.get('method', pos[0] if pos else None)
+        if 'method' in kw:  # the method named: the first positional is the URL or path
+            url = kw.get('url', kw.get('path', pos[0] if pos else None))
+            return RequestTarget(url, kw['method'], None, self.is_client(receiver))
+        method_node = pos[0] if pos else None
         url = kw.get('url', pos[1] if len(pos) > 1 else None)
         return RequestTarget(url, method_node, None, self.is_client(receiver))
 

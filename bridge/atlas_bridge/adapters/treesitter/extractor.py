@@ -4,7 +4,7 @@ service URLs in configuration files."""
 from ...core.http import Extraction
 from ...usecases.ports import Extractor
 from .javascript import JavaScriptExtractor
-from .kit import ConfigFiles, RepositoryFiles
+from .kit import ConfigFiles, RepositoryFiles, TestPathPolicy
 from .python import PythonExtractor
 from .rust import RustExtractor
 
@@ -21,3 +21,9 @@ class TreeSitterExtractor(Extractor):
             if mine:
                 out.extend(language.extract(repo, files, mine))
         return out
+
+    def is_test(self, path: str) -> bool:
+        """By the conventions of the language that reads the file, else the shared ones."""
+        language = next((cls() for cls in self.LANGUAGES if cls().handles(path)), None)
+        policy = language.POLICY() if language is not None else TestPathPolicy()
+        return policy.is_test(path)

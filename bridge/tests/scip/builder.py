@@ -9,8 +9,9 @@ class ScipBuilder:
         self._typed = typed
         self._docs = {}
 
-    def occurrence(self, path, line, symbol, definition=False):
-        self._docs.setdefault(path, []).append((line, symbol, 1 if definition else 8))
+    def occurrence(self, path, line, symbol, definition=False, span=None):
+        """span: (first, last) line of a definition's body, written as its enclosing range."""
+        self._docs.setdefault(path, []).append((line, symbol, 1 if definition else 8, span))
         return self
 
     def build(self) -> bytes:
@@ -19,14 +20,17 @@ class ScipBuilder:
     def _document(self, path, occs):
         return self._len(1, path.encode()) + b''.join(self._len(2, self._occurrence(*o)) for o in occs)
 
-    def _occurrence(self, line, symbol, roles):
+    def _occurrence(self, line, symbol, roles, span=None):
         zero_based = line - 1
         if self._typed:
             line_field = self._varint_field(1, zero_based) if zero_based else b''  # proto3 omits zeros
             rng = self._len(8, line_field + self._varint_field(2, 0) + self._varint_field(3, 5))
         else:
             rng = self._len(1, b''.join(self.varint(v) for v in (zero_based, 0, 5)))
-        return rng + self._len(2, symbol.encode()) + self._varint_field(3, roles)
+        out = rng + self._len(2, symbol.encode()) + self._varint_field(3, roles)
+        if span:
+            out += self._len(7, b''.join(self.varint(v) for v in (span[0] - 1, 0, span[1] - 1, 0)))
+        return out
 
     @classmethod
     def _len(cls, field, payload):

@@ -90,5 +90,16 @@ class FindLinksTest(unittest.TestCase):
         self.assertEqual(links(call(None, hints=['snuba'])), [])
 
 
+class ServiceNamePhrasesTest(unittest.TestCase):
+    def test_names_of_several_words_run_together_in_hints(self):
+        names = ServiceNames(['label-studio', 'label-studio-ml-backend', 'sentry'])
+        resolve = names._by_words
+        self.assertEqual(resolve({'label_studio_sdk.client'}), {'label-studio'})
+        self.assertEqual(resolve({'LABEL_STUDIO_ML_BACKEND_URL'}), {'label-studio-ml-backend'})  # the longest
+        self.assertEqual(resolve({'studio_label'}), set())  # not in order
+        self.assertEqual(resolve({'label_studio_ml.model'}), set())  # starts the longer name, names neither
+        self.assertEqual(resolve({'sentry.utils'}), {'sentry'})
+
+
 if __name__ == '__main__':
     unittest.main()
