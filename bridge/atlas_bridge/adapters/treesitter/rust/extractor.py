@@ -1,16 +1,20 @@
-"""RustExtractor: HTTP routes (axum, actix-web) and requests (reqwest/hyper clients, request-trait impls).
+"""RustExtractor: HTTP routes (axum, actix-web) and requests (reqwest/hyper clients, request-trait impls), and TCP and
+UDP channels both ways (std, tokio and async-std sockets).
 
 Routes come from evaluating router expressions (`.route` chains, `.nest`, `.merge`, let-bound routers and crate fns
 returning routers) and from actix-web attribute routes. Requests come from types implementing a request trait whose
-`fn path` yields a literal, and from `client.get(url)` / `.request(Method::X, url)` calls.
+`fn path` yields a literal, and from `client.get(url)` / `.request(Method::X, url)` calls. Channels come from calls to
+the library entry points of channels.EntryPoints, their address followed through fns, struct fields and environment
+defaults.
 """
 
 from ....core.http import Extraction
 from ..kit import LanguageExtractor
 from .calls import CallOrder, ClientCalls, TraitPathCalls
+from .channels import ChannelCalls, ChannelRoutes, ChannelSites, Followups
 from .policy import RustTestPolicy
 from .routes import ActixAttributeRoutes, ActixAttributes, RouterGraph, RouterRoutes, UniqueRoutes
-from .values import RustValues
+from .values import ChannelValues, CrateFunctions, CrateStructs, RustValues, ValueTypes
 from .workspace import RustWorkspace
 
 
@@ -25,11 +29,16 @@ class RustExtractor(LanguageExtractor):
         attributes = ActixAttributes(workspace.files)
         graph = RouterGraph(workspace, attributes)  # shared: attribute routes are roots only when no router mounts them
         values = RustValues(workspace)
+        functions, structs = CrateFunctions(workspace), CrateStructs(workspace)
+        types = ValueTypes(workspace, functions, structs)
+        channels, sites = ChannelValues(workspace, functions, structs, types), ChannelSites(types)
         return [
             RouterRoutes(workspace, graph),
             ActixAttributeRoutes(workspace, graph, attributes),
+            ChannelRoutes(workspace, channels, sites, Followups(workspace)),
             TraitPathCalls(workspace, values),
             ClientCalls(workspace, values),
+            ChannelCalls(workspace, channels, sites),
         ]
 
     def extract(self, repo, files, paths) -> Extraction:

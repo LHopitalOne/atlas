@@ -15,15 +15,32 @@ class FormatMacro:
     @classmethod
     def read(cls, file, macro, join=False):
         """The macro's value with its arguments as {params}, or None when its format is not a literal."""
+        split = cls.split(macro)
+        if split is None:
+            return None
+        fmt, positional, named = split
+        positional = [file.span(g[0], g[-1]) for g in positional]
+        named = {k: file.span(g[0], g[-1]) for k, g in named.items()}
+        text, hints = cls._render(fmt, positional, named, join)
+        return Value(text, macro, hints)
+
+    @classmethod
+    def split(cls, macro):
+        """(format string, [positional argument tokens], {name: argument tokens}) of a formatting macro, or None
+        when its format is not a string literal."""
         tt = next((c for c in macro.children if c.type == 'token_tree'), None)
         if tt is None:
             return None
         groups = cls._groups(tt)
         if not groups or len(groups[0]) != 1 or groups[0][0].type not in RustSyntax.STRINGS:
             return None
-        positional, named = cls._arguments(file, groups[1:])
-        text, hints = cls._render(StringTemplate.of(groups[0][0]), positional, named, join)
-        return Value(text, macro, hints)
+        positional, named = [], {}
+        for g in groups[1:]:
+            if len(g) >= 3 and g[1].type == '=' and g[0].type == 'identifier':
+                named[RustSyntax.text(g[0])] = g[2:]
+            elif g:
+                positional.append(g)
+        return StringTemplate.of(groups[0][0]), positional, named
 
     @staticmethod
     def _groups(tt):
@@ -38,19 +55,6 @@ class FormatMacro:
         if cur:
             groups.append(cur)
         return groups
-
-    @staticmethod
-    def _arguments(file, groups):
-        """The texts of the positional arguments, and of the `name = value` ones by name."""
-        positional, named = [], {}
-        for g in groups:
-            if not g:
-                continue
-            if len(g) >= 3 and g[1].type == '=' and g[0].type == 'identifier':
-                named[RustSyntax.text(g[0])] = file.span(g[2], g[-1])
-            else:
-                positional.append(file.span(g[0], g[-1]))
-        return positional, named
 
     @classmethod
     def _render(cls, fmt, positional, named, join):
