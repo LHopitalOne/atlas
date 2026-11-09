@@ -76,8 +76,8 @@ EVERY_NAME = Argument(Argument.ALL, None, Shape.NAMES)
 ADDRESS = Argument(0, 'address', Shape.ADDRESS)
 SERVER_ADDRESS = Argument(0, 'server_address', Shape.ADDRESS)
 PORT_THIRD = Argument(2, 'port', Shape.PORT)  # (handler or factory, host, port)
-LOCAL_ADDR = Argument(None, 'local_addr', Shape.ADDRESS)
-REMOTE_ADDR = Argument(None, 'remote_addr', Shape.ADDRESS)
+LOCAL_ADDR = Argument(1, 'local_addr', Shape.ADDRESS)  # create_datagram_endpoint(factory, local_addr, remote_addr)
+REMOTE_ADDR = Argument(2, 'remote_addr', Shape.ADDRESS)
 DEFAULT_EXCHANGE = ((Argument(0, 'exchange'), ''),)  # pika's default exchange routes by queue name
 
 

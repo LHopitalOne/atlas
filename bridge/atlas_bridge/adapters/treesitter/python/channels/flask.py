@@ -23,6 +23,8 @@ class FlaskConfig:
         if PythonSyntax.text(mapping.child_by_field_name('attribute')) != self.CONFIG:
             return None
         name = PythonSyntax.text(key).strip('\'"')
+        if not name.isupper():
+            return None  # from_object copies only uppercase attributes
         for obj in self._loaded(PythonSyntax.text(mapping), scope):
             for source, cls in self._classes(obj, scope):
                 found = self._workspace.attributes.own(source, cls).get(name)

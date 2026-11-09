@@ -21,6 +21,9 @@ class GrpcTest(unittest.TestCase):
 
                     def _helper(self):
                         pass
+
+                    def Describe(self):
+                        return 'not a handler: grpcio calls each method with (request, context)'
                 """,
                 'app/server.py': """
                 import grpc
@@ -131,6 +134,44 @@ class StrawberryTest(unittest.TestCase):
     def test_camel_case_turned_off(self):
         found, _ = self.fields(', config=StrawberryConfig(auto_camel_case=False)')
         self.assertIn(('/book_room', 'Writes.book_room'), found)
+
+    def test_camel_case_turned_off_through_a_config_name(self):
+        ex = extract(
+            {
+                'app/schema.py': self.SCHEMA.replace('{config}', ', config=CONFIG').replace(
+                    'import strawberry\n',
+                    'import strawberry\nfrom strawberry.schema.config import StrawberryConfig\n'
+                    'CONFIG = StrawberryConfig(auto_camel_case = False)\n',
+                )
+            }
+        )
+        found = {str(r.path) for r in ex.routes if r.protocol == Protocol.GRAPHQL}
+        self.assertIn('/book_room', found)
+
+    def test_only_types_a_schema_names_are_roots(self):
+        ex = extract(
+            {
+                'app/types.py': """
+                import strawberry
+
+                @strawberry.type
+                class Query:
+                    rooms: list[str]
+                """,
+                'app/schema.py': """
+                import strawberry
+
+                @strawberry.type
+                class Root:
+                    rooms_left: int = strawberry.field(name='vacancies')
+                    nightly_rate: int
+
+                schema = strawberry.Schema(query=Root)
+                """,
+            }
+        )
+        found = {(str(r.path), r.handler) for r in ex.routes if r.protocol == Protocol.GRAPHQL}
+        self.assertEqual(found, {('/vacancies', 'Root.rooms_left'), ('/nightlyrate', 'Root.nightly_rate')})
 
     def test_camel_case_matches_strawberry(self):
         from atlas_bridge.adapters.treesitter.python.channels import StrawberryFields

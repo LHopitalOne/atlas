@@ -10,6 +10,7 @@ from ..scope import Scope
 from ..syntax import PythonSyntax
 from .origins import Origins
 from .qualified import QualifiedNames
+from .sites import FunctionSites
 
 
 class GrpcNames:
@@ -28,10 +29,12 @@ class GrpcNames:
 
 class GrpcServicers(RouteCollector):
     """`add_<Service>Servicer_to_server(servicer, server)`: each public method of the servicer's class (an instance
-    made in this repository) is a route '/<Service>/<Method>'."""
+    made in this repository) that takes grpcio's handler arguments `(request, context)` (`request_iterator` for a
+    client stream) is a route '/<Service>/<Method>'. Other methods are the servicer's own helpers."""
 
     QUERY = '(call) @call'
     MENTION = b'Servicer_to_server'
+    HANDLER_ARGS = 2  # (request or request_iterator, context), after self
 
     def __init__(self, workspace):
         super().__init__(workspace)
@@ -65,6 +68,8 @@ class GrpcServicers(RouteCollector):
         for st in cls.child_by_field_name('body').named_children:
             func = st.child_by_field_name('definition') if st.type == 'decorated_definition' else st
             if func is None or func.type != 'function_definition' or PythonSyntax.name(func).startswith('_'):
+                continue
+            if len(FunctionSites.params(func)) != self.HANDLER_ARGS:
                 continue
             method = PythonSyntax.name(func)
             path = GrpcNames.path(service, method)

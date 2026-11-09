@@ -313,6 +313,41 @@ class SocketTest(unittest.TestCase):
         self.assertEqual(receives(ex), {(Protocol.TCP, '/41710'), (Protocol.UDP, '/41711')})
         self.assertEqual(sends(ex), {(Protocol.TCP, '/7000')})
 
+    def test_datagram_endpoint_addresses_by_position(self):
+        ex = extract(
+            {
+                'peer.py': """
+                import asyncio
+
+                async def main():
+                    loop = asyncio.get_running_loop()
+                    await loop.create_datagram_endpoint(object, ('0.0.0.0', 9125))
+                    await loop.create_datagram_endpoint(object, None, ('statsd', 8125))
+                """,
+            }
+        )
+        self.assertEqual(receives(ex), {(Protocol.UDP, '/9125')})
+        self.assertEqual(sends(ex), {(Protocol.UDP, '/8125')})
+
+    def test_a_port_only_a_test_passes_is_not_the_services(self):
+        ex = extract(
+            {
+                'svc/server.py': """
+                import asyncio
+
+                async def serve(port):
+                    return await asyncio.start_server(print, '0.0.0.0', port)
+                """,
+                'tests/test_server.py': """
+                from svc.server import serve
+
+                async def test_serve():
+                    await serve(45999)
+                """,
+            }
+        )
+        self.assertEqual(receives(ex), set())
+
 
 class WebSocketTest(unittest.TestCase):
     def test_websockets_library_and_framework_routes(self):
