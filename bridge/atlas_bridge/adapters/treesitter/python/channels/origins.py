@@ -6,6 +6,7 @@ from typing import NamedTuple
 
 from ..scope import Scope
 from ..syntax import PythonSyntax
+from .receivers import MethodCallers
 from .sites import FunctionSites
 
 
@@ -33,7 +34,7 @@ class Origins:
 
     def __init__(self, workspace):
         self._workspace = workspace
-        self._sites = FunctionSites(workspace)
+        self.sites = FunctionSites(workspace, MethodCallers(workspace, self))
         self._handlers = {'call': self._call, 'identifier': self._identifier, 'attribute': self._attribute}
 
     def of(self, node, scope, depth=0) -> list[Origin]:
@@ -107,12 +108,16 @@ class Origins:
         return out
 
     def _parameter(self, func, name, scope, depth):
-        """A parameter's annotation, its default, and what each call site passes for it."""
+        """A parameter's annotation, then what the call the scope is read for passes, or else its default and what
+        each call site passes for it."""
         out = [Origin(Origin.ANNOTATION, a, scope) for a in self._annotations(func, name)]
+        bound = scope.bound(name)
+        if bound is not None or scope.called:
+            return out + (self.of(bound.node, bound.scope, depth + 1) if bound is not None else [])
         default = dict(PythonSyntax.params(func)).get(name)
         if default is not None:
             out += self.of(default, scope.without_function(), depth + 1)
-        for site in self._sites.of(scope):
+        for site in self.sites.of(scope):
             if name in site.bound:
                 out += self.of(site.bound[name], site.scope, depth + 1)
         return out

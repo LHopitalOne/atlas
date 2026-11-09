@@ -4,7 +4,10 @@ number conversions, fields of this repository's objects and `self` attributes se
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from ..values import Marker, PythonValueResolver, Value
+from .bound import BoundValues
+from .enums import EnumMembers
 from .flask import FlaskConfig
+from .mappings import MappingEntries
 from .objects import Field, ObjectFields
 from .origins import Origins
 from .qualified import QualifiedNames
@@ -15,7 +18,9 @@ class ChannelValues(PythonValueResolver):
     """The URL resolver with what a channel's value is often read through. `os.getenv(name, default)` and
     `os.environ.get(name, default)` read as their default, `int(x)` and `float(x)` as x. An attribute the URL resolver
     cannot read is a field of an object (ObjectFields) or, on `self`, what a method assigned it; a parameter there is
-    settled with what the function's call sites pass (settle()). An integer literal (a port) is its digits."""
+    settled with what the function's call sites pass (settle()). An integer literal (a port) is its digits. Dict
+    literals are read by key (MappingEntries: `M['k']`, `make()['k']`, `M.get(k, d)`) and enum members by value
+    (EnumMembers: `Topic.EVENTS.value`)."""
 
     HANDLERS = {**PythonValueResolver.HANDLERS, 'integer': 'integer'}
     ENVIRONMENT = frozenset({'os.getenv', 'os.environ.get'})  # (name, default): the default when the name is unset
@@ -28,7 +33,10 @@ class ChannelValues(PythonValueResolver):
         self._names = QualifiedNames(workspace)
         self._objects = ObjectFields(workspace, self.origins)
         self._config = FlaskConfig(workspace)
-        self._sites = FunctionSites(workspace)
+        self._sites = self.origins.sites
+        bound = BoundValues(workspace, self._sites)
+        self._mappings = MappingEntries(self, bound)
+        self._enums = EnumMembers(workspace, self, bound, self._mappings)
 
     @staticmethod
     def integer(node, scope, depth):
@@ -42,12 +50,18 @@ class ChannelValues(PythonValueResolver):
             return self.resolve(default, scope, depth + 1) if default is not None else self.unknown(node)
         if fn.type == 'identifier' and PythonSyntax.text(fn) in self.NUMBERS and len(pos) == 1:
             return self.resolve(pos[0], scope, depth + 1)
+        entries = self._mappings.get(node, scope)
+        if entries is not None:
+            return self._read(entries, depth) or self.unknown(node)
         return super().call(node, scope, depth)
 
     def attribute(self, node, scope, depth):
         found = super().attribute(node, scope, depth)
         if any(v.is_known for v in found) or depth >= self.MAX_DEPTH:
             return found
+        members = self._read(self._enums.value(node, scope), depth)
+        if members:
+            return members
         if PythonSyntax.is_self(node.child_by_field_name('object')):
             fields = self._self_fields(node, scope)
         else:
@@ -66,7 +80,14 @@ class ChannelValues(PythonValueResolver):
         if any(v.is_known for v in found) or depth >= self.MAX_DEPTH:
             return found
         value = self._config.value(node, scope)
-        return self.resolve(value.node, value.scope, depth + 1) if value is not None else found
+        if value is not None:
+            return self.resolve(value.node, value.scope, depth + 1)
+        return self._read(self._mappings.subscript(node, scope), depth) or found
+
+    def _read(self, fields, depth) -> list[Value]:
+        """The known values of the expressions in `fields`."""
+        out = [v for f in fields for v in self.resolve(f.node, f.scope, depth + 1) if v.is_known]
+        return out[: self.MAX_ALTS]
 
     def settled(self, node, scope, depth=0) -> list[Value]:
         """The values of `node` with the parameters of the function around `scope` replaced by what its call sites

@@ -1,6 +1,9 @@
-"""The port a socket address names, as the channel a TCP or UDP link travels on."""
+"""The channel an entry point's argument names: the port of a socket address (TCP, UDP), or a topic name (Kafka)."""
 
 import re
+
+from ..syntax import RustSyntax
+from .table import EntryPoints
 
 
 class SocketAddress:
@@ -20,3 +23,32 @@ class SocketAddress:
     def channels(cls, values) -> list[str]:
         """The channels of several values, each once, in order."""
         return list(dict.fromkeys(c for c in map(cls.channel, values) if c is not None))
+
+
+class TopicNames:
+    """'orders.created' -> '/orders.created'. A name only partly known ('{}' where it is not) names no channel."""
+
+    NAME = re.compile(r'^[^\s/{}]+$')  # a whole topic name: no blanks, slashes or unknown parts
+
+    @classmethod
+    def channels(cls, values) -> list[str]:
+        return list(dict.fromkeys('/' + v for v in values if cls.NAME.match(v)))
+
+
+class SiteChannels:
+    """The channels of one entry-point call (ChannelSite), read as its entry point's shape says."""
+
+    ARRAYS = frozenset({'array_expression'})
+
+    def __init__(self, values):
+        self._values = values  # ChannelValues
+
+    def of(self, file, site) -> list[str]:
+        shape = site.entry.shape
+        if shape == EntryPoints.ADDRESS:
+            return SocketAddress.channels([v.text for v in self._values.values(file, site.address)])
+        nodes = [site.address]
+        if shape == EntryPoints.NAMES:
+            items = RustSyntax.unwrap(site.address)
+            nodes = items.named_children if items is not None and items.type in self.ARRAYS else []
+        return TopicNames.channels(v.text for n in nodes for v in self._values.values(file, n))

@@ -25,7 +25,7 @@ class ChannelEndpoints(RouteCollector, CallCollector):
         values = ChannelValues(workspace)
         self._table = table
         self._types = LibraryTypes(workspace, values.origins, table)
-        self._arguments = ChannelArguments(workspace, values)
+        self._arguments = ChannelArguments(workspace, values, table)
         self._names = QualifiedNames(workspace)
         callees = ' '.join(f'"{n}"' for n in sorted(table.callees()))
         self._query = f"""

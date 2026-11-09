@@ -10,8 +10,9 @@ class FunctionSites:
     INIT = '__init__'
     MAX_SITES = 8  # call sites followed per function
 
-    def __init__(self, workspace):
+    def __init__(self, workspace, methods=None):
         self._workspace = workspace
+        self._methods = methods  # MethodCallers: the calls of a method on objects of its class, or None
 
     @staticmethod
     def params(func):
@@ -31,11 +32,20 @@ class FunctionSites:
             found = self._constructions(scope.source, scope.cls)
         else:
             found = self._workspace.callers.callers_of(scope.source, func)
+            found += self._typed(scope, found)
         if not self._workspace.is_test(scope.source, func):
             found = [(source, call) for source, call in found if not self._workspace.is_test(source, call)]
         params = self.params(func)
         sites = [CallSite.at(source, call, params) for source, call in found]
         return [s for s in sites if not s.splat][: self.MAX_SITES]
+
+    def _typed(self, scope, found):
+        """The calls of a method on objects of its class that the calls by name left out."""
+        if self._methods is None or scope.cls is None or not PythonSyntax.is_method(scope.func):
+            return []
+        seen = {(source.path, call.start_byte) for source, call in found}
+        typed = self._methods.of(scope.source, scope.func, scope.cls)
+        return [(source, call) for source, call in typed if (source.path, call.start_byte) not in seen]
 
     def _constructions(self, source, cls):
         name = PythonSyntax.name(cls)

@@ -4,7 +4,7 @@ servicers and stubs, and Strawberry GraphQL schemas."""
 from .collector import ChannelEndpoints
 from .graphql import StrawberryFields
 from .grpc import GrpcNames, GrpcServicers, GrpcStubs
-from .table import Argument, ChannelTable, Endpoint, LibraryType, Role, Shape
+from .table import Argument, ChannelTable, Endpoint, LibraryType, Role, Shape, Wrapper
 
 __all__ = [
     'Argument',
@@ -18,4 +18,5 @@ __all__ = [
     'Role',
     'Shape',
     'StrawberryFields',
+    'Wrapper',
 ]
