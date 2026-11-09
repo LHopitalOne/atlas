@@ -103,3 +103,25 @@ class ServiceNamePhrasesTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class UnderdeterminedTest(unittest.TestCase):
+    def test_a_parameter_cannot_choose_between_fixed_words(self):
+        from atlas_bridge.core.http import Call, Extraction, PathTemplate, Route
+        from atlas_bridge.core.model import Status
+
+        P = PathTemplate.parse
+        routes = [
+            Route('api', 'urls.py', 1, P('/projects/{p}/inboxes/{pk}')),
+            Route('api', 'urls.py', 2, P('/projects/{p}/states/{pk}')),
+            Route('api', 'urls.py', 3, P('/admin/backups')),
+            Route('api', 'maintenance.py', 4, P('/admin/backups')),
+        ]
+        finder = LinkFinder(['api', 'web'])
+        kind = Call('web', 'svc.ts', 1, P('/projects/{p}/{kind}/{id}'), 'GET', hints=frozenset({'api'}))
+        found = finder.find(Extraction(list(routes), [kind]))
+        self.assertEqual([(lk.route, lk.status) for lk in found], [(None, Status.UNMATCHED)])
+        twice = Call('web', 'svc.ts', 2, P('/admin/backups'), 'GET', hints=frozenset({'api'}))
+        found = finder.find(Extraction(list(routes), [twice]))
+        self.assertEqual({lk.status for lk in found}, {Status.AMBIGUOUS})  # the same path served twice stays a link
+        self.assertEqual(len(found), 2)

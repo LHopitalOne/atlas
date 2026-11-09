@@ -13,6 +13,7 @@ from ..core.http import Call, Extraction, Protocol, Route
 from ..core.model import Status
 from ..core.words import Words
 from .addresses import AddressBook
+from .ambiguity import Underdetermined
 from .bases import BaseHints
 
 
@@ -271,5 +272,14 @@ class LinkFinder:
                 continue
             rule = next((r for r in rules if r.applies(call)), None)
             if rule:
-                links += rule.links(call)
+                links += self._decided(call, rule.links(call))
         return links
+
+    @staticmethod
+    def _decided(call, links):
+        """The links, or one unmatched link when the call cannot choose among the routes that fit it."""
+        fits = [lk.route.path for lk in links if lk.route is not None]
+        if call.path is None or len(fits) < 2 or not Underdetermined.of(call.path, fits):
+            return links
+        why = f'{len(fits)} routes differ where the path holds a value the code does not show ({call.path})'
+        return [Link(call, call.repo, links[0].target, None, Status.UNMATCHED, why)]
