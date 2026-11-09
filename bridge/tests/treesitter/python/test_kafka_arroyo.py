@@ -5,14 +5,17 @@ from atlas_bridge.core.http import Protocol
 from .support import extract
 
 TOPICS = """
-from enum import Enum
+from enum import Enum, StrEnum
 
 class Topic(Enum):
     EVENTS = "events"
     OUTCOMES = "outcomes"
 
-class Stream(str, Enum):
+class Stream(StrEnum):
     AUDIT = "audit-log"
+
+class Legacy(str, Enum):
+    AUDIT = "legacy-audit"
 """
 
 SETTINGS = """
@@ -157,13 +160,14 @@ class ArroyoTest(unittest.TestCase):
                 from arroyo.processing import StreamProcessor
                 from arroyo.types import Topic
                 from app.registry import CONSUMERS, OVERRIDES
-                from app.topics import Topic as Names
+                from app.topics import Legacy, Topic as Names
 
                 def run(name, factory, config, raw):
                     definition = CONSUMERS[name]
                     StreamProcessor(KafkaConsumer(config), Topic(definition["topic"].value), factory)
                     StreamProcessor(KafkaConsumer(config), Topic(Names.EVENTS), factory)
                     StreamProcessor(KafkaConsumer(config), Topic(OVERRIDES.get(raw, raw)), factory)
+                    StreamProcessor(KafkaConsumer(config), Topic(Legacy.AUDIT), factory)
                 """,
             }
         )
@@ -192,6 +196,32 @@ class ArroyoTest(unittest.TestCase):
             }
         )
         self.assertEqual(receives(ex), {'/outcomes', '/events-eu', '/spans'})
+
+    def test_get_does_not_fall_back_on_a_dict_that_code_adds_entries_to(self):
+        ex = extract(
+            {
+                'app/registry.py': """
+                OVERRIDES = {"events": "events-eu"}
+                EXTRA = {}
+
+                def configure(region):
+                    OVERRIDES["spans"] = "spans-" + region
+                    EXTRA.update({"outcomes": region})
+                """,
+                'app/consume.py': """
+                from arroyo.backends.kafka import KafkaConsumer
+                from arroyo.types import Topic
+                from app.registry import EXTRA, OVERRIDES
+
+                def run(config):
+                    KafkaConsumer(config).subscribe([
+                        Topic(OVERRIDES.get("spans", "spans")),
+                        Topic(EXTRA.get("outcomes", "outcomes")),
+                    ])
+                """,
+            }
+        )
+        self.assertEqual(receives(ex), set())
 
     def test_a_consumer_in_test_code_is_no_route(self):
         ex = extract(

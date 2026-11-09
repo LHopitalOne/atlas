@@ -29,6 +29,7 @@ use rdkafka::consumer::{Consumer, StreamConsumer};
 pub fn consume(consumer: StreamConsumer, extra: &[&str]) {
     consumer.subscribe(&["payments", "refunds"]).unwrap();
     consumer.subscribe(extra).unwrap();
+    consumer.subscribe(&["^audit-.*"]).unwrap();
 }
 """
 

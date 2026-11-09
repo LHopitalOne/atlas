@@ -35,7 +35,7 @@ class ChannelValues(PythonValueResolver):
         self._config = FlaskConfig(workspace)
         self._sites = self.origins.sites
         bound = BoundValues(workspace, self._sites)
-        self._mappings = MappingEntries(self, bound)
+        self._mappings = MappingEntries(workspace, self, bound)
         self._enums = EnumMembers(workspace, self, bound, self._mappings)
 
     @staticmethod

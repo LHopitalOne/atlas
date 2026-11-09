@@ -10,13 +10,14 @@ from .qualified import QualifiedNames
 
 class EnumMembers:
     """The members an expression may be: `E.MEMBER`, `E(value)` (the member with that value), and names, parameters,
-    dict entries and conditionals holding them. A member reads as its value through `.value`; a member of a str enum
-    (`class E(str, Enum)`, `StrEnum`) is its value as it is. A class is an enum when a base is the enum module's or
-    another enum of this repository."""
+    dict entries and conditionals holding them. A member reads as its value through `.value`; a member of a StrEnum is
+    its value as it is, since its str() and format() are the value. A `(str, Enum)` member is not read as it is: its
+    str() is 'E.MEMBER', and since Python 3.11 so is its format() (f-strings), so the text it gives depends on how it
+    is used. A class is an enum when a base is the enum module's or another enum of this repository."""
 
     LIBRARY = 'enum'
     BASES = ('Enum', 'IntEnum', 'StrEnum', 'Flag', 'IntFlag')
-    STRING_BASES = frozenset({'str', 'StrEnum'})  # bases whose members are strings themselves
+    STR_ENUM = 'StrEnum'  # the enum module's base whose members are their values wherever a string is made of them
     VALUE = 'value'
     MAX_DEPTH = 8
     MAX_BASES = 3  # enum classes followed up the bases
@@ -37,7 +38,7 @@ class EnumMembers:
         }
 
     def value(self, node, scope) -> list[Field]:
-        """What an attribute node reads as when it is a member's value: `<member>.value`, or a str enum's member."""
+        """What an attribute node reads as when it is a member's value: `<member>.value`, or a StrEnum's member."""
         attr = PythonSyntax.text(node.child_by_field_name('attribute'))
         if attr == self.VALUE:
             return self.of(node.child_by_field_name('object'), scope)
@@ -105,9 +106,10 @@ class EnumMembers:
         return None
 
     def _is_str(self, source, cls, depth=0):
-        """Whether the members of an enum class are strings: a base is `str` or StrEnum, here or up the bases."""
+        """Whether the members of an enum class are their values as strings: a base is the enum module's StrEnum, here
+        or up the bases."""
         for base in self._bases(cls):
-            if PythonSyntax.text(base) in self.STRING_BASES:
+            if QualifiedNames.matches(self._names.of(source, base), self.LIBRARY, self.STR_ENUM):
                 return True
             parent = self._enum(source, base)
             if parent is not None and depth < self.MAX_BASES and self._is_str(*parent, depth + 1):

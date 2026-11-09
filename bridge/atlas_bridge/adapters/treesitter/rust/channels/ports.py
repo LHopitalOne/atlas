@@ -26,9 +26,10 @@ class SocketAddress:
 
 
 class TopicNames:
-    """'orders.created' -> '/orders.created'. A name only partly known ('{}' where it is not) names no channel."""
+    """'orders.created' -> '/orders.created'. A name only partly known ('{}' where it is not) names no channel, nor does
+    a subscription pattern: librdkafka reads a topic starting with '^' as a regular expression."""
 
-    NAME = re.compile(r'^[^\s/{}]+$')  # a whole topic name: no blanks, slashes or unknown parts
+    NAME = re.compile(r'^[A-Za-z0-9._-]+$')  # a whole, legal Kafka topic name: no unknown parts, no '^' pattern
 
     @classmethod
     def channels(cls, values) -> list[str]:

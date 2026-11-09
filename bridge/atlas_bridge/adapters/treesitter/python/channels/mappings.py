@@ -1,22 +1,53 @@
 """Dict literals and what a literal key reads from them: `CONFIG['topic']`, `make()['name']`, `OVERRIDES.get(k, k)`."""
 
+import re
+
 from ..syntax import PythonSyntax
 from ..values import Marker
 from .objects import Field
+
+
+class DictWrites:
+    """Whether production code may add entries to the dict a name is bound to after it is made: `NAME[k] = v` (also
+    `self.NAME[k]`, `settings.NAME[k]`, nested `NAME[a][b]`), or `NAME.update(...)` / `NAME.setdefault(...)`. Read
+    from raw source by the name alone, so any such write anywhere counts, whichever dict it really reaches."""
+
+    # A name written through: `NAME[k] = v` / `NAME[k] |= v` (group 1), `NAME.update(` / `.setdefault(` (group 2).
+    WRITE = re.compile(
+        rb'\b([A-Za-z_]\w*)(?:\s*\[[^\]\n]*\])+\s*[-+|]?=(?!=)'
+        rb'|\b([A-Za-z_]\w*)\s*\.\s*(?:update|setdefault|__setitem__)\s*\('
+    )
+
+    def __init__(self, sources):
+        self._sources = sources
+        self._written = None  # names written through, read from every production file on first use
+
+    def written(self, name) -> bool:
+        if self._written is None:
+            self._written = {
+                (m.group(1) or m.group(2)).decode()
+                for s in self._sources
+                if not s.test
+                for m in self.WRITE.finditer(s.data)
+            }
+        return name in self._written
 
 
 class MappingEntries:
     """The dict literals an expression may be (a literal, a name bound to one, `settings.NAME`, what a function of this
     repository returns for the call, an entry of another one), and the entries a key reads from them. A key is read
     only when it is known as literal text; an entry is found only under a key written as literal text. `get(key,
-    default)` reads the default only from a dict that cannot hold the key: every key literal, no `**` unpacking."""
+    default)` reads the default only from a dict that cannot hold the key: every key literal, no `**` unpacking, and
+    no write that adds entries to the name it is bound to (DictWrites)."""
 
     MAX_DEPTH = 8
     GET = 'get'
+    BINDINGS = frozenset({'assignment', 'augmented_assignment'})
 
-    def __init__(self, resolver, bound):
+    def __init__(self, workspace, resolver, bound):
         self._resolver = resolver  # resolves keys to their texts
         self._bound = bound  # BoundValues
+        self._writes = DictWrites(workspace.sources)
         self._handlers = {
             'dictionary': lambda node, scope, depth: [Field(node, scope)],
             'parenthesized_expression': self._inner,
@@ -55,7 +86,7 @@ class MappingEntries:
         for d in found:
             pairs = self._pairs(d)
             hits = [Field(value, d.scope) for key, value in pairs if keys and key is not None and key & keys]
-            closed = all(key is not None for key, _ in pairs)
+            closed = all(key is not None for key, _ in pairs) and not self._written(d.node)
             out += hits or (default if closed and (keys or not pairs) else [])
         return out
 
@@ -77,6 +108,19 @@ class MappingEntries:
             elif item.type == 'dictionary_splat':
                 out.append((None, None))
         return out
+
+    def _written(self, dictionary):
+        """Whether entries may be added to the dict literal after it is made, through the name it is bound to."""
+        node = dictionary
+        while node.parent is not None and node.parent.type not in self.BINDINGS:
+            if node.parent.type not in ('pair', 'dictionary', 'parenthesized_expression'):
+                return False  # made where it is used (an argument, a return value): no name to write through
+            node = node.parent
+        left = node.parent.child_by_field_name('left') if node.parent is not None else None
+        if left is None or node.parent.child_by_field_name('right') != node:
+            return False
+        target = left.child_by_field_name('attribute') if left.type == 'attribute' else left
+        return target is None or target.type != 'identifier' or self._writes.written(PythonSyntax.text(target))
 
     def _inner(self, node, scope, depth):
         return self.dicts(node.named_children[0], scope, depth + 1) if node.named_children else []
