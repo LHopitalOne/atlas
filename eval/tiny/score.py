@@ -4,7 +4,8 @@
 A TRUTH link is found when the finder reports a link with the same caller and target services whose receiving end is
 the TRUTH link's: the same file within 2 lines of its `receive` line, or (for HTTP-like protocols) the same
 normalised channel with a compatible operation. Finder links that match no TRUTH link are false links, unless their
-call site is listed under the app's not_links.
+call site is listed under the app's not_links. A sampled key (eval/devset) judges only links made at the call sites it
+covers; the others are counted as unjudged.
 
 Usage: python3 eval/tiny/score.py TRUTH.json links.json [--json]
 """
@@ -60,6 +61,16 @@ def excused(truth, f):
     return any(n.get('where', '').startswith(at) for n in truth.get('not_links', []))
 
 
+def judged(truth, f):
+    """Whether the key can judge a finder link. A full key judges every link; a sampled one (it has `sampling`) only
+    links made at a call site it covers: the other sites were never traced, so a link there is unjudged, not false."""
+    if 'sampling' not in truth:
+        return True
+    near = lambda file, line: file == f['call']['file'] and abs(line - f['call']['line']) <= 2  # noqa: E731
+    sites = [s for t in truth['links'] if t['caller'] == f['caller'] for s in t['send']]
+    return any(near(s['file'], s['line']) for s in sites)
+
+
 def score(truth, found):
     links = [f for f in found['links'] if f.get('route')]
     rows, matched = [], set()
@@ -69,7 +80,8 @@ def score(truth, found):
         rows.append({'id': t['id'], 'protocol': t['protocol'], 'link': f'{t["caller"]} -> {t["target"]} '
                      f'{t["operation"]} {t["channel"]}', 'found': bool(hits), 'idiom': t.get('idiom', ''),
                      'status': sorted({links[i]['status'] for i in hits})})
-    false = [f for i, f in enumerate(links) if i not in matched and not excused(truth, f)]
+    unmatched = [f for i, f in enumerate(links) if i not in matched and not excused(truth, f)]
+    false = [f for f in unmatched if judged(truth, f)]
     by_protocol = {}
     for r in rows:
         got, total = by_protocol.get(r['protocol'], (0, 0))
@@ -83,6 +95,7 @@ def score(truth, found):
             'recall': f'{sum(r["found"] for r in rows)}/{len(rows)}',
             'by_protocol': {p: f'{g}/{t}' for p, (g, t) in sorted(by_protocol.items())},
             'false_links': len(false),
+            'unjudged_links': len(unmatched) - len(false),
         },
     }
 

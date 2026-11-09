@@ -4,6 +4,9 @@
 Each service folder is one repository; no aliases are given (a first try, as on code never seen). Links inside one
 service (a frontend calling its own backend) are looked for with --within.
 
+A TRUTH.json may name its code's folder with "root" (the development-set keys in eval/devset do); otherwise the
+code is the app folder itself.
+
 Usage: python3 eval/tiny/run.py <apps folder> <output folder> [--python /path/to/python] [-- extra links options]
 """
 
@@ -21,7 +24,8 @@ from score import score  # noqa: E402
 def run_app(app, python, out, extra):
     with open(os.path.join(app, 'TRUTH.json'), encoding='utf-8') as f:
         truth = json.load(f)
-    repos = [f'{name}={os.path.join(app, folder)}' for name, folder in truth['services'].items()]
+    root = os.path.expanduser(truth.get('root', app))  # a key kept apart from its code names the code's folder
+    repos = [f'{name}={os.path.normpath(os.path.join(root, folder))}' for name, folder in truth['services'].items()]
     links = os.path.join(out, f'{truth["project"]}.links.json')
     cmd = [python, '-m', 'atlas_bridge', 'links', *repos, '--within', '-o', links, *extra]
     done = subprocess.run(cmd, cwd=BRIDGE, capture_output=True, text=True)

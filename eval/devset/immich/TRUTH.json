@@ -1,0 +1,1129 @@
+{
+ "project": "immich",
+ "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/devset/immich",
+ "commit": "dae37df1a70c21493acdafd85bad8ab69e6b390d",
+ "services": {
+  "server": "server",
+  "web": "web",
+  "sdk": "packages/sdk",
+  "ml": "machine-learning"
+ },
+ "links": [
+  {
+   "id": "l1",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/people/{id}",
+   "send": [
+    {
+     "file": "src/lib/services/person.service.ts",
+     "line": 128,
+     "function": "handleUpdatePerson"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/person.controller.ts",
+    "line": 100,
+    "handler": "PersonController.getPerson"
+   },
+   "idiom": "@immich/sdk generated oazapfts function getPerson (baseUrl /api)"
+  },
+  {
+   "id": "l2",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "PUT",
+   "channel": "/api/people/{id}",
+   "send": [
+    {
+     "file": "src/lib/services/person.service.ts",
+     "line": 126,
+     "function": "handleUpdatePerson"
+    },
+    {
+     "file": "src/lib/services/person.service.ts",
+     "line": 139,
+     "function": "handleShowPerson"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/person.controller.ts",
+    "line": 111,
+    "handler": "PersonController.updatePerson"
+   },
+   "idiom": "@immich/sdk generated oazapfts function updatePerson (baseUrl /api)"
+  },
+  {
+   "id": "l3",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "DELETE",
+   "channel": "/api/sessions/{id}",
+   "send": [
+    {
+     "file": "src/lib/queries/session.query.ts",
+     "line": 12,
+     "function": "deleteSessionMutation"
+    },
+    {
+     "file": "src/lib/queries/client.ts",
+     "line": 102,
+     "function": "asMutation"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/session.controller.ts",
+    "line": 81,
+    "handler": "SessionController.deleteSession"
+   },
+   "idiom": "asMutation(sdkFn) wraps @immich/sdk deleteSession as TanStack mutationFn"
+  },
+  {
+   "id": "l4",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "DELETE",
+   "channel": "/api/faces/{id}",
+   "send": [
+    {
+     "file": "src/lib/queries/face.query.ts",
+     "line": 18,
+     "function": "deleteFaceMutation"
+    },
+    {
+     "file": "src/lib/queries/client.ts",
+     "line": 102,
+     "function": "asMutation"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/face.controller.ts",
+    "line": 60,
+    "handler": "FaceController.deleteFace"
+   },
+   "idiom": "asMutation(sdkFn) wraps @immich/sdk deleteFace as TanStack mutationFn"
+  },
+  {
+   "id": "l5",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "PUT",
+   "channel": "/api/faces/{id}",
+   "send": [
+    {
+     "file": "src/lib/queries/face.query.ts",
+     "line": 27,
+     "function": "reassignFacesByIdMutation"
+    },
+    {
+     "file": "src/lib/queries/client.ts",
+     "line": 102,
+     "function": "asMutation"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/face.controller.ts",
+    "line": 45,
+    "handler": "FaceController.reassignFacesById"
+   },
+   "idiom": "asMutation(sdkFn) wraps @immich/sdk reassignFacesById as TanStack mutationFn"
+  },
+  {
+   "id": "l6",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/people",
+   "send": [
+    {
+     "file": "src/lib/modals/PersonBulkShareModal.svelte",
+     "line": 62
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/person.controller.ts",
+    "line": 55,
+    "handler": "PersonController.getAllPeople"
+   },
+   "idiom": "@immich/sdk generated oazapfts function getAllPeople (baseUrl /api)"
+  },
+  {
+   "id": "l7",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "DELETE",
+   "channel": "/api/memories/{id}",
+   "send": [
+    {
+     "file": "src/lib/managers/memory-manager.svelte.ts",
+     "line": 283,
+     "function": "#deleteMemory"
+    },
+    {
+     "file": "src/lib/managers/memory-manager.svelte.ts",
+     "line": 294,
+     "function": "#deleteAsset"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/memory.controller.ts",
+    "line": 95,
+    "handler": "MemoryController.deleteMemory"
+   },
+   "idiom": "@immich/sdk generated oazapfts function deleteMemory (baseUrl /api)"
+  },
+  {
+   "id": "l8",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/admin/config",
+   "send": [
+    {
+     "file": "src/lib/queries/config-admin.query.ts",
+     "line": 27,
+     "function": "updateAdminConfigMutation"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/config-admin.controller.ts",
+    "line": 14,
+    "handler": "ConfigAdminController.getAdminConfig"
+   },
+   "idiom": "@immich/sdk generated oazapfts function getAdminConfig (baseUrl /api)"
+  },
+  {
+   "id": "l9",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "PUT",
+   "channel": "/api/admin/config",
+   "send": [
+    {
+     "file": "src/lib/queries/config-admin.query.ts",
+     "line": 34,
+     "function": "updateAdminConfigMutation"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/config-admin.controller.ts",
+    "line": 36,
+    "handler": "ConfigAdminController.updateAdminConfig"
+   },
+   "idiom": "@immich/sdk generated oazapfts function updateAdminConfig (baseUrl /api)"
+  },
+  {
+   "id": "l10",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/admin/config/defaults",
+   "send": [
+    {
+     "file": "src/lib/queries/config-admin.query.ts",
+     "line": 21,
+     "function": "getAdminConfigDefaultsQuery"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/config-admin.controller.ts",
+    "line": 25,
+    "handler": "ConfigAdminController.getAdminConfigDefaults"
+   },
+   "idiom": "@immich/sdk generated oazapfts function getAdminConfigDefaults in TanStack queryFn"
+  },
+  {
+   "id": "l11",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/libraries",
+   "send": [
+    {
+     "file": "src/lib/queries/library.query.ts",
+     "line": 24,
+     "function": "getAllLibrariesQuery"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/library.controller.ts",
+    "line": 22,
+    "handler": "LibraryController.getAllLibraries"
+   },
+   "idiom": "@immich/sdk generated oazapfts function getAllLibraries in TanStack queryFn"
+  },
+  {
+   "id": "l12",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "POST",
+   "channel": "/api/libraries",
+   "send": [
+    {
+     "file": "src/lib/queries/library.query.ts",
+     "line": 41,
+     "function": "createLibraryMutation"
+    },
+    {
+     "file": "src/lib/queries/client.ts",
+     "line": 102,
+     "function": "asMutation"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/library.controller.ts",
+    "line": 33,
+    "handler": "LibraryController.createLibrary"
+   },
+   "idiom": "asMutation(sdkFn) wraps @immich/sdk createLibrary as TanStack mutationFn"
+  },
+  {
+   "id": "l13",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "PUT",
+   "channel": "/api/libraries/{id}",
+   "send": [
+    {
+     "file": "src/lib/queries/library.query.ts",
+     "line": 47,
+     "function": "updateLibraryMutation"
+    },
+    {
+     "file": "src/lib/queries/client.ts",
+     "line": 102,
+     "function": "asMutation"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/library.controller.ts",
+    "line": 55,
+    "handler": "LibraryController.updateLibrary"
+   },
+   "idiom": "asMutation(sdkFn) wraps @immich/sdk updateLibrary as TanStack mutationFn"
+  },
+  {
+   "id": "l14",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/server/version",
+   "send": [
+    {
+     "file": "src/routes/admin/maintenance/+page.ts",
+     "line": 10,
+     "function": "load"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/server.controller.ts",
+    "line": 77,
+    "handler": "ServerController.getServerVersion"
+   },
+   "idiom": "@immich/sdk generated oazapfts function getServerVersion (baseUrl /api)"
+  },
+  {
+   "id": "l15",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/admin/database-backups",
+   "send": [
+    {
+     "file": "src/routes/admin/maintenance/+page.ts",
+     "line": 11,
+     "function": "load"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/database-backup.controller.ts",
+    "line": 30,
+    "handler": "DatabaseBackupController.listDatabaseBackups"
+   },
+   "idiom": "@immich/sdk generated oazapfts function listDatabaseBackups (baseUrl /api)"
+  },
+  {
+   "id": "l16",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "DELETE",
+   "channel": "/api/memories/{id}/assets",
+   "send": [
+    {
+     "file": "src/lib/managers/memory-manager.svelte.ts",
+     "line": 298,
+     "function": "#deleteAsset"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/memory.controller.ts",
+    "line": 122,
+    "handler": "MemoryController.removeMemoryAssets"
+   },
+   "idiom": "@immich/sdk generated oazapfts function removeMemoryAssets (baseUrl /api)"
+  },
+  {
+   "id": "l17",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/api-keys",
+   "send": [
+    {
+     "file": "src/lib/queries/api-key.query.ts",
+     "line": 8,
+     "function": "getApiKeysQuery"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/api-key.controller.ts",
+    "line": 27,
+    "handler": "ApiKeyController.getApiKeys"
+   },
+   "idiom": "@immich/sdk generated oazapfts function getApiKeys in TanStack queryFn"
+  },
+  {
+   "id": "l18",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/albums/statistics",
+   "send": [
+    {
+     "file": "src/lib/queries/album.query.ts",
+     "line": 80,
+     "function": "getAlbumStatisticsQuery"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/album.controller.ts",
+    "line": 51,
+    "handler": "AlbumController.getAlbumStatistics"
+   },
+   "idiom": "@immich/sdk generated oazapfts function getAlbumStatistics in TanStack queryFn"
+  },
+  {
+   "id": "l19",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/memories/statistics",
+   "send": [
+    {
+     "file": "src/lib/managers/memory-manager.svelte.ts",
+     "line": 360
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/memory.controller.ts",
+    "line": 47,
+    "handler": "MemoryController.memoriesStatistics"
+   },
+   "idiom": "@immich/sdk generated oazapfts function memoriesStatistics (baseUrl /api)"
+  },
+  {
+   "id": "l20",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/memories",
+   "send": [
+    {
+     "file": "src/lib/managers/memory-manager.svelte.ts",
+     "line": 207,
+     "function": "loadMemory"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/memory.controller.ts",
+    "line": 23,
+    "handler": "MemoryController.searchMemories"
+   },
+   "idiom": "@immich/sdk generated oazapfts function searchMemories (baseUrl /api)"
+  },
+  {
+   "id": "l21",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "POST",
+   "channel": "/api/passkeys/authentication/start",
+   "send": [
+    {
+     "file": "src/lib/queries/passkey.query.ts",
+     "line": 52,
+     "function": "loginWithPasskeyMutation"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/passkey.controller.ts",
+    "line": 68,
+    "handler": "PasskeyController.startAuthentication"
+   },
+   "idiom": "@immich/sdk generated oazapfts function startAuthentication in TanStack mutationFn"
+  },
+  {
+   "id": "l22",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/passkeys",
+   "send": [
+    {
+     "file": "src/lib/queries/passkey.query.ts",
+     "line": 32,
+     "function": "searchPasskeysQuery"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/passkey.controller.ts",
+    "line": 104,
+    "handler": "PasskeyController.searchPasskeys"
+   },
+   "idiom": "@immich/sdk generated oazapfts function searchPasskeys in TanStack queryFn"
+  },
+  {
+   "id": "l23",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/albums/{id}",
+   "send": [
+    {
+     "file": "src/lib/queries/album.query.ts",
+     "line": 86,
+     "function": "getAlbumInfoQuery"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/album.controller.ts",
+    "line": 63,
+    "handler": "AlbumController.getAlbumInfo"
+   },
+   "idiom": "@immich/sdk generated oazapfts function getAlbumInfo in TanStack queryFn"
+  },
+  {
+   "id": "l24",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "DELETE",
+   "channel": "/api/partners/{id}",
+   "send": [
+    {
+     "file": "src/routes/(user)/user-settings/SharingSettings.svelte",
+     "line": 194
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/partner.controller.ts",
+    "line": 64,
+    "handler": "PartnerController.removePartner"
+   },
+   "idiom": "@immich/sdk generated oazapfts function removePartner (baseUrl /api)"
+  },
+  {
+   "id": "l25",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "POST",
+   "channel": "/api/admin/auth/unlink-all",
+   "send": [
+    {
+     "file": "src/routes/admin/system-settings/AuthSettings.svelte",
+     "line": 62
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/auth-admin.controller.ts",
+    "line": 13,
+    "handler": "AuthAdminController.unlinkAllOAuthAccountsAdmin"
+   },
+   "idiom": "@immich/sdk generated oazapfts function unlinkAllOAuthAccountsAdmin (baseUrl /api)"
+  },
+  {
+   "id": "l26",
+   "protocol": "http",
+   "caller": "web",
+   "target": "server",
+   "operation": "GET",
+   "channel": "/api/server/statistics",
+   "send": [
+    {
+     "file": "src/lib/queries/server-info.query.ts",
+     "line": 32,
+     "function": "getServerStatisticsQuery"
+    }
+   ],
+   "receive": {
+    "file": "src/controllers/server.controller.ts",
+    "line": 129,
+    "handler": "ServerController.getServerStatistics"
+   },
+   "idiom": "@immich/sdk generated oazapfts function getServerStatistics in TanStack queryFn"
+  },
+  {
+   "id": "l28",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "AssetExtractMetadata",
+   "send": [
+    {
+     "file": "src/services/asset-media.service.ts",
+     "line": 202
+    },
+    {
+     "file": "src/services/asset.service.ts",
+     "line": 276
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/metadata.service.ts",
+    "line": 228,
+    "handler": "MetadataService.handleMetadataExtraction (@OnJob AssetExtractMetadata, queue MetadataExtraction)"
+   },
+   "idiom": "jobRepository.queue({ name: JobName.X }) -> BullMQ Queue.addBulk on queue resolved from @OnJob handler map"
+  },
+  {
+   "id": "l29",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "IntegrityChecksumFiles",
+   "send": [
+    {
+     "file": "src/services/integrity.service.ts",
+     "line": 105
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/integrity.service.ts",
+    "line": 533,
+    "handler": "@OnJob IntegrityChecksumFiles (queue IntegrityCheck)"
+   },
+   "idiom": "jobRepository.queue({ name: JobName.X }) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l30",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "VersionCheck",
+   "send": [
+    {
+     "file": "src/services/version.service.ts",
+     "line": 97,
+     "function": "handleQueueVersionCheck"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 214,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/version.service.ts",
+    "line": 100,
+    "handler": "@OnJob VersionCheck (queue BackgroundTask)"
+   },
+   "idiom": "jobRepository.queue({ name: JobName.X }) -> BullMQ Queue.add (deduplication option)"
+  },
+  {
+   "id": "l31",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "PersonGenerateThumbnail",
+   "send": [
+    {
+     "file": "src/services/person.service.ts",
+     "line": 643
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/media.service.ts",
+    "line": 397,
+    "handler": "@OnJob PersonGenerateThumbnail (queue ThumbnailGeneration)"
+   },
+   "idiom": "jobRepository.queue({ name: JobName.X }) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l32",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "SendMail",
+   "send": [
+    {
+     "file": "src/services/notification.service.ts",
+     "line": 376
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/notification.service.ts",
+    "line": 446,
+    "handler": "@OnJob SendMail (queue Notification)"
+   },
+   "idiom": "jobRepository.queue({ name: JobName.X }) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l33",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "UserDelete",
+   "send": [
+    {
+     "file": "src/services/user-admin.service.ts",
+     "line": 114
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/user.service.ts",
+    "line": 255,
+    "handler": "@OnJob UserDelete (queue BackgroundTask)"
+   },
+   "idiom": "jobRepository.queue({ name: JobName.X }) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l34",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "FileDelete",
+   "send": [
+    {
+     "file": "src/services/user.service.ts",
+     "line": 135,
+     "function": "deleteProfileImage"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/storage.service.ts",
+    "line": 120,
+    "handler": "@OnJob FileDelete (queue BackgroundTask)"
+   },
+   "idiom": "jobRepository.queue({ name: JobName.X }) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l35",
+   "protocol": "websocket",
+   "caller": "server",
+   "target": "server",
+   "operation": "serverSideEmit",
+   "channel": "HlsSessionResult",
+   "send": [
+    {
+     "file": "src/services/transcoding.service.ts",
+     "line": 85
+    },
+    {
+     "file": "src/services/transcoding.service.ts",
+     "line": 90
+    },
+    {
+     "file": "src/repositories/websocket.repository.ts",
+     "line": 119,
+     "function": "serverSend"
+    }
+   ],
+   "receive": {
+    "file": "src/services/hls.service.ts",
+    "line": 27,
+    "handler": "HlsService.onSessionResult (@OnEvent HlsSessionResult server:true)"
+   },
+   "idiom": "websocketRepository.serverSend(event) -> Socket.IO server.serverSideEmit, received via server.on(event) -> @OnEvent"
+  },
+  {
+   "id": "l36",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "AssetDeleteCheck",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/asset.service.ts",
+    "line": 279,
+    "handler": "@OnJob AssetDeleteCheck"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l37",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "UserDeleteCheck",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/user.service.ts",
+    "line": 247,
+    "handler": "@OnJob UserDeleteCheck"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l38",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "PersonCleanup",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/person.service.ts",
+    "line": 344,
+    "handler": "@OnJob PersonCleanup"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l39",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "MemoryCleanup",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/memory.service.ts",
+    "line": 149,
+    "handler": "@OnJob MemoryCleanup"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l40",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "SessionCleanup",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/session.service.ts",
+    "line": 18,
+    "handler": "@OnJob SessionCleanup"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l41",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "AuthChallengeCleanup",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/passkey.service.ts",
+    "line": 254,
+    "handler": "@OnJob AuthChallengeCleanup"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l42",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "HlsSessionCleanup",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/transcoding.service.ts",
+    "line": 60,
+    "handler": "@OnJob HlsSessionCleanup"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l43",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "AuditTableCleanup",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/sync.service.ts",
+    "line": 241,
+    "handler": "@OnJob AuditTableCleanup"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l44",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "MemoryGenerate",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/memory.service.ts",
+    "line": 28,
+    "handler": "@OnJob MemoryGenerate"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l45",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "UserSyncUsage",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/user.service.ts",
+    "line": 241,
+    "handler": "@OnJob UserSyncUsage"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l46",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "AssetGenerateThumbnailsQueueAll",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 223,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/media.service.ts",
+    "line": 69,
+    "handler": "@OnJob AssetGenerateThumbnailsQueueAll"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.addBulk"
+  },
+  {
+   "id": "l47",
+   "protocol": "task",
+   "caller": "server",
+   "target": "server",
+   "operation": "enqueue",
+   "channel": "FacialRecognitionQueueAll",
+   "send": [
+    {
+     "file": "src/services/queue.service.ts",
+     "line": 300,
+     "function": "handleNightlyJobs"
+    },
+    {
+     "file": "src/repositories/job.repository.ts",
+     "line": 214,
+     "function": "queueAll"
+    }
+   ],
+   "receive": {
+    "file": "src/services/person.service.ts",
+    "line": 501,
+    "handler": "@OnJob FacialRecognitionQueueAll"
+   },
+   "idiom": "jobRepository.queueAll(jobs) -> BullMQ Queue.add (deduplication option)"
+  }
+ ],
+ "not_links": [
+  {
+   "what": "getSupportedMediaTypes() -> GET /api/server/media-types (ServerController.getSupportedMediaTypes, server/src/controllers/server.controller.ts:140)",
+   "where": "packages/cli/src/commands/asset.ts:88",
+   "why": "The call and its receiver are real, but the caller is the Immich CLI in packages/cli. That is not one of the declared services (server, web, sdk, ml), so the link cannot be given a valid caller name. It was link l27 with caller 'cli'."
+  }
+ ],
+ "sampling": {
+  "total_send_sites": 498,
+  "by_protocol": {
+   "http": 353,
+   "websocket": 40,
+   "task": 105
+  },
+  "sampled": 40,
+  "rule": "first 40 by FNV-1a hash of file:line"
+ }
+}

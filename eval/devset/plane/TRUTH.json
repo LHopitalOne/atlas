@@ -1,0 +1,876 @@
+{
+ "project": "plane",
+ "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/devset/plane",
+ "commit": "618d0eb74658329a6f6e92434ac54231422c5b96",
+ "services": {
+  "api": "apps/api",
+  "web": "apps/web",
+  "space": "apps/space",
+  "admin": "apps/admin",
+  "live": "apps/live",
+  "packages": "packages"
+ },
+ "links": [
+  {
+   "id": "L1",
+   "protocol": "http",
+   "caller": "packages",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/public/assets/v2/anchor/{anchor}/",
+   "send": [
+    {
+     "file": "services/src/file/sites-file.service.ts",
+     "function": "SitesFileService.uploadAsset",
+     "line": 84
+    }
+   ],
+   "receive": {
+    "file": "plane/space/urls/asset.py",
+    "line": 16,
+    "handler": "EntityAssetEndpoint.post"
+   },
+   "idiom": "APIService.post (axios wrapper) with template-literal path, base API_BASE_URL"
+  },
+  {
+   "id": "L2",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "PUT",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/modules/{pk}/",
+   "send": [
+    {
+     "file": "services/module.service.ts",
+     "function": "ModuleService.updateModule",
+     "line": 43
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/module.py",
+    "line": 24,
+    "handler": "ModuleViewSet.update"
+   },
+   "idiom": "APIService.put (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L3",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/workspaces/{slug}/sidebar-preferences/",
+   "send": [
+    {
+     "file": "services/workspace.service.ts",
+     "function": "WorkspaceService.fetchSidebarNavigationPreferences",
+     "line": 378
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/workspace.py",
+    "line": 255,
+    "handler": "WorkspaceUserPreferenceViewSet.get"
+   },
+   "idiom": "APIService.get (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L4",
+   "protocol": "task",
+   "caller": "api",
+   "target": "api",
+   "operation": "delay",
+   "channel": "plane.bgtasks.issue_activities_task.issue_activity",
+   "send": [
+    {
+     "file": "plane/api/views/intake.py",
+     "line": 419
+    }
+   ],
+   "receive": {
+    "file": "plane/bgtasks/issue_activities_task.py",
+    "line": 1550,
+    "handler": "issue_activity"
+   },
+   "idiom": "Celery shared_task .delay()"
+  },
+  {
+   "id": "L5",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/cycles/date-check/",
+   "send": [
+    {
+     "file": "services/cycle.service.ts",
+     "function": "CycleService.cycleDateCheck",
+     "line": 154
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/cycle.py",
+    "line": 56,
+    "handler": "CycleDateCheckEndpoint.post"
+   },
+   "idiom": "APIService.post (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L6",
+   "protocol": "task",
+   "caller": "api",
+   "target": "api",
+   "operation": "delay",
+   "channel": "plane.license.bgtasks.telemetry_metrics.push_instance_metrics",
+   "send": [
+    {
+     "file": "plane/license/management/commands/register_instance.py",
+     "line": 90
+    }
+   ],
+   "receive": {
+    "file": "plane/license/bgtasks/telemetry_metrics.py",
+    "line": 369,
+    "handler": "push_instance_metrics"
+   },
+   "idiom": "Celery shared_task .delay()"
+  },
+  {
+   "id": "L7",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/auth/github/",
+   "send": [
+    {
+     "file": "hooks/oauth/core.tsx",
+     "line": 60
+    }
+   ],
+   "receive": {
+    "file": "plane/authentication/urls.py",
+    "line": 93,
+    "handler": "GitHubOauthInitiateEndpoint.get"
+   },
+   "idiom": "window.location.assign(`${API_BASE_URL}/auth/github/...`) browser navigation"
+  },
+  {
+   "id": "L8",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/pages/{page_id}/lock/",
+   "send": [
+    {
+     "file": "services/page/project-page.service.ts",
+     "function": "ProjectPageService.lock",
+     "line": 136
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/page.py",
+    "line": 45,
+    "handler": "PageViewSet.lock"
+   },
+   "idiom": "APIService.post (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L9",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/modules/{pk}/",
+   "send": [
+    {
+     "file": "services/module.service.ts",
+     "function": "ModuleService.getModuleDetails",
+     "line": 51
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/module.py",
+    "line": 24,
+    "handler": "ModuleViewSet.retrieve"
+   },
+   "idiom": "APIService.get (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L10",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/cycles/{cycle_id}/cycle-issues/",
+   "send": [
+    {
+     "file": "services/cycle.service.ts",
+     "function": "CycleService.getCycleIssues",
+     "line": 124
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/cycle.py",
+    "line": 39,
+    "handler": "CycleIssueViewSet.list"
+   },
+   "idiom": "APIService.get (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L11",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/workspaces/{slug}/states/",
+   "send": [
+    {
+     "file": "services/project/project-state.service.ts",
+     "function": "ProjectStateService.getWorkspaceStates",
+     "line": 84
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/workspace.py",
+    "line": 167,
+    "handler": "WorkspaceStatesEndpoint.get"
+   },
+   "idiom": "APIService.get (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L12",
+   "protocol": "task",
+   "caller": "api",
+   "target": "api",
+   "operation": "delay",
+   "channel": "plane.bgtasks.issue_description_version_task.issue_description_version_task",
+   "send": [
+    {
+     "file": "plane/app/views/issue/base.py",
+     "line": 484
+    }
+   ],
+   "receive": {
+    "file": "plane/bgtasks/issue_description_version_task.py",
+    "line": 44,
+    "handler": "issue_description_version_task"
+   },
+   "idiom": "Celery shared_task .delay()"
+  },
+  {
+   "id": "L13",
+   "protocol": "task",
+   "caller": "api",
+   "target": "api",
+   "operation": "delay",
+   "channel": "plane.bgtasks.user_activation_email_task.user_activation_email",
+   "send": [
+    {
+     "file": "plane/authentication/adapter/base.py",
+     "line": 248
+    }
+   ],
+   "receive": {
+    "file": "plane/bgtasks/user_activation_email_task.py",
+    "line": 23,
+    "handler": "user_activation_email"
+   },
+   "idiom": "Celery shared_task .delay()"
+  },
+  {
+   "id": "L14",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "DELETE",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/cycles/{pk}/",
+   "send": [
+    {
+     "file": "services/cycle.service.ts",
+     "function": "CycleService.deleteCycle",
+     "line": 146
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/cycle.py",
+    "line": 27,
+    "handler": "CycleViewSet.destroy"
+   },
+   "idiom": "APIService.delete (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L15",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/issues/{issue_id}/comments/",
+   "send": [
+    {
+     "file": "services/issue/issue_comment.service.ts",
+     "function": "IssueCommentService.createIssueComment",
+     "line": 54
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/issue.py",
+    "line": 156,
+    "handler": "IssueCommentViewSet.create"
+   },
+   "idiom": "APIService.post (axios wrapper) with template-literal path; serviceType defaults to 'issues'"
+  },
+  {
+   "id": "L16",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "DELETE",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/cycles/{cycle_id}/archive/",
+   "send": [
+    {
+     "file": "services/cycle_archive.service.ts",
+     "function": "CycleArchiveService.restoreCycle",
+     "line": 50
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/cycle.py",
+    "line": 81,
+    "handler": "CycleArchiveUnarchiveEndpoint.delete"
+   },
+   "idiom": "APIService.delete (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L17",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/pages/{page_id}/",
+   "send": [
+    {
+     "file": "services/page/project-page.service.ts",
+     "function": "ProjectPageService.fetchById",
+     "line": 33
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/page.py",
+    "line": 27,
+    "handler": "PageViewSet.retrieve"
+   },
+   "idiom": "APIService.get (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L18",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/archived-cycles/",
+   "send": [
+    {
+     "file": "services/cycle_archive.service.ts",
+     "function": "CycleArchiveService.getArchivedCycles",
+     "line": 20
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/cycle.py",
+    "line": 86,
+    "handler": "CycleArchiveUnarchiveEndpoint.get"
+   },
+   "idiom": "APIService.get (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L19",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/pages/",
+   "send": [
+    {
+     "file": "services/page/project-page.service.ts",
+     "function": "ProjectPageService.create",
+     "line": 45
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/page.py",
+    "line": 22,
+    "handler": "PageViewSet.create"
+   },
+   "idiom": "APIService.post (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L20",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "PATCH",
+   "channel": "/api/workspaces/{slug}/home-preferences/{key}/",
+   "send": [
+    {
+     "file": "services/workspace.service.ts",
+     "function": "WorkspaceService.updateWorkspaceWidget",
+     "line": 370
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/workspace.py",
+    "line": 234,
+    "handler": "WorkspaceHomePreferenceViewSet.patch"
+   },
+   "idiom": "APIService.patch (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L21",
+   "protocol": "task",
+   "caller": "api",
+   "target": "api",
+   "operation": "delay",
+   "channel": "plane.bgtasks.issue_activities_task.issue_activity",
+   "send": [
+    {
+     "file": "plane/app/views/issue/attachment.py",
+     "line": 57
+    }
+   ],
+   "receive": {
+    "file": "plane/bgtasks/issue_activities_task.py",
+    "line": 1550,
+    "handler": "issue_activity"
+   },
+   "idiom": "Celery shared_task .delay()"
+  },
+  {
+   "id": "L22",
+   "protocol": "http",
+   "caller": "packages",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/public/anchor/{anchor}/members/",
+   "send": [
+    {
+     "file": "services/src/user/sites-member.service.ts",
+     "function": "SitesMemberService.list",
+     "line": 31
+    }
+   ],
+   "receive": {
+    "file": "plane/space/urls/project.py",
+    "line": 61,
+    "handler": "ProjectMembersEndpoint.get"
+   },
+   "idiom": "APIService.get (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L23",
+   "protocol": "task",
+   "caller": "api",
+   "target": "api",
+   "operation": "delay",
+   "channel": "plane.bgtasks.issue_activities_task.issue_activity",
+   "send": [
+    {
+     "file": "plane/space/views/issue.py",
+     "line": 451
+    }
+   ],
+   "receive": {
+    "file": "plane/bgtasks/issue_activities_task.py",
+    "line": 1550,
+    "handler": "issue_activity"
+   },
+   "idiom": "Celery shared_task .delay()"
+  },
+  {
+   "id": "L24",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/users/me/",
+   "send": [
+    {
+     "file": "services/user.service.ts",
+     "function": "UserService.currentUser",
+     "line": 57
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/user.py",
+    "line": 26,
+    "handler": "UserEndpoint.retrieve"
+   },
+   "idiom": "APIService.get (axios wrapper) with literal path"
+  },
+  {
+   "id": "L25a",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/auth/magic-sign-in/",
+   "send": [
+    {
+     "file": "components/account/auth-forms/unique-code.tsx",
+     "line": 86
+    }
+   ],
+   "receive": {
+    "file": "plane/authentication/urls.py",
+    "line": 62,
+    "handler": "MagicSignInEndpoint.post"
+   },
+   "idiom": "HTML <form method=POST action={`${API_BASE_URL}/auth/${mode}/`}> submission"
+  },
+  {
+   "id": "L25b",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/auth/magic-sign-up/",
+   "send": [
+    {
+     "file": "components/account/auth-forms/unique-code.tsx",
+     "line": 86
+    }
+   ],
+   "receive": {
+    "file": "plane/authentication/urls.py",
+    "line": 63,
+    "handler": "MagicSignUpEndpoint.post"
+   },
+   "idiom": "HTML <form method=POST action={`${API_BASE_URL}/auth/${mode}/`}> submission"
+  },
+  {
+   "id": "L26",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/auth/gitlab/",
+   "send": [
+    {
+     "file": "hooks/oauth/core.tsx",
+     "line": 69
+    }
+   ],
+   "receive": {
+    "file": "plane/authentication/urls.py",
+    "line": 106,
+    "handler": "GitLabOauthInitiateEndpoint.get"
+   },
+   "idiom": "window.location.assign(`${API_BASE_URL}/auth/gitlab/...`) browser navigation"
+  },
+  {
+   "id": "L27",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/assets/v2/workspaces/{slug}/projects/{project_id}/{entity_id}/bulk/",
+   "send": [
+    {
+     "file": "services/file.service.ts",
+     "function": "FileService.updateBulkProjectAssetsUploadStatus",
+     "line": 141
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/asset.py",
+    "line": 89,
+    "handler": "ProjectBulkAssetEndpoint.post"
+   },
+   "idiom": "APIService.post (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L28",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/pages/",
+   "send": [
+    {
+     "file": "services/page/project-page.service.ts",
+     "function": "ProjectPageService.fetchAll",
+     "line": 25
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/page.py",
+    "line": 22,
+    "handler": "PageViewSet.list"
+   },
+   "idiom": "APIService.get (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L29",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/users/me/profile/",
+   "send": [
+    {
+     "file": "services/user.service.ts",
+     "function": "UserService.getCurrentUserProfile",
+     "line": 65
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/user.py",
+    "line": 48,
+    "handler": "ProfileEndpoint.get"
+   },
+   "idiom": "APIService.get (axios wrapper) with literal path"
+  },
+  {
+   "id": "L30",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/assets/v2/workspaces/{slug}/projects/{project_id}/",
+   "send": [
+    {
+     "file": "services/file.service.ts",
+     "function": "FileService.uploadProjectAsset",
+     "line": 156
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/asset.py",
+    "line": 79,
+    "handler": "ProjectAssetEndpoint.post"
+   },
+   "idiom": "APIService.post (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L31",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/issues/{issue_id}/history/",
+   "send": [
+    {
+     "file": "services/issue/issue_activity.service.ts",
+     "function": "IssueActivityService.getIssueActivities",
+     "line": 32
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/issue.py",
+    "line": 149,
+    "handler": "IssueActivityEndpoint.get"
+   },
+   "idiom": "APIService.get (axios wrapper) with template-literal path; serviceType defaults to 'issues'"
+  },
+  {
+   "id": "L32",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/timezones/",
+   "send": [
+    {
+     "file": "services/timezone.service.ts",
+     "function": "TimezoneService.fetch",
+     "line": 19
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/timezone.py",
+    "line": 11,
+    "handler": "TimezoneEndpoint.get"
+   },
+   "idiom": "APIService.get (axios wrapper) with literal path"
+  },
+  {
+   "id": "L33",
+   "protocol": "task",
+   "caller": "api",
+   "target": "api",
+   "operation": "delay",
+   "channel": "plane.bgtasks.issue_activities_task.issue_activity",
+   "send": [
+    {
+     "file": "plane/api/views/module.py",
+     "line": 771
+    }
+   ],
+   "receive": {
+    "file": "plane/bgtasks/issue_activities_task.py",
+    "line": 1550,
+    "handler": "issue_activity"
+   },
+   "idiom": "Celery shared_task .delay()"
+  },
+  {
+   "id": "L34",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/cycles/{cycle_id}/archive/",
+   "send": [
+    {
+     "file": "services/cycle_archive.service.ts",
+     "function": "CycleArchiveService.archiveCycle",
+     "line": 42
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/cycle.py",
+    "line": 81,
+    "handler": "CycleArchiveUnarchiveEndpoint.post"
+   },
+   "idiom": "APIService.post (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L35",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/assets/v2/user-assets/",
+   "send": [
+    {
+     "file": "services/file.service.ts",
+     "function": "FileService.uploadUserAsset",
+     "line": 186
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/asset.py",
+    "line": 59,
+    "handler": "UserAssetsV2Endpoint.post"
+   },
+   "idiom": "APIService.post (axios wrapper) with literal path"
+  },
+  {
+   "id": "L36",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/project-deploy-boards/",
+   "send": [
+    {
+     "file": "services/project/project-publish.service.ts",
+     "function": "ProjectPublishService.publishProject",
+     "line": 32
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/project.py",
+    "line": 112,
+    "handler": "DeployBoardViewSet.create"
+   },
+   "idiom": "APIService.post (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L37",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/archived-cycles/{pk}/",
+   "send": [
+    {
+     "file": "services/cycle_archive.service.ts",
+     "function": "CycleArchiveService.getArchivedCycleDetails",
+     "line": 28
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/cycle.py",
+    "line": 91,
+    "handler": "CycleArchiveUnarchiveEndpoint.get"
+   },
+   "idiom": "APIService.get (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L38",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/auth/gitea/",
+   "send": [
+    {
+     "file": "hooks/oauth/core.tsx",
+     "line": 78
+    }
+   ],
+   "receive": {
+    "file": "plane/authentication/urls.py",
+    "line": 141,
+    "handler": "GiteaOauthInitiateEndpoint.get"
+   },
+   "idiom": "window.location.assign(`${API_BASE_URL}/auth/gitea/...`) browser navigation"
+  },
+  {
+   "id": "L39",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/workspaces/{slug}/cycles/",
+   "send": [
+    {
+     "file": "services/cycle.service.ts",
+     "function": "CycleService.getWorkspaceCycles",
+     "line": 82
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/workspace.py",
+    "line": 182,
+    "handler": "WorkspaceCyclesEndpoint.get"
+   },
+   "idiom": "APIService.get (axios wrapper) with template-literal path"
+  },
+  {
+   "id": "L40",
+   "protocol": "http",
+   "caller": "packages",
+   "target": "api",
+   "operation": "PATCH",
+   "channel": "/api/workspaces/{slug}/projects/{project_id}/modules/{module_id}/module-links/{pk}/",
+   "send": [
+    {
+     "file": "services/src/module/module.service.ts",
+     "function": "ModuleService.updateModuleLink",
+     "line": 173
+    }
+   ],
+   "receive": {
+    "file": "plane/app/urls/module.py",
+    "line": 63,
+    "handler": "ModuleLinkViewSet.partial_update"
+   },
+   "idiom": "APIService.patch (axios wrapper) with template-literal path"
+  }
+ ],
+ "not_links": [],
+ "sampling": {
+  "total_send_sites": 656,
+  "by_protocol": {
+   "http": 471,
+   "task": 178,
+   "websocket": 5,
+   "redis": 2
+  },
+  "sampled": 40,
+  "rule": "first 40 by FNV-1a hash of file:line"
+ }
+}

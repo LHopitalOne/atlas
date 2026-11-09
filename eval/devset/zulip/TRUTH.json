@@ -1,0 +1,1078 @@
+{
+ "project": "zulip",
+ "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/devset/zulip",
+ "commit": "f0f02bcb08cb99ea161baec9a6c2edd008217dda",
+ "services": {
+  "zulip": "."
+ },
+ "links": [
+  {
+   "id": "L1",
+   "protocol": "amqp",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "publish",
+   "channel": "missedmessage_mobile_notifications",
+   "send": [
+    {
+     "file": "zerver/worker/missedmessage_mobile_notifications.py",
+     "function": "PushNotificationsWorker.consume",
+     "line": 72
+    },
+    {
+     "file": "zerver/lib/queue.py",
+     "function": "retry_event",
+     "line": 519
+    }
+   ],
+   "receive": {
+    "file": "zerver/worker/missedmessage_mobile_notifications.py",
+    "handler": "PushNotificationsWorker.consume",
+    "line": 21
+   },
+   "idiom": "retry_event(self.queue_name, event, ...) -> queue_json_publish_rollback_unsafe"
+  },
+  {
+   "id": "L2",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/settings",
+   "send": [
+    {
+     "file": "web/src/settings_preferences.ts",
+     "line": 291
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "json_change_settings",
+    "line": 528
+   },
+   "idiom": "channel.patch({url})"
+  },
+  {
+   "id": "L3",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "DELETE",
+   "channel": "/json/bots/{bot_id}",
+   "send": [
+    {
+     "file": "web/src/user_profile.ts",
+     "line": 1086
+    },
+    {
+     "file": "web/src/dialog_widget.ts",
+     "function": "submit_api_request",
+     "line": 334
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "deactivate_bot_backend",
+    "line": 374
+   },
+   "idiom": "dialog_widget.submit_api_request(channel.del, url)"
+  },
+  {
+   "id": "L4",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/realm/profile_fields/{field_id}",
+   "send": [
+    {
+     "file": "web/src/settings_profile_fields.ts",
+     "line": 733
+    },
+    {
+     "file": "web/src/dialog_widget.ts",
+     "function": "submit_api_request",
+     "line": 334
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "update_realm_custom_profile_field",
+    "line": 348
+   },
+   "idiom": "dialog_widget.submit_api_request(channel.patch, url)"
+  },
+  {
+   "id": "L5",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/settings",
+   "send": [
+    {
+     "file": "web/src/settings_preferences.ts",
+     "line": 247
+    },
+    {
+     "file": "web/src/settings_ui.ts",
+     "function": "do_settings_change",
+     "line": 56
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "json_change_settings",
+    "line": 528
+   },
+   "idiom": "settings_ui.do_settings_change(channel.patch, url)"
+  },
+  {
+   "id": "L6",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "GET",
+   "channel": "/json/messages",
+   "send": [
+    {
+     "file": "web/src/message_fetch_raw_content.ts",
+     "line": 92
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "get_messages_backend",
+    "line": 421
+   },
+   "idiom": "channel.get({url})"
+  },
+  {
+   "id": "L7",
+   "protocol": "amqp",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "publish",
+   "channel": "deferred_work",
+   "send": [
+    {
+     "file": "zerver/migrations/0387_reupload_realmemoji_again.py",
+     "line": 37
+    }
+   ],
+   "receive": {
+    "file": "zerver/worker/deferred_work.py",
+    "handler": "DeferredWorker.consume",
+    "line": 27
+   },
+   "idiom": "queue_json_publish_rollback_unsafe(queue_name, event)"
+  },
+  {
+   "id": "L8a",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/billing/plan",
+   "send": [
+    {
+     "file": "web/src/billing/billing.ts",
+     "line": 272
+    },
+    {
+     "file": "web/src/billing/helpers.ts",
+     "function": "create_ajax_request",
+     "line": 82
+    }
+   ],
+   "receive": {
+    "file": "corporate/urls.py",
+    "handler": "update_plan",
+    "line": 121
+   },
+   "idiom": "helpers.create_ajax_request(url, form, [], 'PATCH') -> $.ajax"
+  },
+  {
+   "id": "L8b",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/realm/{realm_uuid}/billing/plan",
+   "send": [
+    {
+     "file": "web/src/billing/billing.ts",
+     "line": 272
+    },
+    {
+     "file": "web/src/billing/helpers.ts",
+     "function": "create_ajax_request",
+     "line": 82
+    }
+   ],
+   "receive": {
+    "file": "corporate/urls.py",
+    "handler": "update_plan_for_remote_realm",
+    "line": 387
+   },
+   "idiom": "helpers.create_ajax_request(url, form, [], 'PATCH') -> $.ajax"
+  },
+  {
+   "id": "L8c",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/server/{server_uuid}/billing/plan",
+   "send": [
+    {
+     "file": "web/src/billing/billing.ts",
+     "line": 272
+    },
+    {
+     "file": "web/src/billing/helpers.ts",
+     "function": "create_ajax_request",
+     "line": 82
+    }
+   ],
+   "receive": {
+    "file": "corporate/urls.py",
+    "handler": "update_plan_for_remote_server",
+    "line": 388
+   },
+   "idiom": "helpers.create_ajax_request(url, form, [], 'PATCH') -> $.ajax"
+  },
+  {
+   "id": "L9",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/json/users/{user_id}/reactivate",
+   "send": [
+    {
+     "file": "web/src/user_profile.ts",
+     "line": 1098
+    },
+    {
+     "file": "web/src/dialog_widget.ts",
+     "function": "submit_api_request",
+     "line": 334
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "reactivate_user_backend",
+    "line": 361
+   },
+   "idiom": "dialog_widget.submit_api_request(channel.post, url)"
+  },
+  {
+   "id": "L10",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/messages/{message_id}",
+   "send": [
+    {
+     "file": "web/src/message_edit.ts",
+     "line": 1713
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "update_message_backend",
+    "line": 426
+   },
+   "idiom": "channel.patch({url})"
+  },
+  {
+   "id": "L11",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/json/channel_folders/create",
+   "send": [
+    {
+     "file": "web/src/channel_folders_ui.ts",
+     "line": 49
+    },
+    {
+     "file": "web/src/dialog_widget.ts",
+     "function": "submit_api_request",
+     "line": 334
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "create_channel_folder",
+    "line": 586
+   },
+   "idiom": "dialog_widget.submit_api_request(channel.post, url)"
+  },
+  {
+   "id": "L12a",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/billing/plan",
+   "send": [
+    {
+     "file": "web/src/billing/billing.ts",
+     "line": 30
+    },
+    {
+     "file": "web/src/billing/helpers.ts",
+     "function": "create_ajax_request",
+     "line": 82
+    }
+   ],
+   "receive": {
+    "file": "corporate/urls.py",
+    "handler": "update_plan",
+    "line": 121
+   },
+   "idiom": "helpers.create_ajax_request(url, form, [], 'PATCH') -> $.ajax"
+  },
+  {
+   "id": "L12b",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/realm/{realm_uuid}/billing/plan",
+   "send": [
+    {
+     "file": "web/src/billing/billing.ts",
+     "line": 30
+    },
+    {
+     "file": "web/src/billing/helpers.ts",
+     "function": "create_ajax_request",
+     "line": 82
+    }
+   ],
+   "receive": {
+    "file": "corporate/urls.py",
+    "handler": "update_plan_for_remote_realm",
+    "line": 387
+   },
+   "idiom": "helpers.create_ajax_request(url, form, [], 'PATCH') -> $.ajax"
+  },
+  {
+   "id": "L12c",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/server/{server_uuid}/billing/plan",
+   "send": [
+    {
+     "file": "web/src/billing/billing.ts",
+     "line": 30
+    },
+    {
+     "file": "web/src/billing/helpers.ts",
+     "function": "create_ajax_request",
+     "line": 82
+    }
+   ],
+   "receive": {
+    "file": "corporate/urls.py",
+    "handler": "update_plan_for_remote_server",
+    "line": 388
+   },
+   "idiom": "helpers.create_ajax_request(url, form, [], 'PATCH') -> $.ajax"
+  },
+  {
+   "id": "L13",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/api/v1/events/internal",
+   "send": [
+    {
+     "file": "zerver/tornado/django_api.py",
+     "function": "request_event_queue",
+     "line": 145
+    }
+   ],
+   "receive": {
+    "file": "zproject/tornado_urls.py",
+    "handler": "get_events_internal",
+    "line": 36
+   },
+   "idiom": "requests_client().post(tornado_url + path)"
+  },
+  {
+   "id": "L14",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/json/users/me/avatar",
+   "send": [
+    {
+     "file": "web/src/settings_account.ts",
+     "line": 118
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "set_avatar_backend",
+    "line": 516
+   },
+   "idiom": "channel.post({url})"
+  },
+  {
+   "id": "L15",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/api/v1/events/internal",
+   "send": [
+    {
+     "file": "zerver/tornado/django_api.py",
+     "function": "get_user_events",
+     "line": 174
+    }
+   ],
+   "receive": {
+    "file": "zproject/tornado_urls.py",
+    "handler": "get_events_internal",
+    "line": 36
+   },
+   "idiom": "requests_client().post(tornado_url + path)"
+  },
+  {
+   "id": "L16",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/json/bots",
+   "send": [
+    {
+     "file": "web/src/settings_bots.ts",
+     "line": 322
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "add_bot_backend",
+    "line": 371
+   },
+   "idiom": "channel.post({url})"
+  },
+  {
+   "id": "L17",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "GET",
+   "channel": "/json/messages",
+   "send": [
+    {
+     "file": "web/src/message_events.ts",
+     "line": 200
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "get_messages_backend",
+    "line": 421
+   },
+   "idiom": "channel.get({url})"
+  },
+  {
+   "id": "L18",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "GET",
+   "channel": "/json/messages",
+   "send": [
+    {
+     "file": "web/src/message_edit.ts",
+     "line": 1787
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "get_messages_backend",
+    "line": 421
+   },
+   "idiom": "channel.get({url})"
+  },
+  {
+   "id": "L19",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "DELETE",
+   "channel": "/json/events",
+   "send": [
+    {
+     "file": "web/src/server_events.js",
+     "line": 299
+    }
+   ],
+   "receive": {
+    "file": "zproject/tornado_urls.py",
+    "handler": "cleanup_event_queue",
+    "line": 20
+   },
+   "idiom": "channel.del({url})"
+  },
+  {
+   "id": "L20",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/bots/{bot_id}",
+   "send": [
+    {
+     "file": "web/src/user_profile.ts",
+     "line": 954
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "patch_bot_backend",
+    "line": 374
+   },
+   "idiom": "channel.patch({url})"
+  },
+  {
+   "id": "L21",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/json/user_groups/create",
+   "send": [
+    {
+     "file": "web/src/user_group_create.ts",
+     "line": 257
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "add_user_group",
+    "line": 499
+   },
+   "idiom": "channel.post({url})"
+  },
+  {
+   "id": "L22",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "DELETE",
+   "channel": "/json/bots/{bot_id}",
+   "send": [
+    {
+     "file": "web/src/settings_bots.ts",
+     "line": 491
+    },
+    {
+     "file": "web/src/dialog_widget.ts",
+     "function": "submit_api_request",
+     "line": 334
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "deactivate_bot_backend",
+    "line": 374
+   },
+   "idiom": "dialog_widget.submit_api_request(channel.del, url)"
+  },
+  {
+   "id": "L23",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/streams/{stream_id}",
+   "send": [
+    {
+     "file": "web/src/stream_edit.ts",
+     "line": 1117
+    },
+    {
+     "file": "web/src/settings_org.ts",
+     "function": "save_organization_settings",
+     "line": 1280
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "update_stream_backend",
+    "line": 561
+   },
+   "idiom": "settings_org.save_organization_settings(data, $btn, url) -> channel.patch"
+  },
+  {
+   "id": "L24a",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/billing/plan",
+   "send": [
+    {
+     "file": "web/src/billing/billing.ts",
+     "line": 55
+    },
+    {
+     "file": "web/src/billing/helpers.ts",
+     "function": "create_ajax_request",
+     "line": 82
+    }
+   ],
+   "receive": {
+    "file": "corporate/urls.py",
+    "handler": "update_plan",
+    "line": 121
+   },
+   "idiom": "helpers.create_ajax_request(url, form, [], 'PATCH') -> $.ajax"
+  },
+  {
+   "id": "L24b",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/realm/{realm_uuid}/billing/plan",
+   "send": [
+    {
+     "file": "web/src/billing/billing.ts",
+     "line": 55
+    },
+    {
+     "file": "web/src/billing/helpers.ts",
+     "function": "create_ajax_request",
+     "line": 82
+    }
+   ],
+   "receive": {
+    "file": "corporate/urls.py",
+    "handler": "update_plan_for_remote_realm",
+    "line": 387
+   },
+   "idiom": "helpers.create_ajax_request(url, form, [], 'PATCH') -> $.ajax"
+  },
+  {
+   "id": "L24c",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/server/{server_uuid}/billing/plan",
+   "send": [
+    {
+     "file": "web/src/billing/billing.ts",
+     "line": 55
+    },
+    {
+     "file": "web/src/billing/helpers.ts",
+     "function": "create_ajax_request",
+     "line": 82
+    }
+   ],
+   "receive": {
+    "file": "corporate/urls.py",
+    "handler": "update_plan_for_remote_server",
+    "line": 388
+   },
+   "idiom": "helpers.create_ajax_request(url, form, [], 'PATCH') -> $.ajax"
+  },
+  {
+   "id": "L25",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/json/realm/emoji/{emoji_name}",
+   "send": [
+    {
+     "file": "web/src/settings_emoji.ts",
+     "line": 222
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "upload_emoji",
+    "line": 325
+   },
+   "idiom": "channel.post({url})"
+  },
+  {
+   "id": "L26",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/json/realm/domains",
+   "send": [
+    {
+     "file": "web/src/settings_realm_domains.ts",
+     "line": 124
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "create_realm_domain",
+    "line": 320
+   },
+   "idiom": "channel.post({url})"
+  },
+  {
+   "id": "L27",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/json/invites/multiuse",
+   "send": [
+    {
+     "file": "web/src/invite.ts",
+     "line": 304
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "generate_multiuse_invite_backend",
+    "line": 380
+   },
+   "idiom": "channel.post({url})"
+  },
+  {
+   "id": "L28",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "DELETE",
+   "channel": "/json/saved_snippets/{saved_snippet_id}",
+   "send": [
+    {
+     "file": "web/src/saved_snippets_ui.ts",
+     "line": 116
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "delete_saved_snippet",
+    "line": 401
+   },
+   "idiom": "channel.del({url})"
+  },
+  {
+   "id": "L29",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "GET",
+   "channel": "/json/streams/{stream_id}/members",
+   "send": [
+    {
+     "file": "web/src/peer_data.ts",
+     "line": 132
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "get_subscribers_backend",
+    "line": 559
+   },
+   "idiom": "channel.get({url})"
+  },
+  {
+   "id": "L30",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "GET",
+   "channel": "/json/messages/summary",
+   "send": [
+    {
+     "file": "web/src/message_summary.ts",
+     "line": 57
+    },
+    {
+     "file": "web/src/dialog_widget.ts",
+     "function": "submit_api_request",
+     "line": 334
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "get_messages_summary",
+    "line": 432
+   },
+   "idiom": "dialog_widget.submit_api_request(channel.get, url)"
+  },
+  {
+   "id": "L31",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "GET",
+   "channel": "/json/messages",
+   "send": [
+    {
+     "file": "web/src/message_view.ts",
+     "line": 919
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "get_messages_backend",
+    "line": 421
+   },
+   "idiom": "channel.get({url})"
+  },
+  {
+   "id": "L32",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/api/v1/remotes/push/e2ee/register",
+   "send": [
+    {
+     "file": "zerver/lib/push_registration.py",
+     "line": 155
+    },
+    {
+     "file": "zerver/lib/remote_server.py",
+     "function": "send_to_push_bouncer",
+     "line": 183
+    }
+   ],
+   "receive": {
+    "file": "zilencer/urls.py",
+    "handler": "register_remote_push_device_for_e2ee_push_notification",
+    "line": 34
+   },
+   "idiom": "send_to_push_bouncer(method, endpoint) -> session.request(ZULIP_SERVICES_URL + /api/v1/remotes/ + endpoint)"
+  },
+  {
+   "id": "L33",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/api/v1/remotes/server/register/verify_challenge",
+   "send": [
+    {
+     "file": "zerver/management/commands/register_server.py",
+     "line": 179
+    },
+    {
+     "file": "zerver/management/commands/register_server.py",
+     "function": "_request_push_notification_bouncer_url",
+     "line": 218
+    }
+   ],
+   "receive": {
+    "file": "zilencer/urls.py",
+    "handler": "verify_registration_transfer_challenge_ack_endpoint",
+    "line": 56
+   },
+   "idiom": "session.post(ZULIP_SERVICES_URL + url)"
+  },
+  {
+   "id": "L34",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "DELETE",
+   "channel": "/json/users/me",
+   "send": [
+    {
+     "file": "web/src/settings_account.ts",
+     "line": 863
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "deactivate_user_own_backend",
+    "line": 360
+   },
+   "idiom": "channel.del({url})"
+  },
+  {
+   "id": "L35",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/api/v1/remotes/push/register",
+   "send": [
+    {
+     "file": "zerver/lib/push_notifications.py",
+     "line": 749
+    },
+    {
+     "file": "zerver/lib/remote_server.py",
+     "function": "send_to_push_bouncer",
+     "line": 183
+    }
+   ],
+   "receive": {
+    "file": "zilencer/urls.py",
+    "handler": "register_remote_push_device",
+    "line": 31
+   },
+   "idiom": "send_to_push_bouncer(method, endpoint) -> session.request(ZULIP_SERVICES_URL + /api/v1/remotes/ + endpoint)"
+  },
+  {
+   "id": "L36",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/users/{user_id}",
+   "send": [
+    {
+     "file": "web/src/settings_account.ts",
+     "line": 991
+    },
+    {
+     "file": "web/src/settings_ui.ts",
+     "function": "do_settings_change",
+     "line": 56
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "update_user_by_id_api",
+    "line": 363
+   },
+   "idiom": "settings_ui.do_settings_change(channel.patch, url)"
+  },
+  {
+   "id": "L37",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "POST",
+   "channel": "/json/submessage",
+   "send": [
+    {
+     "file": "web/src/submessage.ts",
+     "line": 261
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "process_submessage",
+    "line": 446
+   },
+   "idiom": "channel.post({url})"
+  },
+  {
+   "id": "L38a",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "DELETE",
+   "channel": "/json/invites/{invite_id}",
+   "send": [
+    {
+     "file": "web/src/settings_invites.ts",
+     "line": 174
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "revoke_user_invite",
+    "line": 377
+   },
+   "idiom": "channel.del({url})"
+  },
+  {
+   "id": "L38b",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "DELETE",
+   "channel": "/json/invites/multiuse/{invite_id}",
+   "send": [
+    {
+     "file": "web/src/settings_invites.ts",
+     "line": 174
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "revoke_multiuse_invite",
+    "line": 382
+   },
+   "idiom": "channel.del({url})"
+  },
+  {
+   "id": "L39",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "PATCH",
+   "channel": "/json/settings",
+   "send": [
+    {
+     "file": "web/src/settings_account.ts",
+     "line": 940
+    },
+    {
+     "file": "web/src/settings_ui.ts",
+     "function": "do_settings_change",
+     "line": 56
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "json_change_settings",
+    "line": 528
+   },
+   "idiom": "settings_ui.do_settings_change(channel.patch, url)"
+  },
+  {
+   "id": "L40",
+   "protocol": "http",
+   "caller": "zulip",
+   "target": "zulip",
+   "operation": "GET",
+   "channel": "/json/messages/{message_id}/read_receipts",
+   "send": [
+    {
+     "file": "web/src/read_receipts.ts",
+     "line": 57
+    }
+   ],
+   "receive": {
+    "file": "zproject/urls.py",
+    "handler": "read_receipts",
+    "line": 453
+   },
+   "idiom": "channel.get({url})"
+  }
+ ],
+ "not_links": [],
+ "sampling": {
+  "total_send_sites": 267,
+  "by_protocol": {
+   "http": 227,
+   "amqp": 40
+  },
+  "sampled": 40,
+  "rule": "first 40 by FNV-1a hash of file:line"
+ }
+}
