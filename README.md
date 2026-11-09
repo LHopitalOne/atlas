@@ -82,6 +82,12 @@ The indexers never run the repositories' code: scip-python and scip-typescript o
 with build scripts and procedural macros switched off. SCIP files are read without a protobuf dependency. What no
 index can confirm is configuration: which host a base URL points to when the code runs.
 
+Without the repository's libraries installed, an index cannot say where a call into them goes (`requests`, Django, a
+client SDK). `index --sandbox` (needs Docker) indexes Python in a throwaway container instead: the repository is
+mounted read-only, the libraries it declares (requirements files, `pyproject.toml`, Poetry) are installed there,
+where install scripts can do no harm, and only the index is written back. On Label Studio this takes the libraries
+the index resolves from none to 55.
+
 `eval/sentry/` and `eval/openedx/` are answer keys of the real links between four Sentry services and four Open edX
 ones (the second built after the finder was tuned on the first, to test whether it generalises);
 `eval/labelstudio/` is a held-out key the frozen finder was run on once. `eval/score.py` scores a run:

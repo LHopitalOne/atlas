@@ -25,6 +25,7 @@ class ScipIndexer(ABC):
         """Index the repository into out_dir; returns the .scip file's path."""
         if shutil.which(self.TOOL) is None:
             raise IndexerUnavailableError(self.TOOL, self.INSTALL)
+        self.prepare()
         out = os.path.abspath(os.path.join(out_dir, f'{name}.{self.LANGUAGE}.scip'))
         with tempfile.TemporaryDirectory() as scratch:
             done = subprocess.run(
@@ -37,6 +38,10 @@ class ScipIndexer(ABC):
         if done.returncode != 0 or not os.path.exists(out):
             raise IndexerFailedError(self.TOOL, name, (done.stderr or done.stdout).strip()[-300:] or 'no index written')
         return out
+
+    def prepare(self):
+        """Anything the command needs first (an image to build); nothing by default."""
+        return None
 
     @abstractmethod
     def command(self, name: str, root: str, out: str, scratch: str) -> list[str]:
