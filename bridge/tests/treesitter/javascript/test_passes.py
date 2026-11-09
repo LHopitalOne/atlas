@@ -3,6 +3,7 @@ import unittest
 from atlas_bridge.adapters.treesitter.javascript.calls.composite import RequestCalls
 from atlas_bridge.adapters.treesitter.javascript.calls.direct import DirectRequests
 from atlas_bridge.adapters.treesitter.javascript.calls.verbs import VerbRequests
+from atlas_bridge.adapters.treesitter.javascript.channels.collector import ChannelCollector
 from atlas_bridge.adapters.treesitter.javascript.collector import FileCollector, SharedPass
 from atlas_bridge.adapters.treesitter.javascript.extractor import JavaScriptExtractor
 from atlas_bridge.adapters.treesitter.javascript.policy import JavaScriptTestPolicy
@@ -39,8 +40,9 @@ class TreeSpy(FileCollector):
 class FilePassTest(unittest.TestCase):
     def test_the_extractor_reads_every_file_in_one_pass(self):
         ws = Repository.workspace(FILES)
-        (shared,) = JavaScriptExtractor().collectors(ws)
+        shared, channels = JavaScriptExtractor().collectors(ws)
         self.assertIsInstance(shared, SharedPass)
+        self.assertIsInstance(channels, ChannelCollector)  # other protocols: only files that name their libraries
         self.assertEqual([type(c) for c in shared.collectors], [ExpressRoutes, RequestCalls])
         out = shared.collect()
         self.assertEqual([str(r.path) for r in out.routes], ['/x'])
