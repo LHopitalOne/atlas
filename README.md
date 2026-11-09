@@ -99,6 +99,12 @@ python3 -m atlas_bridge index --sandbox -o scip label-studio label-studio-ml-bac
 python3 -m atlas_bridge links label-studio label-studio-ml-backend --library label-studio-sdk --scip-dir scip -o links.json
 ```
 
+Most products keep their frontend and backend in one repository. `links --within` also links browser code to its own
+repository's server routes: a request to a relative path goes to the origin that served the page. It needs every
+fixed word of the path to meet a route's (a catch-all page route never takes it), and a generic helper that requests
+`/api/0/{anything}` is linked only when one route fits. On Sentry alone that is 225 frontend-to-backend links, on
+Label Studio 9; these have no answer key yet, so they are not in the scores above.
+
 `eval/sentry/` and `eval/openedx/` are answer keys of the real links between four Sentry services and four Open edX
 ones (the second built after the finder was tuned on the first, to test whether it generalises);
 `eval/labelstudio/` is a held-out key the frozen finder was run on once. `eval/score.py` scores a run:

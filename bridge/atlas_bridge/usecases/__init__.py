@@ -7,6 +7,7 @@ from .hops import LibraryHops
 from .link import Link, LinkFinder, LinkReport, LinkRule, ServiceNames
 from .ports import CallGraph, DefinitionOracle, Extractor
 from .verify import LinkVerifier
+from .within import WithinRepoRule
 
 __all__ = [
     'GROUPINGS',
@@ -27,4 +28,5 @@ __all__ = [
     'MapDrawer',
     'MapView',
     'ServiceNames',
+    'WithinRepoRule',
 ]

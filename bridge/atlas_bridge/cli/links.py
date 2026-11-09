@@ -10,6 +10,7 @@ from ..core.http import Extraction
 from ..usecases.hops import LibraryHops
 from ..usecases.link import LinkFinder, LinkReport
 from ..usecases.verify import LinkVerifier
+from ..usecases.within import WithinRepoRule
 from .command import Command
 from .inputs import Aliases, GraphInput, JsonFile, RepositoryInput, ScipInput
 
@@ -44,6 +45,11 @@ class LinksCommand(Command):
             '--scip-dir', help='a folder of <repo>[.<language>].scip files, as the index command writes'
         )
         parser.add_argument(
+            '--within',
+            action='store_true',
+            help="also link browser code to its own repository's server routes (a monorepo's frontend and backend)",
+        )
+        parser.add_argument(
             '--library',
             action='append',
             default=[],
@@ -57,7 +63,7 @@ class LinksCommand(Command):
 
         repos = [RepositoryInput.parse(item).checked() for item in args.repos]
         names = [r.name for r in repos]
-        finder = LinkFinder(names, Aliases.parse(args.alias), include_tests=args.include_tests)
+        finder = LinkFinder(names, Aliases.parse(args.alias), args.include_tests, self._rules(args.within))
         extraction, extractor = Extraction(), TreeSitterExtractor()
         for repo in repos:
             extraction.extend(extractor.extract(repo.name, repo.path))
@@ -86,6 +92,14 @@ class LinksCommand(Command):
         moved = LibraryHops(ScipCallGraph(indexes, names), names).calls(sent.calls)
         self.report(f'libraries: {len(moved)} requests reach the services through {", ".join(sorted(names))}')
         return [replace(call, test=extractor.is_test(call.file)) for call in moved]
+
+    @staticmethod
+    def _rules(within):
+        """Within a repository, a frontend's own routes are asked about before a path is matched across repositories."""
+        if not within:
+            return LinkFinder.RULES
+        *before, path_only = LinkFinder.RULES
+        return (*before, WithinRepoRule, path_only)
 
     @staticmethod
     def _indexes(args):
