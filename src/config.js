@@ -38,6 +38,7 @@ export const HTTP_ARC = {
   width: 1.5, // arc width at rest, px
   hotWidth: 2.6, // ...when selected, hovered or part of an impact view
   restAlpha: 0.8, // arc opacity at rest
+  withinAlpha: 0.22, // ...for links inside one repository (a frontend calling its own API), which are many
   dimAlpha: 0.1, // ...while something else has the focus
   arrowPx: 6, // arrowhead length at the endpoint end
   endpointPx: 3.2, // endpoint marker radius, drawn at every zoom so endpoints show before their streets do

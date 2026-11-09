@@ -67,9 +67,9 @@ export function linkInspectorHTML(gid) {
     a = first.call.repo,
     b = first.route.repo;
   let h = `<button class="handle" data-handle aria-label="Resize panel"></button><div class="ins-head"><nav class="crumbs" aria-label="Repositories" ${nameAttrs}><button data-terr="r${a}">${esc(g.repoName[a])}</button><span class="slash" aria-hidden="true">→</span><button data-terr="r${b}">${esc(g.repoName[b])}</button></nav>`;
-  h += `<h2 class="ins-title mono" id="insTitle" tabindex="-1" ${nameAttrs}>${esc(first.method)} ${esc(first.path)}</h2><div class="kindrow">${proofBadge(gr.proof)}<span class="badge badge-outline">HTTP link</span></div>`;
+  h += `<h2 class="ins-title mono" id="insTitle" tabindex="-1" ${nameAttrs}>${esc(first.method)} ${esc(first.path)}</h2><div class="kindrow">${proofBadge(gr.proof)}<span class="badge badge-outline">${gr.within ? 'Inside one repository' : 'HTTP link'}</span></div>`;
   h += `<button class="btn btn-ghost btn-icon close" data-close aria-label="Close panel">${ICON_X}</button></div><div class="ins-body scroll">`;
-  h += `<div class="about"><p class="about-text">${esc(PROOF[gr.proof].note)}</p><div class="prov">Why it matched: ${esc(first.reason || 'the method and path fit one route')}</div></div>`;
+  h += `<div class="about"><p class="about-text">${esc(PROOF[gr.proof].note)}</p><div class="prov">Why it matched: ${esc(first.reason || 'the method and path fit one route')}${gr.within ? '. No answer key covers links inside one repository yet.' : ''}</div></div>`;
   for (const li of gr.links) {
     const l = H.links[li];
     h += `<div class="sec proof">${siteHTML(g, l.call, 'Sends the request', callDetail(l.call))}`;
@@ -112,8 +112,15 @@ export function impactBlockHTML(g, target, what) {
     on = store.httpImpact === key,
     reach = new Set();
   for (const s of im.callers) for (const t of impactOf(g, s).services) if (!im.callers.includes(t)) reach.add(t);
+  const cross = im.links.length - im.within,
+    parts = [];
+  if (cross)
+    parts.push(
+      `<b>${plural(cross, 'call site', 'call sites')}</b> in <b>${plural(im.repos.length, 'other repository', 'other repositories')}</b>`,
+    );
+  if (im.within) parts.push(`<b>${plural(im.within, 'call site', 'call sites')}</b> in its own frontend`);
   let h = `<div class="sec"><div class="sec-h"><h3>If ${esc(what)} changes</h3></div><div class="impact-body"><p class="impact-text">`;
-  h += `<b>${plural(im.links.length, 'call site', 'call sites')}</b> in <b>${plural(im.repos.length, 'other repository', 'other repositories')}</b> send it requests, from <b>${plural(im.callers.length, 'file', 'files')}</b>`;
+  h += `${parts.join(' and ')} send ${target.t === 'n' && target.id >= g.S ? 'it' : 'them'} requests, from <b>${plural(im.callers.length, 'file', 'files')}</b>`;
   h += target.t === 'n' && target.id < g.S ? ` to ${plural(im.endpoints.length, 'endpoint', 'endpoints')}.` : '.';
   if (reach.size)
     h += ` Another <b>${plural(reach.size, 'file', 'files')}</b> reach those calls through Graphify’s call graph (inferred, not proven).`;
@@ -137,7 +144,7 @@ export function httpSectionHTML(id) {
     h += `<div class="sec proof"><div class="sec-h"><h3>HTTP endpoint</h3></div>${siteHTML(g, l.route, 'Served at', routeDetail(l.route))}</div>`;
   }
   if (into.length)
-    h += `<div class="sec"><div class="sec-h"><h3>Called from other repositories</h3><span>${fmt(into.length)}</span></div>${into.map(i => groupRow(g, i, 'caller')).join('')}</div>`;
+    h += `<div class="sec"><div class="sec-h"><h3>Called over HTTP from</h3><span>${fmt(into.length)}</span></div>${into.map(i => groupRow(g, i, 'caller')).join('')}</div>`;
   if (from.length)
     h += `<div class="sec"><div class="sec-h"><h3>Sends requests to</h3><span>${fmt(from.length)}</span></div>${from.map(i => groupRow(g, i, 'endpoint')).join('')}</div>`;
   if (into.length) h += impactBlockHTML(g, { t: 'n', id }, id < g.S ? 'this file’s endpoints' : 'this endpoint');
@@ -145,7 +152,7 @@ export function httpSectionHTML(id) {
 }
 
 /** How the links scored on an answer key built without the tool; says so plainly when nothing was measured. */
-export function accuracyHTML(acc) {
+export function accuracyHTML(acc, within = 0) {
   if (!acc)
     return `<div class="acc"><div class="acc-h">Accuracy not measured</div><p class="acc-note">No answer key exists for these repositories, so these links are unchecked.</p></div>`;
   const stat = (v, label) => `<div class="acc-s"><b>${esc(v)}</b><span>${esc(label)}</span></div>`;
@@ -156,6 +163,8 @@ export function accuracyHTML(acc) {
   h += '</div>';
   if (acc.how) h += `<p class="acc-note">${esc(acc.how)}</p>`;
   if (acc.missed) h += `<p class="acc-note">Missed: ${esc(acc.missed)}</p>`;
+  if (within)
+    h += `<p class="acc-note">Not counted: ${fmt(within)} links inside one repository (a frontend calling its own API), which no answer key covers yet.</p>`;
   if (acc.key)
     h += `<a class="linkbtn acc-link" href="${esc(acc.key)}" target="_blank" rel="noopener noreferrer">The answer key and how it was built ↗</a>`;
   return h + '</div>';

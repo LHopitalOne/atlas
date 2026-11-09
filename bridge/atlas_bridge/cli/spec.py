@@ -26,7 +26,12 @@ class SpecCommand(Command):
             help="what becomes a domain: Graphify's communities (default) or folders",
         )
         parser.add_argument('--title', default='Graphify graph')
-        parser.add_argument('--links', help='the links JSON the links command wrote: HTTP links, with their proof')
+        parser.add_argument(
+            '--links',
+            action='append',
+            default=[],
+            help='a links JSON the links command wrote: HTTP links, with their proof (repeatable, e.g. with --within)',
+        )
         parser.add_argument(
             '--repo',
             action='append',
@@ -62,7 +67,9 @@ class SpecCommand(Command):
     def _http(args):
         if not args.links:
             return None
-        records = LinkFile(args.links).parse(JsonFile.read(args.links))
+        records = sorted(
+            (r for path in args.links for r in LinkFile(path).parse(JsonFile.read(path))), key=lambda r: r.sort_key
+        )
         folders = {r.name: r.path for r in (RepositoryInput.parse(item).checked() for item in args.repo)}
         accuracy = JsonFile.read(args.accuracy) if args.accuracy else None
         if accuracy is not None and not isinstance(accuracy, dict):

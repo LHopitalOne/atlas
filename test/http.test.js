@@ -56,3 +56,16 @@ test('malformed links are reported', () => {
   assert.ok(errs.some(e => /links\[1\] needs from and to/.test(e)));
   assert.deepEqual(validateSpec({ ...SPEC, links: 'x' }).slice(-1), ['spec.links must be an array']);
 });
+
+test('links inside one repository are kept apart from those between repositories', () => {
+  const spec = structuredClone(SPEC);
+  spec.links[1].call.repo = spec.links[1].route.repo; // pretend api's own frontend sends the second request
+  const g2 = buildSpec(spec),
+    H2 = g2.http;
+  assert.deepEqual(proofCounts(H2), { scip: 1 });
+  const ep = g2.http.groups[1].to;
+  assert.equal(httpImpact(g2, H2, { t: 'n', id: ep }).within, 1);
+  assert.equal(httpImpact(g2, H2, { t: 'n', id: ep }).repos.length, 0);
+  const pairs = repoPairs(g2, H2);
+  assert.ok(pairs.at(-1).a === pairs.at(-1).b);
+});

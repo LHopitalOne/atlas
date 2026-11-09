@@ -131,6 +131,9 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
 - **Impact separates proof from inference.** "If this changes" counts the call sites that send requests (proven),
   then the files that reach them through Graphify's call graph, labelled inferred.
 - **Requests no route was found for are listed, never drawn.** Drawing a guess would be a false link.
+- **Links inside one repository stay apart from links between repositories.** A frontend calling its own API is
+  drawn fainter, listed in its own folded section and kept out of the accuracy numbers until an answer key covers it.
+  Why: they outnumber the cross-service links six to one and are not measured.
 
 ## Directions
 

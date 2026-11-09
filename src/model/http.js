@@ -85,7 +85,8 @@ export function httpIndex(spec, g) {
     const key = l.from + '>' + l.to;
     if (!at.has(key)) {
       at.set(key, groups.length);
-      groups.push({ from: l.from, to: l.to, e: contractOf(g, l.from, l.to), links: [], proof: l.proof });
+      const within = l.call.repo === l.route.repo;
+      groups.push({ from: l.from, to: l.to, e: contractOf(g, l.from, l.to), links: [], proof: l.proof, within });
     }
     const gr = groups[at.get(key)];
     gr.links.push(i);
@@ -149,7 +150,8 @@ function range(a, b) {
 /**
  * What breaks if an endpoint, service or repository changes: the call sites in other repositories that send it
  * requests (each with its proof), the endpoints they reach, and the caller services.
- * @returns {{groups:number[], links:number[], endpoints:number[], callers:number[], repos:number[]}}
+ * `within` counts the call sites in the target's own repository; `repos` are the other repositories.
+ * @returns {{groups:number[], links:number[], within:number, endpoints:number[], callers:number[], repos:number[]}}
  */
 export function httpImpact(g, H, target) {
   const groups = groupsInto(g, H, target),
@@ -157,33 +159,42 @@ export function httpImpact(g, H, target) {
     endpoints = new Set(),
     callers = new Set(),
     repos = new Set();
+  let within = 0;
   for (const i of groups) {
     const gr = H.groups[i];
     links.push(...gr.links);
+    if (gr.within) within += gr.links.length;
     endpoints.add(gr.to);
     callers.add(g.own(gr.from));
-    repos.add(repoOf(g, gr.from));
+    if (!gr.within) repos.add(repoOf(g, gr.from));
   }
-  return { groups, links, endpoints: [...endpoints], callers: [...callers], repos: [...repos] };
+  return { groups, links, within, endpoints: [...endpoints], callers: [...callers], repos: [...repos] };
 }
 
-/** Links between each ordered pair of repositories, busiest first: [{a, b, groups}]. */
+/** Links between each ordered pair of repositories: [{a, b, groups}]. */
 export function repoPairs(g, H) {
   const m = new Map();
   H.groups.forEach((gr, i) => {
-    const a = repoOf(g, gr.from),
-      b = repoOf(g, gr.to),
+    const l = H.links[gr.links[0]],
+      a = l.call.repo,
+      b = l.route.repo,
       k = a + '>' + b;
     if (!m.has(k)) m.set(k, { a, b, groups: [] });
     m.get(k).groups.push(i);
   });
-  return [...m.values()].sort((x, y) => y.groups.length - x.groups.length || x.a - y.a || x.b - y.b);
+  // between repositories first, busiest first; links inside one repository last
+  return [...m.values()].sort(
+    (x, y) => (x.a === x.b) - (y.a === y.b) || y.groups.length - x.groups.length || x.a - y.a || x.b - y.b,
+  );
 }
 
-/** How many links have each proof: {scip: 30, syntax: 4, ...}. */
+/** A link inside one repository (say, its frontend calling its own API) rather than between two. */
+export const isWithin = l => l.call.repo === l.route.repo;
+
+/** How many links between repositories have each proof: {scip: 30, syntax: 4, ...}. */
 export function proofCounts(H) {
   const c = {};
-  for (const l of H.links) c[l.proof] = (c[l.proof] || 0) + 1;
+  for (const l of H.links) if (!isWithin(l)) c[l.proof] = (c[l.proof] || 0) + 1;
   return c;
 }
 

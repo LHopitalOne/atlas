@@ -8,7 +8,7 @@ import { store } from '../state.js';
 import { openLink, toggleHttpImpact } from '../app/http.js';
 import { select } from '../app/selection.js';
 import { LINKS } from '../dom.js';
-import { httpImpact, PROOF_ORDER, proofCounts, repoPairs } from '../model/http.js';
+import { httpImpact, isWithin, PROOF_ORDER, proofCounts, repoPairs } from '../model/http.js';
 import { renderAttn, syncLegend } from './attention.js';
 import { closeAsk } from './ask.js';
 import { ICON_X, nameAttrs } from './fragments.js';
@@ -45,8 +45,11 @@ export function closeLinksPanel() {
 export const toggleLinksPanel = () => (store.linksOpen ? closeLinksPanel() : openLinksPanel());
 
 function headerHTML(g, H) {
-  const repos = new Set(H.links.flatMap(l => [l.call.repo, l.route.repo]));
-  return `<div class="ph"><div><h2 id="linksTitle">HTTP links</h2><p>${fmt(H.links.length)} requests between ${fmt(repos.size)} repositories, each proven down to the line</p></div><button class="btn btn-ghost btn-icon" data-lclose aria-label="Close HTTP links">${ICON_X}</button></div>`;
+  const cross = H.links.filter(l => !isWithin(l)),
+    repos = new Set(cross.flatMap(l => [l.call.repo, l.route.repo])),
+    within = H.links.length - cross.length,
+    more = within ? `, plus ${fmt(within)} inside one repository` : '';
+  return `<div class="ph"><div><h2 id="linksTitle">HTTP links</h2><p>${fmt(cross.length)} requests between ${fmt(repos.size)} repositories${more}, each proven down to the line</p></div><button class="btn btn-ghost btn-icon" data-lclose aria-label="Close HTTP links">${ICON_X}</button></div>`;
 }
 
 function proofLegendHTML(H) {
@@ -59,9 +62,13 @@ function proofLegendHTML(H) {
 function pairsHTML(g, H) {
   let h = '';
   for (const p of repoPairs(g, H)) {
-    const sites = p.groups.reduce((n, i) => n + H.groups[i].links.length, 0);
-    h += `<div class="sec"><div class="sec-h"><h3 ${nameAttrs}>${esc(g.repoName[p.a])} → ${esc(g.repoName[p.b])}</h3><span>${fmt(sites)}</span></div>`;
-    h += p.groups.map(i => groupRow(g, i, 'endpoint')).join('') + '</div>';
+    const sites = p.groups.reduce((n, i) => n + H.groups[i].links.length, 0),
+      rows = p.groups.map(i => groupRow(g, i, 'endpoint')).join('');
+    if (p.a === p.b)
+      // inside one repository (a frontend calling its own API): many, and no answer key covers them, so folded
+      h += `<details class="sec unmatched within"><summary class="sec-h"><h3 ${nameAttrs}>Inside ${esc(g.repoName[p.a])}: frontend → API</h3><span>${fmt(sites)}</span></summary><p class="impact-text pad">Browser code calling its own repository’s routes. No answer key covers these yet, so they are not in the accuracy above.</p>${rows}</details>`;
+    else
+      h += `<div class="sec"><div class="sec-h"><h3 ${nameAttrs}>${esc(g.repoName[p.a])} → ${esc(g.repoName[p.b])}</h3><span>${fmt(sites)}</span></div>${rows}</div>`;
   }
   return h;
 }
@@ -105,7 +112,7 @@ export function renderLinks() {
   if (!show) return;
   LINKS.innerHTML =
     headerHTML(g, H) +
-    `<div class="scroll" style="padding:0 8px 10px">${accuracyHTML(H.accuracy)}${proofLegendHTML(H)}${pairsHTML(g, H)}${repoImpactHTML(g, H)}${unmatchedHTML(g, H)}</div>`;
+    `<div class="scroll" style="padding:0 8px 10px">${accuracyHTML(H.accuracy, H.links.filter(isWithin).length)}${proofLegendHTML(H)}${pairsHTML(g, H)}${repoImpactHTML(g, H)}${unmatchedHTML(g, H)}</div>`;
 }
 
 /** Wire this module to the DOM. Called once from main.js. */

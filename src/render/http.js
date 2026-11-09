@@ -56,7 +56,8 @@ export function drawHttp(fx) {
     if (!on(x0, y0, 4000) && !on(x1, y1, 4000)) continue;
     const [cx, cy] = arcCtrl(x0, y0, x1, y1),
       [col, dash] = arcStyle(gr.proof),
-      a = isHot ? 1 : focused ? HTTP_ARC.dimAlpha + (1 - HTTP_ARC.dimAlpha) * (1 - store.dimT) : HTTP_ARC.restAlpha;
+      rest = gr.within ? HTTP_ARC.withinAlpha : HTTP_ARC.restAlpha,
+      a = isHot ? 1 : focused ? HTTP_ARC.dimAlpha + (rest - HTTP_ARC.dimAlpha) * (1 - store.dimT) : rest;
     oc.globalAlpha = a * I;
     oc.strokeStyle = css(col);
     oc.lineWidth = isHot ? HTTP_ARC.hotWidth : HTTP_ARC.width;

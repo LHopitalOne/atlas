@@ -65,7 +65,7 @@ test('an endpoint lists its callers in other repositories and shows its impact o
   await insp.locator('.row[data-id]').nth(1).click();
   await expect(insp.locator('#insTitle')).toHaveText('GET /orders/{order_id}');
   await expect(insp).toContainText('HTTP endpoint');
-  await expect(insp).toContainText('Called from other repositories');
+  await expect(insp).toContainText('Called over HTTP from');
   await expect(insp.locator('[data-link]')).toContainText('loadOrder');
   const impact = insp.locator('[data-http-impact]');
   await expect(insp).toContainText('1 call site in 1 other repository');
