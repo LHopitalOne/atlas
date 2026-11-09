@@ -16,6 +16,10 @@ class ImportTable:
         """(module source, imported name or 'default') for an imported name, or None."""
         return self._table().get(name)
 
+    def names(self) -> dict:
+        """{local name: (module source, imported name or 'default')} for every import of the file."""
+        return dict(self._table())
+
     def exported_name(self, name):
         """The name a module exports `name` under: the imported name, or `name` itself for a default import."""
         imported = self.get(name)
