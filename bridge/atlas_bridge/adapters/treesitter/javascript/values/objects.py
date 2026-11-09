@@ -17,8 +17,8 @@ class Location:
 class ObjectPaths:
     """Follows an expression of one file to the expression its value is written as.
 
-    `config.restaurant.baseUrl` -> the `baseUrl` property of the object literal `config` is bound to;
-    `const { baseUrl, endpoints } = config.restaurant` binds each name to the property of that object; an imported
+    `config.orders.baseUrl` -> the `baseUrl` property of the object literal `config` is bound to;
+    `const { baseUrl, endpoints } = config.orders` binds each name to the property of that object; an imported
     name is followed to what the other file exports (`export const config = {...} as const`) when the module linker
     can read that file. `Object.freeze({...})` is its object.
     """

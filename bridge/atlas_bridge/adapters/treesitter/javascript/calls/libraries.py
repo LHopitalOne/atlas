@@ -14,8 +14,11 @@ class EntryPoint:
     libraries: the module names it is imported from; callee: its exported name ('default' for a default export);
     argument: the index of the argument that holds the channel (a URL key, a GraphQL document); option: the property
     of that argument, when it is an options object, that holds it; unless: an option whose presence means a function
-    of the caller sends the request instead (TanStack Query's `queryFn`), so the key says nothing.
+    of the caller sends the request instead (TanStack Query's `queryFn`), so the key says nothing. An options object
+    that spreads another (`{ ...options, queryKey }`) may hold that option unseen, so it says nothing either.
     """
+
+    SPREAD = 'spread_element'
 
     SEND = 'send'
 
@@ -32,7 +35,11 @@ class EntryPoint:
         arg = JsSyntax.unwrap(args[self.argument]) if self.argument < len(args) else None
         if arg is None or not self.option:
             return arg
-        if arg.type != 'object' or (self.unless and JsSyntax.prop(arg, self.unless) is not None):
+        if arg.type != 'object':
+            return None
+        if self.unless and (
+            JsSyntax.prop(arg, self.unless) is not None or any(c.type == self.SPREAD for c in arg.named_children)
+        ):
             return None
         return JsSyntax.prop(arg, self.option)
 
@@ -41,7 +48,7 @@ SWR = ('swr', 'swr/immutable')
 TANSTACK = ('@tanstack/react-query', '@tanstack/vue-query', '@tanstack/solid-query', 'react-query')
 APOLLO = ('@apollo/client', '@apollo/client/react', '@apollo/client/react/hooks', '@apollo/react-hooks')
 APOLLO_HOOKS = ('useQuery', 'useLazyQuery', 'useSuspenseQuery', 'useBackgroundQuery', 'useMutation', 'useSubscription')
-URQL = ('urql', '@urql/preact', '@urql/svelte', '@urql/vue')
+URQL = ('urql', '@urql/preact', '@urql/vue')  # @urql/svelte has stores (queryStore), not these hooks
 
 
 class EntryPoints:

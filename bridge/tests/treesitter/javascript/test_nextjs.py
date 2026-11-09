@@ -16,8 +16,8 @@ class NextPathTest(unittest.TestCase):
         self.assertEqual(NextPath.pages_api('src/pages/api/notes/[id].ts'), '/api/notes/{id}')
         self.assertEqual(NextPath.pages_api('apps/web/pages/api/files/[...slug].tsx'), '/api/files/{*slug}')
         self.assertEqual(NextPath.pages_api('pages/api/docs/[[...slug]].js'), '/api/docs/{*slug}')
-        self.assertEqual(NextPath.pages_api('pages/api.js'), '/api')
         for other in (
+            'pages/api.js',  # a page beside the api folder, not inside it
             'pages/index.js',
             'pages/notes/[id].js',
             'pages/api/x.test.js',

@@ -36,7 +36,7 @@ class GraphqlCalls(CallCollector, FileCollector):
         for call, entry in EntryPoints.calls_in(module, Protocol.GRAPHQL):
             operations = self._operations(module, entry.channel(JsSyntax.args(call)))
             name = JsSyntax.text(call.child_by_field_name('function'))
-            self._calls += self.emit(module, call, operations, {name, *entry.libraries[:1]})
+            self._calls += self.emit(module, call, operations, {name})  # the library names no service
 
     def finish(self) -> Extraction:
         settled = DocumentForwarder(self.workspace, self.emit).settle(self._opens)

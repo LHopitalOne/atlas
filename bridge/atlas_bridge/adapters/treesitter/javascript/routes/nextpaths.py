@@ -7,8 +7,9 @@ class NextPath:
     """`pages/api/notes/[id].js` -> '/api/notes/{id}', `src/app/api/(shop)/orders/[...slug]/route.ts` ->
     '/api/orders/{*slug}'. The folder may sit under `src/` or in a package of a monorepo."""
 
-    # a pages-router API file: everything under `pages/api/`, with the extension Next.js reads
-    PAGES_API = re.compile(r'(?:^|/)pages/(api(?:/.*)?)\.(?:js|jsx|ts|tsx|mjs)$')
+    # a pages-router API file: everything inside `pages/api/` (`pages/api.js` itself is a page), with the extension
+    # Next.js reads
+    PAGES_API = re.compile(r'(?:^|/)pages/(api/.+)\.(?:js|jsx|ts|tsx|mjs)$')
     # an app-router route handler: `app/<folders>/route.<ext>`
     APP_ROUTE = re.compile(r'(?:^|/)app/((?:[^/]+/)*)route\.(?:js|jsx|ts|tsx|mjs)$')
     CATCH_ALL = re.compile(r'^\[\[?\.\.\.(\w+)\]\]?$')  # '[...slug]' and the optional '[[...slug]]'

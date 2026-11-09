@@ -114,7 +114,9 @@ class GraphqlCallTest(unittest.TestCase):
         )
         paths = sorted(p for _, _, p in found)
         self.assertEqual(paths, ['/adddog', '/birds', '/cats', '/dogs'])
-        self.assertIn('@apollo/client', found[(Protocol.GRAPHQL, ANY, '/dogs')].hints)
+        hints = found[(Protocol.GRAPHQL, ANY, '/dogs')].hints
+        self.assertIn('useQuery', hints)
+        self.assertNotIn('@apollo/client', hints)  # the library names no service
 
 
 if __name__ == '__main__':

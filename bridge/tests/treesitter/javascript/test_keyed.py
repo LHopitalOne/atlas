@@ -55,7 +55,8 @@ class KeyedRequestTest(unittest.TestCase):
                 'src/q.ts': "import { useQuery } from '@tanstack/react-query';\n"
                 "useQuery({ queryKey: ['/api/projects'] });\n"
                 "useQuery({ queryKey: ['/api/own'], queryFn: () => load() });\n"
-                "useQuery({ queryKey: ['todos'] });\n",
+                "useQuery({ queryKey: ['todos'] });\n"
+                "useQuery({ ...projectOptions, queryKey: ['/api/spread'] });\n",
             }
         )
         self.assertEqual(sorted(found), [('GET', '/api/projects')])
