@@ -117,6 +117,16 @@ class AtlasCommandTest(unittest.TestCase):
             self.assertEqual(AtlasApp().run(['/no/such/repo', '--no-open']), 2)
         self.assertIn("atlas: no repository folder at '/no/such/repo'", err.getvalue())
 
+    def test_unwritable_output_folder_is_an_output_error(self):
+        with Shop() as shop:
+            blocker = shop.path('file')
+            open(blocker, 'w').close()
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
+                code = AtlasApp().run([shop.path('api'), '-o', os.path.join(blocker, 'out'), '--no-open'])
+        self.assertEqual(code, 1)
+        self.assertIn('pass another folder with -o', err.getvalue())
+
     def test_also_a_bridge_subcommand(self):
         with Shop() as shop:
             exe = fake_graphify(shop.dir, 0)

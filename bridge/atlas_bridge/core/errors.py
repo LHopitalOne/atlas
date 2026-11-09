@@ -15,6 +15,7 @@ BridgeError
 │   ├── GraphifyUnavailableError the graphify command is not installed
 │   └── GraphifyFailedError     graphify ran but wrote no graph.json
 └── OutputError                 writing the result failed
+    ├── OutputWriteError        the output folder cannot be written
     └── PageTemplateError       the prebuilt Atlas page is missing from the installation
 """
 
@@ -100,6 +101,11 @@ class GraphifyFailedError(ExtractionError):
 
 class OutputError(BridgeError):
     pass
+
+
+class OutputWriteError(OutputError):
+    def __init__(self, path: str, problem: str):
+        super().__init__(f'cannot write {path}: {problem}', 'pass another folder with -o')
 
 
 class PageTemplateError(OutputError):

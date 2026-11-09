@@ -23,14 +23,17 @@ class GraphifyRunner:
 
     def update(self, name: str, root: str) -> str:
         """Build or refresh the repository's graph; returns graph.json's path."""
-        done = subprocess.run(
-            [self.executable(), 'update', '.'],
-            cwd=root,
-            env={**os.environ, 'GRAPHIFY_NO_AUTO_REFRESH': '1', 'GRAPHIFY_NO_TIPS': '1'},
-            capture_output=True,
-            text=True,
-            errors='replace',
-        )
+        try:
+            done = subprocess.run(
+                [self.executable(), 'update', '.'],
+                cwd=root,
+                env={**os.environ, 'GRAPHIFY_NO_AUTO_REFRESH': '1', 'GRAPHIFY_NO_TIPS': '1'},
+                capture_output=True,
+                text=True,
+                errors='replace',
+            )
+        except OSError as e:
+            raise GraphifyFailedError(name, e.strerror or str(e)) from e
         if done.returncode != 0 or not self.has_graph(root):
             problem = (done.stderr.strip() or done.stdout.strip())[-self.TAIL :] or 'no graph.json written'
             raise GraphifyFailedError(name, problem)

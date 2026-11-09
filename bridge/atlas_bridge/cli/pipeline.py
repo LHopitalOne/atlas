@@ -8,7 +8,7 @@ from ..adapters.atlas import AtlasSpecPresenter
 from ..adapters.graphify import GraphifyLinkWriter, GraphifyMerger, GraphifyReader, GraphifyRunner
 from ..adapters.linkfile import LinkFilePresenter
 from ..adapters.page import AtlasPage
-from ..core.errors import BridgeError, GraphFormatError
+from ..core.errors import BridgeError, GraphFormatError, OutputWriteError
 from ..core.http import Extraction
 from ..core.model import CodeGraph
 from ..usecases.draw import GROUPINGS, MapDrawer
@@ -26,14 +26,14 @@ class MapPipeline:
 
     def run(self, repos) -> str:
         """Every step for these repositories (cli.inputs.RepositoryInput); returns the page's path."""
-        os.makedirs(self._o.out_dir, exist_ok=True)
+        self._save('', None)  # the output folder, before the slow steps
         graph = self._timed('graphify', lambda: GraphifyMerger().merge([(r.name, self._graph(r)) for r in repos]))
         links = self._timed('links', lambda: self._links(repos))
         graph = GraphifyLinkWriter(graph).present(links)
-        JsonFile.write(self._out('graph.json'), graph)
+        self._save('graph.json', graph)
         spec = self._timed('map', lambda: self._spec(graph))
-        JsonFile.write(self._out('spec.json'), spec)
-        return AtlasPage().write(self._out('atlas.html'), spec)
+        self._save('spec.json', spec)
+        return self._save('atlas.html', spec, AtlasPage().write)
 
     def _graph(self, repo):
         """The repository's Graphify graph: the one already in graphify-out/ unless --refresh, else a new one; an
@@ -69,7 +69,7 @@ class MapPipeline:
         else:
             self._report('  links     not checked with SCIP (add --verify; needs Node.js and/or rust-analyzer)')
         report = LinkReport(names, extraction, links)
-        JsonFile.write(self._out('links.json'), LinkFilePresenter().present(report), indent=1)
+        self._save('links.json', LinkFilePresenter().present(report))
         found = sum(link.route is not None for link in links)
         self._report(f'  links     {found} between repositories, {len(links) - found} requests with no route found')
         return links
@@ -87,6 +87,18 @@ class MapPipeline:
         result = work()
         self._report(f'  {step:<9} done in {time.monotonic() - start:.1f}s')
         return result
+
+    def _save(self, name, data, write=JsonFile.write):
+        """Write one output file (or, with no name, make the output folder)."""
+        path = self._out(name)
+        try:
+            if name:
+                write(path, data)
+            else:
+                os.makedirs(path, exist_ok=True)
+        except OSError as e:
+            raise OutputWriteError(path, e.strerror or str(e)) from e
+        return path
 
     def _out(self, name):
         return os.path.join(self._o.out_dir, name)
