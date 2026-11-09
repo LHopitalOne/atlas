@@ -38,6 +38,8 @@ class RequestCalls(CallCollector):
         return Extraction(calls=self._book.calls())
 
     def _request(self, source, call, idiom, name):
+        if call.parent is not None and call.parent.type == 'decorator':
+            return  # `@routes.get('/healthz')` declares a route; a decorator never sends a request
         sends = self._senders.verdict(source, call, name)
         if sends is False:
             return  # the index says it reaches something else: a wrapper whose own request is found inside it

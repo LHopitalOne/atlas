@@ -1,0 +1,168 @@
+{
+  "project": "chat",
+  "services": {
+    "chat-server": "chat-server",
+    "web": "web",
+    "moderation": "moderation"
+  },
+  "links": [
+    {
+      "id": "T01",
+      "protocol": "http",
+      "caller": "web",
+      "target": "chat-server",
+      "operation": "GET",
+      "channel": "/api/rooms",
+      "send": [
+        {"file": "src/api.ts", "line": 25, "function": "ChatApi.listRooms"},
+        {"file": "src/api.ts", "line": 14, "function": "ChatApi.request"}
+      ],
+      "receive": {"file": "src/routes/rooms.js", "line": 7, "handler": "router.get('/') mounted at app.use('/api/rooms') (src/index.js:15)"},
+      "idiom": "wrapper method on ChatApi class with literal path; base URL from import.meta.env.VITE_API_URL with default in src/config.ts; fetch in private request()",
+      "runtime": "observed"
+    },
+    {
+      "id": "T02",
+      "protocol": "http",
+      "caller": "web",
+      "target": "chat-server",
+      "operation": "POST",
+      "channel": "/api/rooms",
+      "send": [
+        {"file": "src/api.ts", "line": 29, "function": "ChatApi.createRoom"},
+        {"file": "src/api.ts", "line": 14, "function": "ChatApi.request"}
+      ],
+      "receive": {"file": "src/routes/rooms.js", "line": 11, "handler": "router.post('/') mounted at app.use('/api/rooms') (src/index.js:15)"},
+      "idiom": "wrapper method on ChatApi class with literal path; fetch in private request()",
+      "runtime": "observed"
+    },
+    {
+      "id": "T03",
+      "protocol": "http",
+      "caller": "web",
+      "target": "chat-server",
+      "operation": "GET",
+      "channel": "/api/rooms/{roomId}/messages",
+      "send": [
+        {"file": "src/api.ts", "line": 33, "function": "ChatApi.getHistory"},
+        {"file": "src/api.ts", "line": 14, "function": "ChatApi.request"}
+      ],
+      "receive": {"file": "src/routes/rooms.js", "line": 18, "handler": "router.get('/:roomId/messages') mounted at app.use('/api/rooms') (src/index.js:15)"},
+      "idiom": "wrapper method on ChatApi class with template-literal path and query string; Express router mounted under a prefix",
+      "runtime": "observed"
+    },
+    {
+      "id": "T04",
+      "protocol": "http",
+      "caller": "web",
+      "target": "chat-server",
+      "operation": "POST",
+      "channel": "/api/rooms/{roomId}/messages",
+      "send": [
+        {"file": "src/api.ts", "line": 37, "function": "ChatApi.postMessage"},
+        {"file": "src/api.ts", "line": 14, "function": "ChatApi.request"}
+      ],
+      "receive": {"file": "src/routes/rooms.js", "line": 24, "handler": "router.post('/:roomId/messages') mounted at app.use('/api/rooms') (src/index.js:15)"},
+      "idiom": "wrapper method on ChatApi class with template-literal path; Express router mounted under a prefix",
+      "runtime": "observed"
+    },
+    {
+      "id": "T05",
+      "protocol": "http",
+      "caller": "web",
+      "target": "chat-server",
+      "operation": "POST",
+      "channel": "/api/reports",
+      "send": [
+        {"file": "src/api.ts", "line": 41, "function": "ChatApi.reportUser"},
+        {"file": "src/api.ts", "line": 14, "function": "ChatApi.request"}
+      ],
+      "receive": {"file": "src/routes/reports.js", "line": 6, "handler": "router.post('/') mounted at app.use('/api/reports') (src/index.js:16)"},
+      "idiom": "wrapper method on ChatApi class with literal path; Express router mounted under a prefix",
+      "runtime": "observed"
+    },
+    {
+      "id": "T06",
+      "protocol": "websocket",
+      "caller": "web",
+      "target": "chat-server",
+      "operation": "CONNECT",
+      "channel": "/ws",
+      "send": [
+        {"file": "src/socket.ts", "line": 15, "function": "ChatSocket.connect"}
+      ],
+      "receive": {"file": "src/ws.js", "line": 8, "handler": "wss.on('connection') on WebSocketServer({ server, path: '/ws' }) (src/ws.js:6)"},
+      "idiom": "browser WebSocket; URL from import.meta.env.VITE_WS_URL with default 'ws://127.0.0.1:41310/ws' in src/config.ts; server uses ws WebSocketServer attached to the Express http server",
+      "runtime": "observed"
+    },
+    {
+      "id": "T07",
+      "protocol": "websocket",
+      "caller": "web",
+      "target": "chat-server",
+      "operation": "SEND",
+      "channel": "/ws",
+      "send": [
+        {"file": "src/socket.ts", "line": 36, "function": "ChatSocket.join"},
+        {"file": "src/socket.ts", "line": 41, "function": "ChatSocket.say"},
+        {"file": "src/socket.ts", "line": 32, "function": "ChatSocket.emit"}
+      ],
+      "receive": {"file": "src/ws.js", "line": 13, "handler": "socket.on('message') inside attachChatSocket (dispatches on frame.type 'join' / 'message')"},
+      "idiom": "JSON frames with a type field sent through a private emit() wrapper on the ChatSocket class",
+      "runtime": "observed"
+    },
+    {
+      "id": "T08",
+      "protocol": "websocket",
+      "caller": "chat-server",
+      "target": "web",
+      "operation": "SEND",
+      "channel": "/ws",
+      "send": [
+        {"file": "src/messages.js", "line": 21, "function": "postMessage"},
+        {"file": "src/ws.js", "line": 31, "function": "attachChatSocket"},
+        {"file": "src/ws.js", "line": 19, "function": "attachChatSocket"},
+        {"file": "src/hub.js", "line": 22, "function": "broadcast"},
+        {"file": "src/hub.js", "line": 16, "function": "send"}
+      ],
+      "receive": {"file": "src/socket.ts", "line": 18, "handler": "ws.addEventListener('message') in ChatSocket.connect"},
+      "idiom": "server push over the client-opened socket: hub module broadcast()/send() serialises JSON frames ('message', 'rejected', 'error') to room members",
+      "runtime": "observed"
+    },
+    {
+      "id": "T09",
+      "protocol": "grpc",
+      "caller": "chat-server",
+      "target": "moderation",
+      "operation": "CheckMessage",
+      "channel": "moderation.Moderation/CheckMessage",
+      "send": [
+        {"file": "src/messages.js", "line": 16, "function": "postMessage"},
+        {"file": "src/moderationClient.js", "line": 22, "function": "ModerationClient.checkMessage"}
+      ],
+      "receive": {"file": "app/service.py", "line": 15, "handler": "ModerationService.CheckMessage (registered via add_ModerationServicer_to_server at app/server.py:18)"},
+      "idiom": "singleton client class wrapping a @grpc/proto-loader dynamic stub; address from env MODERATION_ADDR with default '127.0.0.1:41311' in src/config.js:6; proto copied in both services",
+      "runtime": "observed"
+    },
+    {
+      "id": "T10",
+      "protocol": "grpc",
+      "caller": "chat-server",
+      "target": "moderation",
+      "operation": "ReportUser",
+      "channel": "moderation.Moderation/ReportUser",
+      "send": [
+        {"file": "src/routes/reports.js", "line": 10, "function": "router.post('/') handler"},
+        {"file": "src/moderationClient.js", "line": 30, "function": "ModerationClient.reportUser"}
+      ],
+      "receive": {"file": "app/service.py", "line": 25, "handler": "ModerationService.ReportUser (registered via add_ModerationServicer_to_server at app/server.py:18)"},
+      "idiom": "singleton client class wrapping a @grpc/proto-loader dynamic stub; called from an Express route handler",
+      "runtime": "observed"
+    }
+  ],
+  "not_links": [
+    {"what": "GET /healthz health endpoint, only probed by the docker-compose healthcheck (wget)", "where": "chat-server:src/index.js:14", "why": "infrastructure probe, no service in the app calls it"},
+    {"what": "avatar image URL on api.dicebear.com", "where": "web:src/api.ts:46", "why": "external service"},
+    {"what": "ModerationClient.close() closes the gRPC channel", "where": "chat-server:src/moderationClient.js:37", "why": "channel lifecycle, not an RPC"}
+  ]
+}

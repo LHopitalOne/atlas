@@ -1,0 +1,123 @@
+{
+  "project": "metrics",
+  "services": {
+    "collector": "collector",
+    "agent": "agent",
+    "dashboard": "dashboard"
+  },
+  "links": [
+    {
+      "id": "T01",
+      "protocol": "tcp",
+      "caller": "agent",
+      "target": "collector",
+      "operation": "SEND",
+      "channel": "tcp:41710",
+      "send": [
+        {"file": "src/main.rs", "line": 19, "function": "main"},
+        {"file": "src/main.rs", "line": 27, "function": "main"},
+        {"file": "src/main.rs", "line": 31, "function": "main"},
+        {"file": "src/sender.rs", "line": 14, "function": "LineSender::connect"},
+        {"file": "src/sender.rs", "line": 22, "function": "LineSender::send_batch"},
+        {"file": "src/sender.rs", "line": 28, "function": "LineSender::reconnect"}
+      ],
+      "receive": {"file": "collector/tcp_ingest.py", "line": 62, "handler": "LineProtocolHandler.__call__ (asyncio.start_server in start_tcp_server)"},
+      "idiom": "env vars with defaults (COLLECTOR_HOST + COLLECTOR_TCP_PORT, default 41710) formatted into an addr string in config.rs, passed to a LineSender wrapper around std::net::TcpStream; collector binds COLLECTOR_TCP_PORT from settings.py",
+      "runtime": "observed"
+    },
+    {
+      "id": "T02",
+      "protocol": "udp",
+      "caller": "agent",
+      "target": "collector",
+      "operation": "SEND",
+      "channel": "udp:41711",
+      "send": [
+        {"file": "src/main.rs", "line": 20, "function": "main"},
+        {"file": "src/main.rs", "line": 29, "function": "main"},
+        {"file": "src/main.rs", "line": 34, "function": "main"},
+        {"file": "src/main.rs", "line": 35, "function": "main"},
+        {"file": "src/statsd.rs", "line": 25, "function": "StatsdClient::send"}
+      ],
+      "receive": {"file": "collector/statsd.py", "line": 40, "handler": "StatsdProtocol.datagram_received (loop.create_datagram_endpoint in start_statsd_listener)"},
+      "idiom": "env vars with defaults (COLLECTOR_HOST + COLLECTOR_STATSD_PORT, default 41711) formatted into an addr string, StatsdClient wrapper (incr/timing) over std::net::UdpSocket::send_to",
+      "runtime": "observed"
+    },
+    {
+      "id": "T03",
+      "protocol": "http",
+      "caller": "dashboard",
+      "target": "collector",
+      "operation": "GET",
+      "channel": "/healthz",
+      "send": [
+        {"file": "src/api/metrics.ts", "line": 5, "function": "health"}
+      ],
+      "receive": {"file": "collector/api.py", "line": 21, "handler": "healthz"},
+      "idiom": "axios instance from axios.create({ baseURL: config.collectorUrl }) (COLLECTOR_URL env var with default) in src/api/http.ts, literal path in a wrapper function",
+      "runtime": "observed"
+    },
+    {
+      "id": "T04",
+      "protocol": "http",
+      "caller": "dashboard",
+      "target": "collector",
+      "operation": "GET",
+      "channel": "/api/metrics",
+      "send": [
+        {"file": "src/api/metrics.ts", "line": 10, "function": "listMetrics"}
+      ],
+      "receive": {"file": "collector/api.py", "line": 26, "handler": "list_metrics"},
+      "idiom": "axios instance (axios.create baseURL from COLLECTOR_URL) + literal path in wrapper function",
+      "runtime": "observed"
+    },
+    {
+      "id": "T05",
+      "protocol": "http",
+      "caller": "dashboard",
+      "target": "collector",
+      "operation": "GET",
+      "channel": "/api/metrics/{name}",
+      "send": [
+        {"file": "src/api/metrics.ts", "line": 15, "function": "getSeries"}
+      ],
+      "receive": {"file": "collector/api.py", "line": 32, "handler": "get_series"},
+      "idiom": "axios instance + template literal path with encodeURIComponent(name) and query params",
+      "runtime": "observed"
+    },
+    {
+      "id": "T06",
+      "protocol": "http",
+      "caller": "dashboard",
+      "target": "collector",
+      "operation": "GET",
+      "channel": "/api/metrics/{name}/summary",
+      "send": [
+        {"file": "src/api/metrics.ts", "line": 20, "function": "getSummary"}
+      ],
+      "receive": {"file": "collector/api.py", "line": 43, "handler": "get_summary"},
+      "idiom": "axios instance + template literal path with encodeURIComponent(name)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T07",
+      "protocol": "http",
+      "caller": "dashboard",
+      "target": "collector",
+      "operation": "POST",
+      "channel": "/api/annotations",
+      "send": [
+        {"file": "src/api/metrics.ts", "line": 25, "function": "annotate"}
+      ],
+      "receive": {"file": "collector/api.py", "line": 51, "handler": "create_annotation"},
+      "idiom": "axios instance + literal path in wrapper function",
+      "runtime": "observed"
+    }
+  ],
+  "not_links": [
+    {"what": "POST to Slack incoming webhook (SLACK_WEBHOOK_URL) when load is high", "where": "dashboard:src/notify.ts:6", "why": "external service"},
+    {"what": "curl GET /healthz readiness poll", "where": "run.sh:35", "why": "test only (harness script, not a service)"},
+    {"what": "UdpSocket::bind(\"0.0.0.0:0\") ephemeral local socket", "where": "agent:src/statsd.rs:12", "why": "local bind of the sender's own socket, not a receiving endpoint"},
+    {"what": "getloadavg() libc call for system stats", "where": "agent:src/stats.rs:34", "why": "local OS call, no network communication"}
+  ]
+}

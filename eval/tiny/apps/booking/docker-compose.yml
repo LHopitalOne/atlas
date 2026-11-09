@@ -1,0 +1,27 @@
+services:
+  payments:
+    build: ./payments
+    environment:
+      PAYMENTS_API_KEY: ${PAYMENTS_API_KEY}
+    ports:
+      - "127.0.0.1:41820:41820"
+
+  booking-api:
+    build: ./booking-api
+    environment:
+      BOOKING_PAYMENTS_URL: http://payments:41820
+      BOOKING_PAYMENTS_API_KEY: ${BOOKING_PAYMENTS_API_KEY}
+      BOOKING_CURRENCY: ${BOOKING_CURRENCY:-EUR}
+    ports:
+      - "127.0.0.1:41810:41810"
+    depends_on:
+      - payments
+
+  booking-web:
+    build: ./booking-web
+    environment:
+      VITE_API_URL: http://127.0.0.1:41810
+    ports:
+      - "127.0.0.1:41830:41830"
+    depends_on:
+      - booking-api

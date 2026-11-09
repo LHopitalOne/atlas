@@ -1,0 +1,18 @@
+services:
+  ledger:
+    build: ./ledger
+    environment:
+      LEDGER_HOST: 0.0.0.0
+      LEDGER_PORT: "41410"
+    ports:
+      - "127.0.0.1:41410:41410"
+
+  billing:
+    build: ./billing
+    environment:
+      LEDGER_URL: http://ledger:41410
+      BILLING_CURRENCY: USD
+    ports:
+      - "127.0.0.1:41411:41411"
+    depends_on:
+      - ledger

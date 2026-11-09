@@ -1,0 +1,116 @@
+{
+  "project": "inventory",
+  "services": {
+    "inventory": "inventory",
+    "warehouse": "warehouse",
+    "purchasing": "purchasing"
+  },
+  "links": [
+    {
+      "id": "T01",
+      "protocol": "grpc",
+      "caller": "warehouse",
+      "target": "inventory",
+      "operation": "Reserve",
+      "channel": "inventory.v1.InventoryService/Reserve",
+      "send": [
+        {"file": "src/routes/picks.js", "line": 12, "function": "router.post('/') handler"},
+        {"file": "src/clients/inventoryClient.js", "line": 20, "function": "InventoryClient.reserve"},
+        {"file": "src/clients/inventoryClient.js", "line": 34, "function": "InventoryClient.unary"}
+      ],
+      "receive": {"file": "server.py", "line": 29, "handler": "InventoryServicer.Reserve"},
+      "idiom": "wrapper class over a proto-loader stub: method name passed as a string literal to a generic unary() helper that does this.stub[method](...); target from config.inventory.target (env INVENTORY_GRPC_TARGET with default)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T02",
+      "protocol": "grpc",
+      "caller": "warehouse",
+      "target": "inventory",
+      "operation": "Release",
+      "channel": "inventory.v1.InventoryService/Release",
+      "send": [
+        {"file": "src/routes/picks.js", "line": 26, "function": "router.delete('/:pickId') handler"},
+        {"file": "src/clients/inventoryClient.js", "line": 24, "function": "InventoryClient.release"},
+        {"file": "src/clients/inventoryClient.js", "line": 34, "function": "InventoryClient.unary"}
+      ],
+      "receive": {"file": "server.py", "line": 42, "handler": "InventoryServicer.Release"},
+      "idiom": "wrapper class over a proto-loader stub: method name passed as a string literal to a generic unary() helper that does this.stub[method](...); target from config.inventory.target (env INVENTORY_GRPC_TARGET with default)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T03",
+      "protocol": "grpc",
+      "caller": "warehouse",
+      "target": "inventory",
+      "operation": "GetStock",
+      "channel": "inventory.v1.InventoryService/GetStock",
+      "send": [
+        {"file": "src/routes/stock.js", "line": 8, "function": "router.get('/:sku') handler"},
+        {"file": "src/clients/inventoryClient.js", "line": 28, "function": "InventoryClient.getStock"},
+        {"file": "src/clients/inventoryClient.js", "line": 34, "function": "InventoryClient.unary"}
+      ],
+      "receive": {"file": "server.py", "line": 49, "handler": "InventoryServicer.GetStock"},
+      "idiom": "wrapper class over a proto-loader stub: method name passed as a string literal to a generic unary() helper that does this.stub[method](...); target from config.inventory.target (env INVENTORY_GRPC_TARGET with default)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T04",
+      "protocol": "kafka",
+      "caller": "inventory",
+      "target": "purchasing",
+      "operation": "PUBLISH",
+      "channel": "stock.low",
+      "send": [
+        {"file": "server.py", "line": 38, "function": "InventoryServicer.Reserve"},
+        {"file": "events.py", "line": 37, "function": "StockEventPublisher.stock_low"},
+        {"file": "events.py", "line": 41, "function": "StockEventPublisher._publish"}
+      ],
+      "receive": {"file": "consumer.py", "line": 31, "handler": "main (KafkaConsumer subscribed to settings.STOCK_LOW_TOPIC) -> handle_stock_low"},
+      "idiom": "settings module constant (env STOCK_LOW_TOPIC with default 'stock.low') on both sides; producer wrapped in StockEventPublisher with a lazy KafkaProducer property and a generic _publish(topic, ...) helper; consumer is kafka-python KafkaConsumer(topic, ...) iterated in a for loop",
+      "runtime": "observed"
+    },
+    {
+      "id": "T05",
+      "protocol": "http",
+      "caller": "purchasing",
+      "target": "warehouse",
+      "operation": "GET",
+      "channel": "/stock/{sku}",
+      "send": [
+        {"file": "consumer.py", "line": 16, "function": "handle_stock_low"},
+        {"file": "warehouse_client.py", "line": 14, "function": "WarehouseClient.get_stock"},
+        {"file": "warehouse_client.py", "line": 20, "function": "WarehouseClient._request"}
+      ],
+      "receive": {"file": "src/routes/stock.js", "line": 6, "handler": "router.get('/:sku') mounted at app.use('/stock') in src/app.js:14"},
+      "idiom": "client class: f-string path f\"/stock/{sku}\" passed to a generic _request(method, path) that calls requests.Session.request with base URL from settings.WAREHOUSE_API_URL (env WAREHOUSE_API_URL with default)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T06",
+      "protocol": "http",
+      "caller": "purchasing",
+      "target": "warehouse",
+      "operation": "POST",
+      "channel": "/restock-orders",
+      "send": [
+        {"file": "consumer.py", "line": 24, "function": "handle_stock_low"},
+        {"file": "warehouse_client.py", "line": 17, "function": "WarehouseClient.place_restock_order"},
+        {"file": "warehouse_client.py", "line": 20, "function": "WarehouseClient._request"}
+      ],
+      "receive": {"file": "src/routes/restockOrders.js", "line": 7, "handler": "router.post('/') mounted at app.use('/restock-orders') in src/app.js:16"},
+      "idiom": "client class: literal path \"/restock-orders\" passed to a generic _request(method, path) that calls requests.Session.request with base URL from settings.WAREHOUSE_API_URL (env WAREHOUSE_API_URL with default)",
+      "runtime": "observed"
+    }
+  ],
+  "not_links": [
+    {"what": "POST /picks (Express route) - only called by the smoke driver, no service calls it", "where": "warehouse:src/routes/picks.js:6", "why": "test only"},
+    {"what": "DELETE /picks/{pickId} (Express route) - only called by the smoke driver", "where": "warehouse:src/routes/picks.js:24", "why": "test only"},
+    {"what": "GET /restock-orders (Express route) - only polled by the smoke driver", "where": "warehouse:src/routes/restockOrders.js:24", "why": "test only"},
+    {"what": "GET /healthz (Express route) - no caller in the app", "where": "warehouse:src/app.js:13", "why": "test only"},
+    {"what": "curl calls to the warehouse API from the end-to-end driver script", "where": "root:scripts/smoke.sh:11", "why": "test only"},
+    {"what": "kafka-topics.sh --create stock.low via docker exec during setup", "where": "root:run.sh:50", "why": "test only"},
+    {"what": "vendored copy of inventory.proto in the warehouse service (declares InventoryService but warehouse does not serve it)", "where": "warehouse:proto/inventory.proto:5", "why": "self-call / external service / test only: client-side schema copy, not a server"},
+    {"what": "docker-compose service wiring (INVENTORY_GRPC_TARGET, WAREHOUSE_API_URL, KAFKA_BOOTSTRAP_SERVERS env) for container deployment", "where": "root:docker-compose.yml:41", "why": "configuration only, the links themselves are T01-T06"}
+  ]
+}

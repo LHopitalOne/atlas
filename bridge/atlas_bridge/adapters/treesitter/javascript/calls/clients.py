@@ -19,7 +19,7 @@ class ClientRequests(RequestCollector):
         if require_path and builder.module.receivers.is_not_client(obj):
             return []
         options = args[1] if len(args) > 1 else None
-        return builder.build(site.node, obj, args[0], builder.method(options, 'GET'), require_path)
+        return builder.build(site.node, obj, args[0], builder.method(options, 'GET'), require_path, options=options)
 
 
 class ClientFetch(ClientRequests):

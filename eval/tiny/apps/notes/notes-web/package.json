@@ -1,0 +1,16 @@
+{
+  "name": "notes-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 41601",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1 -p 41601"
+  },
+  "dependencies": {
+    "next": "15.5.28",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "swr": "2.3.3"
+  }
+}

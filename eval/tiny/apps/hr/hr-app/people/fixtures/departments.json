@@ -1,0 +1,5 @@
+[
+  {"model": "people.department", "pk": 1, "fields": {"name": "Engineering", "cost_center": "CC-100"}},
+  {"model": "people.department", "pk": 2, "fields": {"name": "Sales", "cost_center": "CC-200"}},
+  {"model": "people.department", "pk": 3, "fields": {"name": "People Ops", "cost_center": "CC-300"}}
+]

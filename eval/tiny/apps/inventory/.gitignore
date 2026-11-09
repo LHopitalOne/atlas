@@ -1,0 +1,7 @@
+.venv/
+node_modules/
+__pycache__/
+*_pb2.py
+*_pb2_grpc.py
+.run/
+observed.log

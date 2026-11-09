@@ -1,0 +1,34 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-alpine
+    ports:
+      - "127.0.0.1:41520:5672"
+
+  restaurant:
+    build: ./restaurant
+    env_file: ./restaurant/.env
+    environment:
+      RESTAURANT_HOST: 0.0.0.0
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672/%2F
+    ports:
+      - "127.0.0.1:41510:41510"
+    depends_on:
+      - rabbitmq
+
+  courier:
+    build: ./courier
+    env_file: ./courier/.env
+    environment:
+      RESTAURANT_API_URL: http://restaurant:41510
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672/%2F
+    depends_on:
+      - rabbitmq
+      - restaurant
+
+  customer-web:
+    build: ./customer-web
+    env_file: ./customer-web/.env
+    environment:
+      RESTAURANT_API_URL: http://restaurant:41510
+    depends_on:
+      - restaurant

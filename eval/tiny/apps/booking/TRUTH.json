@@ -1,0 +1,303 @@
+{
+  "project": "booking",
+  "services": {
+    "booking-api": "booking-api",
+    "booking-web": "booking-web",
+    "payments": "payments"
+  },
+  "links": [
+    {
+      "id": "T01",
+      "protocol": "graphql",
+      "caller": "booking-web",
+      "target": "booking-api",
+      "operation": "Rooms",
+      "channel": "rooms",
+      "send": [
+        {
+          "file": "src/api/queries.ts",
+          "line": 14,
+          "function": "<module>"
+        },
+        {
+          "file": "src/api/queries.ts",
+          "line": 15,
+          "function": "<module>"
+        },
+        {
+          "file": "src/api/bookings.ts",
+          "line": 12,
+          "function": "listRooms"
+        },
+        {
+          "file": "src/api/client.ts",
+          "line": 16,
+          "function": "gql"
+        }
+      ],
+      "receive": {
+        "file": "app/schema.py",
+        "line": 114,
+        "handler": "Query.rooms"
+      },
+      "idiom": "operation held in a template-literal constant in src/api/queries.ts (shared fragment interpolated), passed to a typed wrapper function in src/api/bookings.ts, sent by a generic gql() helper doing fetch POST to `${API_URL}/graphql` (API_URL from import.meta.env.VITE_API_URL with a default)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T02",
+      "protocol": "graphql",
+      "caller": "booking-web",
+      "target": "booking-api",
+      "operation": "Availability",
+      "channel": "availability",
+      "send": [
+        {
+          "file": "src/api/queries.ts",
+          "line": 26,
+          "function": "<module>"
+        },
+        {
+          "file": "src/api/queries.ts",
+          "line": 27,
+          "function": "<module>"
+        },
+        {
+          "file": "src/api/bookings.ts",
+          "line": 17,
+          "function": "checkAvailability"
+        },
+        {
+          "file": "src/api/client.ts",
+          "line": 16,
+          "function": "gql"
+        }
+      ],
+      "receive": {
+        "file": "app/schema.py",
+        "line": 118,
+        "handler": "Query.availability"
+      },
+      "idiom": "operation held in a template-literal constant in src/api/queries.ts (shared fragment interpolated), passed to a typed wrapper function in src/api/bookings.ts, sent by a generic gql() helper doing fetch POST to `${API_URL}/graphql` (API_URL from import.meta.env.VITE_API_URL with a default)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T03",
+      "protocol": "graphql",
+      "caller": "booking-web",
+      "target": "booking-api",
+      "operation": "GetBooking",
+      "channel": "booking",
+      "send": [
+        {
+          "file": "src/api/queries.ts",
+          "line": 37,
+          "function": "<module>"
+        },
+        {
+          "file": "src/api/queries.ts",
+          "line": 38,
+          "function": "<module>"
+        },
+        {
+          "file": "src/api/bookings.ts",
+          "line": 22,
+          "function": "getBooking"
+        },
+        {
+          "file": "src/api/client.ts",
+          "line": 16,
+          "function": "gql"
+        }
+      ],
+      "receive": {
+        "file": "app/schema.py",
+        "line": 132,
+        "handler": "Query.booking"
+      },
+      "idiom": "operation held in a template-literal constant in src/api/queries.ts (shared fragment interpolated), passed to a typed wrapper function in src/api/bookings.ts, sent by a generic gql() helper doing fetch POST to `${API_URL}/graphql` (API_URL from import.meta.env.VITE_API_URL with a default)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T04",
+      "protocol": "graphql",
+      "caller": "booking-web",
+      "target": "booking-api",
+      "operation": "BookRoom",
+      "channel": "bookRoom",
+      "send": [
+        {
+          "file": "src/api/queries.ts",
+          "line": 52,
+          "function": "<module>"
+        },
+        {
+          "file": "src/api/queries.ts",
+          "line": 53,
+          "function": "<module>"
+        },
+        {
+          "file": "src/api/bookings.ts",
+          "line": 27,
+          "function": "bookRoom"
+        },
+        {
+          "file": "src/api/client.ts",
+          "line": 16,
+          "function": "gql"
+        }
+      ],
+      "receive": {
+        "file": "app/schema.py",
+        "line": 140,
+        "handler": "Mutation.book_room"
+      },
+      "idiom": "operation held in a template-literal constant in src/api/queries.ts (shared fragment interpolated), passed to a typed wrapper function in src/api/bookings.ts, sent by a generic gql() helper doing fetch POST to `${API_URL}/graphql` (API_URL from import.meta.env.VITE_API_URL with a default)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T05",
+      "protocol": "graphql",
+      "caller": "booking-web",
+      "target": "booking-api",
+      "operation": "CancelBooking",
+      "channel": "cancelBooking",
+      "send": [
+        {
+          "file": "src/api/queries.ts",
+          "line": 61,
+          "function": "<module>"
+        },
+        {
+          "file": "src/api/queries.ts",
+          "line": 62,
+          "function": "<module>"
+        },
+        {
+          "file": "src/api/bookings.ts",
+          "line": 32,
+          "function": "cancelBooking"
+        },
+        {
+          "file": "src/api/client.ts",
+          "line": 16,
+          "function": "gql"
+        }
+      ],
+      "receive": {
+        "file": "app/schema.py",
+        "line": 161,
+        "handler": "Mutation.cancel_booking"
+      },
+      "idiom": "operation held in a template-literal constant in src/api/queries.ts (shared fragment interpolated), passed to a typed wrapper function in src/api/bookings.ts, sent by a generic gql() helper doing fetch POST to `${API_URL}/graphql` (API_URL from import.meta.env.VITE_API_URL with a default)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T06",
+      "protocol": "http",
+      "caller": "booking-api",
+      "target": "payments",
+      "operation": "POST",
+      "channel": "/charges",
+      "send": [
+        {
+          "file": "app/payments.py",
+          "line": 42,
+          "function": "PaymentsClient.charge"
+        },
+        {
+          "file": "app/schema.py",
+          "line": 150,
+          "function": "Mutation.book_room"
+        }
+      ],
+      "receive": {
+        "file": "app/routes.py",
+        "line": 24,
+        "handler": "create_charge"
+      },
+      "idiom": "httpx.AsyncClient with base_url from pydantic-settings (BOOKING_PAYMENTS_URL, default http://127.0.0.1:41820) wrapped in a PaymentsClient class; path literal/f-string inside the wrapper method, wrapper called from Strawberry resolvers via info.context.payments; receiver is a Flask blueprint with url_prefix='/charges'",
+      "runtime": "observed"
+    },
+    {
+      "id": "T07",
+      "protocol": "http",
+      "caller": "booking-api",
+      "target": "payments",
+      "operation": "GET",
+      "channel": "/charges/{charge_id}",
+      "send": [
+        {
+          "file": "app/payments.py",
+          "line": 46,
+          "function": "PaymentsClient.get_charge"
+        },
+        {
+          "file": "app/schema.py",
+          "line": 87,
+          "function": "Booking.payment"
+        }
+      ],
+      "receive": {
+        "file": "app/routes.py",
+        "line": 39,
+        "handler": "get_charge"
+      },
+      "idiom": "httpx.AsyncClient with base_url from pydantic-settings (BOOKING_PAYMENTS_URL, default http://127.0.0.1:41820) wrapped in a PaymentsClient class; path literal/f-string inside the wrapper method, wrapper called from Strawberry resolvers via info.context.payments; receiver is a Flask blueprint with url_prefix='/charges'",
+      "runtime": "observed"
+    },
+    {
+      "id": "T08",
+      "protocol": "http",
+      "caller": "booking-api",
+      "target": "payments",
+      "operation": "POST",
+      "channel": "/charges/{charge_id}/refund",
+      "send": [
+        {
+          "file": "app/payments.py",
+          "line": 50,
+          "function": "PaymentsClient.refund"
+        },
+        {
+          "file": "app/schema.py",
+          "line": 166,
+          "function": "Mutation.cancel_booking"
+        }
+      ],
+      "receive": {
+        "file": "app/routes.py",
+        "line": 44,
+        "handler": "refund_charge"
+      },
+      "idiom": "httpx.AsyncClient with base_url from pydantic-settings (BOOKING_PAYMENTS_URL, default http://127.0.0.1:41820) wrapped in a PaymentsClient class; path literal/f-string inside the wrapper method, wrapper called from Strawberry resolvers via info.context.payments; receiver is a Flask blueprint with url_prefix='/charges'",
+      "runtime": "observed"
+    }
+  ],
+  "not_links": [
+    {
+      "what": "readiness probe GET /health on payments",
+      "where": "payments:app/__init__.py:21",
+      "why": "test only: called by run.sh (curl), not by any service"
+    },
+    {
+      "what": "readiness probe GET /healthz on booking-api",
+      "where": "booking-api:app/main.py:44",
+      "why": "test only: called by run.sh (curl), not by any service"
+    },
+    {
+      "what": "curl health polling loop",
+      "where": "run.sh:27",
+      "why": "test only: harness script, not a service"
+    },
+    {
+      "what": "smoke driver calling listRooms/checkAvailability/bookRoom/getBooking/cancelBooking",
+      "where": "booking-web:scripts/smoke.ts:4",
+      "why": "test only: drives the real src/api wrappers, which are the send sites of T01-T05"
+    },
+    {
+      "what": "nested field Booking.payment resolved inside GetBooking (not a separate GraphQL operation)",
+      "where": "booking-api:app/schema.py:84",
+      "why": "self-call: in-process resolver of booking-api; its outbound call is T07"
+    }
+  ]
+}

@@ -29,6 +29,7 @@ class RepositoryFiles:
         {'.git', 'node_modules', '.venv', 'venv', 'target', 'dist', 'build', '__pycache__', '.tox', 'vendor'}
     )
     MAX_BYTES = 2_000_000  # generated or minified files are not worth parsing
+    GIT_FILES = ['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard']
 
     def __init__(self, root: str):
         self.root = root
@@ -39,10 +40,11 @@ class RepositoryFiles:
         return [p for p in self.all_paths() if os.path.splitext(p)[1] in Grammar.BY_EXTENSION]
 
     def all_paths(self) -> list[str]:
-        """Every relative path, sorted. Uses git when the folder is a repository (honours .gitignore); read once."""
+        """Every relative path, sorted. Uses git when the folder is a repository: tracked files and new ones it does
+        not ignore (honours .gitignore); read once."""
         if self._all is None:
             try:
-                out = subprocess.run(['git', 'ls-files', '-z'], cwd=self.root, capture_output=True, check=True).stdout
+                out = subprocess.run(self.GIT_FILES, cwd=self.root, capture_output=True, check=True).stdout
                 paths = [p for p in out.decode('utf-8', 'replace').split('\0') if p]
             except (OSError, subprocess.CalledProcessError):
                 paths = self._walk()

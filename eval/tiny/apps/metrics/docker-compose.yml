@@ -1,0 +1,27 @@
+services:
+  collector:
+    build: ./collector
+    env_file: .env
+    environment:
+      COLLECTOR_BIND_HOST: 0.0.0.0
+    ports:
+      - "127.0.0.1:41710:41710"
+      - "127.0.0.1:41711:41711/udp"
+      - "127.0.0.1:41712:41712"
+
+  agent:
+    build: ./agent
+    env_file: .env
+    environment:
+      COLLECTOR_HOST: collector
+      AGENT_INTERVAL_MS: "5000"
+    depends_on:
+      - collector
+
+  dashboard:
+    build: ./dashboard
+    env_file: .env
+    environment:
+      COLLECTOR_URL: http://collector:41712
+    depends_on:
+      - collector

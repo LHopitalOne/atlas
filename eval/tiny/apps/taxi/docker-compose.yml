@@ -1,0 +1,42 @@
+services:
+  dispatch:
+    image: node:22-alpine
+    working_dir: /app
+    command: npm start
+    volumes: ["./dispatch:/app"]
+    environment:
+      DISPATCH_HOST: 0.0.0.0
+      DISPATCH_PORT: ${DISPATCH_PORT}
+    ports: ["127.0.0.1:${DISPATCH_PORT}:${DISPATCH_PORT}"]
+
+  location:
+    image: python:3.13-slim
+    working_dir: /app
+    command: sh -c "pip install -r requirements.txt && python -m location_service"
+    volumes: ["./location:/app"]
+    environment:
+      LOCATION_UDP_HOST: 0.0.0.0
+      LOCATION_UDP_PORT: ${LOCATION_UDP_PORT}
+      DISPATCH_URL: http://dispatch:${DISPATCH_PORT}
+    ports: ["127.0.0.1:${LOCATION_UDP_PORT}:${LOCATION_UDP_PORT}/udp"]
+    depends_on: [dispatch]
+
+  driver-app:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm run build && npm start"
+    volumes: ["./driver-app:/app"]
+    environment:
+      DISPATCH_URL: http://dispatch:${DISPATCH_PORT}
+      DRIVER_ID: ${DRIVER_ID}
+    depends_on: [dispatch]
+
+  gps-simulator:
+    image: python:3.13-slim
+    working_dir: /app
+    command: python simulate.py --driver ${DRIVER_ID}
+    volumes: ["./gps-simulator:/app"]
+    environment:
+      LOCATION_HOST: location
+      LOCATION_PORT: ${LOCATION_UDP_PORT}
+    depends_on: [location]

@@ -11,26 +11,11 @@ class JavaScriptWorkspace(Workspace):
     """Index: the files worth scanning. Each pass over them reads every file with a new JsModule (FilePass), and the
     test policy decides which code is test code."""
 
-    # bytes a file must contain to declare a route or send a request (checked before parsing)
-    PRECHECK = (
-        b'fetch',
-        b'axios',
-        b'got(',
-        b'ky(',
-        b'.get(',
-        b'.post(',
-        b'.put(',
-        b'.delete(',
-        b'.del(',
-        b'.patch(',
-        b'.head(',
-        b'.options(',
-        b'.all(',
-        b'.route(',
-        b'.request(',
-        b'.requestPromise(',
-        b'.use(',
-    )
+    # bytes a file must contain to declare a route or send a request (checked before parsing); a method call may
+    # carry TypeScript type arguments: `http.get<Series>(url)`
+    METHODS = ('get', 'post', 'put', 'delete', 'del', 'patch', 'head', 'options', 'all', 'route', 'request')
+    METHODS += ('requestPromise', 'use')
+    PRECHECK = (b'fetch', b'axios', b'got(', b'ky(') + tuple(f'.{m}{c}'.encode() for m in METHODS for c in '(<')
 
     POLICY = JavaScriptTestPolicy  # used when the workspace is not given the extractor's policy
 

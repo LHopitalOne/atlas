@@ -6,7 +6,7 @@ from atlas_bridge.adapters.treesitter.python import PythonExtractor
 from atlas_bridge.adapters.treesitter.python.routes import Registrations
 from atlas_bridge.core.http import ANY
 
-from .support import extract, routes, workspace
+from .support import extract, requests_, routes, workspace
 
 
 class DecoratorRouteTest(unittest.TestCase):
@@ -202,3 +202,20 @@ class PrefixedTemplateTest(unittest.TestCase):
         self.assertEqual([str(r.path) for r in decorators.collect().routes], ['/v1/a'])
         self.assertEqual([str(r.path) for r in decorators.collect().routes], ['/v1/a'])  # no duplicates
         self.assertEqual([str(r.path) for r in rules.collect().routes], ['/v1/b'])
+
+
+class DecoratorsAreNotRequestsTest(unittest.TestCase):
+    def test_a_route_decorator_is_not_a_request(self):
+        ex = extract(
+            {
+                'svc/api.py': """
+                from aiohttp import web
+                routes = web.RouteTableDef()
+
+                @routes.get('/healthz')
+                async def health(request):
+                    return web.json_response({'status': 'ok'})
+                """,
+            }
+        )
+        self.assertEqual(requests_(ex), set())

@@ -1,0 +1,108 @@
+{
+  "project": "shop",
+  "services": {
+    "catalog": "catalog",
+    "orders": "orders",
+    "gateway": "gateway",
+    "notifier": "notifier"
+  },
+  "links": [
+    {
+      "id": "T01",
+      "protocol": "http",
+      "caller": "gateway",
+      "target": "catalog",
+      "operation": "GET",
+      "channel": "/products",
+      "send": [
+        {"file": "src/upstream.js", "line": 15, "function": "listProducts"},
+        {"file": "src/routes/products.js", "line": 9, "function": "router.get('/') handler"}
+      ],
+      "receive": {"file": "app/routes.py", "line": 9, "handler": "list_products"},
+      "idiom": "axios instance (axios.create with baseURL from config.catalogUrl <- CATALOG_URL env) wrapped in client module function; literal path; receiver path = APIRouter prefix '/products' + ''",
+      "runtime": "observed"
+    },
+    {
+      "id": "T02",
+      "protocol": "http",
+      "caller": "gateway",
+      "target": "catalog",
+      "operation": "GET",
+      "channel": "/products/{product_id}",
+      "send": [
+        {"file": "src/upstream.js", "line": 20, "function": "getProduct"},
+        {"file": "src/routes/products.js", "line": 17, "function": "router.get('/:id') handler"}
+      ],
+      "receive": {"file": "app/routes.py", "line": 17, "handler": "get_product"},
+      "idiom": "axios instance from config object, template literal `/products/${encodeURIComponent(id)}` in client module function; receiver path = APIRouter prefix + '/{product_id}'",
+      "runtime": "observed"
+    },
+    {
+      "id": "T03",
+      "protocol": "http",
+      "caller": "gateway",
+      "target": "orders",
+      "operation": "POST",
+      "channel": "/orders",
+      "send": [
+        {"file": "src/upstream.js", "line": 25, "function": "createOrder"},
+        {"file": "src/routes/orders.js", "line": 8, "function": "router.post('/') handler"}
+      ],
+      "receive": {"file": "app/routes.py", "line": 10, "handler": "create_order"},
+      "idiom": "axios instance (baseURL from config.ordersUrl <- ORDERS_URL env) wrapped in client module function; receiver is Flask Blueprint url_prefix '/orders' + @bp.post('')",
+      "runtime": "observed"
+    },
+    {
+      "id": "T04",
+      "protocol": "http",
+      "caller": "gateway",
+      "target": "orders",
+      "operation": "GET",
+      "channel": "/orders/{order_id}",
+      "send": [
+        {"file": "src/upstream.js", "line": 30, "function": "getOrder"},
+        {"file": "src/routes/orders.js", "line": 20, "function": "router.get('/:id') handler"}
+      ],
+      "receive": {"file": "app/routes.py", "line": 42, "handler": "get_order"},
+      "idiom": "axios instance, template literal `/orders/${encodeURIComponent(id)}`; receiver is Flask Blueprint url_prefix '/orders' + '/<int:order_id>'",
+      "runtime": "observed"
+    },
+    {
+      "id": "T05",
+      "protocol": "http",
+      "caller": "orders",
+      "target": "catalog",
+      "operation": "GET",
+      "channel": "/products/{product_id}",
+      "send": [
+        {"file": "app/catalog_client.py", "line": 17, "function": "CatalogClient.get_product"},
+        {"file": "app/routes.py", "line": 23, "function": "create_order"}
+      ],
+      "receive": {"file": "app/routes.py", "line": 17, "handler": "get_product"},
+      "idiom": "wrapper class CatalogClient around httpx.Client(base_url=CATALOG_URL from Flask Config/env), f-string path; client stored in app.extensions['catalog'] and called via current_app",
+      "runtime": "observed"
+    },
+    {
+      "id": "T06",
+      "protocol": "redis",
+      "caller": "orders",
+      "target": "notifier",
+      "operation": "PUBLISH",
+      "channel": "orders.created",
+      "send": [
+        {"file": "app/events.py", "line": 17, "function": "OrderEventPublisher.order_created"},
+        {"file": "app/routes.py", "line": 38, "function": "create_order"}
+      ],
+      "receive": {"file": "notifier/__main__.py", "line": 16, "handler": "main -> handle_order_created"},
+      "idiom": "redis pub/sub; channel name from env ORDER_EVENTS_CHANNEL with default 'orders.created' on both sides (Flask Config attribute -> OrderEventPublisher._channel; notifier config module constant -> pubsub.subscribe + listen loop)",
+      "runtime": "observed"
+    }
+  ],
+  "not_links": [
+    {"what": "driver curl GET /api/products, GET /api/products/2, POST /api/orders, GET /api/orders/1 against gateway", "where": "shop:run.sh:98", "why": "test only: smoke driver in run.sh, not a service; gateway's public /api/* routes have no in-app caller"},
+    {"what": "gateway mounts /api/products and /api/orders routers", "where": "gateway:src/app.js:8", "why": "public entry routes, only reached by external clients / the test driver"},
+    {"what": "docker run redis + redis-cli ping readiness probe", "where": "shop:run.sh:57", "why": "test only: broker bootstrap in run.sh"},
+    {"what": "docker-compose service URLs (CATALOG_URL=http://catalog:..., ORDERS_URL, REDIS_URL) and depends_on", "where": "shop:docker-compose.yml:18", "why": "configuration that feeds the links above, not a communication itself"},
+    {"what": "notifier renders a confirmation email but only logs it", "where": "notifier:notifier/handlers.py:15", "why": "no outbound call; notifier sends nothing back"}
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "project": "ledger",
+  "services": {
+    "ledger": "ledger",
+    "billing": "billing"
+  },
+  "links": [
+    {
+      "id": "T01",
+      "protocol": "http",
+      "caller": "billing",
+      "target": "ledger",
+      "operation": "GET",
+      "channel": "/health",
+      "send": [{"file": "billing/customers.py", "line": 16, "function": "healthz"}],
+      "receive": {"file": "src/routes.rs", "line": 18, "handler": "health"},
+      "idiom": "SDK: LedgerClient.ping() (ledger-sdk ledger_sdk/client.py:26 literal path, handed to requests.Session.request at client.py:58); client built from LEDGER_URL env var in billing/extensions.py",
+      "runtime": "observed"
+    },
+    {
+      "id": "T02",
+      "protocol": "http",
+      "caller": "billing",
+      "target": "ledger",
+      "operation": "POST",
+      "channel": "/accounts",
+      "send": [
+        {"file": "billing/service.py", "line": 26, "function": "BillingService.register_customer"},
+        {"file": "billing/service.py", "line": 62, "function": "BillingService._revenue_account"}
+      ],
+      "receive": {"file": "src/routes.rs", "line": 19, "handler": "create_account"},
+      "idiom": "SDK: LedgerClient.create_account() (ledger-sdk ledger_sdk/client.py:34 literal path, client.py:58 requests call); client obtained via ledger() accessor from app.extensions",
+      "runtime": "observed"
+    },
+    {
+      "id": "T03",
+      "protocol": "http",
+      "caller": "billing",
+      "target": "ledger",
+      "operation": "GET",
+      "channel": "/accounts/{account_id}",
+      "send": [{"file": "billing/service.py", "line": 39, "function": "BillingService.account"}],
+      "receive": {"file": "src/routes.rs", "line": 20, "handler": "get_account"},
+      "idiom": "SDK: LedgerClient.get_account() (ledger-sdk ledger_sdk/client.py:37 f-string path, client.py:58 requests call)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T04",
+      "protocol": "http",
+      "caller": "billing",
+      "target": "ledger",
+      "operation": "GET",
+      "channel": "/accounts/{account_id}/balance",
+      "send": [{"file": "billing/service.py", "line": 42, "function": "BillingService.balance"}],
+      "receive": {"file": "src/routes.rs", "line": 21, "handler": "get_balance"},
+      "idiom": "SDK: LedgerClient.get_balance() (ledger-sdk ledger_sdk/client.py:40 f-string path, client.py:58 requests call)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T05",
+      "protocol": "http",
+      "caller": "billing",
+      "target": "ledger",
+      "operation": "GET",
+      "channel": "/accounts/{account_id}/transfers",
+      "send": [{"file": "billing/service.py", "line": 55, "function": "BillingService.charges"}],
+      "receive": {"file": "src/routes.rs", "line": 22, "handler": "list_transfers"},
+      "idiom": "SDK: LedgerClient.list_transfers() (ledger-sdk ledger_sdk/client.py:43 f-string path, client.py:58 requests call)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T06",
+      "protocol": "http",
+      "caller": "billing",
+      "target": "ledger",
+      "operation": "POST",
+      "channel": "/transfers",
+      "send": [{"file": "billing/service.py", "line": 45, "function": "BillingService.charge"}],
+      "receive": {"file": "src/routes.rs", "line": 23, "handler": "create_transfer"},
+      "idiom": "SDK: LedgerClient.create_transfer() (ledger-sdk ledger_sdk/client.py:55 literal path, client.py:58 requests call)",
+      "runtime": "observed"
+    }
+  ],
+  "not_links": [
+    {"what": "driver calls billing GET /healthz, POST /customers, GET /customers/{customer_id}, GET/POST /customers/{customer_id}/charges, GET /customers/{customer_id}/balance", "where": "scripts/drive.py:17", "why": "test only: run.sh driver, not a service (billing routes declared in billing:billing/customers.py:13,22,36,43,49,61)"},
+    {"what": "run.sh readiness probes curl ledger GET /health and billing GET /healthz", "where": "run.sh:47", "why": "test only"},
+    {"what": "ledger-sdk unit tests mock requests.Session and assert POST http://ledger.test/transfers", "where": "ledger-sdk:tests/test_client.py:25", "why": "test only: mocked session, no network"},
+    {"what": "LedgerClient._request hands every SDK call to requests.Session.request", "where": "ledger-sdk:ledger_sdk/client.py:58", "why": "library code, not a service; its calls are attributed to billing (T01-T06)"},
+    {"what": "docker-compose sets LEDGER_URL=http://ledger:41410 for billing", "where": "docker-compose.yml:13", "why": "configuration of T01-T06, not a separate communication"}
+  ]
+}

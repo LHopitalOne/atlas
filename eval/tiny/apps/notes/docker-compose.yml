@@ -1,0 +1,22 @@
+services:
+  search-indexer:
+    build: ./search-indexer
+    environment:
+      SEARCH_PORT: "41602"
+    ports:
+      - "127.0.0.1:41602:41602"
+
+  notes-web:
+    build: ./notes-web
+    environment:
+      SEARCH_INDEXER_URL: http://search-indexer:41602
+      NOTES_DATA_FILE: /data/notes.json
+    volumes:
+      - notes-data:/data
+    ports:
+      - "127.0.0.1:41601:41601"
+    depends_on:
+      - search-indexer
+
+volumes:
+  notes-data:

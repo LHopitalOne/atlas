@@ -1,0 +1,38 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-41079}:6379"
+
+  catalog:
+    build: ./catalog
+    environment:
+      CATALOG_PORT: ${CATALOG_PORT:-41001}
+    ports:
+      - "127.0.0.1:${CATALOG_PORT:-41001}:${CATALOG_PORT:-41001}"
+
+  orders:
+    build: ./orders
+    environment:
+      ORDERS_PORT: ${ORDERS_PORT:-41002}
+      CATALOG_URL: http://catalog:${CATALOG_PORT:-41001}
+      REDIS_URL: redis://redis:6379/0
+      ORDER_EVENTS_CHANNEL: ${ORDER_EVENTS_CHANNEL:-orders.created}
+    depends_on: [catalog, redis]
+
+  notifier:
+    build: ./notifier
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      ORDER_EVENTS_CHANNEL: ${ORDER_EVENTS_CHANNEL:-orders.created}
+    depends_on: [redis]
+
+  gateway:
+    build: ./gateway
+    environment:
+      GATEWAY_PORT: ${GATEWAY_PORT:-41000}
+      CATALOG_URL: http://catalog:${CATALOG_PORT:-41001}
+      ORDERS_URL: http://orders:${ORDERS_PORT:-41002}
+    ports:
+      - "127.0.0.1:${GATEWAY_PORT:-41000}:${GATEWAY_PORT:-41000}"
+    depends_on: [catalog, orders]

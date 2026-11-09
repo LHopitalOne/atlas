@@ -1,11 +1,14 @@
 """Turning the URL argument of a request call into a PendingRequest: its path, hints, client and test flag."""
 
+from dataclasses import replace
+
 from .....core.http import ANY
 from ...kit import UrlTemplate
 from ..bindings.receivers import Receivers
 from ..syntax.functions import Functions
 from ..syntax.nodes import JsSyntax
 from ..values.urls import UrlText
+from .forwarding import OpenRequest
 from .pending import PendingRequest
 
 
@@ -13,10 +16,12 @@ class RequestBuilder:
     """Builds the requests of one file."""
 
     MAX_HINT = 200  # longer hints are cut
+    NAMES = frozenset({'identifier', 'shorthand_property_identifier'})  # `{ method }`, `{ method: m }`
 
     def __init__(self, workspace, module):
         self._workspace = workspace
         self._module = module
+        self.opens = []  # OpenRequest: URLs made of their function's parameters, settled at its callers later
 
     @property
     def module(self):
@@ -48,14 +53,17 @@ class RequestBuilder:
             return []
         return self.build(node, obj, url, self.method(config, 'GET'))
 
-    def build(self, node, obj, url_node, method, require_path=False):
-        """[the request] when `url_node` holds something to match a route with; [] when it does not."""
+    def build(self, node, obj, url_node, method, require_path=False, options=None):
+        """[the request] when `url_node` holds something to match a route with; [] when it does not (a URL made of
+        the function's parameters is kept as an open request, for its callers to fill in)."""
         if JsSyntax.unwrap(url_node).type == 'number':
             return []
         hints = set()
         value = self._module.values.resolve(url_node, hints)
         if value is None or not UrlText.matchable(value):
-            return []  # entirely dynamic: nothing to match
+            if value is not None and obj is None:
+                self._open(node, value, method, options, hints)
+            return []  # entirely dynamic here: nothing to match
         path_like = UrlText.path_like(value)
         if require_path and not path_like:
             return []
@@ -69,6 +77,15 @@ class RequestBuilder:
         hints.update(JsSyntax.names_in(url_node))
         client = self._client(obj, receiver, hints, relative=not url.hints and '://' not in value)
         return [self._pending(node, method, url.path, hints, client)]
+
+    def _open(self, node, value, method, options, hints):
+        """Keep a URL made of the enclosing function's parameters; `{ method }` from a parameter is filled in too."""
+        given = JsSyntax.prop(options, 'method') if options is not None else None
+        if method == ANY and given is not None and JsSyntax.unwrap(given).type in self.NAMES:
+            method = '{' + JsSyntax.text(given) + '}'
+        found = OpenRequest.at(node, value, method, '', hints)
+        if found is not None:
+            self.opens.append(replace(found, path=self._module.path))
 
     def _client(self, obj, receiver, hints, relative):
         """The client of a request made on a receiver; its base goes in front of a relative path."""

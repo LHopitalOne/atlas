@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ledger-sdk"
+dynamic = ["version"]
+description = "Python client for the Ledger API"
+requires-python = ">=3.10"
+dependencies = ["requests>=2.31"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools.dynamic]
+version = { attr = "ledger_sdk._version.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["ledger_sdk*"]

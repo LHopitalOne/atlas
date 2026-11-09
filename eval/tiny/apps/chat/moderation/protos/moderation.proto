@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package moderation;
+
+service Moderation {
+  rpc CheckMessage (CheckMessageRequest) returns (CheckMessageResponse);
+  rpc ReportUser (ReportUserRequest) returns (ReportUserResponse);
+}
+
+message CheckMessageRequest {
+  string room_id = 1;
+  string author = 2;
+  string text = 3;
+}
+
+message CheckMessageResponse {
+  bool allowed = 1;
+  string reason = 2;
+  string sanitized_text = 3;
+}
+
+message ReportUserRequest {
+  string reporter = 1;
+  string reported = 2;
+  string room_id = 3;
+  string reason = 4;
+}
+
+message ReportUserResponse {
+  string ticket_id = 1;
+  int32 open_reports = 2;
+}

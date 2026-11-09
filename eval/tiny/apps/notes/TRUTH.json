@@ -1,0 +1,160 @@
+{
+  "project": "notes",
+  "services": {
+    "notes-web": "notes-web",
+    "search-indexer": "search-indexer"
+  },
+  "links": [
+    {
+      "id": "T01",
+      "protocol": "http",
+      "caller": "notes-web",
+      "target": "notes-web",
+      "operation": "GET",
+      "channel": "/api/notes",
+      "send": [
+        {"file": "pages/index.js", "line": 7, "function": "Home"},
+        {"file": "lib/api.js", "line": 2, "function": "fetcher"}
+      ],
+      "receive": {"file": "pages/api/notes/index.js", "line": 6, "handler": "handler (GET branch), exported via withRequestLog('/api/notes')"},
+      "idiom": "SWR key literal; global SWRConfig fetcher from lib/api.js calls fetch; route defined by Next.js pages/api file path (runtime RECV produced by the smoke driver calling the same route; the browser page call site itself was not exercised)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T02",
+      "protocol": "http",
+      "caller": "notes-web",
+      "target": "notes-web",
+      "operation": "POST",
+      "channel": "/api/notes",
+      "send": [
+        {"file": "pages/index.js", "line": 14, "function": "handleSubmit"},
+        {"file": "lib/api.js", "line": 22, "function": "createNote"},
+        {"file": "lib/api.js", "line": 12, "function": "send"}
+      ],
+      "receive": {"file": "pages/api/notes/index.js", "line": 10, "handler": "handler (POST branch)"},
+      "idiom": "wrapper function createNote with literal path, generic send() helper calls fetch (runtime RECV produced by the smoke driver calling the same route; the browser page call site itself was not exercised)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T03",
+      "protocol": "http",
+      "caller": "notes-web",
+      "target": "notes-web",
+      "operation": "GET",
+      "channel": "/api/notes/{id}",
+      "send": [
+        {"file": "pages/notes/[id].js", "line": 9, "function": "NotePage"},
+        {"file": "lib/api.js", "line": 2, "function": "fetcher"}
+      ],
+      "receive": {"file": "pages/api/notes/[id].js", "line": 9, "handler": "handler (case 'GET')"},
+      "idiom": "SWR key template literal `/api/notes/${id}`; global SWRConfig fetcher; dynamic route [id] from file name (runtime RECV produced by the smoke driver calling the same route; the browser page call site itself was not exercised)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T04",
+      "protocol": "http",
+      "caller": "notes-web",
+      "target": "notes-web",
+      "operation": "PUT",
+      "channel": "/api/notes/{id}",
+      "send": [
+        {"file": "pages/notes/[id].js", "line": 20, "function": "handleSave"},
+        {"file": "lib/api.js", "line": 26, "function": "saveNote"},
+        {"file": "lib/api.js", "line": 12, "function": "send"}
+      ],
+      "receive": {"file": "pages/api/notes/[id].js", "line": 13, "handler": "handler (case 'PUT')"},
+      "idiom": "wrapper function saveNote with template-literal path, generic send() helper calls fetch (runtime RECV produced by the smoke driver calling the same route; the browser page call site itself was not exercised)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T05",
+      "protocol": "http",
+      "caller": "notes-web",
+      "target": "notes-web",
+      "operation": "DELETE",
+      "channel": "/api/notes/{id}",
+      "send": [
+        {"file": "pages/notes/[id].js", "line": 29, "function": "handleDelete"},
+        {"file": "lib/api.js", "line": 30, "function": "removeNote"},
+        {"file": "lib/api.js", "line": 12, "function": "send"}
+      ],
+      "receive": {"file": "pages/api/notes/[id].js", "line": 19, "handler": "handler (case 'DELETE')"},
+      "idiom": "wrapper function removeNote with template-literal path, generic send() helper calls fetch (runtime RECV produced by the smoke driver calling the same route; the browser page call site itself was not exercised)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T06",
+      "protocol": "http",
+      "caller": "notes-web",
+      "target": "notes-web",
+      "operation": "GET",
+      "channel": "/api/search",
+      "send": [
+        {"file": "pages/search.js", "line": 7, "function": "SearchPage"},
+        {"file": "pages/search.js", "line": 8, "function": "SearchPage"},
+        {"file": "lib/api.js", "line": 2, "function": "fetcher"}
+      ],
+      "receive": {"file": "pages/api/search.js", "line": 4, "handler": "handler, exported via withRequestLog('/api/search')"},
+      "idiom": "SWR key built as template literal with query string in a variable, then useSWR(key); global SWRConfig fetcher (runtime RECV produced by the smoke driver calling the same route; the browser page call site itself was not exercised)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T07",
+      "protocol": "http",
+      "caller": "notes-web",
+      "target": "search-indexer",
+      "operation": "POST",
+      "channel": "/index",
+      "send": [
+        {"file": "pages/api/notes/index.js", "line": 17, "function": "handler"},
+        {"file": "pages/api/notes/[id].js", "line": 16, "function": "handler"},
+        {"file": "lib/searchIndexer.js", "line": 28, "function": "SearchIndexerClient.indexNote"},
+        {"file": "lib/searchIndexer.js", "line": 16, "function": "SearchIndexerClient.request"}
+      ],
+      "receive": {"file": "app/main.py", "line": 37, "handler": "index_note"},
+      "idiom": "client class (singleton searchIndexer) with base URL from env SEARCH_INDEXER_URL (default http://127.0.0.1:41602); wrapper method indexNote passes literal path to request(), which calls fetch",
+      "runtime": "observed"
+    },
+    {
+      "id": "T08",
+      "protocol": "http",
+      "caller": "notes-web",
+      "target": "search-indexer",
+      "operation": "DELETE",
+      "channel": "/index/{note_id}",
+      "send": [
+        {"file": "pages/api/notes/[id].js", "line": 22, "function": "handler"},
+        {"file": "lib/searchIndexer.js", "line": 36, "function": "SearchIndexerClient.removeNote"},
+        {"file": "lib/searchIndexer.js", "line": 16, "function": "SearchIndexerClient.request"}
+      ],
+      "receive": {"file": "app/main.py", "line": 43, "handler": "remove_note"},
+      "idiom": "client class with env base URL; wrapper method removeNote builds template-literal path `/index/${id}`",
+      "runtime": "observed"
+    },
+    {
+      "id": "T09",
+      "protocol": "http",
+      "caller": "notes-web",
+      "target": "search-indexer",
+      "operation": "GET",
+      "channel": "/search",
+      "send": [
+        {"file": "pages/api/search.js", "line": 13, "function": "handler"},
+        {"file": "lib/searchIndexer.js", "line": 44, "function": "SearchIndexerClient.search"},
+        {"file": "lib/searchIndexer.js", "line": 16, "function": "SearchIndexerClient.request"}
+      ],
+      "receive": {"file": "app/main.py", "line": 50, "handler": "search"},
+      "idiom": "Next.js API route proxy; client class with env base URL; wrapper method search builds `/search?${params}` with URLSearchParams",
+      "runtime": "observed"
+    }
+  ],
+  "not_links": [
+    {"what": "next/link navigation to /search (page route, not an API call)", "where": "notes-web:pages/index.js:23", "why": "self-call / client-side page navigation, no HTTP API request"},
+    {"what": "next/link navigation to /notes/{id}", "where": "notes-web:pages/index.js:34", "why": "self-call / client-side page navigation, no HTTP API request"},
+    {"what": "next/link navigation to /notes/{id} from search results", "where": "notes-web:pages/search.js:18", "why": "self-call / client-side page navigation, no HTTP API request"},
+    {"what": "router.push('/') after delete", "where": "notes-web:pages/notes/[id].js:30", "why": "self-call / client-side page navigation, no HTTP API request"},
+    {"what": "smoke driver calling notes-web API routes", "where": "notes-web:scripts/smoke.mjs:3", "why": "test only (run.sh driver)"},
+    {"what": "file-based notes store (fs read/write of data/notes.json)", "where": "notes-web:lib/notesStore.js:7", "why": "local filesystem, not inter-service communication"}
+  ]
+}

@@ -1,0 +1,16 @@
+import os
+
+GRPC_HOST = os.getenv("INVENTORY_GRPC_HOST", "127.0.0.1")
+GRPC_PORT = int(os.getenv("INVENTORY_GRPC_PORT", "41974"))
+GRPC_WORKERS = int(os.getenv("INVENTORY_GRPC_WORKERS", "8"))
+
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:41976")
+STOCK_LOW_TOPIC = os.getenv("STOCK_LOW_TOPIC", "stock.low")
+
+LOW_STOCK_THRESHOLD = int(os.getenv("LOW_STOCK_THRESHOLD", "5"))
+
+SEED_STOCK = {
+    "SKU-1001": 12,
+    "SKU-1002": 40,
+    "SKU-2001": 6,
+}

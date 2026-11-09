@@ -1,0 +1,108 @@
+{
+  "project": "taxi",
+  "services": {
+    "dispatch": "dispatch",
+    "driver-app": "driver-app",
+    "location": "location",
+    "gps-simulator": "gps-simulator"
+  },
+  "links": [
+    {
+      "id": "T01",
+      "protocol": "websocket",
+      "caller": "driver-app",
+      "target": "dispatch",
+      "operation": "CONNECT",
+      "channel": "/drivers/stream",
+      "send": [
+        {"file": "src/config.ts", "line": 8, "function": "streamUrl"},
+        {"file": "src/connection.ts", "line": 14, "function": "DriverConnection.open"}
+      ],
+      "receive": {"file": "src/realtime/driverHub.js", "line": 12, "handler": "DriverHub.attach -> DriverHub.onConnection"},
+      "idiom": "path literal joined to DISPATCH_URL env var with new URL() in a config helper (protocol rewritten to ws:, driverId query param); ws client wrapped in a DriverConnection class; server path comes from config.driverStreamPath (env DRIVER_STREAM_PATH, default literal) passed to WebSocketServer({server, path})",
+      "runtime": "observed"
+    },
+    {
+      "id": "T02",
+      "protocol": "websocket",
+      "caller": "driver-app",
+      "target": "dispatch",
+      "operation": "SEND",
+      "channel": "/drivers/stream",
+      "send": [
+        {"file": "src/connection.ts", "line": 30, "function": "DriverConnection.setStatus"},
+        {"file": "src/index.ts", "line": 23, "function": "<module>"}
+      ],
+      "receive": {"file": "src/realtime/driverHub.js", "line": 28, "handler": "DriverHub.onMessage"},
+      "idiom": "wrapper method setStatus sends JSON {type:'status'} over the already-open socket; server handles socket.on('message')",
+      "runtime": "observed"
+    },
+    {
+      "id": "T03",
+      "protocol": "websocket",
+      "caller": "dispatch",
+      "target": "driver-app",
+      "operation": "SEND",
+      "channel": "/drivers/stream",
+      "send": [
+        {"file": "src/routes/rides.js", "line": 16, "function": "POST /rides handler (ride_offer)"},
+        {"file": "src/routes/drivers.js", "line": 15, "function": "POST /drivers/:driverId/nearby handler (pickup_nearby)"},
+        {"file": "src/realtime/driverHub.js", "line": 58, "function": "DriverHub.notify"}
+      ],
+      "receive": {"file": "src/connection.ts", "line": 18, "handler": "DriverConnection.handle (emits ride_offer / pickup_nearby)"},
+      "idiom": "server push through a singleton hub's notify(driverId, payload) over the socket the driver opened; client dispatches by msg.type via EventEmitter",
+      "runtime": "observed"
+    },
+    {
+      "id": "T04",
+      "protocol": "http",
+      "caller": "driver-app",
+      "target": "dispatch",
+      "operation": "POST",
+      "channel": "/rides/{rideId}/accept",
+      "send": [
+        {"file": "src/dispatchApi.ts", "line": 20, "function": "DispatchApi.acceptRide"},
+        {"file": "src/dispatchApi.ts", "line": 8, "function": "DispatchApi.request"}
+      ],
+      "receive": {"file": "src/routes/rides.js", "line": 28, "handler": "router.post('/:rideId/accept') mounted at /rides"},
+      "idiom": "API client class: acceptRide builds a template-literal path, generic request() prefixes baseUrl (DISPATCH_URL env var with default) and calls global fetch; receiver is an Express Router mounted with app.use('/rides')",
+      "runtime": "observed"
+    },
+    {
+      "id": "T05",
+      "protocol": "http",
+      "caller": "location",
+      "target": "dispatch",
+      "operation": "POST",
+      "channel": "/drivers/{driverId}/nearby",
+      "send": [
+        {"file": "location_service/dispatch_client.py", "line": 14, "function": "DispatchClient.driver_nearby"},
+        {"file": "location_service/dispatch_client.py", "line": 13, "function": "DispatchClient.driver_nearby"}
+      ],
+      "receive": {"file": "src/routes/drivers.js", "line": 7, "handler": "router.post('/:driverId/nearby') mounted at /drivers"},
+      "idiom": "client class over httpx.AsyncClient(base_url=settings.dispatch_url from DISPATCH_URL env var) with an f-string path; called from GpsProtocol.datagram_received via asyncio.create_task",
+      "runtime": "observed"
+    },
+    {
+      "id": "T06",
+      "protocol": "udp",
+      "caller": "gps-simulator",
+      "target": "location",
+      "operation": "SEND",
+      "channel": "udp:41210",
+      "send": [
+        {"file": "simulate.py", "line": 26, "function": "replay"}
+      ],
+      "receive": {"file": "location_service/server.py", "line": 38, "handler": "GpsProtocol.datagram_received (create_datagram_endpoint in serve)"},
+      "idiom": "raw socket.sendto to (LOCATION_HOST, LOCATION_PORT) module constants read from env vars with defaults; receiver binds settings.bind_port (LOCATION_UDP_PORT env var, default 41210) with asyncio DatagramProtocol",
+      "runtime": "observed"
+    }
+  ],
+  "not_links": [
+    {"what": "POST /rides (rider requests a ride)", "where": "dispatch:src/routes/rides.js:7", "why": "external service: riders are outside this repo; only run.sh calls it with curl"},
+    {"what": "GET /rides/{rideId}", "where": "dispatch:src/routes/rides.js:22", "why": "external service: no in-repo caller (rider polling)"},
+    {"what": "GET /drivers/{driverId}", "where": "dispatch:src/routes/drivers.js:20", "why": "external service: no in-repo caller"},
+    {"what": "GET /healthz", "where": "dispatch:src/app.js:10", "why": "external service: health probe, no in-repo caller"},
+    {"what": "service URLs in docker-compose (http://dispatch:..., LOCATION_HOST=location)", "where": "taxi:docker-compose.yml:20", "why": "deployment config only; the links are the code paths above"}
+  ]
+}

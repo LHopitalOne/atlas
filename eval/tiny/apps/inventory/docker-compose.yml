@@ -1,0 +1,57 @@
+name: tiny-inventory
+
+services:
+  kafka:
+    image: apache/kafka:3.8.1
+    container_name: tiny-inventory-kafka
+    ports:
+      - "127.0.0.1:${KAFKA_HOST_PORT:-41976}:9094"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://127.0.0.1:${KAFKA_HOST_PORT:-41976}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  inventory:
+    build: ./inventory
+    environment:
+      INVENTORY_GRPC_HOST: 0.0.0.0
+      INVENTORY_GRPC_PORT: ${INVENTORY_GRPC_PORT:-41974}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      STOCK_LOW_TOPIC: ${STOCK_LOW_TOPIC:-stock.low}
+      LOW_STOCK_THRESHOLD: ${LOW_STOCK_THRESHOLD:-5}
+    depends_on:
+      - kafka
+    profiles: ["app"]
+
+  warehouse:
+    build: ./warehouse
+    environment:
+      HOST: 0.0.0.0
+      PORT: ${WAREHOUSE_PORT:-41975}
+      INVENTORY_GRPC_TARGET: inventory:${INVENTORY_GRPC_PORT:-41974}
+    ports:
+      - "127.0.0.1:${WAREHOUSE_PORT:-41975}:${WAREHOUSE_PORT:-41975}"
+    depends_on:
+      - inventory
+    profiles: ["app"]
+
+  purchasing:
+    build: ./purchasing
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      STOCK_LOW_TOPIC: ${STOCK_LOW_TOPIC:-stock.low}
+      WAREHOUSE_API_URL: http://warehouse:${WAREHOUSE_PORT:-41975}
+    depends_on:
+      - kafka
+      - warehouse
+    profiles: ["app"]

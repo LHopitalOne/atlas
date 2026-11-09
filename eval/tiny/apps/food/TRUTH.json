@@ -1,0 +1,204 @@
+{
+  "project": "food",
+  "services": {
+    "restaurant": "restaurant",
+    "courier": "courier",
+    "customer-web": "customer-web"
+  },
+  "links": [
+    {
+      "id": "T01",
+      "protocol": "http",
+      "caller": "customer-web",
+      "target": "restaurant",
+      "operation": "GET",
+      "channel": "/menus/{restaurant_id}",
+      "send": [
+        {
+          "file": "src/api/restaurant.ts",
+          "line": 14,
+          "function": "fetchMenu"
+        },
+        {
+          "file": "src/main.ts",
+          "line": 18,
+          "function": "main"
+        }
+      ],
+      "receive": {
+        "file": "app/routers/menus.py",
+        "line": 8,
+        "handler": "get_menu"
+      },
+      "idiom": "config object (config.restaurant.baseUrl from RESTAURANT_API_URL + endpoints.menu) in a template literal passed to fetch",
+      "runtime": "observed"
+    },
+    {
+      "id": "T02",
+      "protocol": "http",
+      "caller": "customer-web",
+      "target": "restaurant",
+      "operation": "POST",
+      "channel": "/orders",
+      "send": [
+        {
+          "file": "src/api/restaurant.ts",
+          "line": 19,
+          "function": "placeOrder"
+        },
+        {
+          "file": "src/main.ts",
+          "line": 21,
+          "function": "main"
+        }
+      ],
+      "receive": {
+        "file": "app/routers/orders.py",
+        "line": 30,
+        "handler": "create_order"
+      },
+      "idiom": "config object (baseUrl + endpoints.orders) in a template literal passed to fetch with method POST; receiver path is APIRouter prefix '/orders' + route ''",
+      "runtime": "observed"
+    },
+    {
+      "id": "T03",
+      "protocol": "http",
+      "caller": "customer-web",
+      "target": "restaurant",
+      "operation": "GET",
+      "channel": "/orders/{order_id}",
+      "send": [
+        {
+          "file": "src/api/restaurant.ts",
+          "line": 28,
+          "function": "getOrder"
+        },
+        {
+          "file": "src/main.ts",
+          "line": 8,
+          "function": "trackOrder"
+        }
+      ],
+      "receive": {
+        "file": "app/routers/orders.py",
+        "line": 40,
+        "handler": "get_order"
+      },
+      "idiom": "config object (baseUrl + endpoints.orders) in a template literal passed to fetch; receiver path is APIRouter prefix + '/{order_id}'; shares receiver line with T05 so observed.log cannot split them: 2 of the 3 'GET /orders/{order_id}' lines are this poll (customer-web.out shows 2 'order N:' status lines)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T04",
+      "protocol": "amqp",
+      "caller": "restaurant",
+      "target": "courier",
+      "operation": "PUBLISH",
+      "channel": "orders.ready_for_pickup",
+      "send": [
+        {
+          "file": "app/messaging.py",
+          "line": 21,
+          "function": "PickupPublisher.publish_ready"
+        },
+        {
+          "file": "app/routers/orders.py",
+          "line": 49,
+          "function": "mark_ready"
+        }
+      ],
+      "receive": {
+        "file": "courier/worker.py",
+        "line": 42,
+        "handler": "PickupWorker.on_message"
+      },
+      "idiom": "pika basic_publish to the default exchange with routing_key=self._queue; queue name from pydantic-settings Settings.pickup_queue (env PICKUP_QUEUE, default 'orders.ready_for_pickup'); consumer reads the same name from os.getenv in courier/config.py",
+      "runtime": "observed"
+    },
+    {
+      "id": "T05",
+      "protocol": "http",
+      "caller": "courier",
+      "target": "restaurant",
+      "operation": "GET",
+      "channel": "/orders/{order_id}",
+      "send": [
+        {
+          "file": "courier/restaurant_client.py",
+          "line": 21,
+          "function": "RestaurantClient.get_order"
+        },
+        {
+          "file": "courier/restaurant_client.py",
+          "line": 14,
+          "function": "RestaurantClient._request"
+        },
+        {
+          "file": "courier/worker.py",
+          "line": 20,
+          "function": "PickupWorker.handle"
+        }
+      ],
+      "receive": {
+        "file": "app/routers/orders.py",
+        "line": 40,
+        "handler": "get_order"
+      },
+      "idiom": "wrapper method: RestaurantClient._request(method, path) on a requests.Session, base URL from env RESTAURANT_API_URL; shares receiver line with T03: 1 of the 3 'GET /orders/{order_id}' lines is this call (courier.log 'picking up order N' is printed only after it succeeded)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T06",
+      "protocol": "http",
+      "caller": "courier",
+      "target": "restaurant",
+      "operation": "PUT",
+      "channel": "/orders/{order_id}/delivery-status",
+      "send": [
+        {
+          "file": "courier/restaurant_client.py",
+          "line": 24,
+          "function": "RestaurantClient.report_status"
+        },
+        {
+          "file": "courier/restaurant_client.py",
+          "line": 14,
+          "function": "RestaurantClient._request"
+        },
+        {
+          "file": "courier/worker.py",
+          "line": 22,
+          "function": "PickupWorker.handle"
+        },
+        {
+          "file": "courier/worker.py",
+          "line": 23,
+          "function": "PickupWorker.handle"
+        }
+      ],
+      "receive": {
+        "file": "app/routers/orders.py",
+        "line": 55,
+        "handler": "update_delivery_status"
+      },
+      "idiom": "wrapper method: RestaurantClient._request(\"PUT\", f\"/orders/{order_id}/delivery-status\") on a requests.Session, base URL from env RESTAURANT_API_URL",
+      "runtime": "observed"
+    }
+  ],
+  "not_links": [
+    {
+      "what": "POST /orders/{order_id}/ready (kitchen marks order ready) is only called by the run.sh driver via curl; no service in the app calls it",
+      "where": "restaurant:app/routers/orders.py:45",
+      "why": "test only"
+    },
+    {
+      "what": "GET /healthz readiness probe, called only by run.sh",
+      "where": "restaurant:app/main.py:27",
+      "why": "test only"
+    },
+    {
+      "what": "docker-compose.yml rabbitmq service is the broker for T04, not an app service",
+      "where": "food:docker-compose.yml:2",
+      "why": "external service"
+    }
+  ]
+}

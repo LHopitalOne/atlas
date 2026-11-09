@@ -20,4 +20,4 @@ class DirectRequests(RequestCollector):
         if site.name == 'axios' and first.type == 'object':
             return builder.from_config(site.node, None, first)
         options = site.args[1] if len(site.args) > 1 else None
-        return builder.build(site.node, None, site.args[0], builder.method(options, 'GET'))
+        return builder.build(site.node, None, site.args[0], builder.method(options, 'GET'), options=options)

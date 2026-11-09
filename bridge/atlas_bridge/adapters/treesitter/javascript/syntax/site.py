@@ -12,15 +12,17 @@ class CallSite:
     DIRECT = ('fetch', 'axios', 'got', 'ky')  # functions that send a request when called
     GLOBALS = ('window', 'globalThis', 'self', 'global')  # `window.fetch(...)` is `fetch(...)`
     NAMES = (*ROUTE_VERBS, *REQUEST_METHODS, *DIRECT, 'route', 'use')
+    # typescript reads `await http.get<T>(url)` as a call of `(await http.get)`: the callee may sit in an await
+    MEMBER = '(member_expression property: (property_identifier) @name)'
     QUERY = (
-        '(call_expression function: [(identifier) @name (member_expression property: (property_identifier) @name)] '
+        f'(call_expression function: [(identifier) @name {MEMBER} (await_expression {MEMBER})] '
         '(#any-of? @name ' + ' '.join(f'"{n}"' for n in NAMES) + ')) @call'
     )
 
     def __init__(self, node, name):
         self._node = node
         self._name = name
-        function = node.child_by_field_name('function')
+        function = JsSyntax.unwrap(node.child_by_field_name('function'))
         self._member = function.type != 'identifier'
         self._receiver = JsSyntax.unwrap(function.child_by_field_name('object')) if self._member else None
         self._args = JsSyntax.args(node)

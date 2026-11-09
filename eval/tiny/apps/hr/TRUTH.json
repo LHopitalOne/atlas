@@ -1,0 +1,112 @@
+{
+  "project": "hr",
+  "services": {"hr-app": "hr-app", "payroll": "payroll"},
+  "links": [
+    {
+      "id": "T01", "protocol": "http", "caller": "hr-app", "target": "hr-app",
+      "operation": "GET", "channel": "/api/departments/",
+      "send": [
+        {"file": "frontend/src/api/hr.ts", "line": 6, "function": "listDepartments"},
+        {"file": "frontend/src/api/client.ts", "line": 13, "function": "apiFetch"}
+      ],
+      "receive": {"file": "people/urls.py", "line": 7, "handler": "DepartmentViewSet.list"},
+      "idiom": "literal relative path passed to apiFetch wrapper (fetch); DRF DefaultRouter register under path('api/', include(...))",
+      "runtime": "observed"
+    },
+    {
+      "id": "T02", "protocol": "http", "caller": "hr-app", "target": "hr-app",
+      "operation": "GET", "channel": "/api/employees/",
+      "send": [
+        {"file": "frontend/src/api/hr.ts", "line": 8, "function": "listEmployees"},
+        {"file": "frontend/src/api/client.ts", "line": 13, "function": "apiFetch"}
+      ],
+      "receive": {"file": "people/urls.py", "line": 8, "handler": "EmployeeViewSet.list"},
+      "idiom": "literal relative path passed to apiFetch wrapper (fetch); DRF router ModelViewSet",
+      "runtime": "observed"
+    },
+    {
+      "id": "T03", "protocol": "http", "caller": "hr-app", "target": "hr-app",
+      "operation": "POST", "channel": "/api/employees/",
+      "send": [
+        {"file": "frontend/src/api/hr.ts", "line": 11, "function": "hireEmployee"},
+        {"file": "frontend/src/api/client.ts", "line": 13, "function": "apiFetch"}
+      ],
+      "receive": {"file": "people/urls.py", "line": 8, "handler": "EmployeeViewSet.create"},
+      "idiom": "literal relative path + { method: 'POST', body } options object to apiFetch wrapper; DRF router ModelViewSet (perform_create)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T04", "protocol": "http", "caller": "hr-app", "target": "hr-app",
+      "operation": "GET", "channel": "/api/leave-requests/",
+      "send": [
+        {"file": "frontend/src/api/hr.ts", "line": 14, "function": "listLeaveRequests"},
+        {"file": "frontend/src/api/client.ts", "line": 13, "function": "apiFetch"}
+      ],
+      "receive": {"file": "people/urls.py", "line": 9, "handler": "LeaveRequestViewSet.list"},
+      "idiom": "template literal with optional ?status= query string to apiFetch wrapper; DRF router with basename",
+      "runtime": "observed"
+    },
+    {
+      "id": "T05", "protocol": "http", "caller": "hr-app", "target": "hr-app",
+      "operation": "POST", "channel": "/api/leave-requests/",
+      "send": [
+        {"file": "frontend/src/api/hr.ts", "line": 17, "function": "requestLeave"},
+        {"file": "frontend/src/api/client.ts", "line": 13, "function": "apiFetch"}
+      ],
+      "receive": {"file": "people/urls.py", "line": 9, "handler": "LeaveRequestViewSet.create"},
+      "idiom": "literal relative path + { method: 'POST', body } to apiFetch wrapper; DRF router with basename",
+      "runtime": "observed"
+    },
+    {
+      "id": "T06", "protocol": "http", "caller": "hr-app", "target": "hr-app",
+      "operation": "POST", "channel": "/api/leave-requests/{pk}/approve/",
+      "send": [
+        {"file": "frontend/src/api/hr.ts", "line": 20, "function": "approveLeave"},
+        {"file": "frontend/src/api/client.ts", "line": 13, "function": "apiFetch"}
+      ],
+      "receive": {"file": "people/views.py", "line": 40, "handler": "LeaveRequestViewSet.approve"},
+      "idiom": "template literal `/api/leave-requests/${id}/approve/` to apiFetch wrapper; DRF @action(detail=True) on a router-registered viewset (url_path defaults to method name)",
+      "runtime": "observed"
+    },
+    {
+      "id": "T07", "protocol": "http", "caller": "hr-app", "target": "hr-app",
+      "operation": "GET", "channel": "/api/stats/headcount/",
+      "send": [
+        {"file": "frontend/src/api/hr.ts", "line": 22, "function": "getHeadcount"},
+        {"file": "frontend/src/api/client.ts", "line": 13, "function": "apiFetch"}
+      ],
+      "receive": {"file": "people/urls.py", "line": 12, "handler": "headcount"},
+      "idiom": "literal relative path to apiFetch wrapper; plain Django path() to @api_view function, nested under path('api/', include('people.urls'))",
+      "runtime": "observed"
+    },
+    {
+      "id": "T08", "protocol": "kafka", "caller": "hr-app", "target": "payroll",
+      "operation": "PUBLISH", "channel": "employee.hired",
+      "send": [
+        {"file": "people/events.py", "line": 38, "function": "employee_hired"},
+        {"file": "people/events.py", "line": 15, "function": "EventPublisher.publish"}
+      ],
+      "receive": {"file": "payroll/consumer.py", "line": 37, "handler": "HiredEventConsumer.run"},
+      "idiom": "topic from Django settings (settings.EMPLOYEE_HIRED_TOPIC, env var with default 'employee.hired') passed to a publisher wrapper around confluent_kafka.Producer; triggered via transaction.on_commit in EmployeeViewSet.perform_create; consumer topic from a Settings dataclass (env var with same default) passed to Consumer.subscribe",
+      "runtime": "observed"
+    },
+    {
+      "id": "T09", "protocol": "http", "caller": "payroll", "target": "hr-app",
+      "operation": "GET", "channel": "/api/employees/{pk}/salary-band/",
+      "send": [
+        {"file": "payroll/hr_client.py", "line": 24, "function": "HrClient.salary_band"},
+        {"file": "payroll/hr_client.py", "line": 17, "function": "HrClient._get"}
+      ],
+      "receive": {"file": "people/views.py", "line": 26, "handler": "EmployeeViewSet.salary_band"},
+      "idiom": "client class: base URL from env var HR_API_URL (Settings dataclass) + f-string path, requests.Session.get; receiver is DRF @action(detail=True, url_path='salary-band')",
+      "runtime": "observed"
+    }
+  ],
+  "not_links": [
+    {"what": "Vite dev-server proxy forwarding /api to the Django backend", "where": "hr-app:frontend/vite.config.ts:11", "why": "dev tooling that relays the frontend's own calls (T01-T07); not a separate communication"},
+    {"what": "GET /api/health/ endpoint", "where": "hr-app:people/urls.py:13", "why": "declared route with no caller in application code; only the docker-compose healthcheck probes it"},
+    {"what": "docker-compose healthcheck urlopen('http://127.0.0.1:8000/api/health/')", "where": "project:docker-compose.yml:35", "why": "infrastructure probe, self-call inside the hr-app container"},
+    {"what": "HrClient.salary_band against http://hr.test/ with a mocked session", "where": "payroll:tests/test_hr_client.py:13", "why": "test only"},
+    {"what": "smoke driver patches fetch and calls the frontend api functions", "where": "project:driver/smoke.ts:7", "why": "test harness outside any service; exercises T01-T07 but is not a caller"}
+  ]
+}
