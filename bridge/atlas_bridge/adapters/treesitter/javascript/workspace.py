@@ -1,7 +1,9 @@
 """JavaScriptWorkspace: the javascript / typescript files of a repository, and which of them are worth reading."""
 
 from ..kit import SourceFile, Workspace
+from .calls.libraries import EntryPoints
 from .clients.registry import ClientRegistry
+from .linker import ModuleLinker
 from .module import JsModule
 from .policy import JavaScriptTestPolicy
 from .source import JsSource
@@ -16,6 +18,7 @@ class JavaScriptWorkspace(Workspace):
     METHODS = ('get', 'post', 'put', 'delete', 'del', 'patch', 'head', 'options', 'all', 'route', 'request')
     METHODS += ('requestPromise', 'use')
     PRECHECK = (b'fetch', b'axios', b'got(', b'ky(') + tuple(f'.{m}{c}'.encode() for m in METHODS for c in '(<')
+    PRECHECK += EntryPoints.MENTIONS  # files that import a data fetching or GraphQL library
 
     POLICY = JavaScriptTestPolicy  # used when the workspace is not given the extractor's policy
 
@@ -33,13 +36,19 @@ class JavaScriptWorkspace(Workspace):
         return self._scanned
 
     def modules(self):
-        """A new JsModule for each scanned file, in path order, made as the caller gets to it."""
-        return (self.module(s) for s in self._scanned)
+        """A new JsModule for each scanned file, in path order, made as the caller gets to it. The modules of one
+        call share a linker, so the files they import are read once."""
+        linker = self.linker()
+        return (self.module(s, linker) for s in self._scanned)
+
+    def linker(self) -> ModuleLinker:
+        """A new linker over every file of the repository."""
+        return ModuleLinker(self.sources, JsModule)
 
     @staticmethod
-    def module(source: JsSource) -> JsModule:
+    def module(source: JsSource, linker: ModuleLinker | None = None) -> JsModule:
         """A new reading of a file, with caches of its own."""
-        return JsModule(source)
+        return JsModule(source, linker)
 
     def is_test(self, source: SourceFile, node=None) -> bool:
         return source.test or (node is not None and self._policy.in_test_block(node))

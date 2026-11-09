@@ -1,24 +1,29 @@
 """JsModule: one javascript / typescript file as the collectors read it."""
 
+from .bindings.exports import ModuleExports
 from .bindings.imports import ImportTable
 from .bindings.receivers import Receivers
 from .bindings.scopes import Scopes
 from .clients.resolver import ClientResolver
 from .declarations.table import RouteSyntaxes
 from .syntax.site import CallSite
+from .values.objects import ObjectPaths
 from .values.resolver import UrlValues
 
 
 class JsModule:
     """A source file with its call sites, scopes, URL values, imports, receivers, clients and route syntaxes. Made
     once per file and pass, and shared by the collectors of that pass, so each scope is read and each binding
-    resolved once. Its caches depend on the order bindings are resolved in, so a pass never reuses another's."""
+    resolved once. Its caches depend on the order bindings are resolved in, so a pass never reuses another's. With
+    a linker (linker.ModuleLinker), values are followed into the files it imports."""
 
-    def __init__(self, source):
+    def __init__(self, source, linker=None):
         self._source = source
         self._scopes = Scopes()
         self._imports = ImportTable(source)
-        self._values = UrlValues(self._scopes)
+        self._exports = ModuleExports(source)
+        self._objects = ObjectPaths(self, linker)
+        self._values = UrlValues(self._scopes, self._objects)
         self._receivers = Receivers(self._scopes, self._imports)
         self._clients = ClientResolver(source, self._scopes, self._imports, self._values)
         self._route_syntax = None
@@ -39,6 +44,14 @@ class JsModule:
     @property
     def imports(self) -> ImportTable:
         return self._imports
+
+    @property
+    def exports(self) -> ModuleExports:
+        return self._exports
+
+    @property
+    def objects(self) -> ObjectPaths:
+        return self._objects
 
     @property
     def values(self) -> UrlValues:

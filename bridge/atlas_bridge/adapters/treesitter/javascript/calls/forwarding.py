@@ -5,6 +5,7 @@ from dataclasses import dataclass, replace
 
 from .....core.http import ANY
 from ...kit import UrlTemplate
+from ..linker import ModuleLinker
 from ..module import JsModule
 from ..syntax.functions import Functions
 from ..syntax.nodes import JsSyntax
@@ -77,10 +78,17 @@ class Forwarder:
             module = self._module(source)
             if open_.method_of_class and module.path != open_.path:
                 continue
-            if not open_.method_of_class and module.path != open_.path and module.imports.get(open_.function) is None:
+            if not open_.method_of_class and module.path != open_.path and not self._imports(module, open_):
                 continue
             found += [(module, c) for c in JsSyntax.walk(source.root, {'call_expression'}) if self._calls(open_, c)]
         return found
+
+    @staticmethod
+    def _imports(module, open_):
+        """The module imports the open request's function from its file (not a function of a package that has
+        the same name)."""
+        imported = module.imports.get(open_.function)
+        return imported is not None and ModuleLinker.may_name(module.path, imported[0], open_.path)
 
     @staticmethod
     def _calls(open_, call):

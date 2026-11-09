@@ -12,6 +12,10 @@ class UrlText:
     LEADING_BASE = re.compile(r'^\{([^{}]*)\}/')  # '{BASE}/...': a variable in front of the first slash
     ROUTE_PARAM = re.compile(r'(?<=/)[:$]([A-Za-z_]\w*)')  # '/:id' or '/$org' written into a request path
     PATH_NAME = re.compile(r'url|uri|path|endpoint|route|href', re.I)  # an expression that holds a path or URL
+    SCHEME = re.compile(r'^(?:[a-z][a-z0-9+.-]*|\{[^{}]*\})://', re.I)  # 'https://', '{protocol}://' at the start
+    AUTHORITY = re.compile(r'^[a-z][a-z0-9+.-]*://[^/]*', re.I)  # 'https://host:port' up to the path
+    WORD = re.compile(r'\w')
+    REST = re.compile(r'\{\*([^{}]*)\}')  # '{*path}': a tail made of a path variable
 
     @classmethod
     def literal(cls, value):
@@ -24,9 +28,22 @@ class UrlText:
         return bool(cls.WORD_OR_SLASH.search(cls.PLACEHOLDER.sub('', value)))
 
     @classmethod
+    def untailed(cls, value):
+        """Tails as plain placeholders, '/{*path}' -> '/{path}': the name a caller's argument fills in."""
+        return cls.REST.sub(r'{\1}', value)
+
+    @classmethod
+    def unknown_path(cls, value):
+        """A URL whose host is known but whose path is all unknown: 'https://api.example.com/{*path}'. Nothing in it
+        says which route it asks for (the path is filled in elsewhere)."""
+        m = cls.AUTHORITY.match(value)
+        rest = value[m.end() :] if m else ''
+        return bool(cls.PLACEHOLDER.search(rest)) and not cls.WORD.search(cls.PLACEHOLDER.sub('', rest))
+
+    @classmethod
     def path_like(cls, value):
         """'/x', 'http://h/x', or '{BASE}/x' where the leading variable is a base URL."""
-        if value.startswith('/') or '://' in value:
+        if value.startswith('/') or cls.SCHEME.match(value):
             return True
         m = cls.LEADING_BASE.match(value)
         return bool(m) and cls.is_base_name(m.group(1))
