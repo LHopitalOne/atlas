@@ -186,6 +186,21 @@ class PartsTest(unittest.TestCase):
                 self.assertEqual(runner.update('r', d), os.path.join(d, 'graphify-out', 'graph.json'))
         self.assertTrue(seen and all(s > 0 for s in seen))
 
+    def test_budget_folds_symbols_into_files_but_keeps_cross_repository_ends(self):
+        from atlas_bridge.cli.budget import MapBudget
+        from atlas_bridge.core.model import CodeGraph, Kind, Ref, Status, Symbol
+
+        g = CodeGraph()
+        for repo, path, sym in (('web', 'a.js', 'f'), ('web', 'b.js', 'g'), ('api', 'c.py', 'h')):
+            g.file(repo, path).symbols.append(Symbol(sym, sym, Kind.FUNCTION))
+        f, gg, h = Ref('web', 'a.js', 'f'), Ref('web', 'b.js', 'g'), Ref('api', 'c.py', 'h')
+        g.link(f, gg, Status.MATCHED)
+        g.link(f, h, Status.INFERRED)
+        self.assertFalse(MapBudget(6).fit(g))
+        self.assertTrue(MapBudget(5).fit(g))
+        self.assertEqual([len(x.symbols) for x in g.files.values()], [1, 0, 1])
+        self.assertEqual(g.links, {(f, Ref('web', 'b.js')): Status.MATCHED, (f, h): Status.INFERRED})
+
     def test_runner_errors(self):
         self.assertIsInstance(GraphifyFailedError('api', 'x'), ExtractionError)
         with mock.patch('os.path.isfile', return_value=False), mock.patch('shutil.which', return_value=None):

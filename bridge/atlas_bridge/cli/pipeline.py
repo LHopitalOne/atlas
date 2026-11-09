@@ -13,6 +13,7 @@ from ..core.http import Extraction
 from ..core.model import CodeGraph
 from ..usecases.draw import GROUPINGS, MapDrawer
 from ..usecases.link import LinkFinder, LinkReport
+from .budget import MapBudget
 from .inputs import GraphInput, JsonFile
 from .scipcheck import ScipCheck
 
@@ -83,6 +84,11 @@ class MapPipeline:
     def _spec(self, graph):
         code = CodeGraph()
         GraphifyReader(code).read(graph, 'repo', source=self._out('graph.json'))
+        if MapBudget().fit(code):
+            self._report(
+                f'  map       over {MapBudget.MAX_NODES:,} files and symbols: functions and classes are folded into '
+                'their files, except where requests cross repositories'
+            )
         spec = AtlasSpecPresenter(self._o.title).present(MapDrawer(GROUPINGS[self._o.group]).draw(code))
         files = sum(len(d['services']) for r in spec['repos'] for d in r['domains'])
         self._report(f'  map       {len(spec["repos"])} repositories, {files:,} files, {len(spec["edges"]):,} links')
