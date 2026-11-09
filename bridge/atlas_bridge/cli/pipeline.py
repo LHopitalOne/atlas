@@ -57,7 +57,8 @@ class MapPipeline:
 
     def _still_mapping(self, seconds):
         hint = ', large repositories take Graphify a while; map a subfolder for a quicker look' if seconds > 100 else ''
-        self._report(f'  graphify  {self._current}: still mapping, {seconds / 60:.0f} min so far{hint}')
+        minutes, rest = divmod(int(seconds), 60)
+        self._report(f'  graphify  {self._current}: still mapping, {minutes}m{rest:02d}s so far{hint}')
 
     def _links(self, repos):
         names = [r.name for r in repos]
