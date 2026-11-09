@@ -5,23 +5,27 @@ import re
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from ..values import Marker, UrlShape
-from .table import Argument, Shape
+from .qualified import QualifiedNames
+from .table import Argument, ChannelTable, Shape
 
 
 class ChannelArguments:
     """The channel paths one argument of a call stands for: '/orders.created' for a topic, '/41210' for a port, the
-    URL's path for a URL. Only values fully known as literals count: a channel the code builds from what it cannot
-    see is left out rather than guessed."""
+    URL's path for a URL, the name a library object carries (`Topic('orders')`, ChannelTable.WRAPPERS). Only values
+    fully known as literals count: a channel the code builds from what it cannot see is left out rather than guessed."""
 
     NAME = re.compile(r'^[^\s/{}]+$')  # a whole topic, queue or channel name: no blanks, slashes or placeholders
     PORT = re.compile(r'^[1-9]\d{0,4}$')  # a fixed port; 0 asks the system for any free one
     GLOB = re.compile(r'[*?]+')  # a run of glob wildcards in a subscription pattern
     SEQUENCES = ('list', 'tuple', 'set')
     ANY_PATH = '/{*path}'
+    MAX_WRAPS = 3  # library objects followed inside one another: Partition(Topic(name), 0)
 
-    def __init__(self, workspace, values):
+    def __init__(self, workspace, values, table=ChannelTable):
         self._workspace = workspace
         self._values = values  # ChannelValues
+        self._table = table
+        self._qualified = QualifiedNames(workspace)
         self._shapes = {
             Shape.NAME: self._names,
             Shape.NAMES: self._sequence,
@@ -29,6 +33,8 @@ class ChannelArguments:
             Shape.ADDRESS: self._address,
             Shape.PORT: self._port,
             Shape.URL: self._url,
+            Shape.OBJECT: self._object,
+            Shape.OBJECTS: self._objects,
         }
 
     @staticmethod
@@ -66,6 +72,26 @@ class ChannelArguments:
 
     def _patterns(self, node, scope):
         return [self.GLOB.sub('{pattern}', p) for p in self._sequence(node, scope)]
+
+    def _object(self, node, scope, depth=0):
+        """The names a library object carries, read from the calls that made it (Origins)."""
+        out = []
+        for origin in self._values.origins.of(node, scope) if depth <= self.MAX_WRAPS else ():
+            if not origin.is_call:
+                continue
+            qualified = self._qualified.of(origin.scope.source, origin.node.child_by_field_name('function'))
+            for wrapper in self._table.WRAPPERS:
+                if not QualifiedNames.matches(qualified, wrapper.library, wrapper.name):
+                    continue
+                for arg in self.nodes(wrapper.argument, origin.node):
+                    inner = wrapper.argument.shape == Shape.OBJECT
+                    out += self._object(arg, origin.scope, depth + 1) if inner else self._names(arg, origin.scope)
+        return out
+
+    def _objects(self, node, scope):
+        node, scope = self._bound(node, scope)
+        items = node.named_children if node.type in self.SEQUENCES else [node]
+        return [p for item in items for p in self._object(item, scope)]
 
     def _port(self, node, scope):
         return ['/' + t for t in self.literals(node, scope) if self.PORT.match(t)]

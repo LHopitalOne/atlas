@@ -20,6 +20,8 @@ class Shape:
     ADDRESS = 'address'  # a (host, port) tuple: the port is the channel
     PORT = 'port'  # a port number
     URL = 'url'  # a URL: its path is the channel
+    OBJECT = 'object'  # a library object that carries the name (ChannelTable.WRAPPERS): arroyo's Topic('orders')
+    OBJECTS = 'objects'  # a list or tuple of such objects
     ANY_PATH = 'any'  # no channel argument: the server takes every path
 
 
@@ -42,6 +44,15 @@ class LibraryType(NamedTuple):
     name: str
     creators: tuple = ()
     factories: tuple = ()
+
+
+class Wrapper(NamedTuple):
+    """A library object made around a channel: `arroyo.types.Topic(name)`. `argument`: where the call passes it (a
+    name, or another wrapper: `Partition(Topic(name), index)`)."""
+
+    library: str
+    name: str  # the dotted end of the qualified name of the call that makes it
+    argument: Argument
 
 
 class Endpoint(NamedTuple):
@@ -78,6 +89,9 @@ SERVER_ADDRESS = Argument(0, 'server_address', Shape.ADDRESS)
 PORT_THIRD = Argument(2, 'port', Shape.PORT)  # (handler or factory, host, port)
 LOCAL_ADDR = Argument(1, 'local_addr', Shape.ADDRESS)  # create_datagram_endpoint(factory, local_addr, remote_addr)
 REMOTE_ADDR = Argument(2, 'remote_addr', Shape.ADDRESS)
+TOPIC_OBJECT = Argument(1, 'topic', Shape.OBJECT)  # arroyo: (producer or consumer, topic, ...)
+DESTINATION = Argument(0, 'destination', Shape.OBJECT)  # arroyo: produce(destination, payload)
+TOPIC_OBJECTS = Argument(0, 'topics', Shape.OBJECTS)
 DEFAULT_EXCHANGE = ((Argument(0, 'exchange'), ''),)  # pika's default exchange routes by queue name
 
 
@@ -91,6 +105,11 @@ class ChannelTable:
         LibraryType('confluent_kafka', 'Consumer', ('Consumer', 'DeserializingConsumer')),
         LibraryType('aiokafka', 'AIOKafkaProducer', ('AIOKafkaProducer',)),
         LibraryType('aiokafka', 'AIOKafkaConsumer', ('AIOKafkaConsumer',)),
+        LibraryType('arroyo', 'KafkaProducer', ('KafkaProducer',)),
+        LibraryType('arroyo', 'KafkaConsumer', ('KafkaConsumer',)),
+        LibraryType('arroyo', 'FutureTrackingProducer', ('FutureTrackingProducer',)),
+        LibraryType('arroyo', 'Producer'),  # arroyo.backends.abstract: the interfaces, only ever annotated
+        LibraryType('arroyo', 'Consumer'),
         LibraryType('pika', 'Connection', ('BlockingConnection', 'SelectConnection')),
         LibraryType('pika', 'Channel', factories=(('Connection', 'channel'),)),
         LibraryType('redis', 'Redis', ('Redis', 'StrictRedis', 'Redis.from_url', 'redis.from_url')),
@@ -112,6 +131,18 @@ class ChannelTable:
         Endpoint('aiokafka', 'AIOKafkaProducer', 'send_and_wait', SEND, KAFKA, TOPIC),
         Endpoint('aiokafka', 'AIOKafkaConsumer', NEW, RECEIVE, KAFKA, EVERY_NAME),
         Endpoint('aiokafka', 'AIOKafkaConsumer', 'subscribe', RECEIVE, KAFKA, TOPICS),
+        # arroyo: Producer.produce(destination, payload) to a Topic or Partition (FutureTrackingProducer's is `dest`);
+        # Consumer.subscribe(topics);
+        # StreamProcessor(consumer, topic, factory) consumes; the Produce strategy and KafkaDlqProducer(producer, topic)
+        # produce
+        Endpoint('arroyo', 'KafkaProducer', 'produce', SEND, KAFKA, DESTINATION),
+        Endpoint('arroyo', 'Producer', 'produce', SEND, KAFKA, DESTINATION),
+        Endpoint('arroyo', 'FutureTrackingProducer', 'produce', SEND, KAFKA, Argument(0, 'dest', Shape.OBJECT)),
+        Endpoint('arroyo', 'KafkaConsumer', 'subscribe', RECEIVE, KAFKA, TOPIC_OBJECTS),
+        Endpoint('arroyo', 'Consumer', 'subscribe', RECEIVE, KAFKA, TOPIC_OBJECTS),
+        Endpoint('arroyo', MODULE, 'StreamProcessor', RECEIVE, KAFKA, TOPIC_OBJECT),
+        Endpoint('arroyo', MODULE, 'Produce', SEND, KAFKA, TOPIC_OBJECT),
+        Endpoint('arroyo', MODULE, 'KafkaDlqProducer', SEND, KAFKA, TOPIC_OBJECT),
         # pika: basic_publish(exchange, routing_key) on the default exchange '' reaches the queue the key names;
         # basic_consume(queue, on_message_callback)
         Endpoint('pika', 'Channel', 'basic_publish', SEND, AMQP, Argument(1, 'routing_key'), requires=DEFAULT_EXCHANGE),
@@ -145,6 +176,11 @@ class ChannelTable:
         # websockets: connect(uri) opens a connection to the URL's path; serve(handler, host, port) takes every path
         Endpoint('websockets', MODULE, 'connect', SEND, WEBSOCKET, Argument(0, 'uri', Shape.URL), 'CONNECT'),
         Endpoint('websockets', MODULE, 'serve', RECEIVE, WEBSOCKET, Argument(None, None, Shape.ANY_PATH)),
+    )
+
+    WRAPPERS = (
+        Wrapper('arroyo', 'Topic', Argument(0, 'name')),  # arroyo.types.Topic(name)
+        Wrapper('arroyo', 'Partition', Argument(0, 'topic', Shape.OBJECT)),  # arroyo.types.Partition(topic, index)
     )
 
     @classmethod

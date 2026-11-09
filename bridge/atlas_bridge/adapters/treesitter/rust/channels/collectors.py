@@ -7,7 +7,7 @@ from ...kit import RouteCollector
 from ..calls import RequestContext, RustCallCollector
 from ..guard import StackGuard
 from ..syntax import RustSyntax
-from .ports import SocketAddress
+from .ports import SiteChannels
 from .table import EntryPoints
 
 
@@ -19,6 +19,7 @@ class ChannelCalls(RustCallCollector):
 
     def __init__(self, workspace, values, sites, followups):
         super().__init__(workspace, values)
+        self._channels = SiteChannels(values)
         self._sites = sites
         self._followups = followups
 
@@ -28,7 +29,6 @@ class ChannelCalls(RustCallCollector):
             return []
         if site.entry.then and not self._followups.follows(file, site):
             return []
-        values = [v.text for v in self._values.values(file, site.address)]
         function = RequestContext.function_name(node)
         hints = {file.path, function, RustSyntax.text(site.address)}
         hints |= {RustSyntax.text(i) for i in RustSyntax.identifiers(site.address)}
@@ -38,7 +38,7 @@ class ChannelCalls(RustCallCollector):
             self.call(
                 file, file.line(node), path, function=function, hints=hints, test=test, protocol=site.entry.protocol
             )
-            for path in SocketAddress.channels(values)
+            for path in self._channels.of(file, site)
         ]
 
 
@@ -49,7 +49,7 @@ class ChannelRoutes(RouteCollector):
 
     def __init__(self, workspace, values, sites, followups):
         super().__init__(workspace)
-        self._values = values
+        self._channels = SiteChannels(values)
         self._sites = sites
         self._followups = followups
 
@@ -68,9 +68,8 @@ class ChannelRoutes(RouteCollector):
             return []
         if site.entry.unless and self._followups.handed(node, site.entry.unless):
             return []
-        values = [v.text for v in self._values.values(file, site.address)]
         handler = RequestContext.function_name(node)
         return [
             dataclasses.replace(self.route(file, file.line(node), path, handler=handler), protocol=site.entry.protocol)
-            for path in SocketAddress.channels(values)
+            for path in self._channels.of(file, site)
         ]

@@ -14,7 +14,8 @@ class EntryPoint(NamedTuple):
     on its bound address when it reads from it), or on the value an instance call is made on (a connected UDP socket
     only sends when it sends; `connect` alone, as when finding the local address, sends nothing). unless: calls
     that, given what it returns, make it carry another protocol (a listener handed to an HTTP server serves HTTP,
-    found by its own routes)."""
+    found by its own routes). shape: how the argument names the channel, a socket address (ADDRESS: the port is the
+    channel) or a topic name (NAME), or a slice of names (NAMES)."""
 
     modules: tuple[str, ...]
     type: str
@@ -25,6 +26,7 @@ class EntryPoint(NamedTuple):
     instance: bool = False
     then: frozenset[str] = frozenset()
     unless: frozenset[str] = frozenset()
+    shape: str = 'address'
 
     def accepts(self, path: str) -> bool:
         """Whether a type's full path ('std::net::UdpSocket') is this entry point's type."""
@@ -36,6 +38,7 @@ class EntryPoints:
 
     SEND = 'send'
     RECEIVE = 'receive'
+    ADDRESS, NAME, NAMES = 'address', 'name', 'names'  # EntryPoint.shape
     SOCKETS = ('std::net', 'tokio::net', 'async_std::net')  # the same socket API in std, tokio and async-std
     # UdpSocket reads in std, tokio and async-std: blocking/async, try_ (non-blocking) and poll_ (manual futures).
     UDP_READS = frozenset({
@@ -47,6 +50,9 @@ class EntryPoints:
     # Servers that take a bound TCP listener: axum::serve, axum_server::from_tcp, hyper's Server::from_tcp,
     # actix-web HttpServer::listen, tonic's serve_with_incoming, warp's run_incoming.
     SERVES = frozenset({'serve', 'from_tcp', 'listen', 'serve_with_incoming', 'run_incoming'})
+    # rdkafka: the records a producer sends (re-exported in rdkafka::producer) and the consumers that subscribe.
+    RECORDS = ('rdkafka::producer', 'rdkafka::producer::base_producer', 'rdkafka::producer::future_producer')
+    CONSUMERS = ('rdkafka::consumer', 'rdkafka::consumer::stream_consumer', 'rdkafka::consumer::base_consumer')
     ENTRIES = (
         EntryPoint(SOCKETS, 'TcpStream', 'connect', SEND, Protocol.TCP, 0),
         EntryPoint(('std::net',), 'TcpStream', 'connect_timeout', SEND, Protocol.TCP, 0),
@@ -54,6 +60,12 @@ class EntryPoints:
         EntryPoint(SOCKETS, 'UdpSocket', 'send_to', SEND, Protocol.UDP, 1, instance=True),
         EntryPoint(SOCKETS, 'UdpSocket', 'connect', SEND, Protocol.UDP, 0, instance=True, then=UDP_SENDS),
         EntryPoint(SOCKETS, 'UdpSocket', 'bind', RECEIVE, Protocol.UDP, 0, then=UDP_READS),
+        # rdkafka: BaseRecord::to(topic) / FutureRecord::to(topic) is a message for that topic; a consumer's
+        # subscribe(&[topics]) (the Consumer trait) receives on each
+        EntryPoint(RECORDS, 'BaseRecord', 'to', SEND, Protocol.KAFKA, 0, shape=NAME),
+        EntryPoint(RECORDS, 'FutureRecord', 'to', SEND, Protocol.KAFKA, 0, shape=NAME),
+        EntryPoint(CONSUMERS, 'StreamConsumer', 'subscribe', RECEIVE, Protocol.KAFKA, 0, instance=True, shape=NAMES),
+        EntryPoint(CONSUMERS, 'BaseConsumer', 'subscribe', RECEIVE, Protocol.KAFKA, 0, instance=True, shape=NAMES),
     )
 
     def __init__(self, entries=ENTRIES):

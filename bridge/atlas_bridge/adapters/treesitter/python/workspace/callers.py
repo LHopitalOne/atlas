@@ -34,6 +34,10 @@ class CallerIndex:
         inside = PythonSyntax.FUNCTION
         return [(g, c) for g, c in sites if PythonSyntax.ancestor(c, inside) != func][: self.MAX_SITES]
 
+    def calls_named(self, name):
+        """[(source, call node)] of every call by this name in the repository, at most MAX_SITES."""
+        return [(s, c) for s in self._mentioning(name) for c in self._file_calls(s).get(name, ())][: self.MAX_SITES]
+
     def constructions_of(self, source, cls, unique):
         """[(source, call node)] that call the class `cls` by its name: in its own file, and in the other files that
         call that name when the class is the only one so named (`unique`). At most MAX_SITES."""

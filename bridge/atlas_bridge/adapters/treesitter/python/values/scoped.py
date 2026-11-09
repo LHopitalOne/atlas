@@ -92,7 +92,10 @@ class ScopeResolver(ValueResolver):
         name = PythonSyntax.text(node)
         func = scope.func
         if func is not None and name in PythonSyntax.param_names(func):
-            return [Value(Marker.wrap(name), frozenset(), Value.PARAM)]
+            bound = scope.bound(name)
+            if bound is not None:
+                return self.resolve(bound.node, bound.scope, depth + 1)
+            return self.unknown(node) if scope.called else [Value(Marker.wrap(name), frozenset(), Value.PARAM)]
         before = node.start_byte if func is None else None
         found = self._workspace.names.lookup(scope.source, name, before=before)
         if found and found.is_value:
