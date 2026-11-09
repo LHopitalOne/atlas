@@ -29,14 +29,17 @@ class GeneratedRuntimes:
 
     TABLE = (
         # oazapfts: `export function getPet({ id }, opts) { return oazapfts.ok(oazapfts.fetchJson(`/pets/${id}`, {
-        # ...opts })) }` with `const oazapfts = Oazapfts.runtime(defaults)` and `defaults = { baseUrl: '/api' }`
+        # ...opts })) }` with `const oazapfts = Oazapfts.runtime(defaults)` and `defaults = { baseUrl: '/api' }`.
+        # The runtime is '@oazapfts/runtime' (oazapfts 5+) or 'oazapfts/lib/runtime' (oazapfts 4 and before); what
+        # `runtime(defaults)` returns sends through fetchText, fetchJson and fetchBlob, and wraps options in json, form
+        # and multipart (packages/runtime/src/runtime.ts).
         GeneratedRuntime(
-            libraries=('@oazapfts/runtime', 'oazapfts/lib/runtime', 'oazapfts/runtime'),
+            libraries=('@oazapfts/runtime', 'oazapfts/lib/runtime'),
             factory='runtime',
             base='baseUrl',
-            senders=frozenset({'fetchJson', 'fetchText', 'fetchBlob', 'fetch'}),
+            senders=frozenset({'fetchJson', 'fetchText', 'fetchBlob'}),
             wrappers=frozenset({'json', 'form', 'multipart'}),
-            queries=('@oazapfts/runtime/query', 'oazapfts/lib/runtime/query', 'oazapfts/runtime/query'),
+            queries=('@oazapfts/runtime/query', 'oazapfts/lib/runtime/query'),
         ),
     )
     # bytes a file must contain to import one of the runtimes (checked before parsing)

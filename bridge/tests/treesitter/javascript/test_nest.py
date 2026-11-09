@@ -69,6 +69,27 @@ class NestRoutesTest(unittest.TestCase):
         found = routes({'src/main.ts': MAIN, 'src/health.controller.ts': HEALTH})
         self.assertEqual(set(found), {('GET', '/health'), ('GET', '/metrics/cpu')})
 
+    def test_an_exclude_entry_applies_to_its_method_and_its_wildcards(self):
+        main = (
+            "app.setGlobalPrefix('api', { exclude: [{ path: 'health', method: RequestMethod.POST }, 'hooks/*splat',"
+            " 'pets/:petId'] });\n"
+        )
+        controller = (
+            "import { Controller, Get, Post, Search } from '@nestjs/common';\n"
+            "@Controller()\nclass C {\n  @Get('health') a() {}\n  @Post('health') b() {}\n"
+            "  @Post('hooks/github/push') c() {}\n  @Get('pets/:id') d() {}\n  @Search('pets') e() {}\n}\n"
+        )
+        self.assertEqual(
+            set(routes({'src/main.ts': main, 'src/c.ts': controller})),
+            {
+                ('GET', '/api/health'),
+                ('POST', '/health'),
+                ('POST', '/hooks/github/push'),
+                ('GET', '/pets/{id}'),
+                ('SEARCH', '/api/pets'),
+            },
+        )
+
     def test_without_a_global_prefix(self):
         self.assertIn(('GET', '/people/{id}'), routes({'src/people.controller.ts': PEOPLE}))
 

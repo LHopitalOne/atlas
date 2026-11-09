@@ -1,4 +1,4 @@
-"""The requests a generated client file sends through its runtime: `oazapfts.fetchJson(`/people/${id}`, opts)`."""
+"""The requests a generated client file sends through its runtime: `oazapfts.fetchJson(`/pets/${id}`, opts)`."""
 
 from dataclasses import replace
 

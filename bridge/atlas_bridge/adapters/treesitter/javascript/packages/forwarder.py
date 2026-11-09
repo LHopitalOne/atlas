@@ -26,9 +26,9 @@ class PackageForwarder(Forwarder):
 
 
 class PassedFunctions:
-    """A package function handed on as a value (`asMutation(deleteSession, ...)`, `{ mutationFn: deleteSession }`)
+    """A package function handed on as a value (`onClick(deletePet)`, `{ mutationFn: deletePet }`)
     sends its request from wherever it is later called with arguments not seen here: it is reported where it is
-    handed on, with its parameters left as parameters ('/sessions/{id}')."""
+    handed on, with its parameters left as parameters ('/pets/{id}')."""
 
     HANDED_ON = frozenset({'arguments', 'pair', 'array'})  # where a function value is passed to other code
     NAMES = 'identifier'

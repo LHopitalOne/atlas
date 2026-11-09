@@ -6,7 +6,7 @@ import unittest
 from atlas_bridge.adapters.treesitter.javascript import JavaScriptExtractor
 from atlas_bridge.adapters.treesitter.javascript.packages.globs import FolderGlobs
 from atlas_bridge.adapters.treesitter.javascript.packages.monorepo import Monorepo, WorkspaceFiles
-from atlas_bridge.adapters.treesitter.javascript.packages.package import PackageEntry
+from atlas_bridge.adapters.treesitter.javascript.packages.package import CompilerFolders, PackageEntry
 from atlas_bridge.adapters.treesitter.kit import RepositoryFiles
 
 from .support import Repository
@@ -155,6 +155,16 @@ class WorkspaceLayoutTest(unittest.TestCase):
         types = PackageEntry.candidates({'exports': {'.': {'types': './dist/index.d.ts'}}})
         self.assertEqual(types[0], './src/index')
         self.assertEqual(PackageEntry.candidates({}, 'client'), ['./client', './src/client'])
+
+    def test_package_entry_follows_the_tsconfig_folders_and_exports_subpaths(self):
+        compiled = ('lib', 'source')
+        self.assertEqual(PackageEntry.candidates({'main': './lib/index.js'}, '', compiled)[0], './source/index')
+        exports = {'exports': {'.': './dist/index.js', './client': {'import': './dist/client.mjs'}}}
+        self.assertEqual(PackageEntry.candidates(exports, 'client')[:2], ['./src/client', './dist/client.mjs'])
+        with tempfile.TemporaryDirectory() as root:
+            with open(os.path.join(root, 'tsconfig.json'), 'w') as f:
+                f.write('{\n  // built by tsc\n  "compilerOptions": { "outDir": "./out/", "rootDir": "lib", },\n}\n')
+            self.assertEqual(CompilerFolders.of(root), ('out', 'lib'))
 
 
 if __name__ == '__main__':

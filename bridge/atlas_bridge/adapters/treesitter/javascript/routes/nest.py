@@ -1,4 +1,4 @@
-"""NestRoutes: the routes of NestJS controllers, `@Controller('people')` classes and their `@Get(':id')` methods."""
+"""NestRoutes: the routes of NestJS controllers, `@Controller('cats')` classes and their `@Get(':id')` methods."""
 
 from .....core.http import ANY, Extraction
 from ...kit import RouteCollector
@@ -22,6 +22,7 @@ class NestDecorators:
         'Delete': 'DELETE',
         'Head': 'HEAD',
         'Options': 'OPTIONS',
+        'Search': 'SEARCH',
         'All': ANY,
     }
     DECORATOR = 'decorator'
@@ -137,7 +138,7 @@ class NestRoutes(RouteCollector):
             paths = decorators.paths(args) if method is not None else None
             for prefix in prefixes if paths is not None else ():
                 for path in paths:
-                    full = app.path(f'{prefix.strip("/")}/{path.strip("/")}', version)
+                    full = app.path(f'{prefix.strip("/")}/{path.strip("/")}', version, method)
                     out.append(self.route(source, JsSyntax.line(decorator), full, {method}, handler))
         return out
 

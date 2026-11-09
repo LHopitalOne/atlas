@@ -41,9 +41,9 @@ class WorkspacePackageCalls(CallCollector):
     """A function imported from a package of the same monorepo (a folder whose package.json `name` the import
     names, found from the workspace root: pnpm-workspace.yaml, package.json `workspaces`) is followed into the
     package's source as if it were in the repository: each request it sends is reported where the application
-    calls it (`getPerson({ id })`), its path filled in with the call's arguments, or where the application hands the
-    function on as a value (`asMutation(deleteSession)`), its parameters left as parameters. Only the files where the
-    imported names are defined are read, and only inside the monorepo; the repository's own package is not."""
+    calls it (`getPet({ id })`), its path filled in with the call's arguments, or where the application hands the
+    function on as a value (`{ mutationFn: deletePet }`), its parameters left as parameters. Only the files where
+    the imported names are defined are read, and only inside the monorepo; the repository's own package is not."""
 
     def collect(self) -> Extraction:
         root = self.workspace.root
