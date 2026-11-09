@@ -11,15 +11,16 @@ from atlas_bridge.adapters.treesitter.python.syntax import PythonSyntax
 from atlas_bridge.adapters.treesitter.python.workspace import PythonWorkspace
 
 
-def extract(files, repo='svc'):
-    """The extraction of `files` ({path: source}); a missing file in the list is skipped, not an error."""
+def extract(files, repo='svc', graph=None):
+    """The extraction of `files` ({path: source}); a missing file in the list is skipped, not an error. `graph`: a
+    CallGraph standing in for SCIP indexes."""
     with tempfile.TemporaryDirectory() as d:
         for path, src in files.items():
             full = os.path.join(d, path)
             os.makedirs(os.path.dirname(full), exist_ok=True)
             with open(full, 'w', encoding='utf-8') as f:
                 f.write(textwrap.dedent(src))
-        return PythonExtractor().extract(repo, RepositoryFiles(d), sorted(files) + ['missing.py'])
+        return PythonExtractor(graph).extract(repo, RepositoryFiles(d), sorted(files) + ['missing.py'])
 
 
 def routes(ex):

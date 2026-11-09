@@ -1,6 +1,6 @@
 """ScipCallGraph: the CallGraph port answered from SCIP indexes of the services and the libraries read with them."""
 
-from ...core.callgraph import Function, Site
+from ...core.callgraph import Function, Site, Target
 from ...usecases.ports import CallGraph
 from .index import ScipIndex
 from .schema import SymbolRole
@@ -30,6 +30,14 @@ class ScipCallGraph(CallGraph):
         if best is None:
             return None
         return Function(ScipSymbol.key(best.symbol), ScipSymbol.name(best.symbol), repo, file, best.start, best.end)
+
+    def resolves(self, repo: str, file: str, line: int, name: str) -> frozenset[Target]:
+        return frozenset(
+            Target(ScipSymbol.key(o.symbol), ScipSymbol.package(o.symbol) == repo, ScipSymbol.is_method(o.symbol))
+            for index in self._indexes.get(repo, [])
+            for o in index.at(file, line)
+            if not o.roles & self.NOT_A_CALL and ScipSymbol.name(o.symbol) == name
+        )
 
     def callers(self, function: Function) -> list[Site]:
         if self._callers is None:

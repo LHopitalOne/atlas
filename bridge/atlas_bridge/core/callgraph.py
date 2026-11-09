@@ -23,3 +23,13 @@ class Site:
     repo: str
     file: str
     line: int
+
+
+@dataclass(frozen=True)
+class Target:
+    """What a name used on a line refers to: a definition `key`; `local` when it is the repository's own code (not a
+    library or the standard library), and `method` when it belongs to a class (so an override may run instead)."""
+
+    key: str
+    local: bool
+    method: bool

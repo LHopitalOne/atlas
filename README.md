@@ -119,6 +119,14 @@ fixed word of the path to meet a route's (a catch-all page route never takes it)
 `/api/0/{anything}` is linked only when one route fits. On Sentry alone that is 225 frontend-to-backend links, on
 Label Studio 9; these have no answer key yet, so they are not in the scores above.
 
+With SCIP indexes, Python extraction also asks them first wherever it would otherwise go by names: a call is a request
+when it resolves into an HTTP library (`requests`, `httpx`, `aiohttp`, `urllib3`) and not one when it resolves into
+another library (`dict.get`, Django's test client), and a wrapper's callers are every call the index resolves to it,
+in any file, even under a common name like `get`. Where the index knows nothing, or a call reaches the repository's
+own code (often a `*args, **kwargs` pass-through the URL cannot be followed through), the name rules decide as before;
+`--no-scip-search` keeps them alone. On the four answer keys it finds exactly the same links (their requests were
+already read right by name); JavaScript and Rust still go by names.
+
 `eval/sentry/` and `eval/openedx/` are answer keys of the real links between four Sentry services and four Open edX
 ones (the second built after the finder was tuned on the first, to test whether it generalises);
 `eval/labelstudio/` is a held-out key the frozen finder was run on once. `eval/score.py` scores a run:

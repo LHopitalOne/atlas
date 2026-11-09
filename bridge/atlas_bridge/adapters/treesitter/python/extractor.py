@@ -28,7 +28,7 @@ class PythonExtractor(LanguageExtractor):
     OTHERS = (DjangoRoutes, RequestCalls, PayloadCalls, SettingUrls)
 
     def workspace(self, repo, sources):
-        return PythonWorkspace(repo, sources)
+        return PythonWorkspace(repo, sources, self.graph)
 
     def collectors(self, workspace):
         registrations = Registrations(workspace)

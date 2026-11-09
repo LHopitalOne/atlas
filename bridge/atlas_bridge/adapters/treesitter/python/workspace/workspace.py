@@ -26,6 +26,10 @@ class PythonWorkspace(Workspace):
     (class_definition name: (identifier) @clsname) @cls
     """
 
+    def __init__(self, repo, sources, graph=None):
+        self.graph = graph  # a CallGraph from SCIP indexes, or None: then calls and callers are read by name only
+        super().__init__(repo, sources)
+
     def index(self):
         self._calls = []  # (source, call node, called name) of the names in QUERY, in file order
         self._decorated = []  # (source, decorated_definition node)
@@ -38,7 +42,7 @@ class PythonWorkspace(Workspace):
         self.names = NameLookup(ModuleIndex(self.sources, TestPathPolicy()))
         self.locals = LocalIndex()
         self.attributes = ClassAttributes()
-        self.callers = CallerIndex(self.sources, self._functions)
+        self.callers = CallerIndex(self.sources, self._functions, graph=self.graph, repo=self.repo)
         self.settings = DjangoSettings(self.sources)
 
     def _read(self, source):

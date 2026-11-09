@@ -6,9 +6,10 @@ from ..scope import Scope
 from ..syntax import PythonSyntax
 from ..values import PythonValueResolver
 from .book import CallBook
-from .idioms import RequestMethodIdiom, UrlopenIdiom, VerbIdiom
+from .idioms import RequestMethodIdiom, RequestTarget, UrlopenIdiom, VerbIdiom
 from .methods import MethodOptions
 from .pending import PendingRequest, RequestRun
+from .senders import Senders
 from .settle import Settler
 from .sites import SiteHints
 
@@ -29,6 +30,7 @@ class RequestCalls(CallCollector):
         self._book = CallBook(self)
         self._settler = Settler(workspace, self._book, self._values, self._methods, self._sites)
         self._idioms = {name: idiom(self._methods) for idiom in self.IDIOMS for name in idiom.NAMES}
+        self._senders = Senders(workspace)
 
     def collect(self) -> Extraction:
         for source, call, name in self.workspace.calls(self._idioms):
@@ -36,12 +38,19 @@ class RequestCalls(CallCollector):
         return Extraction(calls=self._book.calls())
 
     def _request(self, source, call, idiom, name):
+        sends = self._senders.verdict(source, call, name)
+        if sends is False:
+            return  # the index says it reaches something else: a wrapper whose own request is found inside it
         receiver = PythonSyntax.receiver(call)
         pos, kw = PythonSyntax.call_args(call)
         scope = Scope.at(source, call)
         target = idiom.target(name, scope, receiver, pos, kw)
+        if target is None and sends and receiver is not None:  # syntax took it for mapping.get(key, default)
+            target = RequestTarget(kw.get('url', pos[0] if pos else None), None, [name.upper()], True)
         if target is None or target.url is None or target.url.type in self.SPLATS:
             return
+        if sends:
+            target = target._replace(client=True)
         methods = target.methods
         if methods is None:
             methods = self._methods.options(scope, target.method_node) if target.method_node is not None else [ANY]

@@ -28,6 +28,9 @@ class FakeGraph(CallGraph):
     def callers(self, function):
         return self.CALLERS.get(function.key, [])
 
+    def resolves(self, repo, file, line, name):
+        return frozenset()
+
 
 def request(path='/api/tasks/{id}/', line=15, **kw):
     return Call('sdk', 'sdk/raw.py', line, P(path), 'GET', hints=frozenset({'httpx_client'}), **kw)

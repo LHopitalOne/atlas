@@ -19,6 +19,9 @@ class LanguageExtractor(ABC):
     GRAMMARS: frozenset[str] = frozenset()
     POLICY = TestPathPolicy
 
+    def __init__(self, graph=None):
+        self.graph = graph  # a usecases.ports.CallGraph from precise indexes, for languages that can use one
+
     def handles(self, path: str) -> bool:
         return Grammar.BY_EXTENSION.get(path[path.rfind('.') :]) in self.GRAMMARS
 
