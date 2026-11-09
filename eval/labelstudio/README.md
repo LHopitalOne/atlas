@@ -84,13 +84,39 @@ that branch. Scores after the fix (the frozen numbers above are unchanged):
 
 | | Label Studio | Open edX | Sentry | Mozilla |
 | --- | --- | --- | --- | --- |
-| Production links | 4 / 15 (4 / 4 sent by the services' own code) | 68 / 71 | 20 / 20 | 0 / 41 |
+| Production links | 4 / 15 (4 / 4 sent by the services' own code) | 61 / 71 | 20 / 20 | 0 / 41 |
 | False links | 0 | 0 | 0 | 0 |
 
 `/health` is reported as ambiguous: two routes in the ML backend repository serve it (the shared server and an
 example's own app), and the finder lists both.
 
-### What this says
+### Through the SDK (`--library`)
+
+The 11 SDK links needed the finder to read the SDK and follow calls into it. With the three repositories indexed in
+the Docker sandbox (so each index resolves the libraries it uses) and `--library label-studio-sdk`, every request the
+SDK sends is walked up its call graph to the ML backend lines that reach it:
+
+| | Sent by the services' own code | Sent by the SDK | Total | False links |
+| --- | --- | --- | --- | --- |
+| Frozen run | 3 / 4 | 0 / 11 | 3 / 15 | 0 |
+| `--library`, examples treated as tooling (the default) | 4 / 4 | 2 / 11 | **6 / 15** | **0** |
+| `--library --include-tests` (the example backends counted) | 4 / 4 | 3 / 11 | 7 / 15 | 0 |
+
+Five of the six links are confirmed by SCIP, the SDK ones across repositories (the ML backend's call resolves to the
+SDK function the walk went through). What it does not reach yet:
+
+- `GET /api/projects/{pk}/` and `GET /api/tasks/` are found at `ls_io.py`, which nothing calls (the key lists its call
+  sites as dead code); the same calls in the example backends are found with `--include-tests`, as is
+  `POST /api/predictions/` from `yolo/cli.py`.
+- `GET /api/version/` and the token refresh are sent when the SDK client is created. Following a class reference into
+  `__init__` found `/api/version/` but also the login requests the constructor sends only without an API key, which
+  every caller passes: 30 false links. It stays off until the walk can read such conditions.
+- `GET /api/tasks/{pk}/` and `GET /api/users/` go through generated client methods the walk does not reach yet.
+- The four file-download links: `get_local_path` builds the URL in a variable reassigned across branches and passes
+  it two functions down; the finder reads it as `/data/{data}`, and a library request that only knows one segment is
+  not moved (it would fit several routes).
+
+
 
 Where the request is in the code being read, the finder found 3 of 4 with no false links, on a repository pair it
 had never seen. The larger gap here is structural: services often talk to each other through a client library that

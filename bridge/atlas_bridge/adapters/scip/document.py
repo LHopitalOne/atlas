@@ -7,11 +7,17 @@ from .wire import WireReader
 
 
 class Occurrence(NamedTuple):
-    """A symbol appearing on a line (1-based), as a definition or a reference."""
+    """A symbol appearing on a line (1-based), as a definition or a reference. A definition may carry the lines its
+    whole body spans (`start`..`end`, 1-based; 0 when the indexer wrote no enclosing range)."""
 
     line: int
     symbol: str
     roles: int
+    start: int = 0
+    end: int = 0
+
+    def encloses(self, line: int) -> bool:
+        return self.start <= line <= self.end and self.end > 0
 
     @property
     def is_definition(self):
@@ -32,6 +38,10 @@ class ScipDocument:
         """Every definition in the file."""
         return [o for occurrences in self._lines().values() for o in occurrences if o.is_definition]
 
+    def occurrences(self):
+        """Every occurrence in the file, in line order."""
+        return [o for _, occurrences in sorted(self._lines().items()) for o in occurrences]
+
     def _lines(self):
         if self._by_line is None:
             self._by_line = {}
@@ -44,7 +54,7 @@ class ScipDocument:
         return self._by_line
 
     def _occurrence(self, raw):
-        line, symbol, roles = None, '', 0
+        line, symbol, roles, span = None, '', 0, (0, 0)
         for number, wire, value in self._reader.fields(raw):
             if number == OccurrenceFields.RANGE:
                 line = self._reader.ints(wire, value)[0]
@@ -54,7 +64,18 @@ class ScipDocument:
                 symbol = bytes(value).decode('utf-8', 'replace')
             elif number == OccurrenceFields.SYMBOL_ROLES:
                 roles = value
-        return Occurrence(line + 1, symbol, roles) if line is not None and symbol else None  # SCIP lines are 0-based
+            elif number == OccurrenceFields.ENCLOSING_RANGE:
+                span = self._span(self._reader.ints(wire, value))
+        if line is None or not symbol:
+            return None
+        return Occurrence(line + 1, symbol, roles, *span)  # SCIP lines are 0-based
+
+    @staticmethod
+    def _span(ints):
+        """(start, end) lines, 1-based, of a packed range: [line, start, end] or [start line, start, end line, end]."""
+        if len(ints) == 4:
+            return ints[0] + 1, ints[2] + 1
+        return (ints[0] + 1, ints[0] + 1) if len(ints) == 3 else (0, 0)
 
     def _start_line(self, raw):
         for number, _, value in self._reader.fields(raw):

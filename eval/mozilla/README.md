@@ -71,7 +71,7 @@ machine-checked key, not a human review.
 
 | | Mozilla Add-ons | Open edX (after fixes) | Sentry |
 | --- | --- | --- | --- |
-| Production links | **0 / 41** | 68 / 71 | 20 / 20 |
+| Production links | **0 / 41** | 61 / 71 | 20 / 20 |
 | False links | 0 | 0 | 0 |
 
 ### Why nothing was found

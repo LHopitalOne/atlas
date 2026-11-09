@@ -14,6 +14,7 @@ class OccurrenceFields:
     RANGE = 1  # deprecated packed [line, start char, (end line,) end char]; still what most indexers write
     SYMBOL = 2
     SYMBOL_ROLES = 3
+    ENCLOSING_RANGE = 7  # packed, like RANGE: the whole definition (a function's body) around its name
     SINGLE_LINE_RANGE = 8  # the typed replacement for RANGE
     MULTI_LINE_RANGE = 9
 

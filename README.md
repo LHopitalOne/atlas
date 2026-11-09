@@ -88,6 +88,17 @@ mounted read-only, the libraries it declares (requirements files, `pyproject.tom
 where install scripts can do no harm, and only the index is written back. On Label Studio this takes the libraries
 the index resolves from none to 55.
 
+Services often talk through a client library that lives in a repository of its own (an SDK): the service calls
+`ls.tasks.get(id)` and the HTTP request is built inside the SDK. `links --library sdk=folder` reads the library too,
+and, with SCIP indexes of every repository, walks from each request the library sends up through the library's own
+functions to the service lines that call into it, where the request is reported. Each call followed is an assumption
+the indexes check, across repositories: `model.py:291 -> TasksClient.get -> RawTasksClient.get -> GET /api/tasks/{id}/`.
+
+```bash
+python3 -m atlas_bridge index --sandbox -o scip label-studio label-studio-ml-backend label-studio-sdk
+python3 -m atlas_bridge links label-studio label-studio-ml-backend --library label-studio-sdk --scip-dir scip -o links.json
+```
+
 `eval/sentry/` and `eval/openedx/` are answer keys of the real links between four Sentry services and four Open edX
 ones (the second built after the finder was tuned on the first, to test whether it generalises);
 `eval/labelstudio/` is a held-out key the frozen finder was run on once. `eval/score.py` scores a run:
@@ -99,8 +110,12 @@ python3 eval/score.py eval/sentry/answer-key.json links.json
 
 | | Sentry | Open edX | Label Studio (held out) |
 | --- | --- | --- | --- |
-| Production links found | 20 / 20 | 68 / 71 (12 / 71 before the held-out fixes) | 4 / 15 (3 / 15 frozen; 4 / 4 sent by the services' own code, the other 11 by an SDK outside the set) |
+| Production links found | 20 / 20 | 61 / 71 (12 / 71 before the held-out fixes) | 6 / 15 (3 / 15 frozen; 4 / 4 sent by the services' own code, 2 / 11 sent through the SDK, traced with `--library`) |
 | False links | 0 | 0 (31 before) | 0 |
+
+`eval/score.py` once credited a key link when a found link's route sat within 3 lines of it, even when that found link
+was another key link's route; it no longer does, which took Open edX from 68 to 61 (the finder sends Discovery's list
+requests to the detail route, and five catalog links had been credited for a neighbouring course route).
 
 The bridge follows the dependency rule of clean architecture; `lint-imports` enforces it:
 

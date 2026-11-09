@@ -8,7 +8,8 @@ from enum import Enum
 class Assumption:
     """`name`, used at `file:line`, was taken to mean a definition in `target_file` between `target_start` and
     `target_end` (inclusive). With no target_file it was only taken to be defined somewhere in the repository
-    (a trait or class of its own, not one from a library)."""
+    (a trait or class of its own, not one from a library). `repo` and `target_repo` place a call that crosses into a
+    library read alongside the services."""
 
     file: str
     line: int
@@ -16,6 +17,8 @@ class Assumption:
     target_file: str = ''
     target_start: int = 0
     target_end: int = 0
+    repo: str = ''  # the repository `file` is in, when not the one the link starts from (a library on the way)
+    target_repo: str = ''  # the repository `target_file` is in, when not `repo` (a call into a library)
 
     @property
     def has_target(self):
