@@ -161,6 +161,27 @@ class RequestTest(unittest.TestCase):
         self.assertIn('self.base_url', call(ex, '/symbolicate').hints)
         self.assertIn('requests.Session()', call(ex, '/kw').hints)
 
+    def test_generated_client_request_with_a_named_method(self):
+        ex = extract(
+            {
+                'sdk/tasks/raw_client.py': """
+                class RawTasksClient:
+                    def get(self, id):
+                        client = self._client_wrapper.httpx_client
+                        return client.request(f"api/tasks/{encode_path_param(id)}/", method="GET")
+
+                    def delete(self, id):
+                        return self._client_wrapper.httpx_client.request(path=f"api/tasks/{id}/", method="DELETE")
+
+                    def legacy(self, session):
+                        return session.request('PATCH', '/api/legacy/')
+                """,
+            }
+        )
+        self.assertEqual(
+            requests_(ex), {('GET', '/api/tasks/{id}'), ('DELETE', '/api/tasks/{id}'), ('PATCH', '/api/legacy')}
+        )
+
     def test_long_assignment_chain(self):
         chain = ' = '.join(f'a{i}' for i in range(3000))
         ex = extract({'svc/chain.py': f"{chain} = '/x'\ndef f():\n    requests.get(a2999)\n    requests.get(a0)\n"})

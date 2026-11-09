@@ -2,7 +2,7 @@
 """Score a links.json (python -m atlas_bridge links) against an answer key (eval/<project>/answer-key.json).
 
 A key link is found when the finder reports a link with the same caller and target repositories whose route is the
-same: equal paths (ignoring parameter names and trailing slashes), or the same route file within 3 lines.
+same: equal paths (ignoring parameter names and trailing slashes), or the same route file within 3 lines with the same fixed words (a route written as a regex).
 Finder links that match no key link are split into those whose call site the key excludes on purpose (tests,
 tooling, plumbing) and the rest, which are false links.
 
@@ -22,13 +22,23 @@ def norm(path):
     return p or '/'
 
 
-def same_route(key, found):
+def same_route(key, found, paths=frozenset()):
+    """paths: the key's normalised paths between the same two repositories. The nearby-line fallback is for a route
+    the finder writes differently (a regex): it needs the same fixed words, and does not apply to a found route whose
+    path is another key link's."""
     r = found.get('route')
     if not r or key['caller'] != found['caller'] or key['target'] != found['target']:
         return False
     if norm(key['path']) == norm(r['path']):
         return True
+    if norm(r['path']) in paths or literals(r['path']) != literals(key['path']):
+        return False
     return key['route']['file'] == r['file'] and abs(key['route']['line'] - r['line']) <= 3
+
+
+def literals(path):
+    """The fixed words of a path: a route written as a regex and the same route written with converters share them."""
+    return [s for s in norm(path).split('/') if s and '{' not in s]
 
 
 def excluded_by_key(key, found):
@@ -48,10 +58,14 @@ def score(key, found):
         'unmatched_calls': sum(1 for f in found['links'] if not f.get('route')),
     }
     matched = set()
+    known = {}
+    for k in key['links']:
+        known.setdefault((k['caller'], k['target']), set()).add(norm(k['path']))
     for scope in sorted({k['scope'] for k in key['links']}):
         rows = []
         for k in (k for k in key['links'] if k['scope'] == scope):
-            hits = [i for i, f in enumerate(links) if same_route(k, f)]
+            paths = known.get((k['caller'], k['target']), frozenset())
+            hits = [i for i, f in enumerate(links) if same_route(k, f, paths)]
             matched.update(hits)
             statuses = sorted({links[i]['status'] for i in hits})
             verified = sorted({links[i].get('verification', 'unverified') for i in hits})

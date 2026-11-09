@@ -153,6 +153,11 @@ class AtlasCommandTest(unittest.TestCase):
 
 
 class PartsTest(unittest.TestCase):
+    def test_links_inside_a_repository_are_on_by_default(self):
+        parser = AtlasApp().parser()
+        self.assertTrue(parser.parse_args(['r']).within)
+        self.assertFalse(parser.parse_args(['r', '--no-within']).within)
+
     def test_folders_with_one_name_are_told_apart(self):
         from atlas_bridge.cli import RepositoryInput
 
@@ -213,6 +218,18 @@ class PartsTest(unittest.TestCase):
         self.assertTrue(MapBudget(5).fit(g))
         self.assertEqual([len(x.symbols) for x in g.files.values()], [1, 0, 1])
         self.assertEqual(g.links, {(f, Ref('web', 'b.js')): Status.MATCHED, (f, h): Status.INFERRED})
+
+    def test_budget_keeps_both_ends_of_a_link_inside_one_repository(self):
+        from atlas_bridge.cli.budget import MapBudget
+        from atlas_bridge.core.model import CodeGraph, Kind, Ref, Status, Symbol
+
+        g = CodeGraph()
+        g.file('app', 'ui.js').symbols.append(Symbol('load', 'load', Kind.FUNCTION))
+        g.file('app', 'urls.py').symbols.append(Symbol('app::http:GET /x', 'GET /x', Kind.OTHER))
+        g.file('app', 'other.py').symbols.append(Symbol('o', 'o', Kind.FUNCTION))
+        g.link(Ref('app', 'ui.js', 'load'), Ref('app', 'urls.py', 'app::http:GET /x'), Status.MATCHED)
+        self.assertTrue(MapBudget(4).fit(g))
+        self.assertEqual([len(x.symbols) for x in g.files.values()], [1, 1, 0])
 
     def test_runner_errors(self):
         self.assertIsInstance(GraphifyFailedError('api', 'x'), ExtractionError)

@@ -15,6 +15,7 @@ from ..usecases.draw import GROUPINGS, MapDrawer
 from ..usecases.link import LinkFinder, LinkReport
 from .budget import MapBudget
 from .inputs import GraphInput, JsonFile
+from .links import LinksCommand
 from .scipcheck import ScipCheck
 
 
@@ -23,7 +24,7 @@ class MapPipeline:
 
     def __init__(self, options, report):
         """options: parsed map arguments (out_dir, refresh, aliases, include_tests, verify, sandbox, group, title,
-        graph_json)."""
+        graph_json, within)."""
         self._o = options
         self._report = report
         self._runner = GraphifyRunner(self._still_mapping)
@@ -76,7 +77,8 @@ class MapPipeline:
             extraction, extractor = Extraction(), TreeSitterExtractor()
             for repo in repos:
                 extraction.extend(extractor.extract(repo.name, repo.path))
-            links = LinkFinder(names, self._o.aliases, include_tests=self._o.include_tests).find(extraction)
+            rules = LinksCommand._rules(self._o.within)  # the same rule order as `links --within`
+            links = LinkFinder(names, self._o.aliases, self._o.include_tests, rules).find(extraction)
         except (BridgeError, ImportError) as e:
             self._report(f'  links     none found: {e}')
             return []
@@ -86,8 +88,12 @@ class MapPipeline:
             self._report('  links     not checked with SCIP (add --verify; needs Node.js and/or rust-analyzer)')
         report = LinkReport(names, extraction, links)
         self._save('links.json', LinkFilePresenter().present(report))
-        found = sum(link.route is not None for link in links)
-        self._report(f'  links     {found} between repositories, {len(links) - found} requests with no route found')
+        found = [link for link in links if link.route is not None]
+        inside = sum(link.source == link.target for link in found)
+        self._report(
+            f'  links     {len(found) - inside} between repositories, {inside} inside one, '
+            f'{len(links) - len(found)} requests with no route found'
+        )
         return links
 
     def _spec(self, graph):
@@ -96,7 +102,7 @@ class MapPipeline:
         if MapBudget().fit(code):
             self._report(
                 f'  map       over {MapBudget.MAX_NODES:,} files and symbols: functions and classes are folded into '
-                'their files, except where requests cross repositories'
+                'their files, except at the ends of HTTP links'
             )
         spec = AtlasSpecPresenter(self._o.title).present(MapDrawer(GROUPINGS[self._o.group]).draw(code))
         files = sum(len(d['services']) for r in spec['repos'] for d in r['domains'])

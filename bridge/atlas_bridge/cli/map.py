@@ -29,6 +29,12 @@ class MapCommand(Command):
             metavar='word=repo',
             help='a word in client code that means a repository, e.g. upstream=sentry (repeatable)',
         )
+        parser.add_argument(
+            '--no-within',
+            dest='within',
+            action='store_false',
+            help="do not link a repository's browser code to its own server routes",
+        )
         parser.add_argument('--include-tests', action='store_true', help='also link requests made only by tests')
         parser.add_argument(
             '--group', choices=sorted(GROUPINGS), default='community', help='what becomes a domain (default: community)'
