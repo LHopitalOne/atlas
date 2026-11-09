@@ -46,6 +46,17 @@ class BullmqTest(unittest.TestCase):
         )
         self.assertEqual(paths(found)[1], [('/reports/daily', 2), ('/reports/{job}', 2), ('/exports/csv', 3)])
 
+    def test_a_switch_nested_in_a_case_names_no_job(self):
+        found = Channels.of(
+            "import { Worker } from 'bullmq';\n"
+            "new Worker('media', async (job) => {\n"
+            '  switch (job.name) {\n'
+            "    case 'scale': switch (job.data.format) { case 'png': break; } break;\n"
+            '  }\n'
+            '});\n'
+        )
+        self.assertEqual(paths(found)[1], [('/media/scale', 2)])
+
     def test_nestjs_injected_queue_and_processor_with_enum_names(self):
         found = Channels(
             {

@@ -8,8 +8,8 @@ from ..channels import Argument, LibraryType
 
 
 class ByName(NamedTuple):
-    """A call that sends a task by its registered name: a method of the app object (`app.send_task(name)`) or, with
-    `method` empty, a function of the library module (`celery.signature(name)`)."""
+    """A call that sends a task by its registered name: `method` of the app object (`app.send_task(name)`), or
+    `function` of the library module (`celery.signature(name)`) when it is not empty."""
 
     method: str
     function: str

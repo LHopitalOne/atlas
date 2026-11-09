@@ -83,11 +83,17 @@ class JobReadings:
         for switch in JsSyntax.walk(fn.child_by_field_name('body'), {'switch_statement'}) if subject else ():
             if JsSyntax.text(JsSyntax.unwrap(switch.child_by_field_name('value'))) != subject:
                 continue
-            for case in JsSyntax.walk(switch.child_by_field_name('body'), {'switch_case'}):
+            for case in self._cases(switch):
                 found = self.names(file, case.child_by_field_name('value'), hints)
                 out += found
                 unknown = unknown or not found
         return list(dict.fromkeys(out + [self.EVERY] * (unknown or not out)))
+
+    @staticmethod
+    def _cases(switch):
+        """The cases of one switch, not those of a switch nested in a case (that one tells apart something else)."""
+        body = switch.child_by_field_name('body')
+        return [c for c in body.named_children if c.type == 'switch_case'] if body is not None else []
 
     def _subject(self, fn):
         """What a switch on the job's name is written as: '<param>.name', or 'name' for a destructured parameter."""
