@@ -2,12 +2,15 @@ import unittest
 
 from atlas_bridge.adapters.treesitter.javascript.calls.composite import RequestCalls
 from atlas_bridge.adapters.treesitter.javascript.calls.direct import DirectRequests
+from atlas_bridge.adapters.treesitter.javascript.calls.graphql.collector import GraphqlCalls
+from atlas_bridge.adapters.treesitter.javascript.calls.keyed import KeyedRequests
 from atlas_bridge.adapters.treesitter.javascript.calls.verbs import VerbRequests
 from atlas_bridge.adapters.treesitter.javascript.channels.collector import ChannelCollector
 from atlas_bridge.adapters.treesitter.javascript.collector import FileCollector, SharedPass
 from atlas_bridge.adapters.treesitter.javascript.extractor import JavaScriptExtractor
 from atlas_bridge.adapters.treesitter.javascript.policy import JavaScriptTestPolicy
 from atlas_bridge.adapters.treesitter.javascript.routes.express import ExpressRoutes
+from atlas_bridge.adapters.treesitter.javascript.routes.nextjs import NextRoutes
 from atlas_bridge.adapters.treesitter.javascript.source import JsSource
 from atlas_bridge.core.http import Extraction
 
@@ -40,10 +43,12 @@ class TreeSpy(FileCollector):
 class FilePassTest(unittest.TestCase):
     def test_the_extractor_reads_every_file_in_one_pass(self):
         ws = Repository.workspace(FILES)
-        shared, channels = JavaScriptExtractor().collectors(ws)
+        shared, files, channels = JavaScriptExtractor().collectors(ws)
         self.assertIsInstance(shared, SharedPass)
+        self.assertIsInstance(files, NextRoutes)  # routes named by their files read the files it picks by path
         self.assertIsInstance(channels, ChannelCollector)  # other protocols: only files that name their libraries
-        self.assertEqual([type(c) for c in shared.collectors], [ExpressRoutes, RequestCalls])
+        kinds = [ExpressRoutes, RequestCalls, KeyedRequests, GraphqlCalls]
+        self.assertEqual([type(c) for c in shared.collectors], kinds)
         out = shared.collect()
         self.assertEqual([str(r.path) for r in out.routes], ['/x'])
         self.assertEqual(calls(out), [('GET', '/b'), ('GET', '/c')])

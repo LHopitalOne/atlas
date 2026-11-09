@@ -60,7 +60,10 @@ class RequestBuilder:
             return []
         hints = set()
         value = self._module.values.resolve(url_node, hints)
-        if value is None or not UrlText.matchable(value):
+        unknown_path = value is not None and UrlText.unknown_path(value)  # 'https://host/{*path}'
+        if unknown_path:
+            value = UrlText.untailed(value)  # the path is a parameter's, for the callers to fill in
+        if value is None or unknown_path or not UrlText.matchable(value):
             if value is not None and obj is None:
                 self._open(node, value, method, options, hints)
             return []  # entirely dynamic here: nothing to match

@@ -1,15 +1,18 @@
 """The value of a URL expression as a template: literals, template strings, `+`, bindings, URL builders, URL objects
-(`url.href`, `url.toString()`) and helper functions that return a URL."""
+(`url.href`, `url.toString()`), helper functions that return a URL, and members of object literals reached through
+destructuring and imports (`const { baseUrl } = config.api`)."""
 
 from ...kit import StringTemplate, ValueResolver
 from ..bindings.scopes import Scopes
 from ..syntax.nodes import JsSyntax
+from .objects import ObjectPaths
 from .urls import UrlText
 
 
 class UrlValues(ValueResolver):
     """Resolves URL expressions of one file. The scope passed along is the set of hints the expression adds to (names
-    of variables and settings it reads). Each binding is resolved once per file."""
+    of variables and settings it reads). Each binding is resolved once per file. A name or member chain bound to no
+    value of its own here is followed to where its value is written (ObjectPaths), in this file or another."""
 
     HANDLERS = {
         'string': '_string',
@@ -29,8 +32,9 @@ class UrlValues(ValueResolver):
     FALLBACKS = frozenset({'||', '??'})
     MAX_URL = 1000  # a resolved URL longer than this is not a URL
 
-    def __init__(self, scopes: Scopes):
+    def __init__(self, scopes: Scopes, objects: ObjectPaths | None = None):
         self._scopes = scopes
+        self._objects = objects
         self._resolved = {}  # initializer node id -> (value, hints)
 
     def resolve(self, node, scope, depth=0):
@@ -118,7 +122,24 @@ class UrlValues(ValueResolver):
         """`url.href` / `url.pathname` of a URL object is that URL."""
         if JsSyntax.text(node.child_by_field_name('property')) in self.URL_PARTS:
             return self.resolve(node.child_by_field_name('object'), hints, depth)
+        located = self._located(node, hints, depth)
+        if located is not None:
+            hints.add(JsSyntax.text(node))
+            return located
         return self.unknown(node, hints)
+
+    def _located(self, node, hints, depth):
+        """The value of a name or member chain where it is written (an object property, an import), when that is a
+        URL template with a known part; None otherwise."""
+        found = self._objects.locate(node) if self._objects is not None and depth < self.MAX_DEPTH else None
+        if found is None or found.node.id == node.id:
+            return None
+        names = set()
+        value = found.module.values.resolve(found.node, names, depth + 1)
+        if not UrlText.literal(value) or len(value) > self.MAX_URL:
+            return None
+        hints.update(names)
+        return value
 
     def _builder(self, node, hints, depth):
         """A URL builder: getUrl('/orders/$id/', {...}) is the path it is given."""
@@ -157,4 +178,8 @@ class UrlValues(ValueResolver):
             hints.update(found)
             if UrlText.literal(resolved) and len(resolved) <= self.MAX_URL:
                 return resolved
+        else:
+            located = self._located(node, hints, depth)
+            if located is not None:
+                return located
         return '{' + name + '}'

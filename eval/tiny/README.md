@@ -35,6 +35,21 @@ same file within 2 lines, or the same channel) for every protocol.
 | --- | --- | --- | --- | --- |
 | Before (commit `1f9a1ff`) | 18 / 73 | 0 | 18 / 50 | 0 / 23 |
 | JavaScript wrappers followed, TypeScript generic calls, decorators never requests | 34 / 73 | 0 | 34 / 50 | 0 / 23 |
+| Channel catalog per language (Kafka, RabbitMQ, Redis, gRPC, WebSocket, TCP/UDP, GraphQL), Next.js file routes, SWR, config objects | **64 / 73** | **0** | 43 / 50 | 21 / 23 |
+
+The channel catalog is one table of library entry points per language (which call sends or receives, on which
+protocol, which argument is the channel) over shared machinery that traces a receiver to the library that made it and
+resolves the channel value. Each language's table was reviewed by a second agent whose only job was to reject rules
+tied to these apps rather than to a library's documented API; the reviewers removed several (gRPC servicer methods
+that are not handlers, GraphQL roots found by class name, ports a test passes). The four real projects did not change
+(Sentry 20/20, Open edX 61/71, Label Studio 6/15, Mozilla 0/41, 0 false links).
+
+Still missed: the six ledger links go through a client SDK, which `--library` follows only with SCIP indexes (this
+run builds none); two are a WebSocket server pushing to a client on a socket it accepted (no channel names that
+direction); one is an HTTP call.
+
+These apps are now a development set: the rules were written while looking at their misses. They show that the
+approach covers every protocol, not how well it does on code never seen; that is measured on held-out projects.
 
 ## What the misses said
 
