@@ -34,6 +34,9 @@ class MapCommand(Command):
             '--group', choices=sorted(GROUPINGS), default='community', help='what becomes a domain (default: community)'
         )
         parser.add_argument('--title', help='the map title (default: the repository names)')
+        parser.add_argument(
+            '--graph-json', action='store_true', help='write graph.json even for very large graphs (over 200,000 nodes)'
+        )
         parser.add_argument('--no-open', action='store_true', help='write the page without opening a browser')
 
     def run(self, args):

@@ -89,6 +89,19 @@ class AtlasCommandTest(unittest.TestCase):
         self.assertEqual(sum(lk['status'] == 'matched' for lk in links['links']), 2)
         self.assertIn('not checked with SCIP', log)
 
+    def test_very_large_graphs_skip_graph_json(self):
+        from atlas_bridge.cli.pipeline import MapPipeline
+
+        with Shop() as shop, mock.patch.object(MapPipeline, 'MAX_GRAPH_JSON_NODES', 3):
+            code, log, out = shop.atlas()
+            written = os.path.exists(os.path.join(out, 'graph.json'))
+            shop.atlas(0, '--graph-json')
+            forced = os.path.exists(os.path.join(out, 'graph.json'))
+        self.assertEqual(code, 0, log)
+        self.assertFalse(written)
+        self.assertTrue(forced)
+        self.assertIn('add --graph-json', log)
+
     def test_reuses_an_existing_graph(self):
         with Shop() as shop:
             shop.atlas()

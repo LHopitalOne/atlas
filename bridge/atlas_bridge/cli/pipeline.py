@@ -19,8 +19,11 @@ from .scipcheck import ScipCheck
 
 
 class MapPipeline:
+    MAX_GRAPH_JSON_NODES = 200_000  # PostHog's 760,000-node merged graph is a 1.2 GB file nobody asked for
+
     def __init__(self, options, report):
-        """options: parsed map arguments (out_dir, refresh, aliases, include_tests, verify, sandbox, group, title)."""
+        """options: parsed map arguments (out_dir, refresh, aliases, include_tests, verify, sandbox, group, title,
+        graph_json)."""
         self._o = options
         self._report = report
         self._runner = GraphifyRunner(self._still_mapping)
@@ -32,7 +35,12 @@ class MapPipeline:
         graph = self._timed('graphify', lambda: GraphifyMerger().merge([(r.name, self._graph(r)) for r in repos]))
         links = self._timed('links', lambda: self._links(repos))
         graph = GraphifyLinkWriter(graph).present(links)
-        self._save('graph.json', graph)
+        if self._o.graph_json or len(graph['nodes']) <= self.MAX_GRAPH_JSON_NODES:
+            self._save('graph.json', graph)
+        else:
+            self._report(
+                f'  graph     graph.json not written: {len(graph["nodes"]):,} nodes (add --graph-json to write it)'
+            )
         spec = self._timed('map', lambda: self._spec(graph))
         self._save('spec.json', spec)
         return self._save('atlas.html', spec, AtlasPage().write)
