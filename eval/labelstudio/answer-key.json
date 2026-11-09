@@ -1,0 +1,1691 @@
+{
+ "repos": {
+  "label-studio": {
+   "url": "https://github.com/HumanSignal/label-studio",
+   "commit": "e638bb569a20d1361b6ce6f719d06f87747e94e1"
+  },
+  "label-studio-ml-backend": {
+   "url": "https://github.com/HumanSignal/label-studio-ml-backend",
+   "commit": "a13c5fb6e7766c6ce9007c0c77d44d17239ffd42"
+  }
+ },
+ "scopes": {
+  "prod": "production code path (the shipped example ML backends count)",
+  "dev": "runs only in development setups"
+ },
+ "how_the_path_is_known": {
+  "literal": "string literal at the call site",
+  "constant": "module constant",
+  "template": "template or f-string with variables",
+  "client-chain": "built by a client wrapper",
+  "setting": "path held in a config value",
+  "library": "sent by label_studio_sdk, outside the two repositories",
+  "other": "see the link's notes"
+ },
+ "links": [
+  {
+   "id": "L01",
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "GET",
+   "path": "/health",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "MLBackend.url (DB field set by the user via /api/ml or the --ml-backends CLI flag) + HEALTH_URL='health', joined by MLApi._get_url (urljoin(url + '/', 'health'))",
+   "route": {
+    "file": "label_studio_ml/api.py",
+    "line": 136,
+    "declared_as": "@_server.route('/health', methods=['GET']) on the Flask app _server (stacked with route('/') at line 137)",
+    "handler": "health (label_studio_ml/api.py:139)",
+    "framework": "flask",
+    "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/api.py#L136"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio/ml/api_connector.py",
+     "line": 234,
+     "function": "MLApi.health",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/api_connector.py#L234"
+    },
+    {
+     "file": "label_studio/ml/models.py",
+     "line": 159,
+     "function": "MLBackend.healthcheck_",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/models.py#L159"
+    },
+    {
+     "file": "label_studio/ml/models.py",
+     "line": 174,
+     "function": "MLBackend.healthcheck",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/models.py#L174"
+    },
+    {
+     "file": "label_studio/ml/models.py",
+     "line": 204,
+     "function": "MLBackend.update_state",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/models.py#L204"
+    },
+    {
+     "file": "label_studio/ml/serializers.py",
+     "line": 63,
+     "function": "MLBackendSerializer._validate_healthcheck",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/serializers.py#L63"
+    }
+   ],
+   "confidence": "high",
+   "notes": "HTTP sent by BaseHTTPAPI.request -> requests.Session.request (api_connector.py:106) via MLApi._request GET branch (line 163). update_state is reached from MLBackendListAPI.get_queryset/perform_create, MLBackendDetailAPI.get_object/perform_update (ml/api.py:88,105,183,188), Project.update_ml_backends_state (projects/models.py:1170) and predict_tasks (ml/models.py:350)."
+  },
+  {
+   "id": "L02",
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "POST",
+   "path": "/predict",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "MLBackend.url + PREDICT_URL='predict' in MLApi._get_url",
+   "route": {
+    "file": "label_studio_ml/api.py",
+    "line": 34,
+    "declared_as": "@_server.route('/predict', methods=['POST'])",
+    "handler": "_predict (label_studio_ml/api.py:36)",
+    "framework": "flask",
+    "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/api.py#L34"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio/ml/api_connector.py",
+     "line": 231,
+     "function": "MLApi.make_predictions",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/api_connector.py#L231"
+    },
+    {
+     "file": "label_studio/ml/models.py",
+     "line": 241,
+     "function": "MLBackend._predict",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/models.py#L241"
+    },
+    {
+     "file": "label_studio/ml/models.py",
+     "line": 293,
+     "function": "MLBackend._get_predictions_from_ml_backend",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/models.py#L293"
+    },
+    {
+     "file": "label_studio/ml/models.py",
+     "line": 387,
+     "function": "MLBackend.interactive_annotating",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/models.py#L387"
+    },
+    {
+     "file": "label_studio/data_manager/functions.py",
+     "line": 377,
+     "function": "evaluate_predictions",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/data_manager/functions.py#L377"
+    },
+    {
+     "file": "label_studio/ml/api.py",
+     "line": 293,
+     "function": "MLBackendPredictTestAPI.post",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/api.py#L293"
+    },
+    {
+     "file": "label_studio/ml/api.py",
+     "line": 375,
+     "function": "MLBackendInteractiveAnnotating.post",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/api.py#L375"
+    }
+   ],
+   "confidence": "high",
+   "notes": "MLBackend._predict calls ml_api._request(PREDICT_URL, ...) directly instead of make_predictions. evaluate_predictions -> predict_tasks -> _get_predictions_from_ml_backend is reached from tasks/api.py:417, tasks/models.py:253, data_manager/api.py:485,493 and the retrieve_predictions action data_manager/actions/basic.py:32. Body {tasks, project, label_config, params{login,password,hostname,context}} matches _predict."
+  },
+  {
+   "id": "L03",
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "POST",
+   "path": "/setup",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "MLBackend.url + SETUP_URL='setup' in MLApi._get_url",
+   "route": {
+    "file": "label_studio_ml/api.py",
+    "line": 92,
+    "declared_as": "@_server.route('/setup', methods=['POST'])",
+    "handler": "_setup (label_studio_ml/api.py:94)",
+    "framework": "flask",
+    "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/api.py#L92"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio/ml/api_connector.py",
+     "line": 242,
+     "function": "MLApi.setup",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/api_connector.py#L242"
+    },
+    {
+     "file": "label_studio/ml/models.py",
+     "line": 171,
+     "function": "MLBackend.setup_",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/models.py#L171"
+    },
+    {
+     "file": "label_studio/ml/models.py",
+     "line": 179,
+     "function": "MLBackend.setup",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/models.py#L179"
+    },
+    {
+     "file": "label_studio/ml/models.py",
+     "line": 207,
+     "function": "MLBackend.update_state",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/models.py#L207"
+    },
+    {
+     "file": "label_studio/ml/serializers.py",
+     "line": 82,
+     "function": "MLBackendSerializer._validate_setup",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/serializers.py#L82"
+    }
+   ],
+   "confidence": "high",
+   "notes": "JSON body {project, schema, hostname, extra_params} matches what _setup reads (project, schema, extra_params). POST via MLApi._request -> BaseHTTPAPI.post (api_connector.py:161)."
+  },
+  {
+   "id": "L04",
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "POST",
+   "path": "/webhook",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "Two ways: (1) MLApi.train sends self._request('webhook', ...) to MLBackend.url when flag ff_back_dev_1417_start_training_mlbackend_webhooks_250122_long is on (feature_flags.json: on=true); (2) post_save signal create_ml_webhook stores Webhook.url = MLBackend.url.rstrip('/') + '/webhook', and the webhooks dispatcher POSTs every event to Webhook.url",
+   "route": {
+    "file": "label_studio_ml/api.py",
+    "line": 117,
+    "declared_as": "@_server.route('/webhook', methods=['POST'])",
+    "handler": "webhook (label_studio_ml/api.py:118)",
+    "framework": "flask",
+    "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/api.py#L117"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio/ml/api_connector.py",
+     "line": 198,
+     "function": "MLApi.train",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/api_connector.py#L198"
+    },
+    {
+     "file": "label_studio/ml/models.py",
+     "line": 224,
+     "function": "MLBackend.train",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/models.py#L224"
+    },
+    {
+     "file": "label_studio/ml/api.py",
+     "line": 236,
+     "function": "MLBackendTrainAPI.post",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/api.py#L236"
+    },
+    {
+     "file": "label_studio/tasks/models.py",
+     "line": 1590,
+     "function": "update_ml_backend (post_save Annotation receiver)",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/tasks/models.py#L1590"
+    },
+    {
+     "file": "label_studio/ml/models.py",
+     "line": 514,
+     "function": "create_ml_webhook (names the URL; no HTTP here)",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/ml/models.py#L514"
+    },
+    {
+     "file": "label_studio/webhooks/utils.py",
+     "line": 58,
+     "function": "run_webhook_sync (ssrf_safe_post to Webhook.url)",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/webhooks/utils.py#L58"
+    },
+    {
+     "file": "label_studio/webhooks/utils.py",
+     "line": 108,
+     "function": "emit_webhooks_sync",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/webhooks/utils.py#L108"
+    },
+    {
+     "file": "label_studio/webhooks/utils.py",
+     "line": 136,
+     "function": "_process_webhook_batch",
+     "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/webhooks/utils.py#L136"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Path for the webhook-dispatcher branch comes from data (Webhook.url row created by create_ml_webhook), so a static tool must connect ml/models.py:514 to webhooks/utils.py:58; the MLApi.train branch is a string literal. Server handler acts on ANNOTATION_CREATED/UPDATED/DELETED and START_TRAINING, returns 200 'Unknown event' for others. Webhook sends do not carry basic-auth credentials, so a backend with BASIC_AUTH set would 401 them."
+  },
+  {
+   "id": "L05",
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "POST",
+   "path": "/api/predictions/",
+   "scope": "prod",
+   "how_the_path_is_known": "library",
+   "how_the_target_is_named": "LabelStudio(base_url=args.ls_url, default LABEL_STUDIO_URL env or http://localhost:8080) in yolo/cli.py:46",
+   "route": {
+    "file": "label_studio/tasks/urls.py",
+    "line": 11,
+    "declared_as": "core/urls.py:65 include('tasks.urls') -> path('api/', include(router.urls)) (tasks/urls.py:47) + DefaultRouter.register(r'predictions')",
+    "handler": "PredictionAPI.create (ModelViewSet; perform_create at label_studio/tasks/api.py:1450)",
+    "framework": "Django/DRF router",
+    "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/tasks/urls.py#L11"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio_ml/examples/yolo/cli.py",
+     "line": 69,
+     "function": "LabelStudioMLPredictor.run (LabelStudio.predictions.create)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/yolo/cli.py#L69"
+    }
+   ],
+   "confidence": "high",
+   "notes": "SDK predictions.create -> POST api/predictions/. CLI scope caveat as for /api/tasks/{pk}/."
+  },
+  {
+   "id": "L06",
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/api/projects/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "library",
+   "how_the_target_is_named": "label_studio_sdk.Client(self.LABEL_STUDIO_HOST, self.LABEL_STUDIO_API_KEY) -> Client.url; LABEL_STUDIO_HOST / LABEL_STUDIO_URL env (default http://localhost:8080); yolo cli: LabelStudio(base_url=--ls-url / LABEL_STUDIO_URL env)",
+   "route": {
+    "file": "label_studio/projects/urls.py",
+    "line": 20,
+    "declared_as": "core/urls.py:60 include('projects.urls') -> path('api/projects/', include(_api_urlpatterns)) (projects/urls.py:61) + path('<int:pk>/')",
+    "handler": "ProjectAPI.get (label_studio/projects/api.py:409)",
+    "framework": "Django/DRF",
+    "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/projects/urls.py#L20"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio_ml/examples/bert_classifier/model.py",
+     "line": 129,
+     "function": "BertClassifier.fit (Client.get_project -> Project.get_from_id -> update_params -> get_params)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/bert_classifier/model.py#L129"
+    },
+    {
+     "file": "label_studio_ml/examples/gliner/model.py",
+     "line": 209,
+     "function": "GLiNERModel.fit (Client.get_project -> Project.get_from_id -> update_params -> get_params)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/gliner/model.py#L209"
+    },
+    {
+     "file": "label_studio_ml/examples/sklearn_text_classifier/model.py",
+     "line": 148,
+     "function": "SklearnTextClassifier._get_tasks (Client.get_project -> Project.get_from_id -> update_params -> get_params)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/sklearn_text_classifier/model.py#L148"
+    },
+    {
+     "file": "label_studio_ml/examples/timeseries_segmenter/model.py",
+     "line": 461,
+     "function": "TimeSeriesSegmenter._get_tasks (Client.get_project -> Project.get_from_id -> update_params -> get_params)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/timeseries_segmenter/model.py#L461"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_ner/model.py",
+     "line": 111,
+     "function": "HuggingFaceNER._get_tasks (Client.get_project -> Project.get_from_id -> update_params -> get_params)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_ner/model.py#L111"
+    },
+    {
+     "file": "label_studio_ml/examples/yolo/cli.py",
+     "line": 52,
+     "function": "LabelStudioMLPredictor.run (LabelStudio.projects.get)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/yolo/cli.py#L52"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Legacy: Project.get_params -> make_request('GET', f'/api/projects/{id}') (_legacy/project.py:358, via get_from_id 461-476). New SDK: projects.get -> GET api/projects/{id}/ (projects/raw_client.py). Legacy SDK sends the path without trailing slash; label-studio has APPEND_SLASH=False but core.middleware.CommonMiddlewareAppendSlashWithoutRedirect (core/middleware.py:54, enabled at core/settings/base.py:279) re-dispatches a 404 slashless path internally to the slashed route, so the declared route is what serves it."
+  },
+  {
+   "id": "L07",
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/api/tasks/",
+   "scope": "prod",
+   "how_the_path_is_known": "library",
+   "how_the_target_is_named": "label_studio_sdk.Client(self.LABEL_STUDIO_HOST, self.LABEL_STUDIO_API_KEY) -> Client.url; LABEL_STUDIO_HOST / LABEL_STUDIO_URL env (default http://localhost:8080)",
+   "route": {
+    "file": "label_studio/tasks/urls.py",
+    "line": 15,
+    "declared_as": "core/urls.py:65 include('tasks.urls') -> path('api/tasks/', include(_api_urlpatterns)) (tasks/urls.py:43) + path('')",
+    "handler": "tasks.api.TaskListAPI (label_studio/tasks/api.py:197) inheriting data_manager.api.TaskListAPI.get (label_studio/data_manager/api.py:431)",
+    "framework": "Django/DRF",
+    "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/tasks/urls.py#L15"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio_ml/examples/bert_classifier/model.py",
+     "line": 130,
+     "function": "BertClassifier.fit (Project.get_labeled_tasks -> get_tasks -> get_paginated_tasks)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/bert_classifier/model.py#L130"
+    },
+    {
+     "file": "label_studio_ml/examples/gliner/model.py",
+     "line": 210,
+     "function": "GLiNERModel.fit (Project.get_labeled_tasks -> get_tasks -> get_paginated_tasks)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/gliner/model.py#L210"
+    },
+    {
+     "file": "label_studio_ml/examples/sklearn_text_classifier/model.py",
+     "line": 149,
+     "function": "SklearnTextClassifier._get_tasks (Project.get_labeled_tasks -> get_tasks -> get_paginated_tasks)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/sklearn_text_classifier/model.py#L149"
+    },
+    {
+     "file": "label_studio_ml/examples/timeseries_segmenter/model.py",
+     "line": 462,
+     "function": "TimeSeriesSegmenter._get_tasks (Project.get_labeled_tasks -> get_tasks -> get_paginated_tasks)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/timeseries_segmenter/model.py#L462"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_ner/model.py",
+     "line": 112,
+     "function": "HuggingFaceNER._get_tasks (Project.get_labeled_tasks -> get_tasks -> get_paginated_tasks)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_ner/model.py#L112"
+    }
+   ],
+   "confidence": "high",
+   "notes": "_legacy/project.py:929-956 -> get_tasks loop -> get_paginated_tasks make_request('GET', '/api/tasks', params{project,page,page_size,query,fields,resolve_uri}) (project.py:822). Paginated until 404. Legacy SDK sends the path without trailing slash; label-studio has APPEND_SLASH=False but core.middleware.CommonMiddlewareAppendSlashWithoutRedirect (core/middleware.py:54, enabled at core/settings/base.py:279) re-dispatches a 404 slashless path internally to the slashed route, so the declared route is what serves it."
+  },
+  {
+   "id": "L08",
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/api/tasks/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "library",
+   "how_the_target_is_named": "LabelStudio(base_url=args.ls_url, default LABEL_STUDIO_URL env or http://localhost:8080) in yolo/cli.py:46",
+   "route": {
+    "file": "label_studio/tasks/urls.py",
+    "line": 16,
+    "declared_as": "core/urls.py:65 include('tasks.urls') -> path('api/tasks/') (tasks/urls.py:43) + path('<int:pk>/')",
+    "handler": "TaskAPI.get (label_studio/tasks/api.py:438)",
+    "framework": "Django/DRF",
+    "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/tasks/urls.py#L16"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio_ml/examples/yolo/cli.py",
+     "line": 123,
+     "function": "LabelStudioMLPredictor.prepare_tasks (LabelStudio.tasks.get)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/yolo/cli.py#L123"
+    }
+   ],
+   "confidence": "high",
+   "notes": "SDK tasks.get -> GET api/tasks/{id}/ (label-studio-sdk tasks/raw_client.py). yolo/cli.py is a user-run batch prediction CLI documented in yolo/README.md; scoped prod but could be read as tooling."
+  },
+  {
+   "id": "L09",
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "POST",
+   "path": "/api/token/refresh/",
+   "scope": "prod",
+   "how_the_path_is_known": "library",
+   "how_the_target_is_named": "LabelStudio(base_url=LABEL_STUDIO_URL or LABEL_STUDIO_HOST or HOSTNAME env, api_key=LABEL_STUDIO_API_KEY env) in LabelStudioMLBase._get_label_studio_client; ls_auth._sdk_client(LABEL_STUDIO_URL / cached /setup url); TokensClientExt._refresh_url = base_url + 'api/token/refresh/'",
+   "route": {
+    "file": "label_studio/jwt_auth/urls.py",
+    "line": 10,
+    "declared_as": "core/urls.py:105 re_path('^', include('jwt_auth.urls')) + path('api/token/refresh/')",
+    "handler": "DecoratedTokenRefreshView.post (label_studio/jwt_auth/views.py:101)",
+    "framework": "Django/DRF (simplejwt TokenRefreshView)",
+    "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/jwt_auth/urls.py#L10"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio_ml/model.py",
+     "line": 264,
+     "function": "LabelStudioMLBase.get_label_studio_access_token (reads _tokens_client.api_key)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/model.py#L264"
+    },
+    {
+     "file": "label_studio_ml/examples/docling/model.py",
+     "line": 262,
+     "function": "Docling.predict_single (get_label_studio_access_token)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/docling/model.py#L262"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_video_interactive/ls_auth.py",
+     "line": 63,
+     "function": "_resolve_token_with_sdk (resolve_x_api_key_header_value)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_video_interactive/ls_auth.py#L63"
+    },
+    {
+     "file": "label_studio_ml/examples/watsonx_llm/data_transfer_app.py",
+     "line": 113,
+     "function": "get_data (implicit, SDK get_headers before users.list)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/watsonx_llm/data_transfer_app.py#L113"
+    },
+    {
+     "file": "label_studio_ml/examples/yolo/cli.py",
+     "line": 52,
+     "function": "LabelStudioMLPredictor.run (implicit, SDK get_headers before projects.get)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/yolo/cli.py#L52"
+    }
+   ],
+   "confidence": "medium",
+   "notes": "Only sent when the API key is a JWT refresh token (Personal Access Token) and no valid cached access token exists (label-studio-sdk src/label_studio_sdk/tokens/client_ext.py:91-106, 149-172). get_label_studio_access_token is reached from every self.get_local_path call that does not pass ls_access_token (model.py:288-289). Legacy tokens never trigger it."
+  },
+  {
+   "id": "L10",
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/api/users/",
+   "scope": "prod",
+   "how_the_path_is_known": "library",
+   "how_the_target_is_named": "LabelStudio(base_url=LABEL_STUDIO_URL env, api_key=LABEL_STUDIO_API_KEY env) in watsonx_llm/data_transfer_app.py:connect_ls",
+   "route": {
+    "file": "label_studio/users/urls.py",
+    "line": 14,
+    "declared_as": "core/urls.py:64 include('users.urls') -> re_path(r'^api/', include(router.urls)) (users/urls.py:17) + DefaultRouter.register(r'users')",
+    "handler": "UserAPI.list (label_studio/users/api.py:171)",
+    "framework": "Django/DRF router",
+    "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/users/urls.py#L14"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio_ml/examples/watsonx_llm/data_transfer_app.py",
+     "line": 113,
+     "function": "get_data (client.users.list)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/watsonx_llm/data_transfer_app.py#L113"
+    }
+   ],
+   "confidence": "high",
+   "notes": "SDK users.list -> GET api/users/ (users/raw_client.py:514-534). data_transfer_app is served by watsonx _wsgi.py via DispatcherMiddleware; handles LS webhooks at /upload."
+  },
+  {
+   "id": "L11",
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/api/version/",
+   "scope": "prod",
+   "how_the_path_is_known": "library",
+   "how_the_target_is_named": "label_studio_sdk.Client(self.LABEL_STUDIO_HOST, self.LABEL_STUDIO_API_KEY) -> Client.url; LABEL_STUDIO_HOST / LABEL_STUDIO_URL env (default http://localhost:8080)",
+   "route": {
+    "file": "label_studio/core/urls.py",
+    "line": 71,
+    "declared_as": "re_path(r'api/version/') in ROOT_URLCONF core.urls (unanchored; re_path(r'version/') at line 71 also matches and maps to the same view) (the unanchored re_path(r'version/') at core/urls.py:71 matches first; same view as line 72, skeptic)",
+    "handler": "version_page (label_studio/core/views.py:46)",
+    "framework": "Django",
+    "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/core/urls.py#L71"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio_ml/examples/bert_classifier/model.py",
+     "line": 128,
+     "function": "BertClassifier.fit (label_studio_sdk.Client constructor -> get_versions)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/bert_classifier/model.py#L128"
+    },
+    {
+     "file": "label_studio_ml/examples/gliner/model.py",
+     "line": 208,
+     "function": "GLiNERModel.fit (label_studio_sdk.Client constructor -> get_versions)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/gliner/model.py#L208"
+    },
+    {
+     "file": "label_studio_ml/examples/sklearn_text_classifier/model.py",
+     "line": 147,
+     "function": "SklearnTextClassifier._get_tasks (label_studio_sdk.Client constructor -> get_versions)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/sklearn_text_classifier/model.py#L147"
+    },
+    {
+     "file": "label_studio_ml/examples/timeseries_segmenter/model.py",
+     "line": 460,
+     "function": "TimeSeriesSegmenter._get_tasks (label_studio_sdk.Client constructor -> get_versions)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/timeseries_segmenter/model.py#L460"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_ner/model.py",
+     "line": 110,
+     "function": "HuggingFaceNER._get_tasks (label_studio_sdk.Client constructor -> get_versions)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_ner/model.py#L110"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Legacy label_studio_sdk.Client.__init__ calls get_versions -> make_request('GET', '/api/version') (label-studio-sdk src/label_studio_sdk/_legacy/client.py:110,121). Legacy SDK sends the path without trailing slash; label-studio has APPEND_SLASH=False but core.middleware.CommonMiddlewareAppendSlashWithoutRedirect (core/middleware.py:54, enabled at core/settings/base.py:279) re-dispatches a 404 slashless path internally to the slashed route, so the declared route is what serves it."
+  },
+  {
+   "id": "L12",
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/data/local-files/",
+   "scope": "prod",
+   "how_the_path_is_known": "library",
+   "how_the_target_is_named": "LABEL_STUDIO_URL or LABEL_STUDIO_HOST env (SDK get_local_path hostname fallback, io.py:233-237) or explicit ls_host/hostname arg (tesseract/easyocr pass their LABEL_STUDIO_HOST attr, ppocr/docling pass env-derived host, segment_anything_video_interactive passes env or cached /setup URL); docker-compose sets e.g. LABEL_STUDIO_URL=http://host.docker.internal:8080",
+   "route": {
+    "file": "label_studio/io_storages/urls.py",
+    "line": 220,
+    "declared_as": "core/urls.py:66 include('io_storages.urls') + re_path(r'data/local-files/')",
+    "handler": "localfiles_data (label_studio/io_storages/localfiles/views.py:83)",
+    "framework": "Django",
+    "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/io_storages/urls.py#L220"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio_ml/model.py",
+     "line": 291,
+     "function": "LabelStudioMLBase.get_local_path",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/model.py#L291"
+    },
+    {
+     "file": "label_studio_ml/model.py",
+     "line": 327,
+     "function": "LabelStudioMLBase.preload_task_data",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/model.py#L327"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_2_video/model.py",
+     "line": 226,
+     "function": "NewModel.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_2_video/model.py#L226"
+    },
+    {
+     "file": "label_studio_ml/examples/nemo_asr/model.py",
+     "line": 29,
+     "function": "NemoASR.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/nemo_asr/model.py#L29"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_dino/dino.py",
+     "line": 153,
+     "function": "GroundingDINO.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_dino/dino.py#L153"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_sam/dino.py",
+     "line": 160,
+     "function": "DINOBackend.one_task",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_sam/dino.py#L160"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_sam/dino.py",
+     "line": 208,
+     "function": "DINOBackend.multiple_tasks",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_sam/dino.py#L208"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_model/sam_predictor.py",
+     "line": 131,
+     "function": "SAMPredictor.set_image (path_resolver=self.get_local_path from SamMLBackend.predict, model.py:57)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_model/sam_predictor.py#L131"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_2_image/model.py",
+     "line": 79,
+     "function": "NewModel.set_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_2_image/model.py#L79"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_video_interactive/model.py",
+     "line": 1048,
+     "function": "SamVideoInteractive._handle_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_video_interactive/model.py#L1048"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_video_interactive/model.py",
+     "line": 1280,
+     "function": "SamVideoInteractive._download_valid_video",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_video_interactive/model.py#L1280"
+    },
+    {
+     "file": "label_studio_ml/examples/tesseract/tesseract.py",
+     "line": 53,
+     "function": "BBOXOCR.load_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/tesseract/tesseract.py#L53"
+    },
+    {
+     "file": "label_studio_ml/examples/easyocr/model.py",
+     "line": 99,
+     "function": "EasyOCR.predict_single",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/easyocr/model.py#L99"
+    },
+    {
+     "file": "label_studio_ml/examples/mmdetection-3/mmdetection.py",
+     "line": 166,
+     "function": "MMDetection.predict_one_task",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/mmdetection-3/mmdetection.py#L166"
+    },
+    {
+     "file": "label_studio_ml/examples/yolo/control_models/base.py",
+     "line": 186,
+     "function": "ControlModel.get_path",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/yolo/control_models/base.py#L186"
+    },
+    {
+     "file": "label_studio_ml/examples/ppocr/model.py",
+     "line": 303,
+     "function": "PPOCR.predict_single (SDK get_local_path called directly)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/ppocr/model.py#L303"
+    },
+    {
+     "file": "label_studio_ml/examples/docling/model.py",
+     "line": 276,
+     "function": "Docling.predict_single (SDK get_local_path called directly as ls_sdk_get_local_path)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/docling/model.py#L276"
+    },
+    {
+     "file": "label_studio_ml/examples/langchain_search_agent/model.py",
+     "line": 124,
+     "function": "LangchainSearchAgent.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/langchain_search_agent/model.py#L124"
+    },
+    {
+     "file": "label_studio_ml/examples/bert_classifier/model.py",
+     "line": 104,
+     "function": "BertClassifier.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/bert_classifier/model.py#L104"
+    },
+    {
+     "file": "label_studio_ml/examples/bert_classifier/model.py",
+     "line": 152,
+     "function": "BertClassifier.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/bert_classifier/model.py#L152"
+    },
+    {
+     "file": "label_studio_ml/examples/flair/model.py",
+     "line": 64,
+     "function": "Flair.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/flair/model.py#L64"
+    },
+    {
+     "file": "label_studio_ml/examples/llm_interactive/model.py",
+     "line": 294,
+     "function": "OpenAIInteractive.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/llm_interactive/model.py#L294"
+    },
+    {
+     "file": "label_studio_ml/examples/sklearn_text_classifier/model.py",
+     "line": 98,
+     "function": "SklearnTextClassifier.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/sklearn_text_classifier/model.py#L98"
+    },
+    {
+     "file": "label_studio_ml/examples/sklearn_text_classifier/model.py",
+     "line": 189,
+     "function": "SklearnTextClassifier.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/sklearn_text_classifier/model.py#L189"
+    },
+    {
+     "file": "label_studio_ml/examples/timeseries_segmenter/model.py",
+     "line": 155,
+     "function": "TimeSeriesSegmenter._read_csv (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/timeseries_segmenter/model.py#L155"
+    },
+    {
+     "file": "label_studio_ml/examples/spacy/model.py",
+     "line": 23,
+     "function": "SpacyMLBackend.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/spacy/model.py#L23"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_ner/model.py",
+     "line": 71,
+     "function": "HuggingFaceNER.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_ner/model.py#L71"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_ner/model.py",
+     "line": 182,
+     "function": "HuggingFaceNER.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_ner/model.py#L182"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_llm/model.py",
+     "line": 34,
+     "function": "HuggingFaceLLM.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_llm/model.py#L34"
+    },
+    {
+     "file": "label_studio_ml/examples/interactive_substring_matching/model.py",
+     "line": 68,
+     "function": "InteractiveSubstringMatching.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/interactive_substring_matching/model.py#L68"
+    }
+   ],
+   "confidence": "medium",
+   "notes": "For /data/local-files/?d=<path> task URLs the SDK reads from disk only if LOCAL_FILES_DOCUMENT_ROOT is set (label-studio-sdk src/label_studio_sdk/_extensions/label_studio_tools/core/utils/io.py:114-147, 274-286); otherwise it GETs {host}/data/local-files/?d=... (io.py:344-345). Conditional on deployment env. deploy/nebius/app.py excluded (rejects ?d= URLs)."
+  },
+  {
+   "id": "L13",
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/data/upload/{filename}",
+   "scope": "prod",
+   "how_the_path_is_known": "library",
+   "how_the_target_is_named": "LABEL_STUDIO_URL or LABEL_STUDIO_HOST env (SDK get_local_path hostname fallback, io.py:233-237) or explicit ls_host/hostname arg (tesseract/easyocr pass their LABEL_STUDIO_HOST attr, ppocr/docling pass env-derived host, segment_anything_video_interactive passes env or cached /setup URL); docker-compose sets e.g. LABEL_STUDIO_URL=http://host.docker.internal:8080",
+   "route": {
+    "file": "label_studio/data_import/urls.py",
+    "line": 24,
+    "declared_as": "core/urls.py:61 include('data_import.urls') + path('data/upload/<path:filename>')",
+    "handler": "UploadedFileResponse.get (label_studio/data_import/api.py:1003)",
+    "framework": "Django/DRF",
+    "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/data_import/urls.py#L24"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio_ml/model.py",
+     "line": 291,
+     "function": "LabelStudioMLBase.get_local_path",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/model.py#L291"
+    },
+    {
+     "file": "label_studio_ml/model.py",
+     "line": 327,
+     "function": "LabelStudioMLBase.preload_task_data",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/model.py#L327"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_2_video/model.py",
+     "line": 226,
+     "function": "NewModel.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_2_video/model.py#L226"
+    },
+    {
+     "file": "label_studio_ml/examples/nemo_asr/model.py",
+     "line": 29,
+     "function": "NemoASR.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/nemo_asr/model.py#L29"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_dino/dino.py",
+     "line": 153,
+     "function": "GroundingDINO.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_dino/dino.py#L153"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_sam/dino.py",
+     "line": 160,
+     "function": "DINOBackend.one_task",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_sam/dino.py#L160"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_sam/dino.py",
+     "line": 208,
+     "function": "DINOBackend.multiple_tasks",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_sam/dino.py#L208"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_model/sam_predictor.py",
+     "line": 131,
+     "function": "SAMPredictor.set_image (path_resolver=self.get_local_path from SamMLBackend.predict, model.py:57)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_model/sam_predictor.py#L131"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_2_image/model.py",
+     "line": 79,
+     "function": "NewModel.set_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_2_image/model.py#L79"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_video_interactive/model.py",
+     "line": 1048,
+     "function": "SamVideoInteractive._handle_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_video_interactive/model.py#L1048"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_video_interactive/model.py",
+     "line": 1280,
+     "function": "SamVideoInteractive._download_valid_video",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_video_interactive/model.py#L1280"
+    },
+    {
+     "file": "label_studio_ml/examples/tesseract/tesseract.py",
+     "line": 53,
+     "function": "BBOXOCR.load_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/tesseract/tesseract.py#L53"
+    },
+    {
+     "file": "label_studio_ml/examples/easyocr/model.py",
+     "line": 99,
+     "function": "EasyOCR.predict_single",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/easyocr/model.py#L99"
+    },
+    {
+     "file": "label_studio_ml/examples/mmdetection-3/mmdetection.py",
+     "line": 166,
+     "function": "MMDetection.predict_one_task",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/mmdetection-3/mmdetection.py#L166"
+    },
+    {
+     "file": "label_studio_ml/examples/yolo/control_models/base.py",
+     "line": 186,
+     "function": "ControlModel.get_path",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/yolo/control_models/base.py#L186"
+    },
+    {
+     "file": "label_studio_ml/examples/ppocr/model.py",
+     "line": 303,
+     "function": "PPOCR.predict_single (SDK get_local_path called directly)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/ppocr/model.py#L303"
+    },
+    {
+     "file": "label_studio_ml/examples/docling/model.py",
+     "line": 276,
+     "function": "Docling.predict_single (SDK get_local_path called directly as ls_sdk_get_local_path)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/docling/model.py#L276"
+    },
+    {
+     "file": "label_studio_ml/examples/langchain_search_agent/model.py",
+     "line": 124,
+     "function": "LangchainSearchAgent.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/langchain_search_agent/model.py#L124"
+    },
+    {
+     "file": "label_studio_ml/examples/bert_classifier/model.py",
+     "line": 104,
+     "function": "BertClassifier.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/bert_classifier/model.py#L104"
+    },
+    {
+     "file": "label_studio_ml/examples/bert_classifier/model.py",
+     "line": 152,
+     "function": "BertClassifier.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/bert_classifier/model.py#L152"
+    },
+    {
+     "file": "label_studio_ml/examples/flair/model.py",
+     "line": 64,
+     "function": "Flair.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/flair/model.py#L64"
+    },
+    {
+     "file": "label_studio_ml/examples/llm_interactive/model.py",
+     "line": 294,
+     "function": "OpenAIInteractive.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/llm_interactive/model.py#L294"
+    },
+    {
+     "file": "label_studio_ml/examples/sklearn_text_classifier/model.py",
+     "line": 98,
+     "function": "SklearnTextClassifier.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/sklearn_text_classifier/model.py#L98"
+    },
+    {
+     "file": "label_studio_ml/examples/sklearn_text_classifier/model.py",
+     "line": 189,
+     "function": "SklearnTextClassifier.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/sklearn_text_classifier/model.py#L189"
+    },
+    {
+     "file": "label_studio_ml/examples/timeseries_segmenter/model.py",
+     "line": 155,
+     "function": "TimeSeriesSegmenter._read_csv (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/timeseries_segmenter/model.py#L155"
+    },
+    {
+     "file": "label_studio_ml/examples/spacy/model.py",
+     "line": 23,
+     "function": "SpacyMLBackend.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/spacy/model.py#L23"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_ner/model.py",
+     "line": 71,
+     "function": "HuggingFaceNER.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_ner/model.py#L71"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_ner/model.py",
+     "line": 182,
+     "function": "HuggingFaceNER.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_ner/model.py#L182"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_llm/model.py",
+     "line": 34,
+     "function": "HuggingFaceLLM.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_llm/model.py#L34"
+    },
+    {
+     "file": "label_studio_ml/examples/interactive_substring_matching/model.py",
+     "line": 68,
+     "function": "InteractiveSubstringMatching.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/interactive_substring_matching/model.py#L68"
+    },
+    {
+     "file": "deploy/nebius/app.py",
+     "line": 115,
+     "function": "create_app.EndpointModel.set_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/deploy/nebius/app.py#L115"
+    }
+   ],
+   "confidence": "medium",
+   "notes": "Only sent as the fallback after /storage-data/uploaded/ fails with an HTTPError (label-studio-sdk src/label_studio_sdk/_extensions/label_studio_tools/core/utils/io.py:331-333, 452-462: fallback_upload_url = host + '/data/' + upload_path). Same call sites as the storage-data link. <path:filename> includes '<project_id>/<file>'."
+  },
+  {
+   "id": "L14",
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/storage-data/uploaded/",
+   "scope": "prod",
+   "how_the_path_is_known": "library",
+   "how_the_target_is_named": "LABEL_STUDIO_URL or LABEL_STUDIO_HOST env (SDK get_local_path hostname fallback, io.py:233-237) or explicit ls_host/hostname arg (tesseract/easyocr pass their LABEL_STUDIO_HOST attr, ppocr/docling pass env-derived host, segment_anything_video_interactive passes env or cached /setup URL); docker-compose sets e.g. LABEL_STUDIO_URL=http://host.docker.internal:8080",
+   "route": {
+    "file": "label_studio/data_import/urls.py",
+    "line": 25,
+    "declared_as": "core/urls.py:61 re_path('^', include('data_import.urls')) + path('storage-data/uploaded/')",
+    "handler": "DownloadStorageData.get (label_studio/data_import/api.py:1057)",
+    "framework": "Django/DRF",
+    "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/data_import/urls.py#L25"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio_ml/model.py",
+     "line": 291,
+     "function": "LabelStudioMLBase.get_local_path",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/model.py#L291"
+    },
+    {
+     "file": "label_studio_ml/model.py",
+     "line": 327,
+     "function": "LabelStudioMLBase.preload_task_data",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/model.py#L327"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_2_video/model.py",
+     "line": 226,
+     "function": "NewModel.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_2_video/model.py#L226"
+    },
+    {
+     "file": "label_studio_ml/examples/nemo_asr/model.py",
+     "line": 29,
+     "function": "NemoASR.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/nemo_asr/model.py#L29"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_dino/dino.py",
+     "line": 153,
+     "function": "GroundingDINO.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_dino/dino.py#L153"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_sam/dino.py",
+     "line": 160,
+     "function": "DINOBackend.one_task",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_sam/dino.py#L160"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_sam/dino.py",
+     "line": 208,
+     "function": "DINOBackend.multiple_tasks",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_sam/dino.py#L208"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_model/sam_predictor.py",
+     "line": 131,
+     "function": "SAMPredictor.set_image (path_resolver=self.get_local_path from SamMLBackend.predict, model.py:57)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_model/sam_predictor.py#L131"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_2_image/model.py",
+     "line": 79,
+     "function": "NewModel.set_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_2_image/model.py#L79"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_video_interactive/model.py",
+     "line": 1048,
+     "function": "SamVideoInteractive._handle_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_video_interactive/model.py#L1048"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_video_interactive/model.py",
+     "line": 1280,
+     "function": "SamVideoInteractive._download_valid_video",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_video_interactive/model.py#L1280"
+    },
+    {
+     "file": "label_studio_ml/examples/tesseract/tesseract.py",
+     "line": 53,
+     "function": "BBOXOCR.load_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/tesseract/tesseract.py#L53"
+    },
+    {
+     "file": "label_studio_ml/examples/easyocr/model.py",
+     "line": 99,
+     "function": "EasyOCR.predict_single",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/easyocr/model.py#L99"
+    },
+    {
+     "file": "label_studio_ml/examples/mmdetection-3/mmdetection.py",
+     "line": 166,
+     "function": "MMDetection.predict_one_task",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/mmdetection-3/mmdetection.py#L166"
+    },
+    {
+     "file": "label_studio_ml/examples/yolo/control_models/base.py",
+     "line": 186,
+     "function": "ControlModel.get_path",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/yolo/control_models/base.py#L186"
+    },
+    {
+     "file": "label_studio_ml/examples/ppocr/model.py",
+     "line": 303,
+     "function": "PPOCR.predict_single (SDK get_local_path called directly)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/ppocr/model.py#L303"
+    },
+    {
+     "file": "label_studio_ml/examples/docling/model.py",
+     "line": 276,
+     "function": "Docling.predict_single (SDK get_local_path called directly as ls_sdk_get_local_path)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/docling/model.py#L276"
+    },
+    {
+     "file": "label_studio_ml/examples/langchain_search_agent/model.py",
+     "line": 124,
+     "function": "LangchainSearchAgent.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/langchain_search_agent/model.py#L124"
+    },
+    {
+     "file": "label_studio_ml/examples/bert_classifier/model.py",
+     "line": 104,
+     "function": "BertClassifier.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/bert_classifier/model.py#L104"
+    },
+    {
+     "file": "label_studio_ml/examples/bert_classifier/model.py",
+     "line": 152,
+     "function": "BertClassifier.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/bert_classifier/model.py#L152"
+    },
+    {
+     "file": "label_studio_ml/examples/flair/model.py",
+     "line": 64,
+     "function": "Flair.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/flair/model.py#L64"
+    },
+    {
+     "file": "label_studio_ml/examples/llm_interactive/model.py",
+     "line": 294,
+     "function": "OpenAIInteractive.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/llm_interactive/model.py#L294"
+    },
+    {
+     "file": "label_studio_ml/examples/sklearn_text_classifier/model.py",
+     "line": 98,
+     "function": "SklearnTextClassifier.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/sklearn_text_classifier/model.py#L98"
+    },
+    {
+     "file": "label_studio_ml/examples/sklearn_text_classifier/model.py",
+     "line": 189,
+     "function": "SklearnTextClassifier.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/sklearn_text_classifier/model.py#L189"
+    },
+    {
+     "file": "label_studio_ml/examples/timeseries_segmenter/model.py",
+     "line": 155,
+     "function": "TimeSeriesSegmenter._read_csv (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/timeseries_segmenter/model.py#L155"
+    },
+    {
+     "file": "label_studio_ml/examples/spacy/model.py",
+     "line": 23,
+     "function": "SpacyMLBackend.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/spacy/model.py#L23"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_ner/model.py",
+     "line": 71,
+     "function": "HuggingFaceNER.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_ner/model.py#L71"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_ner/model.py",
+     "line": 182,
+     "function": "HuggingFaceNER.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_ner/model.py#L182"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_llm/model.py",
+     "line": 34,
+     "function": "HuggingFaceLLM.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_llm/model.py#L34"
+    },
+    {
+     "file": "label_studio_ml/examples/interactive_substring_matching/model.py",
+     "line": 68,
+     "function": "InteractiveSubstringMatching.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/interactive_substring_matching/model.py#L68"
+    },
+    {
+     "file": "deploy/nebius/app.py",
+     "line": 115,
+     "function": "create_app.EndpointModel.set_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/deploy/nebius/app.py#L115"
+    }
+   ],
+   "confidence": "high",
+   "notes": "SDK get_local_path (label-studio-sdk src/label_studio_sdk/_extensions/label_studio_tools/core/utils/io.py:322-333, 366-376, 442) rewrites any /data/upload/... or upload/... task URL, and passes through any /storage-data/uploaded/?filepath=... URL, to GET {host}/storage-data/uploaded/?filepath=upload/<project>/<file> with Authorization Token/Bearer. Triggered whenever task data holds an LS-uploaded file. preload_task_data only fetches when is_preload_needed (label_studio_ml/utils.py:120) is true. nebius deploy restricts input to /data/upload/ and /storage-data/uploaded/."
+  },
+  {
+   "id": "L15",
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/tasks/{task_id}/presign/",
+   "scope": "prod",
+   "how_the_path_is_known": "library",
+   "how_the_target_is_named": "LABEL_STUDIO_URL or LABEL_STUDIO_HOST env (SDK get_local_path hostname fallback, io.py:233-237) or explicit ls_host/hostname arg (tesseract/easyocr pass their LABEL_STUDIO_HOST attr, ppocr/docling pass env-derived host, segment_anything_video_interactive passes env or cached /setup URL); docker-compose sets e.g. LABEL_STUDIO_URL=http://host.docker.internal:8080",
+   "route": {
+    "file": "label_studio/io_storages/urls.py",
+    "line": 205,
+    "declared_as": "core/urls.py:66 include('io_storages.urls') + path('tasks/<int:task_id>/presign/') (backwards-compat alias of tasks/<int:task_id>/resolve/)",
+    "handler": "TaskResolveStorageUri.get (label_studio/io_storages/proxy_api.py:400)",
+    "framework": "Django/DRF",
+    "url": "https://github.com/HumanSignal/label-studio/blob/e638bb569a20d1361b6ce6f719d06f87747e94e1/label_studio/io_storages/urls.py#L205"
+   },
+   "call_sites": [
+    {
+     "file": "label_studio_ml/model.py",
+     "line": 291,
+     "function": "LabelStudioMLBase.get_local_path",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/model.py#L291"
+    },
+    {
+     "file": "label_studio_ml/model.py",
+     "line": 327,
+     "function": "LabelStudioMLBase.preload_task_data",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/model.py#L327"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_2_video/model.py",
+     "line": 226,
+     "function": "NewModel.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_2_video/model.py#L226"
+    },
+    {
+     "file": "label_studio_ml/examples/nemo_asr/model.py",
+     "line": 29,
+     "function": "NemoASR.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/nemo_asr/model.py#L29"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_dino/dino.py",
+     "line": 153,
+     "function": "GroundingDINO.predict",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_dino/dino.py#L153"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_sam/dino.py",
+     "line": 160,
+     "function": "DINOBackend.one_task",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_sam/dino.py#L160"
+    },
+    {
+     "file": "label_studio_ml/examples/grounding_sam/dino.py",
+     "line": 208,
+     "function": "DINOBackend.multiple_tasks",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/grounding_sam/dino.py#L208"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_model/sam_predictor.py",
+     "line": 131,
+     "function": "SAMPredictor.set_image (path_resolver=self.get_local_path from SamMLBackend.predict, model.py:57)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_model/sam_predictor.py#L131"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_2_image/model.py",
+     "line": 79,
+     "function": "NewModel.set_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_2_image/model.py#L79"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_video_interactive/model.py",
+     "line": 1048,
+     "function": "SamVideoInteractive._handle_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_video_interactive/model.py#L1048"
+    },
+    {
+     "file": "label_studio_ml/examples/segment_anything_video_interactive/model.py",
+     "line": 1280,
+     "function": "SamVideoInteractive._download_valid_video",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/segment_anything_video_interactive/model.py#L1280"
+    },
+    {
+     "file": "label_studio_ml/examples/tesseract/tesseract.py",
+     "line": 53,
+     "function": "BBOXOCR.load_image",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/tesseract/tesseract.py#L53"
+    },
+    {
+     "file": "label_studio_ml/examples/easyocr/model.py",
+     "line": 99,
+     "function": "EasyOCR.predict_single",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/easyocr/model.py#L99"
+    },
+    {
+     "file": "label_studio_ml/examples/mmdetection-3/mmdetection.py",
+     "line": 166,
+     "function": "MMDetection.predict_one_task",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/mmdetection-3/mmdetection.py#L166"
+    },
+    {
+     "file": "label_studio_ml/examples/yolo/control_models/base.py",
+     "line": 186,
+     "function": "ControlModel.get_path",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/yolo/control_models/base.py#L186"
+    },
+    {
+     "file": "label_studio_ml/examples/ppocr/model.py",
+     "line": 303,
+     "function": "PPOCR.predict_single (SDK get_local_path called directly)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/ppocr/model.py#L303"
+    },
+    {
+     "file": "label_studio_ml/examples/docling/model.py",
+     "line": 276,
+     "function": "Docling.predict_single (SDK get_local_path called directly as ls_sdk_get_local_path)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/docling/model.py#L276"
+    },
+    {
+     "file": "label_studio_ml/examples/langchain_search_agent/model.py",
+     "line": 124,
+     "function": "LangchainSearchAgent.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/langchain_search_agent/model.py#L124"
+    },
+    {
+     "file": "label_studio_ml/examples/bert_classifier/model.py",
+     "line": 104,
+     "function": "BertClassifier.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/bert_classifier/model.py#L104"
+    },
+    {
+     "file": "label_studio_ml/examples/bert_classifier/model.py",
+     "line": 152,
+     "function": "BertClassifier.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/bert_classifier/model.py#L152"
+    },
+    {
+     "file": "label_studio_ml/examples/flair/model.py",
+     "line": 64,
+     "function": "Flair.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/flair/model.py#L64"
+    },
+    {
+     "file": "label_studio_ml/examples/llm_interactive/model.py",
+     "line": 294,
+     "function": "OpenAIInteractive.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/llm_interactive/model.py#L294"
+    },
+    {
+     "file": "label_studio_ml/examples/sklearn_text_classifier/model.py",
+     "line": 98,
+     "function": "SklearnTextClassifier.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/sklearn_text_classifier/model.py#L98"
+    },
+    {
+     "file": "label_studio_ml/examples/sklearn_text_classifier/model.py",
+     "line": 189,
+     "function": "SklearnTextClassifier.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/sklearn_text_classifier/model.py#L189"
+    },
+    {
+     "file": "label_studio_ml/examples/timeseries_segmenter/model.py",
+     "line": 155,
+     "function": "TimeSeriesSegmenter._read_csv (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/timeseries_segmenter/model.py#L155"
+    },
+    {
+     "file": "label_studio_ml/examples/spacy/model.py",
+     "line": 23,
+     "function": "SpacyMLBackend.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/spacy/model.py#L23"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_ner/model.py",
+     "line": 71,
+     "function": "HuggingFaceNER.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_ner/model.py#L71"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_ner/model.py",
+     "line": 182,
+     "function": "HuggingFaceNER.fit (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_ner/model.py#L182"
+    },
+    {
+     "file": "label_studio_ml/examples/huggingface_llm/model.py",
+     "line": 34,
+     "function": "HuggingFaceLLM.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/huggingface_llm/model.py#L34"
+    },
+    {
+     "file": "label_studio_ml/examples/interactive_substring_matching/model.py",
+     "line": 68,
+     "function": "InteractiveSubstringMatching.predict (preload_task_data)",
+     "url": "https://github.com/HumanSignal/label-studio-ml-backend/blob/a13c5fb6e7766c6ce9007c0c77d44d17239ffd42/label_studio_ml/examples/interactive_substring_matching/model.py#L68"
+    }
+   ],
+   "confidence": "high",
+   "notes": "For cloud URIs (s3:, gs:, azure-blob:) the SDK builds {host}/tasks/{task_id}/presign/?fileuri=<base64 uri> (label-studio-sdk src/label_studio_sdk/_extensions/label_studio_tools/core/utils/io.py:348-359). All listed call sites pass task_id. deploy/nebius/app.py is excluded because validate_media_url rejects non-upload URLs."
+  }
+ ],
+ "excluded": [
+  {
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "POST",
+   "path": "/train",
+   "file": "label_studio/ml/api_connector.py",
+   "line": 212,
+   "where": "label_studio/ml/api_connector.py:212",
+   "reason": "no route in target: label_studio_ml/api.py declares no /train (only /predict, /setup, /webhook, /health, /, /metrics); also only the flag-off branch of MLApi.train"
+  },
+  {
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "GET",
+   "path": "/versions",
+   "file": "label_studio/ml/api_connector.py",
+   "line": 272,
+   "where": "label_studio/ml/api_connector.py:272 (via MLBackend.get_versions ml/models.py:424, MLBackendVersionsAPI ml/api.py:422)",
+   "reason": "no route in target: no /versions route in label_studio_ml/api.py or any example; LS falls back on error (ml/api.py:427)"
+  },
+  {
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "POST",
+   "path": "/job_status",
+   "file": "label_studio/ml/api_connector.py",
+   "line": 269,
+   "where": "label_studio/ml/api_connector.py:269 (MLBackendTrainJob.get_status ml/models.py:470)",
+   "reason": "no route in target; additionally get_status calls project.get_ml_api(), which Project does not define, so the path is dead"
+  },
+  {
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "POST",
+   "path": "/validate",
+   "file": "label_studio/ml/api_connector.py",
+   "line": 237,
+   "where": "label_studio/ml/api_connector.py:237",
+   "reason": "no route in target; MLApi.validate has no callers"
+  },
+  {
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "POST",
+   "path": "/duplicate_model",
+   "file": "label_studio/ml/api_connector.py",
+   "line": 254,
+   "where": "label_studio/ml/api_connector.py:254",
+   "reason": "no route in target; MLApi.duplicate_model has no callers"
+  },
+  {
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "POST",
+   "path": "/delete",
+   "file": "label_studio/ml/api_connector.py",
+   "line": 264,
+   "where": "label_studio/ml/api_connector.py:264",
+   "reason": "no route in target; MLApi.delete has no callers"
+  },
+  {
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "POST",
+   "path": "/upload (watsonx_llm data_transfer_app)",
+   "file": "label_studio/webhooks/utils.py",
+   "line": 58,
+   "where": "label_studio/webhooks/utils.py:58",
+   "reason": "no caller code names this path: only a user-configured Webhook.url per label_studio_ml/examples/watsonx_llm/README.md:26-27 (which itself says /data/upload)"
+  },
+  {
+   "caller": "label-studio",
+   "target": "label-studio-ml-backend",
+   "method": "*",
+   "path": "(ML backend mocks)",
+   "file": "label_studio/tests/ml/test_predict.py",
+   "line": 0,
+   "where": "label_studio/tests/ml/test_predict.py, label_studio/tests/test_predictions.py, label_studio/tests/conftest.py, label_studio/tests/ml.tavern.yml",
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "label-studio",
+   "target": "raw.githubusercontent.com",
+   "method": "GET",
+   "path": "liveContent.json",
+   "file": "label_studio/core/views.py",
+   "line": 155,
+   "where": "label_studio/core/views.py:155",
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "label-studio",
+   "target": "tele.labelstud.io",
+   "method": "POST",
+   "path": "/",
+   "file": "label_studio/core/utils/contextlog.py",
+   "line": 334,
+   "where": "label_studio/core/utils/contextlog.py:334",
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "label-studio",
+   "target": "pypi.org",
+   "method": "GET",
+   "path": "",
+   "file": "label_studio/core/utils/common.py",
+   "line": 383,
+   "where": "label_studio/core/utils/common.py:383",
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "label-studio",
+   "target": "user-supplied",
+   "method": "URL",
+   "path": "GET (task import)",
+   "file": "label_studio/data_import/uploader.py",
+   "line": 124,
+   "where": "label_studio/data_import/uploader.py:124",
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "label-studio",
+   "target": "/api/ml/...",
+   "method": "",
+   "path": "(mlBackends, trainMLBackend, predictWithML, mlInteractive)",
+   "file": "web/apps/labelstudio/src/config/ApiConfig.js",
+   "line": 56,
+   "where": "web/apps/labelstudio/src/config/ApiConfig.js:56-66",
+   "reason": "self-call: frontend calls label-studio's own Django API, which then proxies to the ML backend"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "?",
+   "method": "GET",
+   "path": "<task image URL>",
+   "file": "label_studio_ml/examples/watsonx_llm/model.py",
+   "line": 64,
+   "where": "label_studio_ml/examples/watsonx_llm/model.py:64",
+   "reason": "target not in the set (requests.get(image_url) on an arbitrary task-data URL, not addressed via LABEL_STUDIO_URL and sent without LS auth)"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "?",
+   "method": "GET",
+   "path": "<task image URL>",
+   "file": "label_studio_ml/examples/llm_interactive/model.py",
+   "line": 122,
+   "where": "label_studio_ml/examples/llm_interactive/model.py:122",
+   "reason": "target not in the set (same pattern: raw requests.get on task-data URL)"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "?",
+   "method": "GET",
+   "path": "<absolute http(s) task URL>",
+   "file": "label_studio_ml/model.py",
+   "line": 291,
+   "where": "label_studio_ml/model.py:291 (SDK get_local_path direct-URL branch)",
+   "reason": "target not in the set / not determinable: absolute URLs are fetched as-is (could be any host)"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "?",
+   "method": "GET",
+   "path": "<external video URL> via ffmpeg/ffprobe",
+   "file": "label_studio_ml/examples/segment_anything_video_interactive/model.py",
+   "line": 1318,
+   "where": "label_studio_ml/examples/segment_anything_video_interactive/model.py:1318-1328",
+   "reason": "target not in the set (only non-LS hosts are streamed; LS-hosted URLs go through get_local_path)"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "Deepgram",
+   "method": "API",
+   "path": "/ AWS S3",
+   "file": "label_studio_ml/examples/deepgram/model.py",
+   "line": 31,
+   "where": "label_studio_ml/examples/deepgram/model.py:31,70",
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "OpenAI/Azure",
+   "method": "O",
+   "path": "",
+   "file": "label_studio_ml/examples/llm_interactive/model.py",
+   "line": 45,
+   "where": "label_studio_ml/examples/llm_interactive/model.py:45; label_studio_ml/examples/langchain_search_agent/model.py:89; label_studio_ml/examples/watsonx_llm/model.py",
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "Docling",
+   "method": "S",
+   "path": "",
+   "file": "label_studio_ml/examples/docling/model.py",
+   "line": 142,
+   "where": "label_studio_ml/examples/docling/model.py:142",
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "GitHub/HF/model",
+   "method": "",
+   "path": "hubs (wget checkpoints)",
+   "file": "label_studio_ml/examples/grounding_sam/Dockerfile",
+   "line": 46,
+   "where": "label_studio_ml/examples/grounding_sam/Dockerfile:46",
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio-ml-backend",
+   "method": "GET",
+   "path": "/health, POST /setup, POST /predict",
+   "file": "tests/test_basic.py",
+   "line": 10,
+   "where": "tests/test_basic.py:10; label_studio_ml/examples/mmdetection-3/test_model.py:61",
+   "reason": "test or tooling only (also a self-call)"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/storage-data/uploaded/ (requests_mock)",
+   "file": "deploy/nebius/tests/smoke_cpu.py",
+   "line": 51,
+   "where": "deploy/nebius/tests/smoke_cpu.py:51",
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "",
+   "path": "(SDK client mocked)",
+   "file": "label_studio_ml/examples/deepgram/test_model.py",
+   "line": 224,
+   "where": "label_studio_ml/examples/deepgram/test_model.py:224; tests/test_unit_model.py:71",
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/user/login, POST /user/login, GET /api/current-user/token (legacy Client.get_api_key)",
+   "file": "label-studio-sdk",
+   "line": 0,
+   "where": "label-studio-sdk _legacy/client.py:125-141 via label_studio_sdk.Client(...)",
+   "reason": "not triggered: every caller passes api_key (or LABEL_STUDIO_API_KEY), so the credentials login path is never taken"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "",
+   "path": "(ls_auth_headers streaming headers)",
+   "file": "label_studio_ml/examples/segment_anything_video_interactive/ls_auth.py",
+   "line": 82,
+   "where": "label_studio_ml/examples/segment_anything_video_interactive/ls_auth.py:82",
+   "reason": "no request: ls_auth_headers is not called from model.py (only by tests); streaming to LS hosts was replaced by get_local_path download"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "POST",
+   "path": "/api/token/refresh/",
+   "file": "label_studio_ml/examples/deepgram/model.py",
+   "line": 92,
+   "reason": "dead code: deepgram/model.py calls self.get_label_studio_client(), which no class defines (only _get_label_studio_client, label_studio_ml/model.py:241); AttributeError is raised before any request (skeptic)"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/api/version/",
+   "file": "label_studio_ml/ls_io.py",
+   "line": 12,
+   "reason": "dead code: label_studio_ml/ls_io.py download_ls_dataset has no caller in either repository (skeptic)"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/api/projects/{pk}/",
+   "file": "label_studio_ml/ls_io.py",
+   "line": 13,
+   "reason": "dead code: label_studio_ml/ls_io.py download_ls_dataset has no caller in either repository (skeptic)"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "GET",
+   "path": "/api/tasks/",
+   "file": "label_studio_ml/ls_io.py",
+   "line": 14,
+   "reason": "dead code: label_studio_ml/ls_io.py download_ls_dataset has no caller in either repository (skeptic)"
+  },
+  {
+   "caller": "label-studio-ml-backend",
+   "target": "label-studio",
+   "method": "PATCH",
+   "path": "/api/tasks/{pk}/",
+   "file": "label_studio_ml/examples/deepgram/model.py",
+   "line": 92,
+   "reason": "dead code: deepgram/model.py calls self.get_label_studio_client(), which no class defines (only _get_label_studio_client, label_studio_ml/model.py:241); AttributeError is raised before any request (skeptic)"
+  }
+ ],
+ "no_route": []
+}

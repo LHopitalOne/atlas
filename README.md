@@ -44,13 +44,25 @@ graphify path "placeOrder()" "POST /orders" --graph merged-links.json   # Graphi
 python3 -m atlas_bridge spec merged-links.json -o graph.json             # and so does the Atlas map
 ```
 
-It reads routes (Django URLconfs with includes, Flask and FastAPI decorators, axum and actix routers, Express) and
-requests (urllib3, requests, httpx, reqwest, fetch, axios, and request types that declare their own path), follows
-wrapper functions back to the literal path, and works out the target service from names near the request
-(`_snuba_pool`, `SymbolicatorSession`, `--alias upstream=sentry`). Each link says how sure it is: **matched** (a
-named service, one route fits), **inferred** (no name, or a URL handed to another service to fetch), **ambiguous**
-(several routes fit) or **unmatched** (the named service has no such route). Requests made only by tests are left
-out unless `--include-tests`.
+It reads routes (Django URLconfs with includes, DRF routers and their `@action`s, plugin URL configs, Flask and
+FastAPI decorators, axum and actix routers, Express) and requests (urllib3, requests, httpx, reqwest, fetch, axios,
+and request types that declare their own path). It follows URLs through wrapper functions back to the literal path,
+through helpers that return a URL (`getBookmarksBaseUrl()`, `self._make_url(path)`), URL objects (`new URL(...).href`),
+`urljoin`, and Django settings (`settings.LMS_API_URLS['blocks']`).
+
+The target service comes from names near the request (`_snuba_pool`, `SymbolicatorSession`, `--alias
+upstream=sentry`) and from where configuration says services live. Settings modules, `.env` files and docker-compose
+files name URLs (`COURSE_CATALOG_API_URL = 'http://edx.devstack.discovery:18381/api/v1'`,
+`LMS_BASE_URL='http://localhost:18000'`, a compose service publishing `18381:18381`), so a request to
+`localhost:18381`, `10.0.0.5:18381`, a Docker DNS name or a configured setting reaches the service that address
+belongs to. `localhost` and bare IPs only count with their port; an address two services claim counts for neither.
+When a base URL carries part of the path, a route behind a short API prefix (`/api/v1`) fits, preferring the prefix
+configuration names, then one the base URL's name mentions (`lms_coursemode_api_url` -> `/api/course_modes/v1`).
+
+Each link says how sure it is: **matched** (a named service, one route fits), **inferred** (no name, a route behind a
+prefix the base URL is assumed to carry, or a URL made absolute and handed to another service to fetch),
+**ambiguous** (several routes fit) or **unmatched** (the named service has no such route). Requests made only by
+tests are left out unless `--include-tests`.
 
 ### Confirming links with SCIP
 
@@ -70,12 +82,19 @@ The indexers never run the repositories' code: scip-python and scip-typescript o
 with build scripts and procedural macros switched off. SCIP files are read without a protobuf dependency. What no
 index can confirm is configuration: which host a base URL points to when the code runs.
 
-`eval/sentry/` is an answer key of the real links between four Sentry services; `eval/score.py` scores a run:
+`eval/sentry/` and `eval/openedx/` are answer keys of the real links between four Sentry services and four Open edX
+ones (the second built after the finder was tuned on the first, to test whether it generalises);
+`eval/labelstudio/` is a held-out key the frozen finder was run on once. `eval/score.py` scores a run:
 
 ```bash
 python3 -m atlas_bridge links sentry relay snuba symbolicator --alias upstream=sentry -o links.json
 python3 eval/score.py eval/sentry/answer-key.json links.json
 ```
+
+| | Sentry | Open edX | Label Studio (held out) |
+| --- | --- | --- | --- |
+| Production links found | 20 / 20 | 68 / 71 (12 / 71 before the held-out fixes) | 4 / 15 (3 / 15 frozen; 4 / 4 sent by the services' own code, the other 11 by an SDK outside the set) |
+| False links | 0 | 0 (31 before) | 0 |
 
 The bridge follows the dependency rule of clean architecture; `lint-imports` enforces it:
 
@@ -83,8 +102,10 @@ The bridge follows the dependency rule of clean architecture; `lint-imports` enf
 | --- | --- | --- |
 | Entities | `core/model.py`: files, symbols, links, link certainty | the standard library, no I/O |
 | Entities | `core/http.py`: path templates, routes, requests, how well a request fits a route | the standard library, no I/O |
+| Entities | `core/addresses.py`: service URLs configuration names, hosts and ports | the standard library, no I/O |
 | Use cases | `usecases/draw.py`: arrange a code graph as repos > domains > files | `core` |
 | Use cases | `usecases/link.py`: match requests to other repositories' routes; the `Extractor` port | `core` |
+| Use cases | `usecases/addresses.py`, `usecases/bases.py`: which service an address or setting points at, which prefix a base URL carries | `core` |
 | Adapters | `adapters/graphify.py` (graph.json in and out), `adapters/atlas.py` (Atlas spec out), `adapters/treesitter/` (routes and requests from source), `adapters/linkfile.py` (links JSON) | `usecases`, `core`; never each other |
 | Driver | `__main__.py`: command line, files, wiring | everything |
 
@@ -152,6 +173,7 @@ tools/index-self/    tree-sitter + SCIP indexer for the Self graph
 docs/                DECISIONS, ARCHITECTURE, GRAPH_SPEC, INTEGRATION
 bridge/              Python: Graphify graph.json to Atlas (core, usecases, adapters, CLI)
 eval/sentry/         answer key: verified HTTP links between Sentry's repos, for scoring the link finder
+eval/openedx/, eval/labelstudio/  more answer keys, built without the finder (see each README)
 ```
 
 See `CLAUDE.md` for the rules the code follows.

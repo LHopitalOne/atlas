@@ -54,7 +54,13 @@
      "function": "GetHealthCheck::path",
      "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/services/upstream.rs#L808"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Mounted under ^api/0/ + ^relays/ (src/sentry/api/urls.py:3812); the method in Relay's UpstreamRequest matches."
+   }
   },
   {
    "id": "L02",
@@ -91,7 +97,13 @@
      "function": "GetProjectStates::path",
      "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/services/projects/source/upstream.rs#L81"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Mounted under ^api/0/ + ^relays/ (src/sentry/api/urls.py:3812); the method in Relay's UpstreamRequest matches. The call site at endpoints/project_configs.rs:264 forwards a downstream Relay's own request, so its path comes from that request, not a literal at that line."
+   }
   },
   {
    "id": "L03",
@@ -116,7 +128,13 @@
      "function": "GetRelays::path",
      "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/services/relays.rs#L108"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Mounted under ^api/0/ + ^relays/ (src/sentry/api/urls.py:3812); the method in Relay's UpstreamRequest matches."
+   }
   },
   {
    "id": "L04",
@@ -147,7 +165,13 @@
      "function": "RegisterRequest::path",
      "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/services/upstream.rs#L851"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Mounted under ^api/0/ + ^relays/ (src/sentry/api/urls.py:3812); the method in Relay's UpstreamRequest matches."
+   }
   },
   {
    "id": "L05",
@@ -178,7 +202,13 @@
      "function": "RegisterResponse::path",
      "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/services/upstream.rs#L875"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Mounted under ^api/0/ + ^relays/ (src/sentry/api/urls.py:3812); the method in Relay's UpstreamRequest matches."
+   }
   },
   {
    "id": "L06",
@@ -275,7 +305,13 @@
      "function": "create_subscription",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba_rpc.py#L522"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "snuba_rpc.py:467 builds f\"/rpc/{endpoint_name}/{class_version}\"; snuba_transpiler.py:389 uses \"/rpc/EndpointTraceItemTable/v1\"."
+   }
   },
   {
    "id": "L07",
@@ -300,7 +336,13 @@
      "function": "_raw_mql_query",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba.py#L1559"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "f\"/{request.dataset}/mql\", POST."
+   }
   },
   {
    "id": "L08",
@@ -325,7 +367,13 @@
      "function": "_raw_snql_query",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba.py#L1587"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "f\"/{request.dataset}/snql\", POST."
+   }
   },
   {
    "id": "L09",
@@ -350,7 +398,13 @@
      "function": "_create_snql_in_snuba",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/snuba/tasks.py#L316"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "f\"/{snuba_query.dataset}/{entity_key.value}/subscriptions\", POST."
+   }
   },
   {
    "id": "L10",
@@ -375,7 +429,13 @@
      "function": "_delete_from_snuba",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/snuba/tasks.py#L351"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Sentry sends /{subscription_id}; Snuba creates that id as f\"{partition}/{uuid.hex}\" (snuba/subscriptions/data.py:100), so it fills <int:partition>/<key>."
+   }
   },
   {
    "id": "L11",
@@ -400,7 +460,13 @@
      "function": "_raw_delete_query",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/utils/snuba.py#L1530"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Reached in production through DeleteQuery in src/sentry/deletions/tasks/nodestore.py:365."
+   }
   },
   {
    "id": "L12",
@@ -425,7 +491,13 @@
      "function": "Symbolicator.process_applecrashreport",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L321"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Symbolicator._process joins the path onto the base URL (symbolicator.py:518)."
+   }
   },
   {
    "id": "L13",
@@ -450,7 +522,13 @@
      "function": "Symbolicator.process_minidump",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L277"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "See L12."
+   }
   },
   {
    "id": "L14",
@@ -475,7 +553,13 @@
      "function": "SymbolicatorSession.query_task",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L609"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "task_url = f\"requests/{task_id}\" (symbolicator.py:606)."
+   }
   },
   {
    "id": "L15",
@@ -500,7 +584,13 @@
      "function": "Symbolicator.process_payload",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L365"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "See L12."
+   }
   },
   {
    "id": "L16",
@@ -524,8 +614,20 @@
      "line": 259,
      "function": "Symbolicator.process_minidump",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L259"
+    },
+    {
+     "file": "src/sentry/lang/native/symbolicator.py",
+     "line": 308,
+     "function": "Symbolicator.process_applecrashreport",
+     "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L308"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "See L12. Also called from symbolicator.py:308 (process_applecrashreport), added as a call site."
+   }
   },
   {
    "id": "L17",
@@ -550,7 +652,13 @@
      "function": "Symbolicator.process_js",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L412"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "See L12."
+   }
   },
   {
    "id": "L18",
@@ -575,7 +683,13 @@
      "function": "Symbolicator.process_jvm",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/lang/native/symbolicator.py#L453"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "See L12."
+   }
   },
   {
    "id": "L19",
@@ -612,7 +726,13 @@
      "function": "SentryDownloader::download_source",
      "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator-service/src/download/sentry.rs#L264"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Sentry puts this URL into the source config it sends Symbolicator (src/sentry/lang/native/sources.py:381); Symbolicator fetches it."
+   }
   },
   {
    "id": "L20",
@@ -643,7 +763,13 @@
      "function": "SentryDownloader::download_source",
      "url": "https://github.com/getsentry/symbolicator/blob/2abba9028ca896c489a56fc4ead86383a7301b04/crates/symbolicator-service/src/download/sentry.rs#L264"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Sentry puts this URL into the source config it sends Symbolicator (src/sentry/lang/native/sources.py:351); Symbolicator fetches it."
+   }
   },
   {
    "id": "L21",
@@ -668,7 +794,13 @@
      "function": "handle",
      "url": "https://github.com/getsentry/relay/blob/de080b7053b5e59826af76528f682fe51fa2ed75/relay-server/src/endpoints/forward.rs#L47"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Relay forwards unknown paths unchanged (uri.to_string())."
+   }
   },
   {
    "id": "L22",
@@ -693,7 +825,13 @@
      "function": "produce_snapshot_to_kafka",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/issues/attributes.py#L120"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Only when SENTRY_EVENTSTREAM is not Kafka (attributes.py:119), and Snuba registers /tests routes only when debug or testing (views.py)."
+   }
   },
   {
    "id": "L23",
@@ -718,7 +856,13 @@
      "function": "SnubaEventStream._send_item",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/eventstream/snuba.py#L517"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Only when SENTRY_EVENTSTREAM is not Kafka (attributes.py:119), and Snuba registers /tests routes only when debug or testing (views.py)."
+   }
   },
   {
    "id": "L24",
@@ -743,7 +887,13 @@
      "function": "SnubaEventStream._send",
      "url": "https://github.com/getsentry/sentry/blob/c69ccf85ab98d619e650c31bb1daed839deb5d2b/src/sentry/eventstream/snuba.py#L496"
     }
-   ]
+   ],
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, re-reading the source at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Only when SENTRY_EVENTSTREAM is not Kafka (attributes.py:119), and Snuba registers /tests routes only when debug or testing (views.py)."
+   }
   }
  ],
  "excluded": [
@@ -1268,6 +1418,33 @@
    "file": "crates/symbolicli/src/main.rs",
    "line": 228,
    "reason": "test or tooling only"
+  },
+  {
+   "caller": "relay",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/0/relays/metrics/",
+   "file": "relay-server/src/services/processor/bucket.rs",
+   "line": 736,
+   "reason": "Relay to an upstream Relay: Sentry has no route for this path"
+  },
+  {
+   "caller": "relay",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/{project_id}/envelope/",
+   "file": "relay-server/src/services/processor/common.rs",
+   "line": 273,
+   "reason": "Relay to an upstream Relay: Sentry has no route for this path"
+  },
+  {
+   "caller": "relay",
+   "target": "relay",
+   "method": "POST",
+   "path": "/api/{project_id}/upload/",
+   "file": "relay-server/src/services/upload.rs",
+   "line": 1176,
+   "reason": "Relay to an upstream Relay: Sentry has no route for this path"
   }
  ]
 }

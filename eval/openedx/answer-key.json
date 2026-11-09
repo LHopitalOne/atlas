@@ -1,0 +1,3044 @@
+{
+ "repos": {
+  "openedx-platform": {
+   "url": "https://github.com/openedx/openedx-platform",
+   "commit": "db5bfda81ec02ca78f24932bafa79c8f43e5ffa7"
+  },
+  "course-discovery": {
+   "url": "https://github.com/openedx/course-discovery",
+   "commit": "e0eadcd2c2411832c7e51085c901f4e9e8e293d0"
+  },
+  "credentials": {
+   "url": "https://github.com/openedx/credentials",
+   "commit": "8bb9b5f03e9b6d56a0e6dc590c79680f250d6090"
+  },
+  "frontend-app-learning": {
+   "url": "https://github.com/openedx/frontend-app-learning",
+   "commit": "7ae8423179b4a2edfd494b1fab77087f810bee1f"
+  }
+ },
+ "scopes": {
+  "prod": "production code path",
+  "dev": "runs only in development setups",
+  "ops": "production operations script (run by hand or by a pipeline, outside the services)"
+ },
+ "how_the_path_is_known": {
+  "literal": "string literal at the call site",
+  "constant": "module constant",
+  "template": "format string or template literal with variables",
+  "client-chain": "REST client attribute chain (client.api.v1.programs(uuid).get())",
+  "setting": "path held in a setting or config value",
+  "payload": "URL received from another service",
+  "other": "see the link's notes"
+ },
+ "links": [
+  {
+   "id": "E01",
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api-admin/api/v1/api_access_request/",
+   "scope": "prod",
+   "how_the_path_is_known": "setting",
+   "how_the_target_is_named": "partner.lms_url + settings.LMS_API_URLS['api_access_request'] (urljoin) in LMSAPIClient",
+   "route": {
+    "file": "openedx/core/djangoapps/api_admin/api/v1/urls.py",
+    "line": 11,
+    "declared_as": "lms/urls.py:198 path('api-admin/', include('openedx.core.djangoapps.api_admin.urls')) + api_admin/urls.py:60 path('api/', include('...api_admin.api.urls')) + api/urls.py:10 path('v1/', ...) + path('api_access_request/', ApiAccessRequestView)",
+    "handler": "ApiAccessRequestView.get (ListAPIView) (openedx/core/djangoapps/api_admin/api/v1/views.py:17)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/api_admin/api/v1/urls.py#L11"
+   },
+   "call_sites": [
+    {
+     "file": "course_discovery/apps/core/api_client/lms.py",
+     "line": 73,
+     "function": "LMSAPIClient.get_api_access_request",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/core/api_client/lms.py#L73"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Path constant in course_discovery/settings/base.py:762 'api-admin/api/v1/api_access_request/'. Reached from api/utils.py:186 check_catalog_api_access and api/serializers.py:172 (utm_source with company name, waffle-gated). Query user__username.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "urljoin(partner.lms_url, 'api-admin/api/v1/api_access_request/') (settings/base.py:762, core/api_client/lms.py:72-73); reached from api/utils.py:186 and api/serializers.py:172. Route lms/urls.py:198 + api_admin/urls.py:60 + api/urls.py:10 + api/v1/urls.py:11; ApiAccessRequestView is ListAPIView (api/v1/views.py:17)."
+   }
+  },
+  {
+   "id": "E02",
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/course_modes/v1/courses/{course_id}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "Partner.lms_coursemode_api_url (e.g. https://lms/api/course_modes/v1/) + f'/courses/{course_run.key}/' via partner.oauth_api_client",
+   "route": {
+    "file": "common/djangoapps/course_modes/rest_api/v1/urls.py",
+    "line": 14,
+    "declared_as": "lms/urls.py:181 path('api/course_modes/', include('common.djangoapps.course_modes.rest_api.urls')) + rest_api/urls.py:11 path('v1/', ...) + re_path(r'^courses/{COURSE_ID_PATTERN}/$', CourseModesView)",
+    "handler": "CourseModesView.get (ListCreateAPIView) (common/djangoapps/course_modes/rest_api/v1/views.py:45)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/common/djangoapps/course_modes/rest_api/v1/urls.py#L14"
+   },
+   "call_sites": [
+    {
+     "file": "course_discovery/apps/course_metadata/utils.py",
+     "line": 588,
+     "function": "push_tracks_to_lms_for_course_run",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/course_metadata/utils.py#L588"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Called from CourseRun.update_or_create_official_version (course_metadata/models.py:2902) when a run is published. The DB field value is not in source; the field name and test fixture (test_create_or_update_partner.py: http://courses.fake.org/api/course_modes/v1/) indicate the LMS course_modes API.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "url = partner.lms_coursemode_api_url.rstrip('/') + f'/courses/{key}/' (course_metadata/utils.py:587), GET at :588; reached from models.py:2902 on publish. Stored value only shown in test fixtures ('.../api/course_modes/v1/'). Route lms/urls.py:181 + rest_api/urls.py:11 + rest_api/v1/urls.py:14-15 '^courses/{COURSE_ID_PATTERN}/$'; CourseModesView is ListCreateAPIView (views.py:45). Confidence medium (DB-configured base)."
+   }
+  },
+  {
+   "id": "E03",
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/course_modes/v1/courses/{course_id}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "Partner.lms_coursemode_api_url + f'/courses/{course_run.key}/' via partner.oauth_api_client",
+   "route": {
+    "file": "common/djangoapps/course_modes/rest_api/v1/urls.py",
+    "line": 14,
+    "declared_as": "lms/urls.py:181 path('api/course_modes/', ...) + path('v1/', ...) + re_path(r'^courses/{COURSE_ID_PATTERN}/$', CourseModesView)",
+    "handler": "CourseModesView.post (ListCreateAPIView) (common/djangoapps/course_modes/rest_api/v1/views.py:45)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/common/djangoapps/course_modes/rest_api/v1/urls.py#L14"
+   },
+   "call_sites": [
+    {
+     "file": "course_discovery/apps/course_metadata/utils.py",
+     "line": 602,
+     "function": "push_tracks_to_lms_for_course_run",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/course_metadata/utils.py#L602"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Creates missing seatless course modes (e.g. entitlement-only tracks) in the LMS. Same URL as the GET.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "partner.oauth_api_client.post(url, json=data) at course_metadata/utils.py:602, same URL as the GET. CourseModesView (ListCreateAPIView) serves POST. Same DB-base caveat."
+   }
+  },
+  {
+   "id": "E04",
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/courses/v1/block_metadata/{usage_key_string}",
+   "scope": "prod",
+   "how_the_path_is_known": "setting",
+   "how_the_target_is_named": "partner.lms_url + settings.LMS_API_URLS['block_metadata'] + block_id in LMSAPIClient",
+   "route": {
+    "file": "lms/djangoapps/course_api/blocks/urls.py",
+    "line": 28,
+    "declared_as": "lms/urls.py:142 path('api/courses/', ...) + course_api/urls.py:15 include blocks.urls + re_path(r'^v1/block_metadata/{USAGE_KEY_PATTERN}', BlockMetadataView)",
+    "handler": "BlockMetadataView.list (lms/djangoapps/course_api/blocks/views.py:378)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_api/blocks/urls.py#L28"
+   },
+   "call_sites": [
+    {
+     "file": "course_discovery/apps/core/api_client/lms.py",
+     "line": 126,
+     "function": "LMSAPIClient._get_blocks_data (via get_blocks_metadata, lms.py:205)",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/core/api_client/lms.py#L126"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Path constant settings/base.py:764. Used by taxonomy_support/providers.py:206 _get_block_content (include=index_dictionary).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "resource = 'api/courses/v1/block_metadata/' + block_id (lms.py:205). Route blocks/urls.py:28-29 re_path('^v1/block_metadata/{USAGE_KEY_PATTERN}'), BlockMetadataView."
+   }
+  },
+  {
+   "id": "E05",
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/courses/v1/blocks/",
+   "scope": "prod",
+   "how_the_path_is_known": "setting",
+   "how_the_target_is_named": "partner.lms_url + settings.LMS_API_URLS['blocks'] in LMSAPIClient",
+   "route": {
+    "file": "lms/djangoapps/course_api/blocks/urls.py",
+    "line": 21,
+    "declared_as": "lms/urls.py:142 path('api/courses/', include('lms.djangoapps.course_api.urls')) + course_api/urls.py:15 path('', include('...blocks.urls')) + path('v1/blocks/', BlocksInCourseView)",
+    "handler": "BlocksInCourseView.list (lms/djangoapps/course_api/blocks/views.py:293)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_api/blocks/urls.py#L21"
+   },
+   "call_sites": [
+    {
+     "file": "course_discovery/apps/core/api_client/lms.py",
+     "line": 126,
+     "function": "LMSAPIClient._get_blocks_data (via get_course_blocks_data, lms.py:155)",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/core/api_client/lms.py#L126"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Path constant settings/base.py:763 'api/courses/v1/blocks/'; course_id passed as query param. Used by taxonomy_support/providers.py:258 DiscoveryXBlockMetadataProvider.get_all_xblocks_in_course (taxonomy-connector skills tagging).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "urljoin(lms_url, 'api/courses/v1/blocks/') with course_id query (lms.py:125-126, 155); used by taxonomy_support/providers.py:258, provider wired via settings/base.py:613 TAXONOMY_XBLOCK_METADATA_PROVIDER. Route course_api/urls.py:15 include + blocks/urls.py:21-22 path('v1/blocks/', BlocksInCourseView)."
+   }
+  },
+  {
+   "id": "E06",
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/courses/v1/blocks/{usage_key_string}",
+   "scope": "prod",
+   "how_the_path_is_known": "setting",
+   "how_the_target_is_named": "partner.lms_url + settings.LMS_API_URLS['blocks'] + block_id in LMSAPIClient",
+   "route": {
+    "file": "lms/djangoapps/course_api/blocks/urls.py",
+    "line": 13,
+    "declared_as": "lms/urls.py:142 path('api/courses/', ...) + course_api/urls.py:15 include blocks.urls + re_path(r'^v1/blocks/{USAGE_KEY_PATTERN}', BlocksView)",
+    "handler": "BlocksView.list (lms/djangoapps/course_api/blocks/views.py:209)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_api/blocks/urls.py#L13"
+   },
+   "call_sites": [
+    {
+     "file": "course_discovery/apps/core/api_client/lms.py",
+     "line": 126,
+     "function": "LMSAPIClient._get_blocks_data (via get_blocks_data, lms.py:184)",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/core/api_client/lms.py#L126"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Caller appends the usage key with no trailing slash; the route regex has no $ anchor so it matches. Used by taxonomy_support/providers.py:243 get_xblocks.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "resource = 'api/courses/v1/blocks/' + block_id (lms.py:186), no trailing slash. Route blocks/urls.py:13-14 re_path('^v1/blocks/{USAGE_KEY_PATTERN}') with no '$', BlocksView. Path as written matches."
+   }
+  },
+  {
+   "id": "E07",
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/courses/v1/courses/",
+   "scope": "prod",
+   "how_the_path_is_known": "setting",
+   "how_the_target_is_named": "Partner.courses_api_url (e.g. https://lms/api/courses/v1/) + '/courses/' via partner.oauth_api_client",
+   "route": {
+    "file": "lms/djangoapps/course_api/urls.py",
+    "line": 12,
+    "declared_as": "lms/urls.py:142 path('api/courses/', include('lms.djangoapps.course_api.urls')) + path('v1/courses/', CourseListView)",
+    "handler": "CourseListView.get (lms/djangoapps/course_api/views.py:256)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_api/urls.py#L12"
+   },
+   "call_sites": [
+    {
+     "file": "course_discovery/apps/course_metadata/data_loaders/api.py",
+     "line": 111,
+     "function": "CoursesApiDataLoader._make_request",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/course_metadata/data_loaders/api.py#L111"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Base URL is the Partner.courses_api_url DB field (devstack/sandbox config shows https://<lms>/api/courses/v1/); loader strips trailing '/' then appends '/courses/'. Invoked from refresh_course_metadata management command (scheduled prod job). Query params page, page_size, username, active_only.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api_url = partner.courses_api_url.strip('/') (data_loaders/__init__.py:35) + '/courses/' (data_loaders/api.py:111). Stored value not in source, but devstack/sandbox provisioning config shows '.../api/courses/v1/' (core/management/commands/tests/devstack_configuration.json:8) and the factory uses the same suffix. Route lms/urls.py:142 + lms/djangoapps/course_api/urls.py:12 path('v1/courses/', CourseListView)."
+   }
+  },
+  {
+   "id": "E08",
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/v1/course_runs/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "partner.studio_url (Partner model) via StudioAPI._make_studio_url -> urljoin(studio_url, 'api/v1/' + path); OAuthAPIClient partner.oauth_api_client",
+   "route": {
+    "file": "cms/djangoapps/api/v1/urls.py",
+    "line": 13,
+    "declared_as": "cms/urls.py:98 path('api/', include('cms.djangoapps.api.urls')) + cms/djangoapps/api/urls.py:11 path('v1/', include('cms.djangoapps.api.v1.urls')) + DefaultRouter router.register(r'course_runs', CourseRunViewSet) list route (lookup kwarg pk, lookup_value_regex=COURSE_KEY_REGEX)",
+    "handler": "CourseRunViewSet.create (cms/djangoapps/api/v1/views/course_runs.py:69)",
+    "framework": "Django REST Framework (DefaultRouter ViewSet)",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/cms/djangoapps/api/v1/urls.py#L13"
+   },
+   "call_sites": [
+    {
+     "file": "course_discovery/apps/api/utils.py",
+     "line": 334,
+     "function": "StudioAPI.create_course_run_in_studio",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/utils.py#L334"
+    },
+    {
+     "file": "course_discovery/apps/api/utils.py",
+     "line": 319,
+     "function": "StudioAPI._request",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/utils.py#L319"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Reached from CourseRunViewSet.push_to_studio (api/v1/views/course_runs.py:200, create=True and no rerun key). Also called by dev-only management command add_provisioning_data.py:184.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "StudioAPI._make_studio_url = urljoin(str(partner.studio_url), 'api/v1/' + path) (api/utils.py:315); create_course_run_in_studio posts 'course_runs/' (:334). Route cms/urls.py:98 + cms/djangoapps/api/urls.py:11 + api/v1/urls.py:13 DefaultRouter list; CourseRunViewSet.create at views/course_runs.py:69. Note: call site api/utils.py:319 is the shared _request used by links for rerun/images/PATCH too."
+   }
+  },
+  {
+   "id": "E09",
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "PATCH",
+   "path": "/api/v1/course_runs/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "partner.studio_url (Partner model) via StudioAPI._make_studio_url -> urljoin(studio_url, 'api/v1/' + path); OAuthAPIClient partner.oauth_api_client",
+   "route": {
+    "file": "cms/djangoapps/api/v1/urls.py",
+    "line": 13,
+    "declared_as": "cms/urls.py:98 path('api/', include('cms.djangoapps.api.urls')) + cms/djangoapps/api/urls.py:11 path('v1/', include('cms.djangoapps.api.v1.urls')) + DefaultRouter router.register(r'course_runs', CourseRunViewSet) detail route (lookup kwarg pk, lookup_value_regex=COURSE_KEY_REGEX)",
+    "handler": "CourseRunViewSet.partial_update (cms/djangoapps/api/v1/views/course_runs.py:65)",
+    "framework": "Django REST Framework (DefaultRouter ViewSet)",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/cms/djangoapps/api/v1/urls.py#L13"
+   },
+   "call_sites": [
+    {
+     "file": "course_discovery/apps/api/utils.py",
+     "line": 359,
+     "function": "StudioAPI.update_course_run_details_in_studio",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/utils.py#L359"
+    },
+    {
+     "file": "course_discovery/apps/api/utils.py",
+     "line": 380,
+     "function": "StudioAPI._update_end_date_in_studio",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/utils.py#L380"
+    }
+   ],
+   "confidence": "high",
+   "notes": "_update_end_date_in_studio is used by the archive_courses management command (course_metadata/management/commands/archive_courses.py:131), an operational prod command.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "_request('patch', f'course_runs/{key}/') at api/utils.py:359 (push_to_studio update path, reached from api/v1/views/course_runs.py:200) and :380 (archive_courses command). CourseRunViewSet.partial_update at cms views/course_runs.py:65."
+   }
+  },
+  {
+   "id": "E10",
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/v1/course_runs/{pk}/images/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "partner.studio_url (Partner model) via StudioAPI._make_studio_url -> urljoin(studio_url, 'api/v1/' + path); OAuthAPIClient partner.oauth_api_client",
+   "route": {
+    "file": "cms/djangoapps/api/v1/urls.py",
+    "line": 13,
+    "declared_as": "cms/urls.py:98 path('api/', include('cms.djangoapps.api.urls')) + cms/djangoapps/api/urls.py:11 path('v1/', include('cms.djangoapps.api.v1.urls')) + DefaultRouter router.register(r'course_runs', CourseRunViewSet) @action(detail=True, methods=['post','put']) images (lookup kwarg pk, lookup_value_regex=COURSE_KEY_REGEX)",
+    "handler": "CourseRunViewSet.images (cms/djangoapps/api/v1/views/course_runs.py:80)",
+    "framework": "Django REST Framework (DefaultRouter ViewSet)",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/cms/djangoapps/api/v1/urls.py#L13"
+   },
+   "call_sites": [
+    {
+     "file": "course_discovery/apps/api/utils.py",
+     "line": 343,
+     "function": "StudioAPI.update_course_run_image_in_studio",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/utils.py#L343"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Multipart upload of card_image. Reached from api/v1/views/course_runs.py:209 and api/v1/views/courses.py:424.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "_request('post', f'course_runs/{key}/images/', files=...) at api/utils.py:343. @action(detail=True, methods=['post','put']) images at cms views/course_runs.py:75-80."
+   }
+  },
+  {
+   "id": "E11",
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/v1/course_runs/{pk}/rerun/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "partner.studio_url (Partner model) via StudioAPI._make_studio_url -> urljoin(studio_url, 'api/v1/' + path); OAuthAPIClient partner.oauth_api_client",
+   "route": {
+    "file": "cms/djangoapps/api/v1/urls.py",
+    "line": 13,
+    "declared_as": "cms/urls.py:98 path('api/', include('cms.djangoapps.api.urls')) + cms/djangoapps/api/urls.py:11 path('v1/', include('cms.djangoapps.api.v1.urls')) + DefaultRouter router.register(r'course_runs', CourseRunViewSet) @action(detail=True, methods=['post']) rerun (lookup kwarg pk, lookup_value_regex=COURSE_KEY_REGEX)",
+    "handler": "CourseRunViewSet.rerun (cms/djangoapps/api/v1/views/course_runs.py:88)",
+    "framework": "Django REST Framework (DefaultRouter ViewSet)",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/cms/djangoapps/api/v1/urls.py#L13"
+   },
+   "call_sites": [
+    {
+     "file": "course_discovery/apps/api/utils.py",
+     "line": 330,
+     "function": "StudioAPI.create_course_rerun_in_studio",
+     "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/utils.py#L330"
+    }
+   ],
+   "confidence": "high",
+   "notes": "pk is the old course run key. Reached via StudioAPI.push_to_studio when create and old_course_run_key.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "_request('post', f'course_runs/{old_key}/rerun/') at api/utils.py:330. @action(detail=True, methods=['post']) rerun at cms views/course_runs.py:87-88; lookup_value_regex=COURSE_KEY_REGEX."
+   }
+  },
+  {
+   "id": "E12",
+   "caller": "credentials",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/courses/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "SiteConfiguration.catalog_api_url; site_config.api_client",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 50,
+    "declared_as": "course_discovery/urls.py:46 'api/' + api/urls.py:12 'v1/' + v1/urls.py:50 router.register(r'courses', CourseViewSet, basename='course')",
+    "handler": "CourseViewSet.list (course_discovery/apps/api/v1/views/courses.py:464)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L50"
+   },
+   "call_sites": [
+    {
+     "file": "credentials/apps/catalog/utils.py",
+     "line": 141,
+     "function": "CatalogDataSynchronizer.fetch_resource (resource 'courses', include_hidden_course_runs=1, from fetch_data line 99)",
+     "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/catalog/utils.py#L141"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Same synchronizer loop as organizations; driven by copy_catalog periodic sync.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "CatalogDataSynchronizer.fetch_resource: urljoin(self.catalog_api_url, f'{resource_name}/') + GET at catalog/utils.py:138-141, driven by copy_catalog.py:51-57. catalog_api_url is a DB field (core/models.py:53) whose value is not in source: the help text example is the API-gateway form 'https://api.edx.org/catalog/v1/' and the constructor docstring says 'https://example.com/api/v1/'; tests use a Faker URL. Only discovery's /api/v1/ router serves these resources (api/v2/urls.py has none), so the path holds if the request reaches discovery directly. Caveat: urljoin needs the stored value to end with '/' or the 'v1' segment is dropped. Extra param include_hidden_course_runs=1. Route v1/urls.py:50; CourseViewSet.list at views/courses.py:464."
+   }
+  },
+  {
+   "id": "E13",
+   "caller": "credentials",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/organizations/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "SiteConfiguration.catalog_api_url (DB field, e.g. https://discovery/api/v1/) passed into CatalogDataSynchronizer; site_config.api_client",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 57,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) + api/urls.py:12 path('v1/', include(v1.urls)) + v1/urls.py:57 router.register(r'organizations', OrganizationViewSet) (SimpleRouter list route organizations/)",
+    "handler": "OrganizationViewSet.list (course_discovery/apps/api/v1/views/organizations.py:46)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L57"
+   },
+   "call_sites": [
+    {
+     "file": "credentials/apps/catalog/utils.py",
+     "line": 141,
+     "function": "CatalogDataSynchronizer.fetch_resource (resource 'organizations', from fetch_data line 97)",
+     "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/catalog/utils.py#L141"
+    }
+   ],
+   "confidence": "high",
+   "notes": "URL = urljoin(catalog_api_url, f'{resource_name}/') with params exclude_utm, page, page_size. Driven by management command copy_catalog (credentials/apps/catalog/management/commands/copy_catalog.py:51-57), which is the periodic catalog sync from Discovery (docs/pathways.rst, catalog/docs/decisions/0001) -> prod. The path assumes catalog_api_url points at /api/v1/ as the model help text says.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "CatalogDataSynchronizer.fetch_resource: urljoin(self.catalog_api_url, f'{resource_name}/') + GET at catalog/utils.py:138-141, driven by copy_catalog.py:51-57. catalog_api_url is a DB field (core/models.py:53) whose value is not in source: the help text example is the API-gateway form 'https://api.edx.org/catalog/v1/' and the constructor docstring says 'https://example.com/api/v1/'; tests use a Faker URL. Only discovery's /api/v1/ router serves these resources (api/v2/urls.py has none), so the path holds if the request reaches discovery directly. Caveat: urljoin needs the stored value to end with '/' or the 'v1' segment is dropped. Route v1/urls.py:57; OrganizationViewSet.list at views/organizations.py:46."
+   }
+  },
+  {
+   "id": "E14",
+   "caller": "credentials",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/pathways/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "SiteConfiguration.catalog_api_url; site_config.api_client",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 62,
+    "declared_as": "course_discovery/urls.py:46 'api/' + api/urls.py:12 'v1/' + v1/urls.py:62 router.register(r'pathways', PathwayViewSet, basename='pathway')",
+    "handler": "PathwayViewSet.list (inherited ReadOnlyModelViewSet.list; class at course_discovery/apps/api/v1/views/pathways.py:12)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L62"
+   },
+   "call_sites": [
+    {
+     "file": "credentials/apps/catalog/utils.py",
+     "line": 141,
+     "function": "CatalogDataSynchronizer.fetch_resource (resource 'pathways', from fetch_data line 103)",
+     "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/catalog/utils.py#L141"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Driven by copy_catalog periodic sync. The four catalog links share one call site; the resource names are class constants (CatalogDataSynchronizer.ORGANIZATION/COURSE/PROGRAM/PATHWAY at utils.py:26-30), so a static finder must resolve constants through fetch_resource's resource_name argument.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "CatalogDataSynchronizer.fetch_resource: urljoin(self.catalog_api_url, f'{resource_name}/') + GET at catalog/utils.py:138-141, driven by copy_catalog.py:51-57. catalog_api_url is a DB field (core/models.py:53) whose value is not in source: the help text example is the API-gateway form 'https://api.edx.org/catalog/v1/' and the constructor docstring says 'https://example.com/api/v1/'; tests use a Faker URL. Only discovery's /api/v1/ router serves these resources (api/v2/urls.py has none), so the path holds if the request reaches discovery directly. Caveat: urljoin needs the stored value to end with '/' or the 'v1' segment is dropped. Route v1/urls.py:62; PathwayViewSet (ReadOnlyModelViewSet) list."
+   }
+  },
+  {
+   "id": "E15",
+   "caller": "credentials",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/programs/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "SiteConfiguration.catalog_api_url; site_config.api_client",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 63,
+    "declared_as": "course_discovery/urls.py:46 'api/' + api/urls.py:12 'v1/' + v1/urls.py:63 router.register(r'programs', ProgramViewSet, basename='program')",
+    "handler": "ProgramViewSet.list (course_discovery/apps/api/v1/views/programs.py:67)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L63"
+   },
+   "call_sites": [
+    {
+     "file": "credentials/apps/catalog/utils.py",
+     "line": 141,
+     "function": "CatalogDataSynchronizer.fetch_resource (resource 'programs', from fetch_data line 101)",
+     "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/catalog/utils.py#L141"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Driven by copy_catalog periodic sync.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "CatalogDataSynchronizer.fetch_resource: urljoin(self.catalog_api_url, f'{resource_name}/') + GET at catalog/utils.py:138-141, driven by copy_catalog.py:51-57. catalog_api_url is a DB field (core/models.py:53) whose value is not in source: the help text example is the API-gateway form 'https://api.edx.org/catalog/v1/' and the constructor docstring says 'https://example.com/api/v1/'; tests use a Faker URL. Only discovery's /api/v1/ router serves these resources (api/v2/urls.py has none), so the path holds if the request reaches discovery directly. Caveat: urljoin needs the stored value to end with '/' or the 'v1' segment is dropped. Route v1/urls.py:63; ProgramViewSet.list at views/programs.py:67."
+   }
+  },
+  {
+   "id": "E16",
+   "caller": "credentials",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/user/v1/accounts",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "SiteConfiguration.lms_url_root via SiteConfiguration.user_api_url; site_config.api_client (OAuthAPIClient)",
+   "route": {
+    "file": "openedx/core/djangoapps/user_api/urls.py",
+    "line": 102,
+    "declared_as": "lms/urls.py:145 path('api/user/', include(...user_api.urls)) + user_api/urls.py:102 path('v1/accounts', ACCOUNT_LIST)",
+    "handler": "AccountViewSet.list (openedx/core/djangoapps/user_api/accounts/views.py:171), mapped as ACCOUNT_LIST {'get': 'list'} at user_api/urls.py:32",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/user_api/urls.py#L102"
+   },
+   "call_sites": [
+    {
+     "file": "credentials/apps/core/management/commands/sync_ids_from_platform.py",
+     "line": 87,
+     "function": "Command.get_lms_ids",
+     "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/core/management/commands/sync_ids_from_platform.py#L87"
+    },
+    {
+     "file": "credentials/apps/core/management/commands/make_is_active_match_platform.py",
+     "line": 95,
+     "function": "Command.get_is_active",
+     "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/core/management/commands/make_is_active_match_platform.py#L95"
+    }
+   ],
+   "confidence": "high",
+   "notes": "URL built as urljoin(user_api_url, f'accounts?username={comma-joined usernames}') -> /api/user/v1/accounts?username=a,b (no trailing slash, matches path('v1/accounts')). Both callers are management commands, but they are operational backfill/repair commands run against the real LMS in production (docs/lms_user_id.rst, core/docs/decisions/0002), not local-dev setup, so scoped prod. A skeptic could argue 'dev' since they are run manually, not on a request path.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "urljoin(user_api_url, 'accounts?username=a,b') + GET at sync_ids_from_platform.py:86-87 and make_is_active_match_platform.py:94-95 -> /api/user/v1/accounts. Route user_api/urls.py:102 path('v1/accounts', ACCOUNT_LIST {'get':'list'}), AccountViewSet.list at accounts/views.py:171. Scope prod is arguable (manual backfill commands)."
+   }
+  },
+  {
+   "id": "E17",
+   "caller": "credentials",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/user/v1/accounts/{username}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "SiteConfiguration.lms_url_root (DB field) via SiteConfiguration.user_api_url = '{lms_url_root}/api/user/v1/'; request sent with SiteConfiguration.api_client (edx_rest_api_client OAuthAPIClient)",
+   "route": {
+    "file": "openedx/core/djangoapps/user_api/urls.py",
+    "line": 108,
+    "declared_as": "lms/urls.py:145 path('api/user/', include('openedx.core.djangoapps.user_api.urls')) + user_api/urls.py:108 re_path(fr'^v1/accounts/{settings.USERNAME_PATTERN}$') where USERNAME_PATTERN = (?P<username>...)",
+    "handler": "AccountViewSet.retrieve (openedx/core/djangoapps/user_api/accounts/views.py:286), mapped as ACCOUNT_DETAIL {'get': 'retrieve'} at user_api/urls.py:40",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/user_api/urls.py#L108"
+   },
+   "call_sites": [
+    {
+     "file": "credentials/apps/core/models.py",
+     "line": 175,
+     "function": "SiteConfiguration.get_user_api_data",
+     "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/core/models.py#L175"
+    }
+   ],
+   "confidence": "high",
+   "notes": "URL built as urljoin(user_api_url, f'accounts/{username}'). get_user_api_data is called from the certificate render view credentials/apps/credentials/views.py:114 (RenderCredential.get_context_data), so it is on a production request path.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "user_api_url = f'{lms_url_root.strip('/')}/api/user/v1/' (core/models.py:134; path is built in code, only the root is stored); urljoin(..., f'accounts/{username}') + GET at :174-175; called from credentials/views.py:114. Route lms/urls.py:145 + user_api/urls.py:107-110 '^v1/accounts/{USERNAME_PATTERN}$' ACCOUNT_DETAIL {'get':'retrieve'}; AccountViewSet.retrieve at accounts/views.py:286. No trailing slash on either side."
+   }
+  },
+  {
+   "id": "E18",
+   "caller": "frontend-app-learning",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/course_recommendations/{key}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().DISCOVERY_API_BASE_URL",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 51,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include(api.urls)) -> course_discovery/apps/api/urls.py:12 path('v1/', include(v1.urls)) -> v1/urls.py:51 router.register(r'course_recommendations', CourseRecommendationViewSet) (SimpleRouter detail route, lookup_field='key')",
+    "handler": "CourseRecommendationViewSet.retrieve (RetrieveModelMixin; class at course_discovery/apps/api/v1/views/courses.py:540)",
+    "framework": "django",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L51"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/course/course-exit/data/api.js",
+     "line": 46,
+     "function": "getCourseRecommendations",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/course/course-exit/data/api.js#L46"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Caller URL (api.js:43) has no trailing slash: `${DISCOVERY_API_BASE_URL}/api/v1/course_recommendations/${courseKey}?exclude_utm=true`; router route ends in '/', so it relies on APPEND_SLASH redirect. Skipped if DISCOVERY_API_BASE_URL is unset.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Path as the caller sends it differs only by a trailing slash from the declared route. Caller sends `${DISCOVERY_API_BASE_URL}/api/v1/course_recommendations/${org}+${number}?exclude_utm=true` (course-exit/data/api.js:43, key from CourseRecommendations.jsx:138), without a trailing slash. The SimpleRouter detail route (v1/urls.py:47,51, lookup_field='key', lookup_value_regex COURSE_ID_REGEX) only matches with '/', so the request is served only after CommonMiddleware's APPEND_SLASH 301 redirect (course_discovery/settings/base.py:112). The path written is the route's form, not what the caller sends; method, target and handler are correct."
+   }
+  },
+  {
+   "id": "E19",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/agreements/v1/integrity_signature/{course_id}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/agreements/urls.py",
+    "line": 20,
+    "declared_as": "lms/urls.py:127 path('api/agreements/v1/', include(agreements.urls)) -> urls.py:20 re_path('^integrity_signature/{course_id}$')",
+    "handler": "IntegritySignatureView.post (openedx/core/djangoapps/agreements/views.py:116)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/agreements/urls.py#L20"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 73,
+     "function": "postIntegritySignature",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L73"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:73 POST `/api/agreements/v1/integrity_signature/${courseId}` (useSaveIntegritySignature -> HonorCode.jsx); lms/urls.py:127 -> agreements/urls.py:20 '^integrity_signature/{COURSE_ID}$' -> IntegritySignatureView.post views.py:116."
+   }
+  },
+  {
+   "id": "E20",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/bookmarks/v1/bookmarks/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/bookmarks/urls.py",
+    "line": 12,
+    "declared_as": "plugin_app LMS regex '^api/bookmarks/' (openedx/core/djangoapps/bookmarks/apps.py:24, via lms/urls.py:1078 urlpatterns.extend(get_plugin_url_patterns(ProjectType.LMS))) -> urls.py:12 path('v1/bookmarks/')",
+    "handler": "BookmarksListView.post (openedx/core/djangoapps/bookmarks/views.py:208)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/bookmarks/urls.py#L12"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/course/bookmark/data/api.js",
+     "line": 7,
+     "function": "createBookmark",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/course/bookmark/data/api.js#L7"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Base URL from getBookmarksBaseUrl (bookmark/data/api.js:4).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "bookmark/data/api.js:4,7 POST `${LMS_BASE_URL}/api/bookmarks/v1/bookmarks/`; bookmarks apps.py:24 REGEX '^api/bookmarks/' -> urls.py:12 path('v1/bookmarks/') -> BookmarksListView(ListCreateAPIView).post views.py:208."
+   }
+  },
+  {
+   "id": "E21",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "DELETE",
+   "path": "/api/bookmarks/v1/bookmarks/{username},{usage_id}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/bookmarks/urls.py",
+    "line": 16,
+    "declared_as": "plugin_app LMS regex '^api/bookmarks/' (openedx/core/djangoapps/bookmarks/apps.py:24) -> urls.py:16 re_path('^v1/bookmarks/{username},{usage_key}/$')",
+    "handler": "BookmarksDetailView.delete (openedx/core/djangoapps/bookmarks/views.py:346)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/bookmarks/urls.py#L16"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/course/bookmark/data/api.js",
+     "line": 12,
+     "function": "deleteBookmark",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/course/bookmark/data/api.js#L12"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "bookmark/data/api.js:12 DELETE `/api/bookmarks/v1/bookmarks/${username},${usageId}/`; urls.py:15-16 '^v1/bookmarks/{USERNAME},{USAGE_ID}/$' -> BookmarksDetailView.delete views.py:346."
+   }
+  },
+  {
+   "id": "E22",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/course_experience/v1/reset_course_deadlines",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/features/course_experience/api/v1/urls.py",
+    "line": 20,
+    "declared_as": "lms/urls.py:1098 path('api/course_experience/', include(course_experience.api.v1.urls)) -> urls.py:20 re_path('v1/reset_course_deadlines')",
+    "handler": "reset_course_deadlines (openedx/features/course_experience/api/v1/views.py:39)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/features/course_experience/api/v1/urls.py#L20"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 358,
+     "function": "postCourseDeadlines",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L358"
+    }
+   ],
+   "confidence": "high",
+   "notes": "executePostFromPostEvent (api.ts:397) likely also hits this route but takes its URL from an xblock postMessage payload; listed under excluded.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.ts:357-358 POST `/api/course_experience/v1/reset_course_deadlines` (useResetDeadlines -> ShiftDatesAlert.tsx); lms/urls.py:1098 -> course_experience/api/v1/urls.py:20 -> reset_course_deadlines @api_view(['POST']) views.py:34-39."
+   }
+  },
+  {
+   "id": "E23",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/course_home/course_metadata/{course_key}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/course_home_api/urls.py",
+    "line": 29,
+    "declared_as": "lms/urls.py:1084 path('api/course_home/', include('lms.djangoapps.course_home_api.urls')) -> urls.py:29 re_path('course_metadata/{COURSE_KEY_PATTERN}')",
+    "handler": "CourseHomeMetadataView.get (lms/djangoapps/course_home_api/course_metadata/views.py:81)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_home_api/urls.py#L29"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 57,
+     "function": "getCourseHomeCourseMetadata",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L57"
+    }
+   ],
+   "confidence": "high",
+   "notes": "?browser_timezone may be appended.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.ts:55-57 GET `/api/course_home/course_metadata/${courseId}` (+?browser_timezone); lms/urls.py:1084 -> course_home_api/urls.py:29 -> CourseHomeMetadataView.get course_metadata/views.py:81."
+   }
+  },
+  {
+   "id": "E24",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/course_home/dates/{course_key}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/course_home_api/urls.py",
+    "line": 38,
+    "declared_as": "lms/urls.py:1084 path('api/course_home/', include('lms.djangoapps.course_home_api.urls')) -> urls.py:38 re_path('dates/{COURSE_KEY_PATTERN}')",
+    "handler": "DatesTabView.get (lms/djangoapps/course_home_api/dates/views.py:76)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_home_api/urls.py#L38"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 98,
+     "function": "getDatesTabData",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L98"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.ts:96-98 GET `/api/course_home/dates/${courseId}`; course_home_api/urls.py:38 -> DatesTabView.get dates/views.py:76."
+   }
+  },
+  {
+   "id": "E25",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/course_home/dismiss_welcome_message",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/course_home_api/urls.py",
+    "line": 57,
+    "declared_as": "lms/urls.py:1084 path('api/course_home/', include('lms.djangoapps.course_home_api.urls')) -> urls.py:57 re_path('dismiss_welcome_message')",
+    "handler": "dismiss_welcome_message (lms/djangoapps/course_home_api/outline/views.py:666)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_home_api/urls.py#L57"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 379,
+     "function": "postDismissWelcomeMessage",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L379"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.ts:378-379 POST `/api/course_home/dismiss_welcome_message` (WelcomeMessage.jsx); urls.py:57 -> dismiss_welcome_message @api_view(['POST']) outline/views.py:664-666."
+   }
+  },
+  {
+   "id": "E26",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/course_home/outline/{course_key}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/course_home_api/urls.py",
+    "line": 47,
+    "declared_as": "lms/urls.py:1084 path('api/course_home/', include('lms.djangoapps.course_home_api.urls')) -> urls.py:47 re_path('outline/{COURSE_KEY_PATTERN}')",
+    "handler": "OutlineTabView.get (lms/djangoapps/course_home_api/outline/views.py:193)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_home_api/urls.py#L47"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 326,
+     "function": "getOutlineTabData",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L326"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.ts:322-326 GET `/api/course_home/outline/${courseId}`; course_home_api/urls.py:47 -> OutlineTabView.get outline/views.py:193."
+   }
+  },
+  {
+   "id": "E27",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/course_home/progress/{course_key}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/course_home_api/urls.py",
+    "line": 81,
+    "declared_as": "lms/urls.py:1084 path('api/course_home/', include('lms.djangoapps.course_home_api.urls')) -> urls.py:81 re_path('progress/{COURSE_KEY_PATTERN}')",
+    "handler": "ProgressTabView.get (lms/djangoapps/course_home_api/progress/views.py:202)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_home_api/urls.py#L81"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 202,
+     "function": "getProgressTabData",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L202"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.ts:193,202 GET `/api/course_home/progress/${courseId}` when no targetUserId; the student-id pattern at urls.py:76 cannot match (no '/' after a course-v1 key), so urls.py:81 -> ProgressTabView.get progress/views.py:202."
+   }
+  },
+  {
+   "id": "E28",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/course_home/progress/{course_key}/{student_id}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/course_home_api/urls.py",
+    "line": 76,
+    "declared_as": "lms/urls.py:1084 path('api/course_home/', include('lms.djangoapps.course_home_api.urls')) -> urls.py:76 re_path('progress/{COURSE_KEY_PATTERN}/(?P<student_id>[^/]+)')",
+    "handler": "ProgressTabView.get (lms/djangoapps/course_home_api/progress/views.py:202)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_home_api/urls.py#L76"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 202,
+     "function": "getProgressTabData",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L202"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Only when targetUserId is passed (route /course/:courseId/progress/:targetUserId/); caller appends `/${targetUserId}/` (api.ts:198) with a trailing slash the unanchored pattern tolerates.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Path as the caller sends it differs only by a trailing slash from the declared route. Route is right (course_home_api/urls.py:76, unanchored search tolerates the trailing slash, ProgressTabView.get :202) but the path the caller sends is `/api/course_home/progress/${courseId}/${targetUserId}/` (api.ts:198, trailing slash), not the slashless form written. Minor: only the trailing slash differs."
+   }
+  },
+  {
+   "id": "E29",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/course_home/save_course_goal",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/course_home_api/urls.py",
+    "line": 62,
+    "declared_as": "lms/urls.py:1084 path('api/course_home/', include('lms.djangoapps.course_home_api.urls')) -> urls.py:62 re_path('save_course_goal')",
+    "handler": "save_course_goal (lms/djangoapps/course_home_api/outline/views.py:690)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_home_api/urls.py#L62"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 370,
+     "function": "postWeeklyLearningGoal",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L370"
+    },
+    {
+     "file": "src/courseware/course/course-exit/data/api.js",
+     "line": 54,
+     "function": "postUnsubscribeFromGoalReminders",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/course/course-exit/data/api.js#L54"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.ts:369-370 and course-exit/data/api.js:53-54 both POST `/api/course_home/save_course_goal`; course_home_api/urls.py:62 -> save_course_goal @api_view(['POST']) outline/views.py:687-690. Two call sites, one route: merge is correct."
+   }
+  },
+  {
+   "id": "E30",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/course_home/unsubscribe_from_course_goal/{token}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/course_home_api/urls.py",
+    "line": 67,
+    "declared_as": "lms/urls.py:1084 path('api/course_home/', include('lms.djangoapps.course_home_api.urls')) -> urls.py:67 re_path('unsubscribe_from_course_goal/(?P<token>[^/]*)$')",
+    "handler": "unsubscribe_from_course_goal_by_token (lms/djangoapps/course_home_api/outline/views.py:719)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_home_api/urls.py#L67"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 411,
+     "function": "unsubscribeFromCourseGoal",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L411"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.ts:410-411 POST `/api/course_home/unsubscribe_from_course_goal/${token}` (GoalUnsubscribe.jsx, route /goal-unsubscribe/:token); urls.py:67 -> unsubscribe_from_course_goal_by_token @api_view(['POST']) outline/views.py:718-719."
+   }
+  },
+  {
+   "id": "E31",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/course_home/v1/navigation/{course_key}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/course_home_api/urls.py",
+    "line": 52,
+    "declared_as": "lms/urls.py:1088 path('api/course_home/v1/', include(course_home_api.urls)) -> course_home_api/urls.py:52 re_path('navigation/{COURSE_KEY_PATTERN}')",
+    "handler": "CourseNavigationBlocksView.get (lms/djangoapps/course_home_api/outline/views.py:443)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_home_api/urls.py#L52"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 101,
+     "function": "getCourseOutline",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L101"
+    }
+   ],
+   "confidence": "high",
+   "notes": "course_home_api patterns are unanchored re_paths (Django uses regex.search), so the earlier 'api/course_home/' include at lms/urls.py:1084 actually matches 'v1/navigation/...' first; same view either way.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:101-102 GET `/api/course_home/v1/navigation/${courseId}` (useCourseOutlineStructure). Resolves via lms/urls.py:1084 'api/course_home/' first (unanchored re_path 'navigation/{KEY}' searched in 'v1/navigation/...'), not the 1088 v1 include cited in declared_as, but the leaf is the same course_home_api/urls.py:52 -> CourseNavigationBlocksView.get outline/views.py:443. Method/path/target correct."
+   }
+  },
+  {
+   "id": "E32",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/course_live/iframe/{course_id}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/course_live/urls.py",
+    "line": 20,
+    "declared_as": "plugin_app LMS regex '^api/course_live/' (openedx/core/djangoapps/course_live/apps.py:21, via lms/urls.py:1078 urlpatterns.extend(get_plugin_url_patterns(ProjectType.LMS))) -> urls.py:20 re_path('^iframe/{COURSE_ID_PATTERN}/?$')",
+    "handler": "CourseLiveIframeView.get (openedx/core/djangoapps/course_live/views.py:269)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/course_live/urls.py#L20"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 295,
+     "function": "getLiveTabIframe",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L295"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.ts:293-295 GET `/api/course_live/iframe/${courseId}/` (LiveTab.jsx); course_live apps.py:21 REGEX '^api/course_live/' via lms/urls.py:1078 -> urls.py:20 '^iframe/{COURSE_ID}/?$' -> CourseLiveIframeView.get views.py:269."
+   }
+  },
+  {
+   "id": "E33",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/courses/v2/blocks/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/course_api/blocks/urls.py",
+    "line": 43,
+    "declared_as": "lms/urls.py:142 path('api/courses/', include('lms.djangoapps.course_api.urls')) -> lms/djangoapps/course_api/urls.py:15 path('', include('...blocks.urls')) -> blocks/urls.py:43 path('v2/blocks/')",
+    "handler": "BlocksInCourseView.list (lms/djangoapps/course_api/blocks/views.py:293)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/course_api/blocks/urls.py#L43"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 22,
+     "function": "getSequenceForUnitDeprecated",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L22"
+    }
+   ],
+   "confidence": "high",
+   "notes": "URL built in getSequenceForUnitDeprecatedUrl (api.js:12) with query params course_id, username, depth, requested_fields.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:12 builds `${LMS_BASE_URL}/api/courses/v2/blocks/` + query, GET at :22; used via parentSequenceQuery (apiHooks.ts:147) from CoursewareRedirects.tsx. lms/urls.py:142 -> course_api/urls.py:15 -> blocks/urls.py:42-43 path('v2/blocks/') -> BlocksInCourseView (ListAPIView) list at views.py:293."
+   }
+  },
+  {
+   "id": "E34",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/courseware/celebration/{course_key}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/courseware_api/urls.py",
+    "line": 21,
+    "declared_as": "plugin_app LMS regex 'api/courseware/' (openedx/core/djangoapps/courseware_api/apps.py:23) -> urls.py:21 re_path('^celebration/{COURSE_KEY_PATTERN}')",
+    "handler": "Celebration.post (openedx/core/djangoapps/courseware_api/views.py:914)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/courseware_api/urls.py#L21"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/course/celebration/data/api.js",
+     "line": 9,
+     "function": "postCelebrationComplete",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/course/celebration/data/api.js#L9"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "celebration/data/api.js:8-9 POST `/api/courseware/celebration/${courseId}`; courseware_api urls.py:21 -> Celebration.post views.py:914."
+   }
+  },
+  {
+   "id": "E35",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/courseware/course/{course_key}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/courseware_api/urls.py",
+    "line": 12,
+    "declared_as": "plugin_app LMS regex 'api/courseware/' (openedx/core/djangoapps/courseware_api/apps.py:23, registered via lms/urls.py:1078 urlpatterns.extend(get_plugin_url_patterns(ProjectType.LMS))) -> urls.py:12 re_path('^course/{COURSE_KEY_PATTERN}')",
+    "handler": "CoursewareInformation.get (inherited RetrieveAPIView; get_object at openedx/core/djangoapps/courseware_api/views.py:700)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/courseware_api/urls.py#L12"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 36,
+     "function": "getCourseMetadata",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L36"
+    }
+   ],
+   "confidence": "high",
+   "notes": "URL may get ?browser_timezone= appended by appendBrowserTimezoneToUrl.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:34-36 GET `/api/courseware/course/${courseId}` (+?browser_timezone); courseware_api apps.py REGEX 'api/courseware/' via lms/urls.py:1078 -> urls.py:12 re_path('^course/{COURSE_KEY_PATTERN}') -> CoursewareInformation(RetrieveAPIView) GET."
+   }
+  },
+  {
+   "id": "E36",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/courseware/resume/{course_key}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/courseware_api/urls.py",
+    "line": 18,
+    "declared_as": "plugin_app LMS regex 'api/courseware/' (openedx/core/djangoapps/courseware_api/apps.py:23) -> urls.py:18 re_path('^resume/{COURSE_KEY_PATTERN}')",
+    "handler": "Resume.get (openedx/core/djangoapps/courseware_api/views.py:858)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/courseware_api/urls.py#L18"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 68,
+     "function": "getResumeBlock",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L68"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:67-68 GET `/api/courseware/resume/${courseId}` (resumeBlockQuery -> CoursewareRedirects.tsx); courseware_api urls.py:18 -> Resume.get views.py:858."
+   }
+  },
+  {
+   "id": "E37",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/courseware/sequence/{usage_key}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/courseware_api/urls.py",
+    "line": 15,
+    "declared_as": "plugin_app LMS regex 'api/courseware/' (openedx/core/djangoapps/courseware_api/apps.py:23) -> urls.py:15 re_path('^sequence/{USAGE_KEY_PATTERN}')",
+    "handler": "SequenceMetadata.get (openedx/core/djangoapps/courseware_api/views.py:777)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/courseware_api/urls.py#L15"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 41,
+     "function": "getSequenceMetadata",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L41"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:41-42 GET `/api/courseware/sequence/${sequenceId}` with params {preview} (apiHooks.ts:86); courseware_api urls.py:15 -> SequenceMetadata.get views.py:777."
+   }
+  },
+  {
+   "id": "E38",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/discussion/v1/courses/{course_id}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/discussion/rest_api/urls.py",
+    "line": 65,
+    "declared_as": "lms/urls.py:732 path('api/discussion/', include(rest_api.urls)) [only if settings.ENABLE_DISCUSSION_SERVICE] -> rest_api/urls.py:65 re_path('^v1/courses/{COURSE_ID_PATTERN}')",
+    "handler": "CourseView.get (lms/djangoapps/discussion/rest_api/views.py:116)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/discussion/rest_api/urls.py#L65"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 85,
+     "function": "getCourseDiscussionConfig",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L85"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Mounted conditionally on ENABLE_DISCUSSION_SERVICE.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:84-85 GET `/api/discussion/v1/courses/${courseId}` (discussionTopicsQuery -> DiscussionsProvider.tsx); lms/urls.py:729-734 (ENABLE_DISCUSSION_SERVICE=True in openedx/envs/common.py:1024) -> rest_api/urls.py:64-65 '^v1/courses/{COURSE_ID}' -> CourseView.get views.py:116; earlier v1/courses/* patterns all need a suffix so do not shadow."
+   }
+  },
+  {
+   "id": "E39",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/discussion/v2/course_topics/{course_id}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/discussion/rest_api/urls.py",
+    "line": 82,
+    "declared_as": "lms/urls.py:732 path('api/discussion/', include(rest_api.urls)) -> rest_api/urls.py:82 re_path('^v2/course_topics/{COURSE_ID_PATTERN}')",
+    "handler": "CourseTopicsViewV2.get (lms/djangoapps/discussion/rest_api/views.py:331)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/discussion/rest_api/urls.py#L82"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 90,
+     "function": "getCourseTopics",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L90"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:90-91 GET `/api/discussion/v2/course_topics/${courseId}` (only when provider=='openedx', apiHooks.ts:202); rest_api/urls.py:82 -> CourseTopicsViewV2.get views.py:331."
+   }
+  },
+  {
+   "id": "E40",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/enrollment/v2/enrollment/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/enrollments/v2/urls.py",
+    "line": 53,
+    "declared_as": "lms/urls.py:124 path('api/enrollment/v2/', include(enrollments.v2.urls)) -> v2/urls.py:53 router.register(r'enrollment', EnrollmentViewSet) (DefaultRouter list route 'enrollment/')",
+    "handler": "EnrollmentViewSet.list (openedx/core/djangoapps/enrollments/v2/views.py:301)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/enrollments/v2/urls.py#L53"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/course/course-exit/data/api.js",
+     "line": 31,
+     "function": "getAllEnrollments",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/course/course-exit/data/api.js#L31"
+    }
+   ],
+   "confidence": "high",
+   "notes": "URL built at course-exit/data/api.js:44 (?page_size=100) inside getCourseRecommendations; pagination follows data.next (same route).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "course-exit/data/api.js:44 GET `/api/enrollment/v2/enrollment/?page_size=100` (+ data.next pages); lms/urls.py:124 -> v2/urls.py:52-53,56 DefaultRouter 'enrollment/' -> EnrollmentViewSet.list views.py:301."
+   }
+  },
+  {
+   "id": "E41",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/enrollment/v2/enrollment/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/enrollments/v2/urls.py",
+    "line": 53,
+    "declared_as": "lms/urls.py:124 path('api/enrollment/v2/', include(enrollments.v2.urls)) -> v2/urls.py:53 router.register(r'enrollment', EnrollmentViewSet) (DefaultRouter create route 'enrollment/')",
+    "handler": "EnrollmentViewSet.create (openedx/core/djangoapps/enrollments/v2/views.py:346)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/enrollments/v2/urls.py#L53"
+   },
+   "call_sites": [
+    {
+     "file": "src/alerts/enrollment-alert/data/api.js",
+     "line": 7,
+     "function": "postCourseEnrollment",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/alerts/enrollment-alert/data/api.js#L7"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "enrollment-alert/data/api.js:6-7 POST `/api/enrollment/v2/enrollment/` with {course_details:{course_id}} (clickHook.js); same router list route -> EnrollmentViewSet.create views.py:346, which reads request.data['course_details']['course_id']."
+   }
+  },
+  {
+   "id": "E42",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/learning_sequences/v1/course_outline/{course_key_str}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/content/learning_sequences/urls.py",
+    "line": 8,
+    "declared_as": "lms/urls.py:1070 path('api/learning_sequences/', include(learning_sequences.urls)) -> urls.py:8 path('v1/course_outline/<path:course_key_str>')",
+    "handler": "CourseOutlineView.get (openedx/core/djangoapps/content/learning_sequences/views.py:154)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/content/learning_sequences/urls.py#L8"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 29,
+     "function": "getLearningSequencesOutline",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L29"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:28-29 GET `${LMS_BASE_URL}/api/learning_sequences/v1/course_outline/${courseId}`; lms/urls.py:1068-1075 (unconditional append) -> learning_sequences/urls.py:8 path('v1/course_outline/<path:course_key_str>') -> CourseOutlineView.get views.py:154."
+   }
+  },
+  {
+   "id": "E43",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/notifications/preferences/update/{username}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/notifications/urls.py",
+    "line": 32,
+    "declared_as": "lms/urls.py:1135 path('api/notifications/', include(notifications.urls)) -> urls.py:32 path('preferences/update/<str:username>/')",
+    "handler": "preference_update_from_encrypted_username_view (openedx/core/djangoapps/notifications/views.py:240, @api_view(['GET','POST']))",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/notifications/urls.py#L32"
+   },
+   "call_sites": [
+    {
+     "file": "src/preferences-unsubscribe/data/api.js",
+     "line": 10,
+     "function": "unsubscribeNotificationPreferences",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/preferences-unsubscribe/data/api.js#L10"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Caller names the segment userToken (encrypted username); URL from getUnsubscribeUrl (api.js:4).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "preferences-unsubscribe/data/api.js:5,10 GET `/api/notifications/preferences/update/${userToken}/` (index.jsx:20-24; :updatePatch route param is not forwarded); lms/urls.py:1135 -> notifications/urls.py:32 -> preference_update_from_encrypted_username_view @api_view(['GET','POST']) views.py:239-240."
+   }
+  },
+  {
+   "id": "E44",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/api/send_account_activation_email",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "openedx/core/djangoapps/user_authn/api/urls.py",
+    "line": 11,
+    "declared_as": "plugin_app LMS regex '' (openedx/core/djangoapps/user_authn/apps.py:21, via lms/urls.py:1078 urlpatterns.extend(get_plugin_url_patterns(ProjectType.LMS))) -> user_authn/urls.py:10 path('api/', include(api.urls)) -> api/urls.py:11 path('send_account_activation_email')",
+    "handler": "SendAccountActivationEmail.post (openedx/core/djangoapps/user_authn/api/views.py:124)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/user_authn/api/urls.py#L11"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 79,
+     "function": "sendActivationEmail",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L79"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:78-79 POST `/api/send_account_activation_email` (AccountActivationAlert.jsx); user_authn plugin REGEX '' via lms/urls.py:1078 -> user_authn/urls.py:10 path('api/') -> api/urls.py:11 -> SendAccountActivationEmail.post api/views.py:124."
+   }
+  },
+  {
+   "id": "E45",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/user_tours/v1/{username}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/user_tours/urls.py",
+    "line": 9,
+    "declared_as": "lms/urls.py:1093 path('api/user_tours/', include(user_tours.urls)) -> user_tours/urls.py:9 re_path('^v1/{USERNAME_PATTERN}$')",
+    "handler": "UserTourView.get (lms/djangoapps/user_tours/v1/views.py:28)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/user_tours/urls.py#L9"
+   },
+   "call_sites": [
+    {
+     "file": "src/product-tours/data/api.js",
+     "line": 7,
+     "function": "getTourData",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/product-tours/data/api.js#L7"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "product-tours/data/api.js:5,7 GET `/api/user_tours/v1/${username}`; lms/urls.py:1093 -> user_tours/urls.py:9 '^v1/{USERNAME_PATTERN}$' -> UserTourView.get v1/views.py:28."
+   }
+  },
+  {
+   "id": "E46",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "PATCH",
+   "path": "/api/user_tours/v1/{username}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/user_tours/urls.py",
+    "line": 9,
+    "declared_as": "lms/urls.py:1093 path('api/user_tours/', include(user_tours.urls)) -> user_tours/urls.py:9 re_path('^v1/{USERNAME_PATTERN}$')",
+    "handler": "UserTourView.patch (lms/djangoapps/user_tours/v1/views.py:58)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/user_tours/urls.py#L9"
+   },
+   "call_sites": [
+    {
+     "file": "src/product-tours/data/api.js",
+     "line": 25,
+     "function": "patchTourData",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/product-tours/data/api.js#L25"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "product-tours/data/api.js:24-25 PATCH same URL; -> UserTourView.patch v1/views.py:58."
+   }
+  },
+  {
+   "id": "E47",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/calculate",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/urls.py",
+    "line": 374,
+    "declared_as": "lms/urls.py:374 path('calculate', util_views.calculate)",
+    "handler": "calculate (common/djangoapps/util/views.py:157)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/urls.py#L374"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/course/content-tools/calculator/Calculator.jsx",
+     "line": 23,
+     "function": "Calculator.handleSubmit",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/course/content-tools/calculator/Calculator.jsx#L23"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Query ?equation=...",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Calculator.jsx:23-24 GET `/calculate?equation=...` (rendered by ContentTools.jsx); lms/urls.py:374 path('calculate') -> util_views.calculate common/djangoapps/util/views.py:157 reads request.GET."
+   }
+  },
+  {
+   "id": "E48",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/courses/{course_id}/courseware-navigation-sidebar/toggles/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/urls.py",
+    "line": 769,
+    "declared_as": "lms/urls.py:769 re_path('^courses/{COURSE_ID_PATTERN}/courseware-navigation-sidebar/toggles/$')",
+    "handler": "courseware_mfe_navigation_sidebar_toggles (lms/djangoapps/courseware/views/views.py:2385)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/urls.py#L769"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 115,
+     "function": "getCoursewareOutlineSidebarToggles",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L115"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:114-115 GET `/courses/${courseId}/courseware-navigation-sidebar/toggles/`; lms/urls.py:768-772 '^courses/{COURSE_ID}/courseware-navigation-sidebar/toggles/$' -> courseware_mfe_navigation_sidebar_toggles @api_view(['GET']) views.py:2384-2385. Earlier catch-all include at lms/urls.py:679 (calendar_sync) only has 'calendar_sync' so does not shadow."
+   }
+  },
+  {
+   "id": "E49",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/courses/{course_id}/courseware-search/enabled/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/urls.py",
+    "line": 762,
+    "declared_as": "lms/urls.py:762 re_path('^courses/{COURSE_ID_PATTERN}/courseware-search/enabled/$')",
+    "handler": "courseware_mfe_search_enabled (lms/djangoapps/courseware/views/views.py:2347)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/urls.py#L762"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 417,
+     "function": "getCoursewareSearchEnabled",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L417"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.ts:416-417 GET `/courses/${courseId}/courseware-search/enabled/`; lms/urls.py:762 '...$' -> courseware_mfe_search_enabled @api_view(['GET']) views.py:2346-2347."
+   }
+  },
+  {
+   "id": "E50",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "PUT",
+   "path": "/courses/{course_id}/edxnotes/visibility/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/djangoapps/edxnotes/urls.py",
+    "line": 15,
+    "declared_as": "lms/urls.py:642 re_path('^courses/{COURSE_ID_PATTERN}/edxnotes/', include(edxnotes.urls)) -> edxnotes/urls.py:15 path('visibility/')",
+    "handler": "edxnotes_visibility (lms/djangoapps/edxnotes/views.py:190)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/djangoapps/edxnotes/urls.py#L15"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/course/content-tools/notes-visibility/NotesVisibility.jsx",
+     "line": 23,
+     "function": "NotesVisibility.handleClick",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/course/content-tools/notes-visibility/NotesVisibility.jsx#L23"
+    }
+   ],
+   "confidence": "high",
+   "notes": "URL built at NotesVisibility.jsx:19; view has no method decorator, reads JSON body.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "NotesVisibility.jsx:19,23 PUT `/courses/${course.id}/edxnotes/visibility/` (rendered by ContentTools.jsx); lms/urls.py:641-646 '^courses/{COURSE_ID}/edxnotes/' -> edxnotes/urls.py:15 path('visibility/') -> edxnotes_visibility views.py:190, no method restriction, reads JSON body."
+   }
+  },
+  {
+   "id": "E51",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/courses/{course_id}/generate_user_cert",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/urls.py",
+    "line": 720,
+    "declared_as": "lms/urls.py:720 re_path('^courses/{COURSE_ID_PATTERN}/generate_user_cert')",
+    "handler": "generate_user_cert (lms/djangoapps/courseware/views/views.py:1432, @require_POST)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/urls.py#L720"
+   },
+   "call_sites": [
+    {
+     "file": "src/course-home/data/api.ts",
+     "line": 384,
+     "function": "postRequestCert",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/course-home/data/api.ts#L384"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.ts:383-384 POST `/courses/${courseId}/generate_user_cert` (useRequestCert); lms/urls.py:719-725 unconditional '^courses/{COURSE_ID}/generate_user_cert' -> generate_user_cert @require_POST views.py:1431-1432."
+   }
+  },
+  {
+   "id": "E52",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/courses/{course_id}/xblock/{usage_id}/handler/{handler}",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/urls.py",
+    "line": 297,
+    "declared_as": "lms/urls.py:297 re_path(r'^courses/{course_key}/xblock/{usage_key}/handler/(?P<handler>[^/]*)(?:/(?P<suffix>.*))?$')",
+    "handler": "handle_xblock_callback (lms/djangoapps/courseware/block_render.py:758)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/urls.py#L297"
+   },
+   "call_sites": [
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 50,
+     "function": "getBlockCompletion",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L50"
+    },
+    {
+     "file": "src/courseware/data/api.js",
+     "line": 58,
+     "function": "postSequencePosition",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/courseware/data/api.js#L58"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Concrete handlers: get_completion and goto_position on the sequence block (xmodule/seq_block.py:285, :306). URL prefix built by getSequenceHandlerUrl (api.js:47).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "api.js:47-59 POST `${LMS_BASE_URL}/courses/${courseId}/xblock/${sequenceId}/handler/{get_completion|goto_position}` (used by useCheckBlockCompletion/useSaveSequencePosition); lms/urls.py:296-303 unconditional -> handle_xblock_callback block_render.py:758 (csrf_exempt, any method); seq_block.py json_handlers get_completion/goto_position exist. Two call sites share one route, merge is fine."
+   }
+  },
+  {
+   "id": "E53",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/courses/{course_key}/masquerade",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/urls.py",
+    "line": 710,
+    "declared_as": "lms/urls.py:710 re_path('^courses/{COURSE_KEY_PATTERN}/masquerade$') [only if settings.ENABLE_MASQUERADE]",
+    "handler": "MasqueradeView.get (lms/djangoapps/courseware/masquerade.py:98)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/urls.py#L710"
+   },
+   "call_sites": [
+    {
+     "file": "src/instructor-toolbar/masquerade-widget/data/api.ts",
+     "line": 39,
+     "function": "getMasqueradeOptions",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/instructor-toolbar/masquerade-widget/data/api.ts#L39"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "masquerade-widget/data/api.ts:38-39 GET `/courses/${courseId}/masquerade` (MasqueradeWidget.tsx); lms/urls.py:707-715 (ENABLE_MASQUERADE=True lms/envs/common.py:157) '^courses/{COURSE_KEY}/masquerade$' -> MasqueradeView.get masquerade.py:98."
+   }
+  },
+  {
+   "id": "E54",
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/courses/{course_key}/masquerade",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "getConfig().LMS_BASE_URL",
+   "route": {
+    "file": "lms/urls.py",
+    "line": 710,
+    "declared_as": "lms/urls.py:710 re_path('^courses/{COURSE_KEY_PATTERN}/masquerade$') [only if settings.ENABLE_MASQUERADE]",
+    "handler": "MasqueradeView.post (lms/djangoapps/courseware/masquerade.py:163)",
+    "framework": "django",
+    "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/lms/urls.py#L710"
+   },
+   "call_sites": [
+    {
+     "file": "src/instructor-toolbar/masquerade-widget/data/api.ts",
+     "line": 45,
+     "function": "postMasqueradeOptions",
+     "url": "https://github.com/openedx/frontend-app-learning/blob/7ae8423179b4a2edfd494b1fab77087f810bee1f/src/instructor-toolbar/masquerade-widget/data/api.ts#L45"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "masquerade-widget/data/api.ts:44-45 POST same URL; same route -> MasqueradeView.post masquerade.py:162-163 (@expect_json)."
+   }
+  },
+  {
+   "id": "E55",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/catalogs/",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "get_catalog_api_base_url() (COURSE_CATALOG_API_URL) + CatalogApiMixin.catalogs_api_url; client catalog.utils.get_catalog_api_client",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 48,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'catalogs', CatalogViewSet) (SimpleRouter list route)",
+    "handler": "CatalogViewSet.list (course_discovery/apps/api/v1/views/catalogs.py:60)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L48"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/api_admin/views.py",
+     "line": 181,
+     "function": "CatalogListView._get_catalogs",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/api_admin/views.py#L181"
+    }
+   ],
+   "confidence": "high",
+   "notes": "urljoin(f'{get_catalog_api_base_url()}/', 'catalogs/') at api_admin/views.py:144; params={'username': username}.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "catalogs_api_url = urljoin(f'{base}/', 'catalogs/') (api_admin/views.py:144); client.get at :181 with params username. Route v1/urls.py:48 SimpleRouter list; CatalogViewSet(ModelViewSet).list at views/catalogs.py:60."
+   }
+  },
+  {
+   "id": "E56",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "POST",
+   "path": "/api/v1/catalogs/",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "get_catalog_api_base_url() (COURSE_CATALOG_API_URL) + CatalogApiMixin.catalogs_api_url; client catalog.utils.get_catalog_api_client",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 48,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'catalogs', CatalogViewSet) (SimpleRouter list route, POST)",
+    "handler": "CatalogViewSet.create (course_discovery/apps/api/v1/views/catalogs.py:36)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L48"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/api_admin/views.py",
+     "line": 221,
+     "function": "CatalogListView.post",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/api_admin/views.py#L221"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "client.post(self.catalogs_api_url, data=attrs) at api_admin/views.py:221. List route v1/urls.py:48 accepts POST; CatalogViewSet.create at views/catalogs.py:36."
+   }
+  },
+  {
+   "id": "E57",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "DELETE",
+   "path": "/api/v1/catalogs/{id}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "get_catalog_api_base_url() (COURSE_CATALOG_API_URL) + CatalogApiMixin.catalogs_api_url; client catalog.utils.get_catalog_api_client",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 48,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'catalogs', CatalogViewSet) (SimpleRouter detail route, lookup_field='id')",
+    "handler": "CatalogViewSet.destroy (course_discovery/apps/api/v1/views/catalogs.py:56)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L48"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/api_admin/views.py",
+     "line": 262,
+     "function": "CatalogEditView.post",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/api_admin/views.py#L262"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Issued when the edit form posts delete-catalog=on.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "client.delete(...) at api_admin/views.py:262 when delete-catalog=on. Detail route v1/urls.py:48; CatalogViewSet.destroy at views/catalogs.py:56."
+   }
+  },
+  {
+   "id": "E58",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/catalogs/{id}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "get_catalog_api_base_url() (COURSE_CATALOG_API_URL) + CatalogApiMixin.catalogs_api_url; client catalog.utils.get_catalog_api_client",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 48,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'catalogs', CatalogViewSet) (SimpleRouter detail route, lookup_field='id')",
+    "handler": "CatalogViewSet.retrieve (course_discovery/apps/api/v1/views/catalogs.py:77)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L48"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/api_admin/views.py",
+     "line": 250,
+     "function": "CatalogEditView.get",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/api_admin/views.py#L250"
+    },
+    {
+     "file": "openedx/core/djangoapps/api_admin/views.py",
+     "line": 267,
+     "function": "CatalogEditView.post",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/api_admin/views.py#L267"
+    }
+   ],
+   "confidence": "high",
+   "notes": "urljoin(f'{catalogs_api_url}/', f'{catalog_id}/'); catalogs_api_url already ends with '/', urljoin collapses the double slash.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "client.get(urljoin(f'{catalogs_api_url}/', f'{catalog_id}/')) at api_admin/views.py:250 and :267; urljoin collapses '//' (verified: urljoin('.../catalogs//','5/') -> '.../catalogs/5/'). Detail route lookup_field='id' (views/catalogs.py:26), retrieve at :77."
+   }
+  },
+  {
+   "id": "E59",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "PATCH",
+   "path": "/api/v1/catalogs/{id}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "get_catalog_api_base_url() (COURSE_CATALOG_API_URL) + CatalogApiMixin.catalogs_api_url; client catalog.utils.get_catalog_api_client",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 48,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'catalogs', CatalogViewSet) (SimpleRouter detail route, lookup_field='id')",
+    "handler": "CatalogViewSet.partial_update (course_discovery/apps/api/v1/views/catalogs.py:73)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L48"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/api_admin/views.py",
+     "line": 271,
+     "function": "CatalogEditView.post",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/api_admin/views.py#L271"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "client.patch(...) at api_admin/views.py:271. Detail route; CatalogViewSet.partial_update at views/catalogs.py:73."
+   }
+  },
+  {
+   "id": "E60",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/course_runs/",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "CatalogIntegration.current().get_internal_api_url() -> settings/site COURSE_CATALOG_API_URL (= COURSE_CATALOG_URL_ROOT + '/api/v1'), via get_catalog_api_base_url(); client get_catalog_api_client(user) (requests.Session + SuppliedJwtAuth)",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 54,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'course_runs', CourseRunViewSet) (SimpleRouter list route)",
+    "handler": "CourseRunViewSet.list (course_discovery/apps/api/v1/views/course_runs.py:133)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L54"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/catalog/utils.py",
+     "line": 435,
+     "function": "get_course_runs",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/catalog/utils.py#L435"
+    }
+   ],
+   "confidence": "high",
+   "notes": "querystring page_size, exclude_utm. Used by management commands openedx/core/djangoapps/catalog/management/commands/sync_course_runs.py:32 (prod cron) and cms/djangoapps/contentstore/management/commands/sync_courses.py:46. Request is issued by openedx/core/lib/edx_api_utils.py:102 get_api_data (api_client.get(urljoin(base + '/', resource + '/' [+ resource_id + '/']))) and pagination follow-ups at :145 (next URLs).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "edx_api_utils.py:98-102 builds urljoin(f'{base}/', f'{resource}/' [+ f'{id}/']); base = COURSE_CATALOG_API_URL (openedx/envs/common.py:2462 f'{ROOT}/api/v1', mock.yml 'https://discovery-.../api/v1'), so the path is /api/v1/course_runs/ (catalog/utils.py:435). Route v1/urls.py:54 SimpleRouter list; CourseRunViewSet is ModelViewSet with list at views/course_runs.py:133."
+   }
+  },
+  {
+   "id": "E61",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/course_runs/{key}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "CatalogIntegration.current().get_internal_api_url() -> settings/site COURSE_CATALOG_API_URL (= COURSE_CATALOG_URL_ROOT + '/api/v1'), via get_catalog_api_base_url(); client get_catalog_api_client(user) (requests.Session + SuppliedJwtAuth)",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 54,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'course_runs', CourseRunViewSet) (SimpleRouter detail route, lookup_field='key', lookup_value_regex=COURSE_RUN_ID_REGEX)",
+    "handler": "CourseRunViewSet.retrieve (course_discovery/apps/api/v1/views/course_runs.py:404)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L54"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/catalog/utils.py",
+     "line": 519,
+     "function": "get_course_uuid_for_course",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/catalog/utils.py#L519"
+    },
+    {
+     "file": "openedx/core/djangoapps/catalog/utils.py",
+     "line": 638,
+     "function": "get_course_run_details",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/catalog/utils.py#L638"
+    }
+   ],
+   "confidence": "high",
+   "notes": "get_api_data(..., 'course_runs', resource_id=course run key). get_course_run_details is used by lms certificates webview (via catalog/api.py:63), course_date_signals/utils.py:34, course_overviews/api.py:55, student/tasks.py:95. get_course_run_data appears unreferenced outside tests. Request is issued by openedx/core/lib/edx_api_utils.py:102 get_api_data (api_client.get(urljoin(base + '/', resource + '/' [+ resource_id + '/']))) and pagination follow-ups at :145 (next URLs).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "edx_api_utils.py:98-102 builds urljoin(f'{base}/', f'{resource}/' [+ f'{id}/']); base = COURSE_CATALOG_API_URL (openedx/envs/common.py:2462 f'{ROOT}/api/v1', mock.yml 'https://discovery-.../api/v1'), so the path is /api/v1/course_runs/{key}/ (catalog/utils.py:519, 638). Detail route v1/urls.py:54, lookup_field='key' (views/course_runs.py:60), retrieve at :404. Flag: call site catalog/utils.py:810 (get_course_run_data) has no non-test caller in lms/openedx/common, so it is dead code; the link still holds through 519 and 638."
+   }
+  },
+  {
+   "id": "E62",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/courses/",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "get_catalog_api_base_url() (COURSE_CATALOG_API_URL) + CatalogApiMixin.courses_api_url; client CatalogApiMixin.get_catalog_api_client -> catalog.utils.get_catalog_api_client",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 50,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'courses', CourseViewSet) (SimpleRouter list route)",
+    "handler": "CourseViewSet.list (course_discovery/apps/api/v1/views/courses.py:464)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L50"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/api_admin/views.py",
+     "line": 289,
+     "function": "CatalogPreviewView.get",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/api_admin/views.py#L289"
+    }
+   ],
+   "confidence": "high",
+   "notes": "urljoin(f'{get_catalog_api_base_url()}/', 'courses/') at api_admin/views.py:151; forwards request.GET as params (LMS api_admin catalog preview proxy).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "CatalogApiMixin.courses_api_url = urljoin(f'{get_catalog_api_base_url()}/', 'courses/') (api_admin/views.py:151); CatalogPreviewView.get calls client.get(courses_api_url) at :289; view is routed at api_admin/urls.py:27 under lms/urls.py:198. Route v1/urls.py:50 list, CourseViewSet.list at views/courses.py:464."
+   }
+  },
+  {
+   "id": "E63",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/courses/{key}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "CatalogIntegration.current().get_internal_api_url() -> settings/site COURSE_CATALOG_API_URL (= COURSE_CATALOG_URL_ROOT + '/api/v1'), via get_catalog_api_base_url(); client get_catalog_api_client(user) (requests.Session + SuppliedJwtAuth)",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 50,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'courses', CourseViewSet) (SimpleRouter detail route, lookup_field='key', lookup_value_regex=COURSE_ID_REGEX|COURSE_UUID_REGEX)",
+    "handler": "CourseViewSet.retrieve (course_discovery/apps/api/v1/views/courses.py:521)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L50"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/catalog/utils.py",
+     "line": 453,
+     "function": "get_course_runs_for_course",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/catalog/utils.py#L453"
+    },
+    {
+     "file": "openedx/core/djangoapps/catalog/utils.py",
+     "line": 482,
+     "function": "get_owners_for_course",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/catalog/utils.py#L482"
+    },
+    {
+     "file": "openedx/core/djangoapps/catalog/utils.py",
+     "line": 536,
+     "function": "get_course_uuid_for_course",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/catalog/utils.py#L536"
+    },
+    {
+     "file": "openedx/core/djangoapps/catalog/utils.py",
+     "line": 777,
+     "function": "get_course_data",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/catalog/utils.py#L777"
+    }
+   ],
+   "confidence": "high",
+   "notes": "resource_id is either a course UUID (get_course_runs_for_course, get_owners_for_course, get_course_data from courseware views.py:1913) or a course key string (get_course_uuid_for_course); the detail lookup regex accepts both. Request is issued by openedx/core/lib/edx_api_utils.py:102 get_api_data (api_client.get(urljoin(base + '/', resource + '/' [+ resource_id + '/']))) and pagination follow-ups at :145 (next URLs).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "edx_api_utils.py:98-102 builds urljoin(f'{base}/', f'{resource}/' [+ f'{id}/']); base = COURSE_CATALOG_API_URL (openedx/envs/common.py:2462 f'{ROOT}/api/v1', mock.yml 'https://discovery-.../api/v1'), so the path is /api/v1/courses/{key}/ (catalog/utils.py:453, 482, 536, 777; 777 reached from courseware/views/views.py:1913). Detail route v1/urls.py:50, lookup_value_regex COURSE_ID_REGEX|COURSE_UUID_REGEX (views/courses.py:75) accepts both UUIDs and course keys; retrieve at :521."
+   }
+  },
+  {
+   "id": "E64",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/pathways/",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "get_catalog_api_base_url(site=site) -> site.configuration COURSE_CATALOG_API_URL; client get_catalog_api_client(user)",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 62,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'pathways', PathwayViewSet) (SimpleRouter list route)",
+    "handler": "PathwayViewSet.list (inherited ReadOnlyModelViewSet) (course_discovery/apps/api/v1/views/pathways.py:12)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L62"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/catalog/management/commands/cache_programs.py",
+     "line": 206,
+     "function": "Command.get_pathways",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/catalog/management/commands/cache_programs.py#L206"
+    }
+   ],
+   "confidence": "high",
+   "notes": "URL literal 'pathways/?status=published' (cache_programs.py:203) plus params exclude_utm/page; cache_programs management command.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "urljoin(f'{base}/', 'pathways/?status=published') then client.get(api_url, params=...) at cache_programs.py:203-206. Route v1/urls.py:62 list; PathwayViewSet is ReadOnlyModelViewSet (views/pathways.py:12)."
+   }
+  },
+  {
+   "id": "E65",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/program_types/",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "CatalogIntegration.current().get_internal_api_url() -> settings/site COURSE_CATALOG_API_URL (= COURSE_CATALOG_URL_ROOT + '/api/v1'), via get_catalog_api_base_url(); client get_catalog_api_client(user) (requests.Session + SuppliedJwtAuth)",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 65,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'program_types', ProgramTypeViewSet) (SimpleRouter list route)",
+    "handler": "ProgramTypeViewSet.list (inherited ReadOnlyModelViewSet) (course_discovery/apps/api/v1/views/program_types.py:10)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L65"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/catalog/utils.py",
+     "line": 254,
+     "function": "get_program_types",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/catalog/utils.py#L254"
+    }
+   ],
+   "confidence": "high",
+   "notes": "get_api_data(catalog_integration, 'program_types', ...). Request is issued by openedx/core/lib/edx_api_utils.py:102 get_api_data (api_client.get(urljoin(base + '/', resource + '/' [+ resource_id + '/']))) and pagination follow-ups at :145 (next URLs). Reached from get_programs_with_type (catalog/utils.py:403).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "edx_api_utils.py:98-102 builds urljoin(f'{base}/', f'{resource}/' [+ f'{id}/']); base = COURSE_CATALOG_API_URL (openedx/envs/common.py:2462 f'{ROOT}/api/v1', mock.yml 'https://discovery-.../api/v1'), so the path is /api/v1/program_types/ (catalog/utils.py:254). Route course_discovery/apps/api/v1/urls.py:65 SimpleRouter list; ProgramTypeViewSet is ReadOnlyModelViewSet (views/program_types.py:10). Minor: key note says pagination follows 'next' URLs; actually _traverse_pagination re-requests the same api_url with page=N (edx_api_utils.py:145), path unchanged."
+   }
+  },
+  {
+   "id": "E66",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/programs/",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "get_catalog_api_base_url(site=site) -> site.configuration COURSE_CATALOG_API_URL; client get_catalog_api_client(user)",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 63,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'programs', ProgramViewSet) (SimpleRouter list route)",
+    "handler": "ProgramViewSet.list (course_discovery/apps/api/v1/views/programs.py:67)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L63"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/catalog/management/commands/cache_programs.py",
+     "line": 162,
+     "function": "Command.get_site_program_uuids",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/catalog/management/commands/cache_programs.py#L162"
+    }
+   ],
+   "confidence": "high",
+   "notes": "cache_programs management command (run on a schedule in production to populate the program cache that get_programs() reads). params exclude_utm, status, uuids_only.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "cache_programs.py:91 api_base_url = site.configuration COURSE_CATALOG_API_URL (same setting name/format as the LMS setting ending in /api/v1); urljoin(f'{base}/', 'programs/') and client.get at :161-162. Route v1/urls.py:63 list; ProgramViewSet.list at views/programs.py:67. The stored site-config value is not in source; holds on the shared setting convention."
+   }
+  },
+  {
+   "id": "E67",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/programs/{uuid}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "get_catalog_api_base_url(site=site) -> site.configuration COURSE_CATALOG_API_URL; client get_catalog_api_client(user)",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 63,
+    "declared_as": "course_discovery/urls.py:46 path('api/', include('course_discovery.apps.api.urls')) -> course_discovery/apps/api/urls.py:12 path('v1/', include('course_discovery.apps.api.v1.urls')) -> router.register(r'programs', ProgramViewSet) (SimpleRouter detail route, lookup_field='uuid', lookup_value_regex='[0-9a-f-]+')",
+    "handler": "ProgramViewSet.retrieve (inherited ReadOnlyModelViewSet) (course_discovery/apps/api/v1/views/programs.py:19)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L63"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/catalog/management/commands/cache_programs.py",
+     "line": 183,
+     "function": "Command.fetch_program_details",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/catalog/management/commands/cache_programs.py#L183"
+    }
+   ],
+   "confidence": "high",
+   "notes": "cache_programs management command.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "urljoin(f'{base}/', f'programs/{uuid}/') and client.get at cache_programs.py:182-183. Detail route lookup_field='uuid', lookup_value_regex='[0-9a-f-]+' (views/programs.py:21-22); retrieve inherited from ReadOnlyModelViewSet."
+   }
+  },
+  {
+   "id": "E68",
+   "caller": "openedx-platform",
+   "target": "credentials",
+   "method": "POST",
+   "path": "/api/v2/course_certificates/",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "CredentialsApiConfig.internal_api_url / get_internal_api_url_for_org(org) -> urljoin(settings/site CREDENTIALS_INTERNAL_SERVICE_URL, '/api/v2/'), via get_credentials_api_base_url(); client get_credentials_api_client(user) (requests.Session + SuppliedJwtAuth)",
+   "route": {
+    "file": "credentials/apps/api/v2/urls.py",
+    "line": 18,
+    "declared_as": "credentials/urls.py:56 path('api/', include('credentials.apps.api.urls')) -> credentials/apps/api/urls.py:11 path('v2/', include('credentials.apps.api.v2.urls')) -> router.register(r'course_certificates', CourseCertificateViewSet) (DefaultRouter list route, POST)",
+    "handler": "CourseCertificateViewSet.create (inherited CreateModelMixin) (credentials/apps/api/v2/views.py:299)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/api/v2/urls.py#L18"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/programs/tasks.py",
+     "line": 245,
+     "function": "post_course_certificate_configuration",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/programs/tasks.py#L245"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Called from celery task update_credentials_course_certificate_configuration_available_date (programs/tasks.py:458).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "urljoin(f'{base}/', 'course_certificates/') + client.post at programs/tasks.py:236-245. Route v2/urls.py:18; CourseCertificateViewSet includes CreateModelMixin (views.py:299-305)."
+   }
+  },
+  {
+   "id": "E69",
+   "caller": "openedx-platform",
+   "target": "credentials",
+   "method": "GET",
+   "path": "/api/v2/credentials/",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "CredentialsApiConfig.internal_api_url / get_internal_api_url_for_org(org) -> urljoin(settings/site CREDENTIALS_INTERNAL_SERVICE_URL, '/api/v2/'), via get_credentials_api_base_url(); client get_credentials_api_client(user) (requests.Session + SuppliedJwtAuth)",
+   "route": {
+    "file": "credentials/apps/api/v2/urls.py",
+    "line": 16,
+    "declared_as": "credentials/urls.py:56 path('api/', include('credentials.apps.api.urls')) -> credentials/apps/api/urls.py:11 path('v2/', include('credentials.apps.api.v2.urls')) -> router.register(r'credentials', CredentialViewSet) (DefaultRouter list route)",
+    "handler": "CredentialViewSet.list (credentials/apps/api/v2/views.py:112)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/api/v2/urls.py#L16"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/credentials/utils.py",
+     "line": 114,
+     "function": "get_credentials",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/credentials/utils.py#L114"
+    }
+   ],
+   "confidence": "high",
+   "notes": "get_api_data(credential_configuration, 'credentials', querystring username/status/only_visible/program_uuid/type). Callers: programs/tasks.py:103 get_certified_programs, programs/utils.py:820. Request is issued by openedx/core/lib/edx_api_utils.py:102 get_api_data (api_client.get(urljoin(base + '/', resource + '/' [+ resource_id + '/']))) and pagination follow-ups at :145 (next URLs).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "Base = urljoin(CREDENTIALS_INTERNAL_SERVICE_URL, '/api/v2/') (credentials/models.py:75,84); the absolute '/api/v2/' path is built in code, not stored. get_api_data(..., 'credentials') at credentials/utils.py:114 -> /api/v2/credentials/. Route credentials/apps/api/v2/urls.py:16 DefaultRouter list; CredentialViewSet.list at views.py:112."
+   }
+  },
+  {
+   "id": "E70",
+   "caller": "openedx-platform",
+   "target": "credentials",
+   "method": "POST",
+   "path": "/api/v2/credentials/",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "CredentialsApiConfig.internal_api_url / get_internal_api_url_for_org(org) -> urljoin(settings/site CREDENTIALS_INTERNAL_SERVICE_URL, '/api/v2/'), via get_credentials_api_base_url(); client get_credentials_api_client(user) (requests.Session + SuppliedJwtAuth)",
+   "route": {
+    "file": "credentials/apps/api/v2/urls.py",
+    "line": 16,
+    "declared_as": "credentials/urls.py:56 path('api/', include('credentials.apps.api.urls')) -> credentials/apps/api/urls.py:11 path('v2/', include('credentials.apps.api.v2.urls')) -> router.register(r'credentials', CredentialViewSet) (DefaultRouter list route, POST)",
+    "handler": "CredentialViewSet.create (credentials/apps/api/v2/views.py:85)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/api/v2/urls.py#L16"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/programs/tasks.py",
+     "line": 158,
+     "function": "award_program_certificate",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/programs/tasks.py#L158"
+    },
+    {
+     "file": "openedx/core/djangoapps/programs/tasks.py",
+     "line": 184,
+     "function": "revoke_program_certificate",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/programs/tasks.py#L184"
+    },
+    {
+     "file": "openedx/core/djangoapps/programs/tasks.py",
+     "line": 208,
+     "function": "post_course_certificate",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/programs/tasks.py#L208"
+    }
+   ],
+   "confidence": "high",
+   "notes": "urljoin(f'{get_credentials_api_base_url()}/', 'credentials/'); internal_api_url already ends in '/api/v2/' and urljoin collapses the extra slash. Celery tasks award_program_certificates, revoke_program_certificates, award_course_certificate.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "urljoin(f'{base}/', 'credentials/') + client.post in programs/tasks.py award_program_certificate (:156-158), revoke_program_certificate (:182-184), post_course_certificate (:205-208). Route v2/urls.py:16 list; CredentialViewSet.create at views.py:85."
+   }
+  },
+  {
+   "id": "E71",
+   "caller": "openedx-platform",
+   "target": "credentials",
+   "method": "POST",
+   "path": "/api/v2/grades/",
+   "scope": "prod",
+   "how_the_path_is_known": "constant",
+   "how_the_target_is_named": "CredentialsApiConfig.internal_api_url / get_internal_api_url_for_org(org) -> urljoin(settings/site CREDENTIALS_INTERNAL_SERVICE_URL, '/api/v2/'), via get_credentials_api_base_url(); client get_credentials_api_client(user) (requests.Session + SuppliedJwtAuth)",
+   "route": {
+    "file": "credentials/apps/api/v2/urls.py",
+    "line": 17,
+    "declared_as": "credentials/urls.py:56 path('api/', include('credentials.apps.api.urls')) -> credentials/apps/api/urls.py:11 path('v2/', include('credentials.apps.api.v2.urls')) -> router.register(r'grades', GradeViewSet) (DefaultRouter list route, POST)",
+    "handler": "GradeViewSet.create (credentials/apps/api/v2/views.py:150)",
+    "framework": "Django REST Framework",
+    "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/api/v2/urls.py#L17"
+   },
+   "call_sites": [
+    {
+     "file": "openedx/core/djangoapps/credentials/tasks/v1/tasks.py",
+     "line": 92,
+     "function": "send_grade_to_credentials",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/openedx/core/djangoapps/credentials/tasks/v1/tasks.py#L92"
+    }
+   ],
+   "confidence": "high",
+   "notes": "urljoin(f'{get_credentials_api_base_url(org=course_key.org)}/', 'grades/') at tasks.py:90; celery task.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "urljoin(f'{get_credentials_api_base_url(org=...)}/', 'grades/') + post at credentials/tasks/v1/tasks.py:90-92. Route v2/urls.py:17; GradeViewSet(CreateModelMixin,...).create at views.py:150."
+   }
+  },
+  {
+   "id": "E72",
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "POST",
+   "path": "/api/v1/replace_usernames/",
+   "scope": "ops",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "YAML config base_urls.discovery (user-retirement scripts)",
+   "route": {
+    "file": "course_discovery/apps/api/v1/urls.py",
+    "line": 44,
+    "declared_as": "path('replace_usernames/', UsernameReplacementView) under ^api/v1/",
+    "handler": "UsernameReplacementView.post",
+    "framework": "Django path + DRF APIView",
+    "url": "https://github.com/openedx/course-discovery/blob/e0eadcd2c2411832c7e51085c901f4e9e8e293d0/course_discovery/apps/api/v1/urls.py#L44"
+   },
+   "call_sites": [
+    {
+     "file": "scripts/user_retirement/utils/edx_api.py",
+     "line": 438,
+     "function": "DiscoveryApi.replace_usernames",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/scripts/user_retirement/utils/edx_api.py#L438"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Production ops script (scripts/user_retirement/replace_usernames.py); BaseApiClient.get_api_url appends the trailing slash.",
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, reading caller and route at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "get_api_url strips and re-appends '/' (edx_api.py:43-52)."
+   }
+  },
+  {
+   "id": "E73",
+   "caller": "openedx-platform",
+   "target": "credentials",
+   "method": "POST",
+   "path": "/api/v2/replace_usernames/",
+   "scope": "ops",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "YAML config base_urls.credentials (user-retirement scripts)",
+   "route": {
+    "file": "credentials/apps/api/v2/urls.py",
+    "line": 11,
+    "declared_as": "api/ + v2/ + replace_usernames/",
+    "handler": "UsernameReplacementView.post",
+    "framework": "Django path + DRF APIView",
+    "url": "https://github.com/openedx/credentials/blob/8bb9b5f03e9b6d56a0e6dc590c79680f250d6090/credentials/apps/api/v2/urls.py#L11"
+   },
+   "call_sites": [
+    {
+     "file": "scripts/user_retirement/utils/edx_api.py",
+     "line": 420,
+     "function": "CredentialsApi.replace_usernames",
+     "url": "https://github.com/openedx/openedx-platform/blob/db5bfda81ec02ca78f24932bafa79c8f43e5ffa7/scripts/user_retirement/utils/edx_api.py#L420"
+    }
+   ],
+   "confidence": "high",
+   "notes": "Production ops script (scripts/user_retirement/replace_usernames.py); BaseApiClient.get_api_url appends the trailing slash.",
+   "checked": {
+    "result": "confirmed",
+    "by": "Claude, reading caller and route at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "get_api_url strips and re-appends '/' (edx_api.py:43-52)."
+   }
+  }
+ ],
+ "excluded": [
+  {
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/programs/",
+   "file": "openedx/core/djangoapps/catalog/management/commands/tests/test_cache_programs.py",
+   "line": 112,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "openedx-platform",
+   "target": "credentials",
+   "method": "POST",
+   "path": "/api/v2/credentials/",
+   "file": "openedx/core/djangoapps/programs/tests/test_tasks.py",
+   "line": 98,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "UNKNOWN",
+   "path": "link",
+   "file": "lms/templates/api_admin/catalogs/list.html",
+   "line": 31,
+   "reason": "HTML href rendered for the browser, not an HTTP request made by code (out of scope)"
+  },
+  {
+   "caller": "openedx-platform",
+   "target": "ecommerce",
+   "method": "UNKNOWN",
+   "path": "(EcommerceService",
+   "file": "openedx/core/djangoapps/commerce/utils.py",
+   "line": 269,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "openedx-platform",
+   "target": "edx-notes",
+   "method": "GET",
+   "path": "/POST",
+   "file": "lms/djangoapps/edxnotes/helpers.py",
+   "line": 107,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "openedx-platform",
+   "target": "",
+   "method": "UNKNOWN",
+   "path": "openedx-platform->edx-exams",
+   "file": "cms/djangoapps/contentstore/exams.py",
+   "line": 138,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "openedx-platform",
+   "target": "video",
+   "method": "UNKNOWN",
+   "path": "pipeline",
+   "file": "openedx/core/djangoapps/video_pipeline/utils.py",
+   "line": 16,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "openedx-platform",
+   "target": "ecommerce",
+   "method": "POST",
+   "path": "api/v2/user_management/replace_usernames",
+   "file": "scripts/user_retirement/utils/edx_api.py",
+   "line": 402,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "openedx-platform",
+   "target": "",
+   "method": "UNKNOWN",
+   "path": "openedx-platform->Segment/Braze/Amplitude/Hubspot",
+   "file": "scripts/user_retirement/utils/thirdparty_apis/segment_api.py",
+   "line": 114,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "openedx-platform",
+   "target": "frontend-app-learning",
+   "method": "UNKNOWN",
+   "path": "(any)",
+   "file": "",
+   "line": 0,
+   "reason": "no HTTP requests to the learning MFE found; only redirects/links to MFE pages (out of scope)"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/oauth2/access_token",
+   "file": "course_discovery/apps/core/models.py",
+   "line": 109,
+   "reason": "sent inside a library (edx_rest_api_client fetches a token before each call); no call site in this repository"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/oauth2/access_token",
+   "file": "course_discovery/apps/course_metadata/data_loaders/__init__.py",
+   "line": 47,
+   "reason": "sent inside a library (edx_rest_api_client fetches a token before each call); no call site in this repository"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/oauth2/access_token",
+   "file": "course_discovery/apps/course_metadata/management/commands/load_program_fixture.py",
+   "line": 108,
+   "reason": "sent inside a library (edx_rest_api_client fetches a token before each call); no call site in this repository"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "",
+   "method": "UNKNOWN",
+   "path": "course-discovery->? GET {programs_api_url}/programs/",
+   "file": "course_discovery/apps/course_metadata/data_loaders/api.py",
+   "line": 886,
+   "reason": "target not in the set (legacy Programs service, Partner.programs_api_url); neither LMS nor credentials declare a /programs/ list API"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "ecommerce",
+   "method": "GET",
+   "path": "/courses/,",
+   "file": "course_discovery/apps/course_metadata/data_loaders/api.py",
+   "line": 476,
+   "reason": "target not in the set (ecommerce)"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "marketing",
+   "method": "UNKNOWN",
+   "path": "site",
+   "file": "course_discovery/apps/course_metadata/utils.py",
+   "line": 629,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "analytics",
+   "method": "API",
+   "path": "",
+   "file": "course_discovery/apps/course_metadata/data_loaders/analytics_api.py",
+   "line": 31,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "openexchangerates",
+   "method": "UNKNOWN",
+   "path": "/",
+   "file": "course_discovery/apps/api/v1/views/currency.py",
+   "line": 36,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "course-discovery",
+   "method": "POST",
+   "path": "/PATCH",
+   "file": "course_discovery/apps/course_metadata/data_loaders/mixins.py",
+   "line": 171,
+   "reason": "target not in the set (calls its own API)"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "UNKNOWN",
+   "path": "links",
+   "file": "course_discovery/apps/api/serializers.py",
+   "line": 149,
+   "reason": "not an HTTP request by the caller (URLs rendered into API payloads/emails for humans)"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api-admin/api/v1/api_access_request/,",
+   "file": "course_discovery/apps/core/tests/mixins.py",
+   "line": 86,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/login",
+   "file": "acceptance_tests/affiliate_cookie_tests.py",
+   "line": 83,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "credentials",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/oauth2/access_token",
+   "file": "credentials/apps/core/models.py",
+   "line": 150,
+   "reason": "sent inside a library (edx_rest_api_client fetches a token before each call); no call site in this repository"
+  },
+  {
+   "caller": "credentials",
+   "target": "Credly",
+   "method": "GET",
+   "path": "/POST",
+   "file": "credentials/apps/badges/base_api_client.py",
+   "line": 45,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "credentials",
+   "target": "Accredible",
+   "method": "GET",
+   "path": "/POST",
+   "file": "credentials/apps/badges/base_api_client.py",
+   "line": 45,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "credentials",
+   "target": "openedx-platform",
+   "method": "UNKNOWN",
+   "path": "(browser",
+   "file": "credentials/templates/_header.html",
+   "line": 7,
+   "reason": "not an HTTP request sent by code: an <a href> for browser navigation to the LMS root"
+  },
+  {
+   "caller": "credentials",
+   "target": "openedx-platform",
+   "method": "UNKNOWN",
+   "path": "(browser",
+   "file": "credentials/settings/base.py",
+   "line": 355,
+   "reason": "browser redirects issued by the auth_backends library during login/logout, not requests sent by credentials code"
+  },
+  {
+   "caller": "credentials",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/oauth2/user_info",
+   "file": "credentials/settings/base.py",
+   "line": 479,
+   "reason": "configuration consumed only by edx-drf-extensions' deprecated bearer-token auth; no credentials source code sends it and no active call path was found"
+  },
+  {
+   "caller": "credentials",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/user/v1/accounts...,",
+   "file": "",
+   "line": 0,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "edx-exams",
+   "method": "GET",
+   "path": "/api/v1/student/course_id/{course_id}/onboarding",
+   "file": "src/course-home/data/api.ts",
+   "line": 268,
+   "reason": "target not in the set (getConfig().EXAMS_BASE_URL)"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "edx-exams",
+   "method": "GET",
+   "path": "/api/v1/student/exam/attempt/course_id/{course_id}/content_id/{content_id}",
+   "file": "src/course-home/data/api.ts",
+   "line": 455,
+   "reason": "target not in the set (getConfig().EXAMS_BASE_URL)"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "ecommerce",
+   "method": "GET",
+   "path": "/api/v2/baskets/calculate/",
+   "file": "src/shared/streak-celebration/utils.jsx",
+   "line": 32,
+   "reason": "target not in the set (getConfig().ECOMMERCE_BASE_URL)"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "",
+   "method": "UNKNOWN",
+   "path": "frontend-app-learning->? GET {DISCOUNT_CODE_INFO_URL}",
+   "file": "src/shared/streak-celebration/utils.jsx",
+   "line": 52,
+   "reason": "target not in the set (whole URL from config DISCOUNT_CODE_INFO_URL, an external discount service)"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "",
+   "method": "UNKNOWN",
+   "path": "frontend-app-learning->? POST {postData.url}",
+   "file": "src/course-home/data/api.ts",
+   "line": 397,
+   "reason": "URL comes from an xblock iframe postMessage payload at runtime; target/route not statically determinable (body shape suggests LMS reset_course_deadlines)"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "UNKNOWN",
+   "path": "(via",
+   "file": "src/generic/special-exams/SpecialExamsProvider.tsx",
+   "line": 26,
+   "reason": "requests are issued by the external npm library given getAuthenticatedHttpClient() and LMS_BASE_URL; not in caller source"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "credentials",
+   "method": "GET",
+   "path": "/records",
+   "file": "src/courseware/course/course-exit/ProgramCompletion.jsx",
+   "line": 67,
+   "reason": "browser navigation link (Button href with getConfig().CREDENTIALS_BASE_URL), not an HTTP request sent by code; route exists at credentials/urls.py:63"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/xblock/{usage_key}",
+   "file": "src/courseware/course/sequence/Unit/urls.ts",
+   "line": 26,
+   "reason": "iframe document src (render_xblock, lms/urls.py:330), not an API request sent by an HTTP client"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/courses/{course_id}/progress,",
+   "file": "src/course-home/progress-tab/ProgressTab.jsx",
+   "line": 63,
+   "reason": "browser navigations (location.assign/replace, hrefs), not HTTP requests sent by code"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "UNKNOWN",
+   "path": "(pact",
+   "file": "",
+   "line": 0,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "UNKNOWN",
+   "path": "(axios",
+   "file": "src/setupTest.js",
+   "line": 171,
+   "reason": "test or tooling only"
+  }
+ ],
+ "no_route": [
+  {
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/api/v1/currency/",
+   "file": "openedx/core/djangoapps/catalog/utils.py",
+   "line": 334,
+   "reason": "route is path('currency') with no trailing slash (course_discovery/apps/api/v1/urls.py:42); the caller always sends /currency/, and Django never strips a slash, so the request gets a 404"
+  },
+  {
+   "caller": "openedx-platform",
+   "target": "course-discovery",
+   "method": "GET",
+   "path": "/taxonomy/api/v1/learners-current-job/",
+   "file": "openedx/core/djangoapps/user_api/management/commands/populate_enterprise_learner_current_job.py",
+   "line": 56,
+   "reason": "no route in target: course-discovery mounts it only via course_discovery/urls.py:55 path('taxonomy/', include(taxonomy_support.urls)) -> course_discovery/apps/taxonomy_support/urls.py:6 path('', include('taxonomy.urls')), i.e. the route is declared in the external taxonomy-connector pip package, not in course-discovery source; searched course-discovery for 'learners-current-job'/'learners_current_job' with no hit. Target named by settings.COURSE_CATALOG_URL_ROOT + literal. One-off management command."
+  },
+  {
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "PUT",
+   "path": "/api/organizations/v0/organizations/{short_name}/",
+   "file": "course_discovery/apps/course_metadata/models.py",
+   "line": 378,
+   "reason": "no route in target: lms/urls.py:167 mounts path('api/organizations/', include('organizations.urls')) but the v0/organizations/ patterns live in the external edx-organizations pip package, not in openedx-platform source. Base is Partner.organizations_api_url (add_provisioning_data.py:46 shows http://edx.devstack.lms:18000/api/organizations/v0/). A real LMS call; count it if routes in installed packages are accepted."
+  },
+  {
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/translatable_xblocks/config/",
+   "file": "course_discovery/apps/core/api_client/lms.py",
+   "line": 227,
+   "reason": "no route in target: searched openedx-platform for 'translatable' in urls/py files and plugin apps; endpoint is provided by a separate AI-translations plugin not in the repo (settings/base.py:765, used by update_course_ai_languages command)"
+  },
+  {
+   "caller": "course-discovery",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/oauth2/user_info",
+   "file": "course_discovery/settings/base.py",
+   "line": 599,
+   "reason": "no route in target (no user_info route under oauth_dispatch urls) and only a library setting, no caller code path"
+  },
+  {
+   "caller": "credentials",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/edx_name_affirmation/v1/verified_name?username={username}",
+   "file": "credentials/apps/core/models.py",
+   "line": 181,
+   "reason": "no route in target: served by the external edx-name-affirmation pip plugin (registered into the LMS via plugin entry points); searched openedx-platform lms/urls.py, openedx/**/urls.py and all .py for 'edx_name_affirmation' / 'verified_name' routes and found none (openedx-platform only imports a name_affirmation service wrapper)"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/edx_proctoring/v1/user_onboarding/status",
+   "file": "src/course-home/data/api.ts",
+   "line": 274,
+   "reason": "no route in target: served by the external edx-proctoring pip package (its own plugin URL config); no edx_proctoring urls.py or include exists in openedx-platform source (searched lms/urls.py, lms/envs, all urls.py)"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/api/edx_proctoring/v1/proctored_exam/attempt/course_id/{course_id}",
+   "file": "src/course-home/data/api.ts",
+   "line": 459,
+   "reason": "no route in target: edx-proctoring pip package, not declared in openedx-platform"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "POST",
+   "path": "/search/{course_id}",
+   "file": "src/course-home/data/api.ts",
+   "line": 437,
+   "reason": "no route in target: lms/urls.py:139 path('search/', include('search.urls')) mounts the external edx-search package; leaf route not in openedx-platform source"
+  },
+  {
+   "caller": "frontend-app-learning",
+   "target": "openedx-platform",
+   "method": "GET",
+   "path": "/notices/api/v1/unacknowledged",
+   "file": "src/generic/notices/api.js",
+   "line": 11,
+   "reason": "no route in target: served by the optional platform-plugin-notices package; no 'notices' route anywhere in openedx-platform"
+  }
+ ]
+}

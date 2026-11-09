@@ -1,0 +1,2040 @@
+{
+ "repos": {
+  "addons-server": {
+   "url": "https://github.com/mozilla/addons-server",
+   "commit": "65a56ea495b315b9887c7f7734e408d6c444b537"
+  },
+  "addons-frontend": {
+   "url": "https://github.com/mozilla/addons-frontend",
+   "commit": "b2ed6ceaa35c85c86109766e345bf25223c71a08"
+  }
+ },
+ "scopes": {
+  "prod": "production code path",
+  "dev": "runs only in development setups"
+ },
+ "how_the_path_is_known": {
+  "literal": "string literal at the call site",
+  "constant": "module constant",
+  "template": "template literal with variables",
+  "setting": "path held in a config value",
+  "other": "see the link's notes"
+ },
+ "links": [
+  {
+   "id": "M01",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "POST",
+   "path": "/api/v5/abuse/report/addon/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/abuse/api_urls.py",
+    "line": 15,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:91 ^abuse/ include('olympia.abuse.api_urls') -> abuse/api_urls.py:23 re_path(r'report/', include(reporting.urls)); SimpleRouter reporting.register(r'addon', AddonAbuseViewSet) list route",
+    "handler": "AddonAbuseViewSet.create (CreateModelMixin) (src/olympia/abuse/views.py:95)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/abuse/api_urls.py#L15"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/abuse.js",
+     "line": 72,
+     "function": "reportAddon",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/abuse.js#L72"
+    },
+    {
+     "file": "src/amo/sagas/abuse.js",
+     "line": 74,
+     "function": "reportAddon (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/abuse.js#L74"
+    }
+   ],
+   "confidence": "high",
+   "notes": "When run inside Firefox with mozAddonManager abuse reporting enabled, the saga instead calls addonManager.sendAbuseReport (src/amo/sagas/abuse.js:67), i.e. Firefox itself posts the report; that path is not frontend code.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "reportAddon POST 'abuse/report/addon' (abuse.js:70-73), called sagas/abuse.js:74 (when not sent via mozAddonManager). api/urls.py:88 ^abuse/ -> abuse/api_urls.py:15,23 report/ router 'addon'; AddonAbuseViewSet CreateModelMixin (abuse/views.py:95)."
+   }
+  },
+  {
+   "id": "M02",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "POST",
+   "path": "/api/v5/abuse/report/collection/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/abuse/api_urls.py",
+    "line": 16,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:91 ^abuse/ include('olympia.abuse.api_urls') -> abuse/api_urls.py:23 re_path(r'report/', include(reporting.urls)); SimpleRouter reporting.register(r'collection', CollectionAbuseViewSet) list route",
+    "handler": "CollectionAbuseViewSet.create (CreateModelMixin) (src/olympia/abuse/views.py:158)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/abuse/api_urls.py#L16"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/abuse.js",
+     "line": 256,
+     "function": "reportCollection",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/abuse.js#L256"
+    },
+    {
+     "file": "src/amo/sagas/collectionAbuseReports.js",
+     "line": 47,
+     "function": "reportCollection (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collectionAbuseReports.js#L47"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "reportCollection POST 'abuse/report/collection' (abuse.js:254-257), called sagas/collectionAbuseReports.js:47. abuse/api_urls.py:16-18 CollectionAbuseViewSet CreateModelMixin (views.py:158)."
+   }
+  },
+  {
+   "id": "M03",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "POST",
+   "path": "/api/v5/abuse/report/rating/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/abuse/api_urls.py",
+    "line": 19,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:91 ^abuse/ include('olympia.abuse.api_urls') -> abuse/api_urls.py:23 re_path(r'report/', include(reporting.urls)); SimpleRouter reporting.register(r'rating', RatingAbuseViewSet) list route",
+    "handler": "RatingAbuseViewSet.create (CreateModelMixin) (src/olympia/abuse/views.py:150)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/abuse/api_urls.py#L19"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/abuse.js",
+     "line": 196,
+     "function": "reportRating",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/abuse.js#L196"
+    },
+    {
+     "file": "src/amo/sagas/reviews.js",
+     "line": 461,
+     "function": "sendRatingAbuseReport (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/reviews.js#L461"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "reportRating POST 'abuse/report/rating' (abuse.js:194-197), called sagas/reviews.js:461. abuse/api_urls.py:19 RatingAbuseViewSet CreateModelMixin (views.py:150)."
+   }
+  },
+  {
+   "id": "M04",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "POST",
+   "path": "/api/v5/abuse/report/user/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/abuse/api_urls.py",
+    "line": 20,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:91 ^abuse/ include('olympia.abuse.api_urls') -> abuse/api_urls.py:23 re_path(r'report/', include(reporting.urls)); SimpleRouter reporting.register(r'user', UserAbuseViewSet) list route",
+    "handler": "UserAbuseViewSet.create (CreateModelMixin) (src/olympia/abuse/views.py:142)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/abuse/api_urls.py#L20"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/abuse.js",
+     "line": 136,
+     "function": "reportUser",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/abuse.js#L136"
+    },
+    {
+     "file": "src/amo/sagas/userAbuseReports.js",
+     "line": 47,
+     "function": "reportUser (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/userAbuseReports.js#L47"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "reportUser POST 'abuse/report/user' (abuse.js:134-137), called sagas/userAbuseReports.js:47. abuse/api_urls.py:20 UserAbuseViewSet CreateModelMixin (views.py:142)."
+   }
+  },
+  {
+   "id": "M05",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "DELETE",
+   "path": "/api/v5/accounts/account/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 12,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:29 include(accounts.urls); SimpleRouter accounts.register(r'account', AccountViewSet) detail route account/{pk}/ (lookup_value_regex [^/]+, id or username)",
+    "handler": "AccountViewSet.destroy (src/olympia/accounts/views.py:543)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L12"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/users.js",
+     "line": 155,
+     "function": "deleteUserAccount",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/users.js#L155"
+    },
+    {
+     "file": "src/amo/sagas/users.js",
+     "line": 249,
+     "function": "deleteUserAccount (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/users.js#L249"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "deleteUserAccount DELETE accounts/account/{userId} (users.js:155-156), called sagas/users.js:249. AccountViewSet.destroy (accounts/views.py:543)."
+   }
+  },
+  {
+   "id": "M06",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/accounts/account/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 12,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:29 include(accounts.urls); SimpleRouter accounts.register(r'account', AccountViewSet) detail route account/{pk}/ (lookup_value_regex [^/]+, id or username)",
+    "handler": "AccountViewSet.retrieve (RetrieveModelMixin) (src/olympia/accounts/views.py:478)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L12"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/users.js",
+     "line": 88,
+     "function": "userAccount",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/users.js#L88"
+    },
+    {
+     "file": "src/amo/sagas/users.js",
+     "line": 177,
+     "function": "fetchUserAccount (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/users.js#L177"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "userAccount endpoint accounts/account/{userId} (users.js:88), called sagas/users.js:177. accounts/urls.py:11-12 SimpleRouter 'account'; AccountViewSet has RetrieveModelMixin (accounts/views.py:478-479)."
+   }
+  },
+  {
+   "id": "M07",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "PATCH",
+   "path": "/api/v5/accounts/account/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 12,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:29 include(accounts.urls); SimpleRouter accounts.register(r'account', AccountViewSet) detail route account/{pk}/ (lookup_value_regex [^/]+, id or username)",
+    "handler": "AccountViewSet.partial_update (UpdateModelMixin) (src/olympia/accounts/views.py:478)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L12"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/users.js",
+     "line": 73,
+     "function": "updateUserAccount",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/users.js#L73"
+    },
+    {
+     "file": "src/amo/sagas/users.js",
+     "line": 111,
+     "function": "updateUserAccount (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/users.js#L111"
+    }
+   ],
+   "confidence": "high",
+   "notes": "body is FormData (may include picture upload)",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "updateUserAccount PATCH accounts/account/{userId} (users.js:73-74), called sagas/users.js:111. AccountViewSet UpdateModelMixin -> partial_update."
+   }
+  },
+  {
+   "id": "M08",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "DELETE",
+   "path": "/api/v5/accounts/account/{pk}/picture/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/views.py",
+    "line": 552,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:29 include(accounts.urls); SimpleRouter accounts.register(r'account', AccountViewSet) detail route account/{pk}/ (lookup_value_regex [^/]+, id or username) + @action(detail=True, methods=['delete']) picture -> account/{pk}/picture/",
+    "handler": "AccountViewSet.picture (src/olympia/accounts/views.py:559)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/views.py#L552"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/users.js",
+     "line": 139,
+     "function": "deleteUserPicture",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/users.js#L139"
+    },
+    {
+     "file": "src/amo/sagas/users.js",
+     "line": 225,
+     "function": "deleteUserPicture (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/users.js#L225"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "deleteUserPicture DELETE accounts/account/{userId}/picture (users.js:139-140), called sagas/users.js:225. @action(detail=True, methods=['delete']) picture (accounts/views.py:552-559)."
+   }
+  },
+  {
+   "id": "M09",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/accounts/account/{user_pk}/collections/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 15,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:41 include(collections.urls); NestedSimpleRouter(accounts, r'account', lookup='user') .register(r'collections', CollectionViewSet) (accounts/urls.py:14-15) list route",
+    "handler": "CollectionViewSet.list (ModelViewSet) (src/olympia/bandwagon/views.py:34)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L15"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/collections.js",
+     "line": 103,
+     "function": "listCollections",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/collections.js#L103"
+    },
+    {
+     "file": "src/amo/sagas/collections.js",
+     "line": 150,
+     "function": "fetchUserCollections (saga, via getAllUserCollections)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collections.js#L150"
+    }
+   ],
+   "confidence": "high",
+   "notes": "listCollections uses nextURL (absolute `next` URL from the API response) for subsequent pages via allPages; callApi accepts it only if its path starts with /api/v5, so it resolves to the same route.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "listCollections endpoint accounts/account/{userId}/collections (collections.js:103) via getAllUserCollections, called sagas/collections.js:150. accounts/urls.py:14-15 nested router, kwarg user_pk; CollectionViewSet ModelViewSet list."
+   }
+  },
+  {
+   "id": "M10",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "POST",
+   "path": "/api/v5/accounts/account/{user_pk}/collections/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 15,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:41 include(collections.urls); NestedSimpleRouter(accounts, r'account', lookup='user') .register(r'collections', CollectionViewSet) (accounts/urls.py:14-15) list route",
+    "handler": "CollectionViewSet.create (ModelViewSet) (src/olympia/bandwagon/views.py:34)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L15"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/collections.js",
+     "line": 208,
+     "function": "modifyCollection (creating=true, via createCollection)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/collections.js#L208"
+    },
+    {
+     "file": "src/amo/sagas/collections.js",
+     "line": 257,
+     "function": "modifyCollection (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collections.js#L257"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "modifyCollection with creating=true: POST accounts/account/{userId}/collections/ (collections.js:197-211) via createCollection, called sagas/collections.js:257. CollectionViewSet ModelViewSet create."
+   }
+  },
+  {
+   "id": "M11",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/accounts/account/{user_pk}/collections/{collection_slug}/addons/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 17,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:42 include(sub_collections.urls); NestedSimpleRouter(collections, r'collections', lookup='collection') .register('addons', CollectionAddonViewSet) (accounts/urls.py:16-17) list route",
+    "handler": "CollectionAddonViewSet.list (src/olympia/bandwagon/views.py:134)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L17"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/collections.js",
+     "line": 55,
+     "function": "getCollectionAddons",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/collections.js#L55"
+    },
+    {
+     "file": "src/amo/sagas/collections.js",
+     "line": 91,
+     "function": "fetchCurrentCollection (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collections.js#L91"
+    },
+    {
+     "file": "src/amo/sagas/collections.js",
+     "line": 123,
+     "function": "fetchCurrentCollectionPage (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collections.js#L123"
+    },
+    {
+     "file": "src/amo/sagas/suggestions.js",
+     "line": 31,
+     "function": "fetchSuggestions (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/suggestions.js#L31"
+    }
+   ],
+   "confidence": "high",
+   "notes": "endpoint may be nextURL from a previous response (pagination), same route. getAllCollectionAddons (collections.js:75) also uses it but has no caller in src.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getCollectionAddons endpoint .../collections/{slug}/addons (collections.js:54-55), called sagas/collections.js:91,123 and sagas/suggestions.js:31. sub_collections NestedSimpleRouter lookup='collection' + CollectionViewSet.lookup_field 'slug' -> collection_slug (accounts/urls.py:16-17); CollectionAddonViewSet.list (bandwagon/views.py:134)."
+   }
+  },
+  {
+   "id": "M12",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "POST",
+   "path": "/api/v5/accounts/account/{user_pk}/collections/{collection_slug}/addons/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 17,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:42 include(sub_collections.urls); NestedSimpleRouter(collections, r'collections', lookup='collection') .register('addons', CollectionAddonViewSet) (accounts/urls.py:16-17) list route",
+    "handler": "CollectionAddonViewSet.create (ModelViewSet) (src/olympia/bandwagon/views.py:121)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L17"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/collections.js",
+     "line": 297,
+     "function": "modifyCollectionAddon (action create, via createCollectionAddon)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/collections.js#L297"
+    },
+    {
+     "file": "src/amo/sagas/collections.js",
+     "line": 185,
+     "function": "addAddonToCollection (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collections.js#L185"
+    },
+    {
+     "file": "src/amo/sagas/collections.js",
+     "line": 274,
+     "function": "modifyCollection (saga, includeAddonId)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collections.js#L274"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "modifyCollectionAddon POST .../collections/{slug}/addons (collections.js:295-308) via createCollectionAddon, called sagas/collections.js:185,274. CollectionAddonViewSet ModelViewSet create."
+   }
+  },
+  {
+   "id": "M13",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "DELETE",
+   "path": "/api/v5/accounts/account/{user_pk}/collections/{collection_slug}/addons/{addon}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 17,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:42 include(sub_collections.urls); NestedSimpleRouter(collections, r'collections', lookup='collection') .register('addons', CollectionAddonViewSet) (accounts/urls.py:16-17) detail route",
+    "handler": "CollectionAddonViewSet.destroy (ModelViewSet) (src/olympia/bandwagon/views.py:121)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L17"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/collections.js",
+     "line": 367,
+     "function": "removeAddonFromCollection",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/collections.js#L367"
+    },
+    {
+     "file": "src/amo/sagas/collections.js",
+     "line": 348,
+     "function": "removeAddonFromCollection (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collections.js#L348"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "removeAddonFromCollection DELETE .../addons/{addonId} (collections.js:365-368), called sagas/collections.js:348. ModelViewSet destroy."
+   }
+  },
+  {
+   "id": "M14",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "PATCH",
+   "path": "/api/v5/accounts/account/{user_pk}/collections/{collection_slug}/addons/{addon}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 17,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:42 include(sub_collections.urls); NestedSimpleRouter(collections, r'collections', lookup='collection') .register('addons', CollectionAddonViewSet) (accounts/urls.py:16-17) detail route (lookup_field='addon', bandwagon/views.py:124)",
+    "handler": "CollectionAddonViewSet.partial_update (ModelViewSet) (src/olympia/bandwagon/views.py:121)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L17"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/collections.js",
+     "line": 305,
+     "function": "modifyCollectionAddon (action update, via updateCollectionAddon)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/collections.js#L305"
+    },
+    {
+     "file": "src/amo/sagas/collections.js",
+     "line": 410,
+     "function": "updateCollectionAddon (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collections.js#L410"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "modifyCollectionAddon action=update PATCH .../addons/{addonId} (collections.js:303-305), called sagas/collections.js:410. CollectionAddonViewSet lookup_field='addon' (bandwagon/views.py:124) -> {addon}."
+   }
+  },
+  {
+   "id": "M15",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "DELETE",
+   "path": "/api/v5/accounts/account/{user_pk}/collections/{slug}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 15,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:41 include(collections.urls); NestedSimpleRouter(accounts, r'account', lookup='user') .register(r'collections', CollectionViewSet) (accounts/urls.py:14-15) detail route",
+    "handler": "CollectionViewSet.destroy (ModelViewSet) (src/olympia/bandwagon/views.py:34)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L15"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/collections.js",
+     "line": 390,
+     "function": "deleteCollection",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/collections.js#L390"
+    },
+    {
+     "file": "src/amo/sagas/collections.js",
+     "line": 382,
+     "function": "deleteCollection (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collections.js#L382"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "deleteCollection DELETE .../collections/{slug} (collections.js:388-391), called sagas/collections.js:382. ModelViewSet destroy."
+   }
+  },
+  {
+   "id": "M16",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/accounts/account/{user_pk}/collections/{slug}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 15,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:41 include(collections.urls); NestedSimpleRouter(accounts, r'account', lookup='user') .register(r'collections', CollectionViewSet) (accounts/urls.py:14-15) detail route (lookup_field='slug', bandwagon/views.py:62)",
+    "handler": "CollectionViewSet.retrieve (ModelViewSet) (src/olympia/bandwagon/views.py:34)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L15"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/collections.js",
+     "line": 29,
+     "function": "getCollectionDetail",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/collections.js#L29"
+    },
+    {
+     "file": "src/amo/sagas/collections.js",
+     "line": 90,
+     "function": "fetchCurrentCollection (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collections.js#L90"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getCollectionDetail endpoint accounts/account/{userId}/collections/{slug} (collections.js:29), called sagas/collections.js:90. CollectionViewSet lookup_field='slug' (bandwagon/views.py:62) so detail kwarg is slug."
+   }
+  },
+  {
+   "id": "M17",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "PATCH",
+   "path": "/api/v5/accounts/account/{user_pk}/collections/{slug}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 15,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:41 include(collections.urls); NestedSimpleRouter(accounts, r'account', lookup='user') .register(r'collections', CollectionViewSet) (accounts/urls.py:14-15) detail route",
+    "handler": "CollectionViewSet.partial_update (ModelViewSet) (src/olympia/bandwagon/views.py:34)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L15"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/collections.js",
+     "line": 208,
+     "function": "modifyCollection (creating=false, via updateCollection)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/collections.js#L208"
+    },
+    {
+     "file": "src/amo/sagas/collections.js",
+     "line": 284,
+     "function": "modifyCollection (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/collections.js#L284"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "modifyCollection creating=false: PATCH .../collections/{collectionSlug} (collections.js:208-211) via updateCollection, called sagas/collections.js:284. ModelViewSet partial_update."
+   }
+  },
+  {
+   "id": "M18",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/accounts/account/{user_pk}/notifications/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 20,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:43 include(notifications.urls); NestedSimpleRouter(accounts, r'account', lookup='user') .register(r'notifications', AccountNotificationViewSet) (accounts/urls.py:19-22) list route account/{user_pk}/notifications/",
+    "handler": "AccountNotificationViewSet.list (ListModelMixin) (src/olympia/accounts/views.py:727)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L20"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/users.js",
+     "line": 102,
+     "function": "userNotifications",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/users.js#L102"
+    },
+    {
+     "file": "src/amo/sagas/users.js",
+     "line": 201,
+     "function": "fetchUserNotifications (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/users.js#L201"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "userNotifications GET accounts/account/{userId}/notifications (users.js:102), called sagas/users.js:201. NestedSimpleRouter(accounts,'account',lookup='user') -> user_pk (accounts/urls.py:19-22); AccountNotificationViewSet ListModelMixin (views.py:727)."
+   }
+  },
+  {
+   "id": "M19",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "POST",
+   "path": "/api/v5/accounts/account/{user_pk}/notifications/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 20,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:43 include(notifications.urls); NestedSimpleRouter(accounts, r'account', lookup='user') .register(r'notifications', AccountNotificationViewSet) (accounts/urls.py:19-22) list route account/{user_pk}/notifications/",
+    "handler": "AccountNotificationViewSet.create (src/olympia/accounts/views.py:755)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L20"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/users.js",
+     "line": 124,
+     "function": "updateUserNotifications",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/users.js#L124"
+    },
+    {
+     "file": "src/amo/sagas/users.js",
+     "line": 129,
+     "function": "updateUserAccount (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/users.js#L129"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "updateUserNotifications POST same path (users.js:124-125), called sagas/users.js:129. AccountNotificationViewSet defines create (views.py:755), so router binds POST on the list route."
+   }
+  },
+  {
+   "id": "M20",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/accounts/profile/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 30,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:30 re_path(r'^profile/$')",
+    "handler": "ProfileView.get (src/olympia/accounts/views.py:601)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L30"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/users.js",
+     "line": 34,
+     "function": "currentUserAccount",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/users.js#L34"
+    },
+    {
+     "file": "src/amo/sagas/users.js",
+     "line": 63,
+     "function": "fetchCurrentUserAccount (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/users.js#L63"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "currentUserAccount endpoint 'accounts/profile' (users.js:34), called sagas/users.js:63-65. accounts/urls.py:30 ProfileView.get (accounts/views.py:601)."
+   }
+  },
+  {
+   "id": "M21",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "DELETE",
+   "path": "/api/v5/accounts/session/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 28,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:28 re_path(r'^session/$')",
+    "handler": "SessionView.delete (src/olympia/accounts/views.py:459)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L28"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/index.js",
+     "line": 294,
+     "function": "logOutFromServer",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/index.js#L294"
+    },
+    {
+     "file": "src/amo/components/AuthenticateButton/index.js",
+     "line": 151,
+     "function": "AuthenticateButton.logOut",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/components/AuthenticateButton/index.js#L151"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "logOutFromServer callApi endpoint 'accounts/session' method DELETE credentials (index.js:288-297), called AuthenticateButton/index.js:151. accounts/urls.py:28 SessionView.delete (accounts/views.py:459)."
+   }
+  },
+  {
+   "id": "M22",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "POST",
+   "path": "/api/v5/accounts/unsubscribe/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/accounts/urls.py",
+    "line": 37,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:92 ^accounts/ include(accounts_v4) -> accounts/urls.py:37 re_path(r'^unsubscribe/$')",
+    "handler": "AccountNotificationUnsubscribeView.post (src/olympia/accounts/views.py:778)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/accounts/urls.py#L37"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/users.js",
+     "line": 177,
+     "function": "unsubscribeNotification",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/users.js#L177"
+    },
+    {
+     "file": "src/amo/sagas/users.js",
+     "line": 275,
+     "function": "unsubscribeNotification (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/users.js#L275"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "unsubscribeNotification POST accounts/unsubscribe (users.js:177-178), called sagas/users.js:275. accounts/urls.py:36-40 AccountNotificationUnsubscribeView.post (views.py:778)."
+   }
+  },
+  {
+   "id": "M23",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/addons/addon/{addon_pk}/versions/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/addons/api_urls.py",
+    "line": 33,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:94 ^addons/ include(addons_v5) -> addons/api_urls.py:49 include(sub_addons.urls); NestedSimpleRouter(addons, 'addon', lookup='addon') .register('versions', AddonVersionViewSet) list route",
+    "handler": "AddonVersionViewSet.list (ListModelMixin) (src/olympia/addons/views.py:536)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/addons/api_urls.py#L33"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/versions.js",
+     "line": 52,
+     "function": "getVersions",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/versions.js#L52"
+    },
+    {
+     "file": "src/amo/sagas/versions.js",
+     "line": 62,
+     "function": "fetchVersions (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/versions.js#L62"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getVersions endpoint addons/addon/{slug}/versions/ (versions.js:52), called sagas/versions.js:62. NestedSimpleRouter(addons,'addon',lookup='addon') -> kwarg addon_pk (addons/api_urls.py:32-33); AddonVersionViewSet has ListModelMixin (views.py:536-543)."
+   }
+  },
+  {
+   "id": "M24",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/addons/addon/{addon_pk}/versions/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/addons/api_urls.py",
+    "line": 33,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:94 ^addons/ include(addons_v5) -> addons/api_urls.py:49 include(sub_addons.urls); nested 'versions' detail route",
+    "handler": "AddonVersionViewSet.retrieve (RetrieveModelMixin) (src/olympia/addons/views.py:536)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/addons/api_urls.py#L33"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/versions.js",
+     "line": 29,
+     "function": "getVersion",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/versions.js#L29"
+    },
+    {
+     "file": "src/amo/sagas/versions.js",
+     "line": 38,
+     "function": "fetchVersion (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/versions.js#L38"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getVersion endpoint addons/addon/{slug}/versions/{versionId}/ (versions.js:29), called sagas/versions.js:38. Nested detail route, AddonVersionViewSet has RetrieveModelMixin."
+   }
+  },
+  {
+   "id": "M25",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/addons/addon/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/addons/api_urls.py",
+    "line": 29,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:94 ^addons/ include(addons_v5) -> addons/api_urls.py:48 include(addons.urls); SimpleRouter addons.register(r'addon', AddonViewSet) detail route addon/{pk}/ (lookup_value_regex [^/]+, accepts id/slug/guid)",
+    "handler": "AddonViewSet.retrieve (RetrieveModelMixin) (src/olympia/addons/views.py:233)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/addons/api_urls.py#L29"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/index.js",
+     "line": 252,
+     "function": "fetchAddon",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/index.js#L252"
+    },
+    {
+     "file": "src/amo/sagas/addons.js",
+     "line": 86,
+     "function": "fetchAddon (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/addons.js#L86"
+    },
+    {
+     "file": "src/blog-utils/index.js",
+     "line": 83,
+     "function": "buildStaticAddonCard",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/blog-utils/index.js#L83"
+    }
+   ],
+   "confidence": "high",
+   "notes": "fetchAddon: endpoint `addons/addon/${slug}` + query (app, appversion, show_grouped_ratings) via addQueryParams; callApi parses the query out and appends '/'. blog-utils call site uses raw fetch with hardcoded AMO_BASE_URL='https://addons.mozilla.org' (src/blog-utils/index.js:21) + literal '/api/v5/addons/addon/${addonId}/' (packaged for the blog build; still frontend source, prod).",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "fetchAddon (src/amo/api/index.js:252) -> callApi endpoint addons/addon/{slug}, callApi prefixes apiPath '/api/'+apiVersion 'v5' (index.js:109-117) and appends '/' (index.js:165-168); called by saga src/amo/sagas/addons.js:86. blog-utils fetch (src/blog-utils/index.js:83) hardcodes the same path. Server: api/urls.py:94 ^addons/ -> addons/api_urls.py:29 SimpleRouter 'addon' detail; AddonViewSet has RetrieveModelMixin (addons/views.py:233-240)."
+   }
+  },
+  {
+   "id": "M26",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/addons/addon/{pk}/eula_policy/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/addons/views.py",
+    "line": 389,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:94 ^addons/ include(addons_v5) -> addons/api_urls.py:29 router addon + @action(detail=True) eula_policy (default url_path = method name) -> addon/{pk}/eula_policy/",
+    "handler": "AddonViewSet.eula_policy (src/olympia/addons/views.py:394)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/addons/views.py#L389"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/addonInfo.js",
+     "line": 27,
+     "function": "getAddonInfo",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/addonInfo.js#L27"
+    },
+    {
+     "file": "src/amo/sagas/addons.js",
+     "line": 115,
+     "function": "fetchAddonInfo (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/addons.js#L115"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getAddonInfo endpoint addons/addon/{slug}/eula_policy/ (src/amo/api/addonInfo.js:27), called from sagas/addons.js:115. @action(detail=True) default GET at addons/views.py:389-394 on the addon router."
+   }
+  },
+  {
+   "id": "M27",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/addons/autocomplete/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/addons/api_urls.py",
+    "line": 52,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:94 ^addons/ include(addons_v5) -> addons/api_urls.py:52 re_path(r'^autocomplete/$')",
+    "handler": "AddonAutoCompleteSearchView.list (src/olympia/addons/views.py:1083)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/addons/api_urls.py#L52"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/index.js",
+     "line": 320,
+     "function": "autocomplete",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/index.js#L320"
+    },
+    {
+     "file": "src/amo/sagas/autocomplete.js",
+     "line": 33,
+     "function": "fetchAutocompleteResults (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/autocomplete.js#L33"
+    }
+   ],
+   "confidence": "high",
+   "notes": "method defaults to GET in callApi",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "autocomplete() endpoint 'addons/autocomplete' + '/' (index.js:320), called sagas/autocomplete.js:33. addons/api_urls.py:51-55 ^autocomplete/$, AddonAutoCompleteSearchView(AddonSearchView=ListAPIView).list (views.py:1083)."
+   }
+  },
+  {
+   "id": "M28",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/addons/categories/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/addons/api_urls.py",
+    "line": 57,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:94 ^addons/ include(addons_v5) -> addons/api_urls.py:57 re_path(r'^categories/$')",
+    "handler": "StaticCategoryView (ListAPIView.get) (src/olympia/addons/views.py:1123)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/addons/api_urls.py#L57"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/categories.js",
+     "line": 12,
+     "function": "getCategories",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/categories.js#L12"
+    },
+    {
+     "file": "src/amo/sagas/categories.js",
+     "line": 20,
+     "function": "fetchCategories (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/categories.js#L20"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getCategories endpoint 'addons/categories' (categories.js:12), called sagas/categories.js:20. addons/api_urls.py:57 StaticCategoryView ListAPIView."
+   }
+  },
+  {
+   "id": "M29",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/addons/language-tools/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/addons/api_urls.py",
+    "line": 59,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:94 ^addons/ include(addons_v5) -> addons/api_urls.py:59 re_path(r'^language-tools/$')",
+    "handler": "LanguageToolsView.list (src/olympia/addons/views.py:1295)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/addons/api_urls.py#L59"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/languageTools.js",
+     "line": 15,
+     "function": "languageTools",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/languageTools.js#L15"
+    },
+    {
+     "file": "src/amo/sagas/languageTools.js",
+     "line": 26,
+     "function": "fetchLanguageTools (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/languageTools.js#L26"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "languageTools endpoint 'addons/language-tools' method GET (languageTools.js:15-16), called sagas/languageTools.js:26. addons/api_urls.py:58-60 LanguageToolsView.list."
+   }
+  },
+  {
+   "id": "M30",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/addons/recommendations/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/addons/api_urls.py",
+    "line": 67,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:94 ^addons/ include(addons_v5) -> addons/api_urls.py:67 re_path(r'^recommendations/$')",
+    "handler": "AddonRecommendationView (ListAPIView.get) (src/olympia/addons/views.py:1326)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/addons/api_urls.py#L67"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/recommendations.js",
+     "line": 28,
+     "function": "getRecommendations",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/recommendations.js#L28"
+    },
+    {
+     "file": "src/amo/sagas/recommendations.js",
+     "line": 32,
+     "function": "fetchRecommendations (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/recommendations.js#L32"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getRecommendations endpoint 'addons/recommendations/' (recommendations.js:28), called sagas/recommendations.js:32. addons/api_urls.py:66-70 AddonRecommendationView (AddonSearchView/ListAPIView)."
+   }
+  },
+  {
+   "id": "M31",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/addons/search/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/addons/api_urls.py",
+    "line": 56,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:94 ^addons/ include(addons_v5) -> addons/api_urls.py:56 re_path(r'^search/$')",
+    "handler": "AddonSearchView (ListAPIView.get) (src/olympia/addons/views.py:1009)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/addons/api_urls.py#L56"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/search.js",
+     "line": 67,
+     "function": "search",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/search.js#L67"
+    },
+    {
+     "file": "src/amo/sagas/search.js",
+     "line": 28,
+     "function": "fetchSearchResults (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/search.js#L28"
+    },
+    {
+     "file": "src/amo/sagas/landing.js",
+     "line": 70,
+     "function": "fetchLandingAddons (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/landing.js#L70"
+    },
+    {
+     "file": "src/amo/sagas/home.js",
+     "line": 71,
+     "function": "fetchHomeData (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/home.js#L71"
+    },
+    {
+     "file": "src/amo/sagas/addonsByAuthors.js",
+     "line": 47,
+     "function": "fetchAddonsByAuthors (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/addonsByAuthors.js#L47"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "search() endpoint 'addons/search' (search.js:67), called from sagas search.js:28, landing.js:70-72, home.js:71/74, addonsByAuthors.js:47. addons/api_urls.py:56 AddonSearchView ListAPIView GET."
+   }
+  },
+  {
+   "id": "M32",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/blocklist/block/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/blocklist/urls.py",
+    "line": 9,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:96 ^blocklist/ include('olympia.blocklist.urls') -> blocklist/urls.py:12 include(block.urls); SimpleRouter block.register('block', BlockViewSet) detail route (lookup_value_regex [^/]+; pk or guid)",
+    "handler": "BlockViewSet.retrieve (RetrieveModelMixin) (src/olympia/blocklist/views.py:8)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/blocklist/urls.py#L9"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/blocks.js",
+     "line": 14,
+     "function": "getBlock",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/blocks.js#L14"
+    },
+    {
+     "file": "src/amo/sagas/blocks.js",
+     "line": 20,
+     "function": "fetchBlock (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/blocks.js#L20"
+    }
+   ],
+   "confidence": "high",
+   "notes": "frontend passes the add-on guid as the {pk} segment",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getBlock GET blocklist/block/{guid}/ (blocks.js:14), called sagas/blocks.js:20. api/urls.py:93 ^blocklist/ -> blocklist/urls.py:9; BlockViewSet RetrieveModelMixin, lookup_value_regex [^/]+ (blocklist/views.py:8-16)."
+   }
+  },
+  {
+   "id": "M33",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/ratings/rating/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/ratings/api_urls.py",
+    "line": 10,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:99 ^ratings/ include(ratings_v4.urls) -> ratings/api_urls.py:10 SimpleRouter ratings_v4.register(r'rating', RatingViewSet) list route",
+    "handler": "RatingViewSet.list (ModelViewSet) (src/olympia/ratings/views.py:110)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/ratings/api_urls.py#L10"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/reviews.js",
+     "line": 169,
+     "function": "getReviews",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/reviews.js#L169"
+    },
+    {
+     "file": "src/amo/sagas/reviews.js",
+     "line": 102,
+     "function": "fetchReviews (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/reviews.js#L102"
+    },
+    {
+     "file": "src/amo/sagas/reviews.js",
+     "line": 135,
+     "function": "fetchReviewPermissions (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/reviews.js#L135"
+    },
+    {
+     "file": "src/amo/sagas/reviews.js",
+     "line": 170,
+     "function": "fetchUserReviews (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/reviews.js#L170"
+    },
+    {
+     "file": "src/amo/sagas/reviews.js",
+     "line": 376,
+     "function": "fetchLatestUserReview (saga, via getLatestUserReview)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/reviews.js#L376"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getReviews GET 'ratings/rating' (reviews.js:167-171), called sagas/reviews.js:102,135,170 and via getLatestUserReview (reviews.js:196) at sagas/reviews.js:376. api/urls.py:97 ^ratings/ -> ratings/api_urls.py:9-10 ratings_v4 'rating'; RatingViewSet ModelViewSet (ratings/views.py:110)."
+   }
+  },
+  {
+   "id": "M34",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "POST",
+   "path": "/api/v5/ratings/rating/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/ratings/api_urls.py",
+    "line": 10,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:99 ^ratings/ include(ratings_v4.urls) -> ratings/api_urls.py:10 SimpleRouter ratings_v4.register(r'rating', RatingViewSet) list route",
+    "handler": "RatingViewSet.create (ModelViewSet) (src/olympia/ratings/views.py:110)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/ratings/api_urls.py#L10"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/reviews.js",
+     "line": 80,
+     "function": "submitReview (no reviewId)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/reviews.js#L80"
+    },
+    {
+     "file": "src/amo/sagas/reviews.js",
+     "line": 288,
+     "function": "manageAddonReview (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/reviews.js#L288"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "submitReview without reviewId: POST 'ratings/rating' (reviews.js:79-80,95-98), called sagas/reviews.js:288. RatingViewSet create."
+   }
+  },
+  {
+   "id": "M35",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "DELETE",
+   "path": "/api/v5/ratings/rating/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/ratings/api_urls.py",
+    "line": 10,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:99 ^ratings/ include(ratings_v4.urls) -> ratings/api_urls.py:10 SimpleRouter ratings_v4.register(r'rating', RatingViewSet) detail route",
+    "handler": "RatingViewSet.destroy (ModelViewSet) (src/olympia/ratings/views.py:110)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/ratings/api_urls.py#L10"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/reviews.js",
+     "line": 269,
+     "function": "deleteReview",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/reviews.js#L269"
+    },
+    {
+     "file": "src/amo/sagas/reviews.js",
+     "line": 344,
+     "function": "deleteAddonReview (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/reviews.js#L344"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "deleteReview DELETE ratings/rating/{reviewId}/ (reviews.js:267-271), called sagas/reviews.js:344. RatingViewSet destroy."
+   }
+  },
+  {
+   "id": "M36",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/ratings/rating/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/ratings/api_urls.py",
+    "line": 10,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:99 ^ratings/ include(ratings_v4.urls) -> ratings/api_urls.py:10 SimpleRouter ratings_v4.register(r'rating', RatingViewSet) detail route",
+    "handler": "RatingViewSet.retrieve (ModelViewSet) (src/olympia/ratings/views.py:110)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/ratings/api_urls.py#L10"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/reviews.js",
+     "line": 292,
+     "function": "getReview",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/reviews.js#L292"
+    },
+    {
+     "file": "src/amo/sagas/reviews.js",
+     "line": 420,
+     "function": "fetchReview (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/reviews.js#L420"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getReview GET ratings/rating/{reviewId}/ (reviews.js:290-293), called sagas/reviews.js:420. RatingViewSet retrieve."
+   }
+  },
+  {
+   "id": "M37",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "PATCH",
+   "path": "/api/v5/ratings/rating/{pk}/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/ratings/api_urls.py",
+    "line": 10,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:99 ^ratings/ include(ratings_v4.urls) -> ratings/api_urls.py:10 SimpleRouter ratings_v4.register(r'rating', RatingViewSet) detail route",
+    "handler": "RatingViewSet.partial_update (ModelViewSet) (src/olympia/ratings/views.py:110)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/ratings/api_urls.py#L10"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/reviews.js",
+     "line": 83,
+     "function": "submitReview (with reviewId)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/reviews.js#L83"
+    },
+    {
+     "file": "src/amo/sagas/reviews.js",
+     "line": 288,
+     "function": "manageAddonReview (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/reviews.js#L288"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "submitReview with reviewId: PATCH ratings/rating/{reviewId} (reviews.js:82-84), called sagas/reviews.js:288. RatingViewSet partial_update (PATCH permitted in ByHttpMethod, ratings/views.py:124-126)."
+   }
+  },
+  {
+   "id": "M38",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "POST",
+   "path": "/api/v5/ratings/rating/{pk}/flag/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/ratings/views.py",
+    "line": 445,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:99 ^ratings/ include(ratings_v4.urls) -> ratings/api_urls.py:10 SimpleRouter ratings_v4.register(r'rating', RatingViewSet) + @action(detail=True, methods=['post']) flag",
+    "handler": "RatingViewSet.flag (src/olympia/ratings/views.py:451)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/ratings/views.py#L445"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/reviews.js",
+     "line": 244,
+     "function": "flagReview",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/reviews.js#L244"
+    },
+    {
+     "file": "src/amo/sagas/reviews.js",
+     "line": 220,
+     "function": "handleFlagReview (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/reviews.js#L220"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "flagReview POST ratings/rating/{id}/flag + '/' (reviews.js:244-246), called sagas/reviews.js:220. @action(detail=True, methods=['post']) flag (ratings/views.py:445-451)."
+   }
+  },
+  {
+   "id": "M39",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "POST",
+   "path": "/api/v5/ratings/rating/{pk}/reply/",
+   "scope": "prod",
+   "how_the_path_is_known": "template",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/ratings/views.py",
+    "line": 426,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:99 ^ratings/ include(ratings_v4.urls) -> ratings/api_urls.py:10 SimpleRouter ratings_v4.register(r'rating', RatingViewSet) + @action(detail=True, methods=['post']) reply",
+    "handler": "RatingViewSet.reply (src/olympia/ratings/views.py:433)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/ratings/views.py#L426"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/reviews.js",
+     "line": 121,
+     "function": "replyToReview",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/reviews.js#L121"
+    },
+    {
+     "file": "src/amo/sagas/reviews.js",
+     "line": 195,
+     "function": "handleReplyToReview (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/reviews.js#L195"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "replyToReview POST ratings/rating/{id}/reply/ (reviews.js:121-131), called sagas/reviews.js:195. @action(detail=True, methods=['post']) reply (ratings/views.py:426-433)."
+   }
+  },
+  {
+   "id": "M40",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/shelves/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/shelves/urls.py",
+    "line": 9,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:103 ^shelves/ include('olympia.shelves.urls') -> shelves/urls.py:13 include(router.urls); SimpleRouter router.register('', ShelfViewSet) list route (empty prefix -> ^$)",
+    "handler": "ShelfViewSet.list (src/olympia/shelves/views.py:19)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/shelves/urls.py#L9"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/homeShelves.js",
+     "line": 13,
+     "function": "getHomeShelves",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/homeShelves.js#L13"
+    },
+    {
+     "file": "src/amo/sagas/home.js",
+     "line": 38,
+     "function": "fetchHomeData (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/home.js#L38"
+    }
+   ],
+   "confidence": "high",
+   "notes": "",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getHomeShelves endpoint 'shelves' (homeShelves.js:13), called sagas/home.js:38. api/urls.py:101 ^shelves/ -> shelves/urls.py:9 router.register('', ShelfViewSet): empty prefix gives list regex ^$ -> /api/v5/shelves/; ShelfViewSet ListModelMixin (shelves/views.py:13-19)."
+   }
+  },
+  {
+   "id": "M41",
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/site/",
+   "scope": "prod",
+   "how_the_path_is_known": "literal",
+   "how_the_target_is_named": "callApi in src/amo/api/index.js: config apiHost (config/default.js:68 apiProdHost=https://addons.mozilla.org via config/lib/shared.js) + apiPath '/api/' + apiVersion 'v5' (config/default.js:69-70) + endpoint, trailing slash appended (index.js:165-168)",
+   "route": {
+    "file": "src/olympia/amo/urls.py",
+    "line": 24,
+    "declared_as": "src/olympia/urls.py:83 ^api/ -> api/urls.py:112 get_versioned_api_routes('v5', v5_api_urls) (^v5/, api/urls.py:19,60) -> api/urls.py:101 re_path(r'^', include(amo_api_patterns)) -> amo/urls.py:24 re_path(r'^site/$')",
+    "handler": "SiteStatusView.get (src/olympia/amo/views.py:254)",
+    "framework": "Django + DRF",
+    "url": "https://github.com/mozilla/addons-server/blob/65a56ea495b315b9887c7f7734e408d6c444b537/src/olympia/amo/urls.py#L24"
+   },
+   "call_sites": [
+    {
+     "file": "src/amo/api/site.js",
+     "line": 17,
+     "function": "getSiteStatus",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/api/site.js#L17"
+    },
+    {
+     "file": "src/amo/sagas/site.js",
+     "line": 17,
+     "function": "fetchSiteStatus (saga)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/sagas/site.js#L17"
+    },
+    {
+     "file": "src/amo/utils/server.js",
+     "line": 84,
+     "function": "viewMonitorHandler (/frontend_monitor.json, src/amo/server/base.js:211)",
+     "url": "https://github.com/mozilla/addons-frontend/blob/b2ed6ceaa35c85c86109766e345bf25223c71a08/src/amo/utils/server.js#L84"
+    }
+   ],
+   "confidence": "high",
+   "notes": "viewMonitorHandler builds the URL itself: config apiHost + apiPath + apiVersion + '/site/?disable_caching' (src/amo/utils/server.js:76-78) and calls fetch directly.",
+   "checked": {
+    "result": "confirmed",
+    "by": "a second Claude agent re-reading caller and target at the pinned commits (not a human review)",
+    "on": "2026-11-07",
+    "note": "getSiteStatus callApi endpoint 'site' (site.js:17), called sagas/site.js:17; also server-side viewMonitorHandler fetch apiHost+apiPath+apiVersion+'/site/?disable_caching' (utils/server.js:76-84), mounted at src/amo/server/base.js:211. api/urls.py:99 ^ -> amo/urls.py:24 ^site/$ SiteStatusView.get (amo/views.py:254)."
+   }
+  }
+ ],
+ "excluded": [
+  {
+   "caller": "addons-server",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/__version__",
+   "file": "src/olympia/amo/monitors.py",
+   "line": 52,
+   "reason": "self-call (dev only). localdev_web monitor requests http://nginx/__version__; docker/nginx/addons.conf.template:79 matches ^/(__version__|__heartbeat__|services).*$ to @olympia, served by src/olympia/amo/urls.py:33 views.version. addons-frontend also has app.get('/__version__') at src/amo/server/base.js:207, but nginx never forwards this path to it"
+  },
+  {
+   "caller": "addons-server",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/addons/search/?...",
+   "file": "src/olympia/shelves/forms.py",
+   "line": 121,
+   "reason": "self-call. Admin shelf form validation fetches settings.INTERNAL_SITE_URL + reverse(DEFAULT_VERSION:addon-search / collection-addon-list); nginx routes ^/api/ to @olympia"
+  },
+  {
+   "caller": "addons-server",
+   "target": "nginx",
+   "method": "GET",
+   "path": "{STATIC_URL_PREFIX|MEDIA_URL_PREFIX}test.txt",
+   "file": "src/olympia/core/apps.py",
+   "line": 186,
+   "reason": "self-call/infra (dev only). The startup check fetches INTERNAL_SITE_URL + static/media prefix and expects the X-Served-By: nginx header; nginx serves these from disk"
+  },
+  {
+   "caller": "addons-server",
+   "target": "pinguino-vite",
+   "method": "GET",
+   "path": "{STATIC_URL_PREFIX}pinguino/",
+   "file": "src/olympia/devhub/views.py",
+   "line": 2422,
+   "reason": "target not in the set (DEV_MODE only). Proxies the Pinguino vite dev server (settings.PINGUINO_DEV_SERVER_URL), not addons-frontend"
+  },
+  {
+   "caller": "addons-server",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "https://addons.mozilla.org/api/v4/discovery/editorial/",
+   "file": "src/olympia/discovery/management/commands/extract_content_strings.py",
+   "line": 22,
+   "reason": "self-call (management command). The settings.*_EDITORIAL_CONTENT_API URLs (src/olympia/lib/settings_base.py:609-619) point to the AMO API on prod"
+  },
+  {
+   "caller": "addons-server",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "https://addons.mozilla.org/api/v5/addons/search/",
+   "file": "src/olympia/landfill/management/commands/fetch_prod_addons.py",
+   "line": 53,
+   "reason": "self-call, dev-only landfill command against the prod AMO API (fetch_prod_versions.py:39 and applications/management/commands/import_prod_versions.py:19 are the same)"
+  },
+  {
+   "caller": "addons-server",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "{env}/__version__,",
+   "file": "scripts/health_check.py",
+   "line": 64,
+   "reason": "test or tooling only. A CI/ops health-check script; both paths are routed to @olympia by nginx (amo/urls.py:33, amo/urls.py:8 under services/)"
+  },
+  {
+   "caller": "addons-server",
+   "target": "addons-server",
+   "method": "UNKNOWN",
+   "path": "various",
+   "file": "src/pinguino/devhub/src/data/http.ts",
+   "line": 81,
+   "reason": "self-call. Browser JS served by addons-server calls its own API/views (BASE = VITE_AMO_API_BASE ?? '/api/v5')"
+  },
+  {
+   "caller": "addons-server",
+   "target": "addons-frontend",
+   "method": "POST",
+   "path": "/__cspreport__",
+   "file": "src/olympia/lib/settings_base.py",
+   "line": 1020,
+   "reason": "not a request sent by code. CSP report-uri header value; the browser sends the report. addons-frontend declares app.post('/__cspreport__') at src/amo/server/base.js:221"
+  },
+  {
+   "caller": "addons-server",
+   "target": "addons-frontend",
+   "method": "UNKNOWN",
+   "path": "proxy_pass",
+   "file": "docker/nginx/addons.conf.template",
+   "line": 106,
+   "reason": "not a request sent by code. Local-dev reverse-proxy config for browser traffic (location / -> @frontendamo), not application source"
+  },
+  {
+   "caller": "addons-server",
+   "target": "autograph",
+   "method": "GET",
+   "path": "{AUTOGRAPH_CONFIG.server_url}/__heartbeat__",
+   "file": "src/olympia/amo/monitors.py",
+   "line": 215,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-server",
+   "target": "cinder",
+   "method": "POST",
+   "path": "{CINDER_SERVER_URL}v1/create_report",
+   "file": "src/olympia/abuse/cinder.py",
+   "line": 128,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-server",
+   "target": "remote-settings",
+   "method": "GET",
+   "path": "{REMOTE_SETTINGS_WRITER_URL}__heartbeat__",
+   "file": "src/olympia/lib/remote_settings.py",
+   "line": 38,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-server",
+   "target": "FxA",
+   "method": "POST",
+   "path": "{FXA_OAUTH_HOST}/token",
+   "file": "src/olympia/accounts/verify.py",
+   "line": 58,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-server",
+   "target": "reputation",
+   "method": "UNKNOWN",
+   "path": "service",
+   "file": "src/olympia/users/models.py",
+   "line": 1508,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-server",
+   "target": "SocketLabs",
+   "method": "GET",
+   "path": "/DELETE",
+   "file": "src/olympia/users/tasks.py",
+   "line": 142,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-server",
+   "target": "developer",
+   "method": "UNKNOWN",
+   "path": "blog",
+   "file": "src/olympia/devhub/cron.py",
+   "line": 18,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-server",
+   "target": "scanner",
+   "method": "UNKNOWN",
+   "path": "webhooks",
+   "file": "src/olympia/scanners/tasks.py",
+   "line": 571,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-server",
+   "target": "pontoon",
+   "method": "GET",
+   "path": "(REST",
+   "file": "src/olympia/amo/management/commands/check_locales_completion_rate.py",
+   "line": 109,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/accounts/login/start/",
+   "file": "src/amo/api/index.js",
+   "line": 281,
+   "reason": "browser navigation (window.location.assign in AuthenticateButton), not a request sent by code"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/accounts/login/start/",
+   "file": "src/amo/components/AuthenticateButton/index.js",
+   "line": 131,
+   "reason": "browser navigation (window.location.assign in AuthenticateButton), not a request sent by code"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/api/v5/hero/",
+   "file": "src/amo/api/hero.js",
+   "line": 14,
+   "reason": "dead code: getHeroShelves has no caller in src/"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/firefox/downloads/file/{file_id}/{filename}",
+   "file": "src/amo/installAddon.js",
+   "line": 323,
+   "reason": "URL from the API response, fetched by Firefox (mozAddonManager) or the browser, not by frontend code"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/firefox/downloads/file/{file_id}/{filename}",
+   "file": "src/amo/addonManager.js",
+   "line": 123,
+   "reason": "URL from the API response, fetched by Firefox (mozAddonManager) or the browser, not by frontend code"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "GET",
+   "path": "/firefox/downloads/file/{file_id}/{filename}",
+   "file": "src/amo/components/AMInstallButton/index.js",
+   "line": 184,
+   "reason": "URL from the API response, fetched by Firefox (mozAddonManager) or the browser, not by frontend code"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "ANY",
+   "path": "/api/*",
+   "file": "bin/proxy.js",
+   "line": 21,
+   "reason": "dev only tooling: local proxy forwards any /api/ path to proxyApiHost (config/development.js:20 http://olympia.test); no specific route"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "Firefox",
+   "method": "GET",
+   "path": "https://www.firefox.com/thanks/",
+   "file": "src/amo/constants.js",
+   "line": 24,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "Google",
+   "method": "T",
+   "path": "ag",
+   "file": "",
+   "line": 0,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "Firefox",
+   "method": "UNKNOWN",
+   "path": "(mozAddonManager.sendAbuseReport)",
+   "file": "src/amo/sagas/abuse.js",
+   "line": 67,
+   "reason": "target not in the set (Firefox browser API; Firefox itself contacts AMO)"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "support.mozilla.org",
+   "method": "UNKNOWN",
+   "path": "/",
+   "file": "src/amo/constants.js",
+   "line": 26,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "cdnjs.cloudflare.com",
+   "method": "UNKNOWN",
+   "path": "stylesheets",
+   "file": "src/blog-utils/index.html",
+   "line": 9,
+   "reason": "target not in the set"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "addons-server",
+   "method": "UNKNOWN",
+   "path": "(tests/mocks",
+   "file": "",
+   "line": 0,
+   "reason": "test or tooling only"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "addons-frontend",
+   "method": "GET",
+   "path": "/frontend_monitor.json,",
+   "file": "src/amo/server/base.js",
+   "line": 211,
+   "reason": "self-call / routes served by the frontend itself"
+  },
+  {
+   "caller": "addons-frontend",
+   "target": "",
+   "method": "UNKNOWN",
+   "path": "addons-frontend->(link only) {apiHost}/{lang}/firefox/collections/{userId}/",
+   "file": "src/amo/components/CollectionManager/index.js",
+   "line": 253,
+   "reason": "display-only URL prefix for a frontend page, not a request"
+  }
+ ],
+ "no_route": []
+}
