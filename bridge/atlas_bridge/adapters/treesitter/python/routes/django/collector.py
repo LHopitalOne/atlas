@@ -42,8 +42,9 @@ class DjangoRoutes(RouteCollector):
         return Extraction(routes=routes)
 
     def _roots(self):
-        """The modules ROOT_URLCONF names, from the settings least likely to be test settings. Every module-level
-        assignment counts: `if RUNNING_X: ROOT_URLCONF = 'proj.x_urls'` names a root of another process."""
+        """The modules ROOT_URLCONF names, from the settings least likely to be test settings, test URLconf modules
+        last. Every module-level assignment counts: `if RUNNING_X: ROOT_URLCONF = 'proj.x_urls'` names a root of
+        another process, while `if TESTING: ROOT_URLCONF = 'proj.test_urls'` (a test file) is passed over."""
         roots = []
         for source in self.workspace.sources:
             if not source.mentions(self.ROOT_SETTING.encode()):
@@ -53,7 +54,7 @@ class DjangoRoutes(RouteCollector):
                     dotted = self._values.string(value, Scope.module(source)).text
                     module_file = self.workspace.names.dotted_module(dotted)
                     if module_file is not None:
-                        roots.append((source.test, module_file))
+                        roots.append((source.test or module_file.test, module_file))
         if not roots:
             return []
         best = min(t for t, _ in roots)

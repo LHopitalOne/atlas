@@ -294,6 +294,76 @@ class RouteHelperTest(unittest.TestCase):
         self.assertEqual(found.values(source, loops[1]), [])
 
 
+BOUND = {
+    'proj/settings.py': """
+    ROOT_URLCONF = 'proj.urls'
+    if TESTING:
+        ROOT_URLCONF = 'proj.test_urls'
+    """,
+    'proj/test_urls.py': "urlpatterns = [path('fake/', fake)]\n",
+    'proj/views.py': """
+    from django.views import View
+    class Items(View):
+        def get(self, request): ...
+        def post(self, request): ...
+    """,
+    'proj/helpers.py': """
+    from django.urls import include, path
+    def page(route, view, name=None):
+        return path(route, view, name=name)
+    def api_page(route, view):
+        return page(f'api/{route}', view)
+    def mount(prefix, module):
+        return path(prefix, include(module))
+    def mount_app(prefix, app):
+        return path(prefix, include(f'{app}.urls'))
+    def mount_urls(prefix, urls):
+        return path(prefix, urls)
+    """,
+    'proj/urls.py': """
+    from django.urls import include, path, re_path
+    from proj.helpers import api_page, mount, mount_app, mount_urls, page
+    from proj.views import Items
+    urlpatterns = [
+        page('about/', about_view),
+        page('items/', Items.as_view()),
+        api_page('things/', Items.as_view()),
+        mount('v1/', 'proj.v1.urls'),
+        mount_app('v2/', 'proj.v2'),
+        mount_urls('m/', include('proj.v1.urls')),
+    ]
+    for app in ['x', 'y']:
+        urlpatterns += [path(f'{app}/home/', home), path(app, app_index)]
+    for year in ['2020']:
+        urlpatterns += [re_path(fr'^{year}/(?P<n>\\d{{4}})/$', archive)]
+    """,
+    'proj/v1/urls.py': "urlpatterns = [path('a/', a)]\n",
+    'proj/v2/urls.py': "urlpatterns = [path('b/', b)]\n",
+}
+
+
+class BoundArgumentTest(unittest.TestCase):
+    def setUp(self):
+        self.routes = {str(r.path): (sorted(r.methods), r.handler, r.line) for r in extract(BOUND).routes}
+
+    def test_a_helper_serves_the_view_its_call_passes(self):
+        self.assertEqual(self.routes['/about'], ([ANY], 'about_view', 6))
+        self.assertEqual(self.routes['/items'], (['GET', 'POST'], 'Items', 7))
+        self.assertEqual(self.routes['/api/things'], (['GET', 'POST'], 'Items', 8))
+
+    def test_a_helper_includes_the_module_its_call_names(self):
+        for p in ('/v1/a', '/v2/b', '/m/a'):
+            self.assertIn(p, self.routes)
+
+    def test_loop_variables_fill_route_patterns(self):
+        for p in ('/x/home', '/y/home', '/x', '/y', '/2020/{n}'):
+            self.assertIn(p, self.routes)
+        self.assertFalse(any('{app}' in p or '{year}' in p for p in self.routes), self.routes)
+
+    def test_a_test_urlconf_is_not_a_root_next_to_a_production_one(self):
+        self.assertNotIn('/fake', self.routes)
+
+
 class ComposerTest(unittest.TestCase):
     def test_composer_needs_only_a_route_factory_and_the_name_lookup(self):
         ws = workspace(

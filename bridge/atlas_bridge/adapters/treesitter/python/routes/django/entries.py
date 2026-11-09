@@ -11,15 +11,23 @@ from .loops import LoopValues
 
 
 class ListBinding(NamedTuple):
-    """Inside a function that builds a URL list: the function, and {parameter: literal text} from its call. Inside a
-    module-level `for` loop: no function, and {loop variable: one literal text the loop gives it}."""
+    """Inside a function that builds a URL list: the function, {parameter: literal text} from its call, and
+    {parameter: (file, argument node)} of the call. Inside a module-level `for` loop: no function, and
+    {loop variable: one literal text the loop gives it}."""
 
     func: object
     values: dict
+    arguments: dict | None = None
 
     @property
     def is_loop(self):
         return self.func is None
+
+    def argument(self, node):
+        """(file, node) of the call argument a parameter name stands for, or None."""
+        if self.arguments is None or node is None or node.type != 'identifier':
+            return None
+        return self.arguments.get(PythonSyntax.text(node))
 
 
 class Site(NamedTuple):
@@ -158,7 +166,7 @@ class UrlEntries:
         if not found or not found.is_function or (found.source.path, found.node.start_byte) in seen:
             return
         func = found.node
-        binding = ListBinding(func, self._literal_arguments(source, node, func, args, outer))
+        binding = self._bind(source, node, func, args, outer)
         key = (found.source.path, func.start_byte)
         for r in PythonSyntax.body_nodes(func.child_by_field_name('body')):
             if r.type == 'return_statement' and r.named_children:
@@ -172,19 +180,22 @@ class UrlEntries:
     def _same(a, b):
         return (a.start_byte, a.end_byte) == (b.start_byte, b.end_byte)
 
-    def _literal_arguments(self, source, call, func, args, outer):
-        """{parameter: text} of the arguments of a builder call that are plain literals, or the outer builder's
-        parameters that its own call bound to literals."""
+    def _bind(self, source, call, func, args, outer):
+        """The binding of a builder call: the arguments that are plain literals (or the outer builder's parameters
+        its own call bound to literals) as text, and every argument as (file, node), an outer builder's parameter
+        standing for the argument of the outer call."""
         pos, kw = args
         params = PythonSyntax.params(func)
         values = {params[i][0]: a for i, a in enumerate(pos[: len(params)])}
         values.update(kw)
-        given = outer.values if outer is not None and not outer.is_loop else {}
-        bound = {}
+        outer = outer if outer is not None and not outer.is_loop else None
+        given = outer.values if outer is not None else {}
+        bound, nodes = {}, {}
         scope = Scope.at(source, call)
         for k, a in values.items():
+            nodes[k] = (outer.argument(a) if outer is not None else None) or (source, a)
             v = self._values.resolve(a, scope)[0]
             text = Marker.fill(v.text, given)
             if v.is_known and not Marker.is_unresolved(text):
                 bound[k] = text
-        return bound
+        return ListBinding(func, bound, nodes)

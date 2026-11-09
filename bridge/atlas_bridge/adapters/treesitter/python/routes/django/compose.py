@@ -4,6 +4,7 @@ from ...scope import Scope
 from ...syntax import PythonSyntax
 from ...values import Marker, Value
 from ..converters import FlaskPath
+from .loops import BoundText
 from .modules import IncludedModules
 from .regex import DjangoRegex
 
@@ -33,8 +34,9 @@ class Composition:
 class UrlComposer:
     """Walks a URLconf's entries, expanding include() with the prefixes above it, and builds the leaf routes.
 
-    A route a helper declares is placed at the helper's call, and serves the HTTP methods the call names as keywords
-    (`rest_path('users', GET=list_users, POST=add_user)`: one route per method, each with its view)."""
+    A route a helper declares is placed at the helper's call, with the view the call passes for the helper's view
+    parameter, and serves the HTTP methods the call names as keywords (`api_route('users', GET=list_users,
+    POST=add_user)`: one route per method, each with its view)."""
 
     MAX_ALTS = DjangoRegex.MAX_ALTS
 
@@ -46,6 +48,7 @@ class UrlComposer:
         self._views = views  # ViewMethods
         self._routers = routers  # DrfRouters
         self._modules = IncludedModules(names, values)
+        self._text = BoundText(values)
 
     def compose(self, source, name) -> Composition:
         """Every route a module-level URL list composes to, with no prefix."""
@@ -79,22 +82,25 @@ class UrlComposer:
         full = [p + a for p in prefixes for a in self._patterns(entry, pos, kw)][: self.MAX_ALTS]
         if view is None:
             return
+        argument = binding.argument(view) if binding is not None else None
+        view_source, view = argument if argument is not None else (entry.source, view)
         if view.type == 'call' and PythonSyntax.callee(view) == 'include':
-            for child in self._included(entry.source, pat, view, binding):
+            inner = binding if argument is None else None
+            for child in self._included(view_source, view, inner):
                 self._entry(child, full, stack | {key}, out, True)
             return
         name = self._route_name(entry.source, kw.get('name'), binding)
         line = PythonSyntax.line(declaring)
-        for methods, handler in self._served(entry, view):
+        for methods, handler in self._served(entry, view_source, view):
             for p in full:
                 out.add_route(self._route(where, line, '/' + p, methods, handler, name))
 
-    def _served(self, entry, view):
+    def _served(self, entry, source, view):
         """[(methods, handler)] of an entry: one per HTTP method its helper call names, else its view's."""
         keyed = self._views.keyword_views(entry.site.call) if entry.site is not None else []
         if keyed:
             return [(frozenset({method}), handler) for method, handler in keyed]
-        handler, methods = self._views.handler_and_methods(entry.source, view)
+        handler, methods = self._views.handler_and_methods(source, view)
         return [(methods, handler)]
 
     def _router_entry(self, source, register, prefixes, out):
@@ -105,18 +111,27 @@ class UrlComposer:
 
     def _patterns(self, entry, pos, kw):
         """The path templates one entry's pattern stands for: a path() route, or a regex's alternatives. A route
-        helper's parameters take the call's literal arguments. Unresolved, it is '{param}', or nothing in a loop."""
+        helper's parameters take the call's literal arguments, and a loop's variable each text the loop gives it.
+        Unresolved, it is '{param}', or nothing in a loop."""
         source, pat, binding = entry.source, entry.call, entry.binding
         node = pos[0] if pos else kw.get('route', kw.get('regex'))
+        loop = binding is not None and binding.is_loop
+        if loop and node is not None and self._text.mentions(node, binding.values):
+            text = self._text.text(Scope.at(source, pat), node, binding.values)
+            return [] if text is None else self._templates(pat, text)
         v = self._values.resolve(node, Scope.at(source, pat))[0] if node is not None else None
         text = Marker.fill(v.text, binding.values if binding is not None else {}) if v is not None else ''
         if v is None or not v.is_known or Marker.is_unresolved(text):
-            return [] if binding is not None and binding.is_loop else ['{param}']
+            return [] if loop else ['{param}']
+        return self._templates(pat, text)
+
+    @staticmethod
+    def _templates(pat, text):
         if PythonSyntax.callee(pat) == 'path':
             return [FlaskPath.template(text)]
         return DjangoRegex.templates(text)
 
-    def _included(self, source, pat, view, binding):
+    def _included(self, source, view, binding):
         """The entries an include() brings in: a list expression, or a module its argument names."""
         ipos, ikw = PythonSyntax.call_args(view)
         arg = ipos[0] if ipos else ikw.get('arg')
@@ -127,8 +142,8 @@ class UrlComposer:
         listed = [] if arg.type == 'string' else list(self._entries.entries_of(source, arg, binding))
         if listed:
             return listed
-        given = binding.values if binding is not None and binding.is_loop else {}
-        return self._entries.module_entries(self._modules.module(Scope.at(source, pat), arg, given))
+        given = binding.values if binding is not None else {}
+        return self._entries.module_entries(self._modules.module(Scope.at(source, view), arg, given))
 
     def _route_name(self, source, node, binding):
         """The literal `name=` of an entry, filling builder parameters from the call that built the list."""
