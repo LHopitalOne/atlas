@@ -27,6 +27,7 @@ class RepositoryFiles:
 
     SKIP_DIRS = frozenset(
         {'.git', 'node_modules', '.venv', 'venv', 'target', 'dist', 'build', '__pycache__', '.tox', 'vendor'}
+        | {'graphify-out', '.next', '.nuxt', 'coverage', '.mypy_cache', '.pytest_cache'}  # tools' output, not code
     )
     MAX_BYTES = 2_000_000  # generated or minified files are not worth parsing
     GIT_FILES = ['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard']
@@ -45,7 +46,7 @@ class RepositoryFiles:
         if self._all is None:
             try:
                 out = subprocess.run(self.GIT_FILES, cwd=self.root, capture_output=True, check=True).stdout
-                paths = [p for p in out.decode('utf-8', 'replace').split('\0') if p]
+                paths = [p for p in out.decode('utf-8', 'replace').split('\0') if p and not self._skipped(p)]
             except (OSError, subprocess.CalledProcessError):
                 paths = self._walk()
             self._all = sorted(paths)
@@ -60,6 +61,10 @@ class RepositoryFiles:
                 return f.read()
         except OSError as e:
             raise SourceReadError(path, e.strerror or str(e)) from e
+
+    def _skipped(self, path):
+        """In a folder never read (dependencies, build and tool output), even when git lists it."""
+        return any(part in self.SKIP_DIRS for part in path.split('/')[:-1])
 
     def _walk(self):
         paths = []

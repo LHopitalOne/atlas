@@ -46,3 +46,12 @@ class CallGraph(ABC):
     @abstractmethod
     def resolves(self, repo: str, file: str, line: int, name: str) -> frozenset[Target]:
         """What `name`, used on that line, refers to; empty when the index does not know."""
+
+
+class ChannelMentions(ABC):
+    """Finds where a repository names a channel (a topic, queue or pub/sub channel) as a whole string or config
+    value, outside tests."""
+
+    @abstractmethod
+    def mentions(self, repo: str, name: str) -> list[tuple[str, int, str]]:
+        """[(file, line, the text around it)] of each place `repo` names `name`."""

@@ -5,7 +5,8 @@ from .bases import BaseHints
 from .draw import GROUPINGS, CommunityGrouping, FolderGrouping, Grouping, MapDrawer, MapView
 from .hops import LibraryHops
 from .link import Link, LinkFinder, LinkReport, LinkRule, ServiceNames
-from .ports import CallGraph, DefinitionOracle, Extractor
+from .mentions import NamedChannels
+from .ports import CallGraph, ChannelMentions, DefinitionOracle, Extractor
 from .verify import LinkVerifier
 from .within import WithinRepoRule
 
@@ -14,6 +15,7 @@ __all__ = [
     'AddressBook',
     'BaseHints',
     'CallGraph',
+    'ChannelMentions',
     'CommunityGrouping',
     'DefinitionOracle',
     'Extractor',
@@ -27,6 +29,7 @@ __all__ = [
     'LinkVerifier',
     'MapDrawer',
     'MapView',
+    'NamedChannels',
     'ServiceNames',
     'WithinRepoRule',
 ]

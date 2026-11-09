@@ -5,6 +5,7 @@ from .config import ComposeFile, ConfigFiles, EnvFile
 from .files import RepositoryFiles, TestPathPolicy
 from .grammar import Grammar
 from .language import LanguageExtractor
+from .mentions import FileMentions
 from .resolver import ValueResolver
 from .source import SourceFile
 from .strings import StringTemplate, UrlTemplate
@@ -17,6 +18,7 @@ __all__ = [
     'ComposeFile',
     'ConfigFiles',
     'EnvFile',
+    'FileMentions',
     'Grammar',
     'LanguageExtractor',
     'RepositoryFiles',

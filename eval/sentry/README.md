@@ -99,3 +99,23 @@ How the path is known: **literal** string literal at the call site, **constant**
 - Three general rules keep false links out: a catch-all route that would swallow named path segments is a fallback,
   not a match; a route with fixed words must share at least one with the request; and requests made only by tests,
   CI and tooling are left out by default.
+
+
+## Kafka links (`kafka-key.json`)
+
+A second key, built the same way after the finder learned channels: two agents that never saw the finder listed every
+Kafka topic one of the four repositories produces and another consumes, one from the producers and one from the
+consumers, and a third merged them and tried to refute each. 31 links: sentry -> snuba 12, relay -> sentry 9, snuba -> sentry 7, relay -> snuba 3.
+Score it with `python3 eval/tiny/score.py eval/sentry/kafka-key.json links.json` on the Kafka links of a run.
+
+| Finder | Kafka links found | False Kafka links |
+| --- | --- | --- |
+| Library catalog only (arroyo, confluent_kafka, rdkafka, topic enums, settings maps) | 0 / 31 | 0 |
+| Plus receivers named by another repository (consumers wired in a registry or YAML) | 9 / 31 | 0 |
+
+The finder reads Sentry's producers (27 sends with resolved topic names) but no consumer in a library call: Sentry
+registers its consumers in a dictionary of consumer definitions, Snuba in storage YAML (`stream_loader`), and the
+topic often reaches the consumer from a command-line flag. A topic is one name on the whole broker, so a repository
+that names it next to a reader's words (consume, subscribe, stream, loader, processor) and does not send to it is
+taken as its consumer, as an inferred link. The nine found are Sentry -> Snuba. Not found yet: Relay's producers
+(their topic names come from a Rust match on a config enum) and Snuba's producers.

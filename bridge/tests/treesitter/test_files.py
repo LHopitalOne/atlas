@@ -9,7 +9,13 @@ from atlas_bridge.adapters.treesitter.kit import RepositoryFiles
 class RepositoryFilesTest(unittest.TestCase):
     def test_a_git_repository_lists_tracked_and_new_files_not_ignored_ones(self):
         with tempfile.TemporaryDirectory() as d:
-            for name, text in {'tracked.py': 'a = 1\n', 'new.py': 'b = 2\n', 'out/ignored.py': 'c = 3\n'}.items():
+            files = {
+                'tracked.py': 'a = 1\n',
+                'new.py': 'b = 2\n',
+                'out/ignored.py': 'c = 3\n',
+                'graphify-out/x.json': '{}',
+            }
+            for name, text in files.items():
                 os.makedirs(os.path.join(d, os.path.dirname(name)), exist_ok=True)
                 with open(os.path.join(d, name), 'w') as f:
                     f.write(text)

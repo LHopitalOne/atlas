@@ -1,0 +1,1134 @@
+{
+ "project": "sentry",
+ "services": {
+  "sentry": "sentry",
+  "snuba": "snuba",
+  "relay": "relay",
+  "symbolicator": "symbolicator"
+ },
+ "links": [
+  {
+   "id": "K01",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "ingest-events",
+   "idiom": "rdkafka via relay-kafka: StoreService::produce -> KafkaClient::send_message (store.rs:967); KafkaTopic::Events default 'ingest-events' (relay-kafka/src/config.rs:131) -> sentry KAFKA_CONSUMERS['ingest-events'] Topic.INGEST_EVENTS",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 582,
+     "function": "StoreService::do_store_event"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 586,
+     "function": "StoreService::do_store_event"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/consumers/__init__.py",
+    "line": 373,
+    "handler": "KAFKA_CONSUMERS['ingest-events'] -> sentry.ingest.consumer.factory.IngestStrategyFactory"
+   }
+  },
+  {
+   "id": "K02",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "ingest-attachments",
+   "idiom": "rdkafka via relay-kafka; KafkaTopic::Attachments default 'ingest-attachments' (config.rs:132) -> sentry KAFKA_CONSUMERS['ingest-attachments']",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 580,
+     "function": "StoreService::do_store_event"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 586,
+     "function": "StoreService::do_store_event"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 880,
+     "function": "StoreService::handle_user_report"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 1077,
+     "function": "StoreService::chunked_attachment_from_attachment"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 1144,
+     "function": "StoreService::produce_attachment"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 1167,
+     "function": "StoreService::produce_user_report"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/consumers/__init__.py",
+    "line": 392,
+    "handler": "KAFKA_CONSUMERS['ingest-attachments'] -> IngestStrategyFactory"
+   }
+  },
+  {
+   "id": "K03",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "ingest-transactions",
+   "idiom": "rdkafka via relay-kafka; KafkaTopic::Transactions default 'ingest-transactions' (config.rs:133) -> sentry KAFKA_CONSUMERS['ingest-transactions']",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 576,
+     "function": "StoreService::do_store_event"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 586,
+     "function": "StoreService::do_store_event"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/consumers/__init__.py",
+    "line": 401,
+    "handler": "KAFKA_CONSUMERS['ingest-transactions'] -> IngestTransactionsStrategyFactory"
+   }
+  },
+  {
+   "id": "K04",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "ingest-feedback-events",
+   "idiom": "rdkafka via relay-kafka; KafkaTopic::Feedback default 'ingest-feedback-events' (config.rs:141) -> sentry KAFKA_CONSUMERS['ingest-feedback-events']",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 578,
+     "function": "StoreService::do_store_event"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 586,
+     "function": "StoreService::do_store_event"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/consumers/__init__.py",
+    "line": 383,
+    "handler": "KAFKA_CONSUMERS['ingest-feedback-events'] -> IngestStrategyFactory"
+   }
+  },
+  {
+   "id": "K05",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "ingest-metrics",
+   "idiom": "rdkafka via relay-kafka; MetricNamespace::Sessions -> KafkaTopic::MetricsSessions default 'ingest-metrics' (config.rs:136) -> sentry release-health metrics indexer consumer",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 1176,
+     "function": "StoreService::send_metric_message"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 1194,
+     "function": "StoreService::send_metric_message"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/consumers/__init__.py",
+    "line": 408,
+    "handler": "KAFKA_CONSUMERS['ingest-metrics'] -> sentry.sentry_metrics.consumers.indexer.parallel.MetricsConsumerStrategyFactory"
+   }
+  },
+  {
+   "id": "K06",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "ingest-monitors",
+   "idiom": "rdkafka via relay-kafka; KafkaTopic::Monitors default 'ingest-monitors' (config.rs:139) -> sentry KAFKA_CONSUMERS['ingest-monitors']",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 916,
+     "function": "StoreService::handle_check_in"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/consumers/__init__.py",
+    "line": 341,
+    "handler": "KAFKA_CONSUMERS['ingest-monitors'] -> StoreMonitorCheckInStrategyFactory"
+   }
+  },
+  {
+   "id": "K07",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "ingest-spans",
+   "idiom": "rdkafka via relay-kafka; KafkaTopic::Spans default 'ingest-spans' (config.rs:140) -> sentry KAFKA_CONSUMERS['process-spans'] Topic.INGEST_SPANS",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 772,
+     "function": "StoreService::handle_store_span"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/consumers/__init__.py",
+    "line": 455,
+    "handler": "KAFKA_CONSUMERS['process-spans'] -> ProcessSpansStrategyFactory"
+   }
+  },
+  {
+   "id": "K08",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "profiles",
+   "idiom": "rdkafka via relay-kafka; KafkaTopic::Profiles default 'profiles' (config.rs:137), both profiles and profile chunks -> taskbroker raw mode spawns sentry task process_profile_from_kafka_raw (namespace ingest.profiling.raw, is_raw_mode=True); topic binding lives in infra, sentry names it only as Topic.PROFILES (kafka_definition.py:45)",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 812,
+     "function": "StoreService::handle_store_profile_chunk"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 1268,
+     "function": "StoreService::produce_profile"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/profiles/task.py",
+    "line": 192,
+    "handler": "sentry.profiles.task.process_profile_from_kafka_raw (taskbroker raw mode)"
+   }
+  },
+  {
+   "id": "K09",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "ingest-replay-recordings",
+   "idiom": "rdkafka via relay-kafka; KafkaTopic::ReplayRecordings default 'ingest-replay-recordings' (config.rs:138) -> taskbroker raw mode spawns sentry.replays.tasks.process_replay_recording (replays.raw namespace) which decodes with the Topic.INGEST_REPLAYS_RECORDINGS codec",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 839,
+     "function": "StoreService::handle_store_replay"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/replays/consumers/recording.py",
+    "line": 24,
+    "handler": "RECORDINGS_CODEC / process_message via raw task process_replay_recording (replays/tasks.py:78)"
+   }
+  },
+  {
+   "id": "K10",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "outcomes",
+   "idiom": "rdkafka via relay-kafka; outcomes are aggregated as metrics and emitted in send_metric_based_outcome; KafkaTopic::Outcomes default 'outcomes' (config.rs:134) -> snuba outcomes_raw storage stream_loader",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 1238,
+     "function": "StoreService::send_metric_based_outcome"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 1241,
+     "function": "StoreService::send_metric_based_outcome"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/outcomes_raw/storages/raw.yaml",
+    "line": 32,
+    "handler": "outcomes_raw stream_loader default_topic (rust-consumer --storage=outcomes_raw)"
+   }
+  },
+  {
+   "id": "K11",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "outcomes-billing",
+   "idiom": "rdkafka via relay-kafka; billing outcomes -> KafkaTopic::OutcomesBilling default 'outcomes-billing' (config.rs:135) -> snuba outcomes-billing-consumer = outcomes_raw storage with --raw-events-topic=outcomes-billing (lower confidence: topic chosen by CLI override, not storage YAML)",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 1237,
+     "function": "StoreService::send_metric_based_outcome"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 1241,
+     "function": "StoreService::send_metric_based_outcome"
+    }
+   ],
+   "receive": {
+    "file": "snuba/cli/devserver.py",
+    "line": 91,
+    "handler": "outcomes-billing-consumer (snuba rust-consumer --storage=outcomes_raw --raw-events-topic=outcomes-billing)"
+   }
+  },
+  {
+   "id": "K12",
+   "protocol": "kafka",
+   "caller": "relay",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "snuba-items",
+   "idiom": "rdkafka via relay-kafka; KafkaTopic::Items default 'snuba-items' (config.rs:142) -> snuba eap_items storage stream_loader",
+   "send": [
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 661,
+     "function": "StoreService::handle_store_metrics"
+    },
+    {
+     "file": "relay-server/src/services/store.rs",
+     "line": 705,
+     "function": "StoreService::handle_store_trace_item"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/events_analytics_platform/storages/eap_items.yaml",
+    "line": 170,
+    "handler": "eap_items stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K13",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "events",
+   "idiom": "arroyo KafkaProducer in KafkaEventStream (Topic.EVENTS='events'); the Kafka path used when SENTRY_EVENTSTREAM is KafkaEventStream (settings default is HTTP SnubaEventStream) -> snuba errors storage stream_loader",
+   "send": [
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 66,
+     "function": "KafkaEventStream.__init__"
+    },
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 223,
+     "function": "KafkaEventStream._send"
+    },
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 233,
+     "function": "KafkaEventStream._send"
+    },
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 248,
+     "function": "KafkaEventStream._send"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/events/storages/errors.yaml",
+    "line": 399,
+    "handler": "errors stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K14",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "transactions",
+   "idiom": "arroyo KafkaProducer in KafkaEventStream (Topic.TRANSACTIONS='transactions') -> snuba transactions storage stream_loader",
+   "send": [
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 67,
+     "function": "KafkaEventStream.__init__"
+    },
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 219,
+     "function": "KafkaEventStream._send"
+    },
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 233,
+     "function": "KafkaEventStream._send"
+    },
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 248,
+     "function": "KafkaEventStream._send"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/transactions/storages/transactions.yaml",
+    "line": 238,
+    "handler": "transactions stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K15",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "generic-events",
+   "idiom": "arroyo KafkaProducer in KafkaEventStream (Topic.EVENTSTREAM_GENERIC='generic-events') -> snuba search_issues storage stream_loader",
+   "send": [
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 68,
+     "function": "KafkaEventStream.__init__"
+    },
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 221,
+     "function": "KafkaEventStream._send"
+    },
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 233,
+     "function": "KafkaEventStream._send"
+    },
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 248,
+     "function": "KafkaEventStream._send"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/issues/storages/search_issues.yaml",
+    "line": 119,
+    "handler": "search_issues stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K16",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "snuba-items",
+   "idiom": "arroyo producers resolving get_topic_definition(Topic.SNUBA_ITEMS)['real_topic_name'] in many modules -> snuba eap_items storage stream_loader (eap_items_2.yaml:170 reads the same topic)",
+   "send": [
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 279,
+     "function": "KafkaEventStream._send_item"
+    },
+    {
+     "file": "src/sentry/eventstream/kafka/backend.py",
+     "line": 281,
+     "function": "KafkaEventStream._send_item"
+    },
+    {
+     "file": "src/sentry/spans/consumers/process_segments/tasks.py",
+     "line": 42,
+     "function": "module-level _snuba_items_topic"
+    },
+    {
+     "file": "src/sentry/spans/consumers/process_segments/tasks.py",
+     "line": 124,
+     "function": "process_segment_task"
+    },
+    {
+     "file": "src/sentry/processing_errors/eap/producer.py",
+     "line": 74,
+     "function": "produce_processing_errors_to_eap"
+    },
+    {
+     "file": "src/sentry/processing_errors/eap/producer.py",
+     "line": 145,
+     "function": "produce_processing_errors_to_eap"
+    },
+    {
+     "file": "src/sentry/preprod/eap/write.py",
+     "line": 145,
+     "function": "produce_preprod_size_metric_to_eap"
+    },
+    {
+     "file": "src/sentry/preprod/eap/write.py",
+     "line": 147,
+     "function": "produce_preprod_size_metric_to_eap"
+    },
+    {
+     "file": "src/sentry/preprod/eap/write.py",
+     "line": 261,
+     "function": "produce_preprod_build_distribution_to_eap"
+    },
+    {
+     "file": "src/sentry/preprod/eap/write.py",
+     "line": 263,
+     "function": "produce_preprod_build_distribution_to_eap"
+    },
+    {
+     "file": "src/sentry/replays/lib/kafka.py",
+     "line": 66,
+     "function": "write_trace_items"
+    },
+    {
+     "file": "src/sentry/replays/lib/kafka.py",
+     "line": 69,
+     "function": "write_trace_items"
+    },
+    {
+     "file": "src/sentry/workflow_engine/processors/evaluations/eap.py",
+     "line": 216,
+     "function": "EAPEmitter.emit"
+    },
+    {
+     "file": "src/sentry/workflow_engine/processors/evaluations/eap.py",
+     "line": 182,
+     "function": "_produce_trace_item"
+    },
+    {
+     "file": "src/sentry/uptime/consumers/eap_producer.py",
+     "line": 64,
+     "function": "produce_eap_uptime_result"
+    },
+    {
+     "file": "src/sentry/uptime/consumers/eap_producer.py",
+     "line": 68,
+     "function": "produce_eap_uptime_result"
+    },
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1623,
+     "function": "_process_vroomrs_transaction_profile"
+    },
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1627,
+     "function": "_process_vroomrs_transaction_profile"
+    },
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1728,
+     "function": "_process_vroomrs_chunk_profile"
+    },
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1732,
+     "function": "_process_vroomrs_chunk_profile"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/events_analytics_platform/storages/eap_items.yaml",
+    "line": 170,
+    "handler": "eap_items stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K17",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "outcomes",
+   "idiom": "arroyo producer in track_outcome, Topic.OUTCOMES='outcomes' for non-billing outcomes -> snuba outcomes_raw storage stream_loader",
+   "send": [
+    {
+     "file": "src/sentry/utils/outcomes.py",
+     "line": 220,
+     "function": "track_outcome"
+    },
+    {
+     "file": "src/sentry/utils/outcomes.py",
+     "line": 236,
+     "function": "track_outcome"
+    },
+    {
+     "file": "src/sentry/utils/outcomes.py",
+     "line": 240,
+     "function": "track_outcome"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/outcomes_raw/storages/raw.yaml",
+    "line": 32,
+    "handler": "outcomes_raw stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K18",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "outcomes-billing",
+   "idiom": "arroyo producer in track_outcome, Topic.OUTCOMES_BILLING='outcomes-billing' when outcome.is_billing() -> snuba outcomes-billing-consumer (outcomes_raw storage with --raw-events-topic override; lower confidence)",
+   "send": [
+    {
+     "file": "src/sentry/utils/outcomes.py",
+     "line": 221,
+     "function": "track_outcome"
+    },
+    {
+     "file": "src/sentry/utils/outcomes.py",
+     "line": 236,
+     "function": "track_outcome"
+    },
+    {
+     "file": "src/sentry/utils/outcomes.py",
+     "line": 240,
+     "function": "track_outcome"
+    }
+   ],
+   "receive": {
+    "file": "snuba/cli/devserver.py",
+    "line": 91,
+    "handler": "outcomes-billing-consumer (snuba rust-consumer --storage=outcomes_raw --raw-events-topic=outcomes-billing)"
+   }
+  },
+  {
+   "id": "K19",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "snuba-metrics",
+   "idiom": "confluent_kafka producer in metrics indexer SimpleProduceStep; release-health ingest config output_topic=Topic.SNUBA_METRICS -> snuba metrics_raw storage stream_loader",
+   "send": [
+    {
+     "file": "src/sentry/sentry_metrics/configuration.py",
+     "line": 72,
+     "function": "get_ingest_config"
+    },
+    {
+     "file": "src/sentry/sentry_metrics/consumers/indexer/multiprocess.py",
+     "line": 32,
+     "function": "SimpleProduceStep.__init__"
+    },
+    {
+     "file": "src/sentry/sentry_metrics/consumers/indexer/multiprocess.py",
+     "line": 89,
+     "function": "SimpleProduceStep.submit"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/metrics/storages/raw.yaml",
+    "line": 48,
+    "handler": "metrics_raw stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K20",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "group-attributes",
+   "idiom": "arroyo producer, Topic.GROUP_ATTRIBUTES='group-attributes' (Kafka branch when SENTRY_EVENTSTREAM is KafkaEventStream) -> snuba group_attributes storage stream_loader",
+   "send": [
+    {
+     "file": "src/sentry/issues/attributes.py",
+     "line": 135,
+     "function": "produce_snapshot_to_kafka"
+    },
+    {
+     "file": "src/sentry/issues/attributes.py",
+     "line": 136,
+     "function": "produce_snapshot_to_kafka"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/group_attributes/storages/group_attributes.yaml",
+    "line": 50,
+    "handler": "group_attributes stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K21",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "ingest-replay-events",
+   "idiom": "arroyo producer, Topic.INGEST_REPLAY_EVENTS='ingest-replay-events' -> snuba replays storage stream_loader",
+   "send": [
+    {
+     "file": "src/sentry/replays/lib/kafka.py",
+     "line": 105,
+     "function": "publish_replay_event"
+    },
+    {
+     "file": "src/sentry/replays/lib/kafka.py",
+     "line": 106,
+     "function": "publish_replay_event"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/replays/storages/replays.yaml",
+    "line": 242,
+    "handler": "replays stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K22",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "processed-profiles",
+   "idiom": "arroyo producer, Topic.PROCESSED_PROFILES='processed-profiles' -> snuba profiles storage stream_loader",
+   "send": [
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1642,
+     "function": "_process_vroomrs_transaction_profile"
+    },
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1644,
+     "function": "_process_vroomrs_transaction_profile"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/profiles/storages/profiles.yaml",
+    "line": 64,
+    "handler": "profiles stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K23",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "profiles-call-tree",
+   "idiom": "arroyo producer, Topic.PROFILES_CALL_TREE='profiles-call-tree' -> snuba functions_raw storage stream_loader",
+   "send": [
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1608,
+     "function": "_process_vroomrs_transaction_profile"
+    },
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1610,
+     "function": "_process_vroomrs_transaction_profile"
+    },
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1713,
+     "function": "_process_vroomrs_chunk_profile"
+    },
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1715,
+     "function": "_process_vroomrs_chunk_profile"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/functions/storages/functions_raw.yaml",
+    "line": 47,
+    "handler": "functions_raw stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K24",
+   "protocol": "kafka",
+   "caller": "sentry",
+   "target": "snuba",
+   "operation": "PUBLISH",
+   "channel": "snuba-profile-chunks",
+   "idiom": "arroyo producer, Topic.PROFILE_CHUNKS='snuba-profile-chunks' -> snuba profile_chunks storage stream_loader",
+   "send": [
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1702,
+     "function": "_process_vroomrs_chunk_profile"
+    },
+    {
+     "file": "src/sentry/profiles/task.py",
+     "line": 1703,
+     "function": "_process_vroomrs_chunk_profile"
+    }
+   ],
+   "receive": {
+    "file": "snuba/datasets/configuration/profiles/storages/chunks.yaml",
+    "line": 37,
+    "handler": "profile_chunks stream_loader default_topic"
+   }
+  },
+  {
+   "id": "K25",
+   "protocol": "kafka",
+   "caller": "snuba",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "snuba-commit-log",
+   "idiom": "rust_snuba consumer builds a commit-log producer from stream_loader commit_log_topic and ProduceCommitLog step produces to it -> sentry post-process-forwarder-errors SynchronizedConsumer (synchronize_commit_log_topic_default)",
+   "send": [
+    {
+     "file": "snuba/datasets/configuration/events/storages/errors.yaml",
+     "line": 401,
+     "function": "errors stream_loader.commit_log_topic"
+    },
+    {
+     "file": "rust_snuba/src/consumer.rs",
+     "line": 250,
+     "function": "consumer_impl"
+    },
+    {
+     "file": "rust_snuba/src/factory_v2.rs",
+     "line": 134,
+     "function": "ConsumerStrategyFactoryV2::create"
+    },
+    {
+     "file": "rust_snuba/src/strategies/commit_log.rs",
+     "line": 130,
+     "function": "ProduceMessage commit log produce"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/consumers/__init__.py",
+    "line": 447,
+    "handler": "KAFKA_CONSUMERS['post-process-forwarder-errors'] synchronize_commit_log_topic_default -> SynchronizedConsumer"
+   }
+  },
+  {
+   "id": "K26",
+   "protocol": "kafka",
+   "caller": "snuba",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "snuba-transactions-commit-log",
+   "idiom": "rust_snuba ProduceCommitLog to transactions stream_loader commit_log_topic -> sentry post-process-forwarder-transactions SynchronizedConsumer",
+   "send": [
+    {
+     "file": "snuba/datasets/configuration/transactions/storages/transactions.yaml",
+     "line": 239,
+     "function": "transactions stream_loader.commit_log_topic"
+    },
+    {
+     "file": "rust_snuba/src/consumer.rs",
+     "line": 250,
+     "function": "consumer_impl"
+    },
+    {
+     "file": "rust_snuba/src/factory_v2.rs",
+     "line": 134,
+     "function": "ConsumerStrategyFactoryV2::create"
+    },
+    {
+     "file": "rust_snuba/src/strategies/commit_log.rs",
+     "line": 130,
+     "function": "ProduceMessage commit log produce"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/consumers/__init__.py",
+    "line": 437,
+    "handler": "KAFKA_CONSUMERS['post-process-forwarder-transactions'] synchronize_commit_log_topic_default -> SynchronizedConsumer"
+   }
+  },
+  {
+   "id": "K27",
+   "protocol": "kafka",
+   "caller": "snuba",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "snuba-generic-events-commit-log",
+   "idiom": "rust_snuba ProduceCommitLog to search_issues stream_loader commit_log_topic -> sentry post-process-forwarder-issue-platform SynchronizedConsumer",
+   "send": [
+    {
+     "file": "snuba/datasets/configuration/issues/storages/search_issues.yaml",
+     "line": 120,
+     "function": "search_issues stream_loader.commit_log_topic"
+    },
+    {
+     "file": "rust_snuba/src/consumer.rs",
+     "line": 250,
+     "function": "consumer_impl"
+    },
+    {
+     "file": "rust_snuba/src/factory_v2.rs",
+     "line": 134,
+     "function": "ConsumerStrategyFactoryV2::create"
+    },
+    {
+     "file": "rust_snuba/src/strategies/commit_log.rs",
+     "line": 130,
+     "function": "ProduceMessage commit log produce"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/consumers/__init__.py",
+    "line": 427,
+    "handler": "KAFKA_CONSUMERS['post-process-forwarder-issue-platform'] synchronize_commit_log_topic_default -> SynchronizedConsumer"
+   }
+  },
+  {
+   "id": "K28",
+   "protocol": "kafka",
+   "caller": "snuba",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "events-subscription-results",
+   "idiom": "snuba subscriptions-executor arroyo Produce step to stream_loader subscription_result_topic -> sentry raw-mode taskbroker task process_events_subscription_from_kafka (query_subscriptions/run.py) keyed by dataset_to_logical_topic",
+   "send": [
+    {
+     "file": "snuba/datasets/configuration/events/storages/errors.yaml",
+     "line": 406,
+     "function": "errors stream_loader.subscription_result_topic"
+    },
+    {
+     "file": "snuba/subscriptions/executor_consumer.py",
+     "line": 121,
+     "function": "build_executor_consumer.get_topics_for_entity"
+    },
+    {
+     "file": "snuba/subscriptions/executor_consumer.py",
+     "line": 206,
+     "function": "SubscriptionExecutorProcessingFactory.create_with_partitions"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/snuba/query_subscriptions/constants.py",
+    "line": 6,
+    "handler": "dataset_to_logical_topic[Dataset.Events] -> run.process_events_subscription_from_kafka -> consumer.handle_message"
+   }
+  },
+  {
+   "id": "K29",
+   "protocol": "kafka",
+   "caller": "snuba",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "transactions-subscription-results",
+   "idiom": "snuba subscriptions-executor Produce to subscription_result_topic -> sentry raw-mode subscription task",
+   "send": [
+    {
+     "file": "snuba/datasets/configuration/transactions/storages/transactions.yaml",
+     "line": 244,
+     "function": "transactions stream_loader.subscription_result_topic"
+    },
+    {
+     "file": "snuba/subscriptions/executor_consumer.py",
+     "line": 121,
+     "function": "build_executor_consumer.get_topics_for_entity"
+    },
+    {
+     "file": "snuba/subscriptions/executor_consumer.py",
+     "line": 206,
+     "function": "SubscriptionExecutorProcessingFactory.create_with_partitions"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/snuba/query_subscriptions/constants.py",
+    "line": 7,
+    "handler": "dataset_to_logical_topic[Dataset.Transactions] -> run.process_transactions_subscription_from_kafka"
+   }
+  },
+  {
+   "id": "K30",
+   "protocol": "kafka",
+   "caller": "snuba",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "metrics-subscription-results",
+   "idiom": "snuba subscriptions-executor Produce to subscription_result_topic -> sentry raw-mode subscription task",
+   "send": [
+    {
+     "file": "snuba/datasets/configuration/metrics/storages/raw.yaml",
+     "line": 54,
+     "function": "metrics_raw stream_loader.subscription_result_topic"
+    },
+    {
+     "file": "snuba/subscriptions/executor_consumer.py",
+     "line": 121,
+     "function": "build_executor_consumer.get_topics_for_entity"
+    },
+    {
+     "file": "snuba/subscriptions/executor_consumer.py",
+     "line": 206,
+     "function": "SubscriptionExecutorProcessingFactory.create_with_partitions"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/snuba/query_subscriptions/constants.py",
+    "line": 8,
+    "handler": "dataset_to_logical_topic[Dataset.Metrics] -> run.process_metrics_subscription_from_kafka"
+   }
+  },
+  {
+   "id": "K31",
+   "protocol": "kafka",
+   "caller": "snuba",
+   "target": "sentry",
+   "operation": "PUBLISH",
+   "channel": "subscription-results-eap-items",
+   "idiom": "snuba subscriptions-executor Produce to subscription_result_topic -> sentry raw-mode subscription task",
+   "send": [
+    {
+     "file": "snuba/datasets/configuration/events_analytics_platform/storages/eap_items.yaml",
+     "line": 175,
+     "function": "eap_items stream_loader.subscription_result_topic"
+    },
+    {
+     "file": "snuba/subscriptions/executor_consumer.py",
+     "line": 121,
+     "function": "build_executor_consumer.get_topics_for_entity"
+    },
+    {
+     "file": "snuba/subscriptions/executor_consumer.py",
+     "line": 206,
+     "function": "SubscriptionExecutorProcessingFactory.create_with_partitions"
+    }
+   ],
+   "receive": {
+    "file": "src/sentry/snuba/query_subscriptions/constants.py",
+    "line": 9,
+    "handler": "dataset_to_logical_topic[Dataset.EventsAnalyticsPlatform] -> run.process_eap_subscription_from_kafka"
+   }
+  }
+ ],
+ "not_links": [
+  {
+   "what": "symbolicator (any Kafka topic)",
+   "where": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/symbolicator",
+   "why": "No kafka/rdkafka references in any .rs or .toml file; it neither produces nor consumes Kafka"
+  },
+  {
+   "what": "relay as consumer",
+   "where": "relay (whole repo)",
+   "why": "Relay only produces to Kafka. It has no Kafka consumers."
+  },
+  {
+   "what": "relay/sentry outcomes and outcomes-billing -> sentry",
+   "where": "relay-server/src/services/store.rs:1237-1241; sentry src/sentry/utils/outcomes.py:220-240",
+   "why": "No sentry consumer for the outcomes topics. The billing consumer lives in getsentry, which is out of scope. Only snuba consumes them."
+  },
+  {
+   "what": "outcomes-billing produced by snuba accepted-outcomes consumer",
+   "where": "snuba snuba/cli/accepted_outcomes_consumer.py:51",
+   "why": "Consumed only by snuba itself (outcomes-billing-consumer), so it stays inside one repo"
+  },
+  {
+   "what": "ingest-occurrences",
+   "where": "sentry src/sentry/issues/producer.py, src/sentry/profiles/task.py:1595; consumer src/sentry/consumers/__init__.py:368",
+   "why": "Produced and consumed only within sentry"
+  },
+  {
+   "what": "monitors-clock-tick, monitors-clock-tasks, monitors-incident-occurrences",
+   "where": "sentry src/sentry/monitors/clock_dispatch.py, clock_tasks/producer.py, logic/incident_occurrence.py; consumers __init__.py:346,350,355",
+   "why": "Same-repository topics, produced and consumed in sentry"
+  },
+  {
+   "what": "ingest-monitors produced by sentry clock_pulse",
+   "where": "sentry src/sentry/monitors/tasks/clock_pulse.py",
+   "why": "Sentry produces this to its own consumer, so it stays inside one repo. K06 covers the cross-repo traffic."
+  },
+  {
+   "what": "events / transactions / generic-events consumed by sentry post-process forwarders",
+   "where": "sentry src/sentry/consumers/__init__.py:425,435,445",
+   "why": "Same-repo leg (sentry KafkaEventStream produces). The cross-repo consumer is snuba (K13-K15)."
+  },
+  {
+   "what": "snuba-metrics consumed by sentry metrics-last-seen-updater",
+   "where": "sentry src/sentry/consumers/__init__.py:417",
+   "why": "Same-repo leg. The cross-repo consumer is snuba (K19)."
+  },
+  {
+   "what": "shared-resources-usage",
+   "where": "sentry src/sentry/usage_accountant/accountant.py:49; snuba snuba/cogs/accountant.py:21, rust_snuba/src/strategies/accountant.rs:109",
+   "why": "Sentry and snuba both produce it, but none of the four repositories has a consumer"
+  },
+  {
+   "what": "taskworker, taskworker-control",
+   "where": "sentry src/sentry/taskworker/adapters.py",
+   "why": "Consumed by taskbroker, an external service outside this repo set"
+  },
+  {
+   "what": "uptime-results",
+   "where": "sentry src/sentry/consumers/__init__.py:359",
+   "why": "Consumed by sentry, but the producer is uptime-checker, which is not in these repos"
+  },
+  {
+   "what": "snuba-generic-metrics, ingest-performance-metrics, generic-metrics-subscription-results, buffered-segments",
+   "where": "sentry src/sentry/conf/types/kafka_definition.py",
+   "why": "Only registered in the Topic enum. No producer/consumer pair across these repos; relay drops spans/transactions generic metrics at store.rs:1180-1183."
+  },
+  {
+   "what": "cdc",
+   "where": "snuba groupedmessage/storages/grouped_messages.yaml:57, groupassignee/storages/group_assignees.yaml:45",
+   "why": "Consumed by snuba but produced by an external Postgres CDC pipeline"
+  },
+  {
+   "what": "snuba-llm-proxy-cost",
+   "where": "snuba outcomes/storages/llm_proxy_cost_raw.yaml:45",
+   "why": "Consumed by snuba, but no producer exists in sentry or relay"
+  },
+  {
+   "what": "event-replacements",
+   "where": "snuba errors.yaml:400; rust_snuba/src/strategies/replacements.rs; snuba/cli/replacer.py",
+   "why": "Produced by the snuba errors consumer and consumed by the snuba replacer, all in one repo"
+  },
+  {
+   "what": "snuba-metrics-commit-log, snuba-items-commit-log, scheduled-subscriptions-*",
+   "where": "snuba metrics/storages/raw.yaml:49; eap_items.yaml:171; snuba/subscriptions/*",
+   "why": "Produced and consumed inside snuba (subscription scheduler/executor). Sentry does not consume them."
+  },
+  {
+   "what": "snuba-queries (querylog)",
+   "where": "snuba snuba/state/__init__.py; querylog.yaml:170",
+   "why": "Produced and consumed inside snuba"
+  },
+  {
+   "what": "snuba-lw-deletions-generic-events, snuba-lw-deletions-eap-items",
+   "where": "snuba snuba/web/bulk_delete_query.py; snuba/cli/lw_deletions_consumer.py",
+   "why": "Produced and consumed inside snuba"
+  },
+  {
+   "what": "snuba-eap-mutations, snuba-ourlogs, eap-spans-subscription-results, snuba-eap-spans-commit-log",
+   "where": "snuba snuba/utils/streams/topics.py",
+   "why": "Only in the enum. No producer or consumer in sentry or relay."
+  },
+  {
+   "what": "snuba-dead-letter-* DLQ topics",
+   "where": "snuba storage YAML dlq_topic entries",
+   "why": "Snuba-internal DLQs"
+  },
+  {
+   "what": "ingest-*-dlq / *-backlog topics",
+   "where": "sentry src/sentry/consumers/__init__.py dlq_topic/stale_topic",
+   "why": "Sentry-internal DLQ and stale topics"
+  },
+  {
+   "what": "SnubaEventStream HTTP path",
+   "where": "sentry src/sentry/eventstream/snuba.py:487-489; settings default src/sentry/conf/server.py:1817",
+   "why": "The default SENTRY_EVENTSTREAM posts to snuba over HTTP, not Kafka. Kafka links K13-K15 and K20 come from KafkaEventStream, which deployed setups and the sentry devserver (runner/commands/devserver.py:384) use."
+  }
+ ]
+}

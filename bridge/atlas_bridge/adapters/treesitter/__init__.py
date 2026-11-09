@@ -5,5 +5,6 @@ a value resolver, one collector per framework or request idiom, and an extractor
 """
 
 from .extractor import TreeSitterExtractor
+from .kit import FileMentions
 
-__all__ = ['TreeSitterExtractor']
+__all__ = ['FileMentions', 'TreeSitterExtractor']

@@ -9,6 +9,7 @@ from ..core.errors import LibraryIndexError
 from ..core.http import Extraction
 from ..usecases.hops import LibraryHops
 from ..usecases.link import LinkFinder, LinkReport
+from ..usecases.mentions import NamedChannels
 from ..usecases.verify import LinkVerifier
 from ..usecases.within import WithinRepoRule
 from .command import Command
@@ -64,7 +65,7 @@ class LinksCommand(Command):
         )
 
     def run(self, args):
-        from ..adapters.treesitter import TreeSitterExtractor  # needs the optional tree-sitter packages
+        from ..adapters.treesitter import FileMentions, TreeSitterExtractor  # needs the optional tree-sitter packages
 
         repos = [RepositoryInput.parse(item).checked() for item in args.repos]
         libraries = [RepositoryInput.parse(item).checked() for item in args.library]
@@ -77,6 +78,8 @@ class LinksCommand(Command):
         for repo in repos:
             extraction.extend(extractor.extract(repo.name, repo.path))
         extraction.calls += self._through_libraries(libraries, extractor, graph)
+        named = NamedChannels(FileMentions({r.name: r.path for r in repos}), names)
+        extraction.routes += named.routes(extraction.calls, extraction.routes)
         links = self._verified(finder.find(extraction), indexes)
         report = LinkReport(names, extraction, links)
         JsonFile.write(args.out, LinkFilePresenter().present(report), indent=1)
