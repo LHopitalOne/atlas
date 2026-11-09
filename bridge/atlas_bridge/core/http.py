@@ -3,7 +3,8 @@
 Paths use one canonical syntax whatever the framework: `/rpc/{name}/{version}`, `{*rest}` for a tail wildcard.
 Adapters translate Django regexes, Flask converters, axum captures and format strings into it. A link over another
 protocol uses the same model: its channel is the path (a topic or queue `/orders.created`, a gRPC method
-`/Service/Method`, a port `/41210`), and a route and a call only meet on the same protocol.
+`/Service/Method`, a port `/41210`, a background task `/app.tasks.send_mail`), and a route and a call only meet on the
+same protocol.
 """
 
 import re
@@ -27,7 +28,9 @@ class Protocol:
     REDIS = 'redis'
     TCP = 'tcp'
     UDP = 'udp'
-    ALL = frozenset({HTTP, WEBSOCKET, GRPC, GRAPHQL, KAFKA, AMQP, REDIS, TCP, UDP})
+    TASK = 'task'  # a background job handed to workers through a task library (Celery, BullMQ, RQ): its channel is the
+    # task's name (Celery: the task function's dotted path or its name=; BullMQ: '<queue>/<job name>')
+    ALL = frozenset({HTTP, WEBSOCKET, GRPC, GRAPHQL, KAFKA, AMQP, REDIS, TCP, UDP, TASK})
 
 
 @dataclass(frozen=True)
