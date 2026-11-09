@@ -6,8 +6,11 @@ from .calls.graphql.collector import GraphqlCalls
 from .calls.keyed import KeyedRequests
 from .channels.collector import ChannelCollector
 from .collector import SharedPass
+from .generated.collector import GeneratedClientRequests
+from .packages.collector import WorkspacePackageCalls
 from .policy import JavaScriptTestPolicy
 from .routes.express import ExpressRoutes
+from .routes.nest import NestRoutes
 from .routes.nextjs import NextRoutes
 from .workspace import JavaScriptWorkspace
 
@@ -30,10 +33,21 @@ class JavaScriptExtractor(LanguageExtractor):
     GRAMMARS = frozenset({'javascript', 'typescript', 'tsx'})
     POLICY = JavaScriptTestPolicy
 
+    def __init__(self, graph=None):
+        super().__init__(graph)
+        self._root = ''  # the folder of the repository being read (workspace packages are found from it)
+
+    def extract(self, repo, files, paths):
+        self._root = files.root
+        return super().extract(repo, files, paths)
+
     def workspace(self, repo, sources) -> JavaScriptWorkspace:
-        return JavaScriptWorkspace(repo, sources, self.POLICY())
+        return JavaScriptWorkspace(repo, sources, self.POLICY(), self._root)
 
     def collectors(self, workspace) -> list:
         shared = (ExpressRoutes(workspace), RequestCalls(workspace), KeyedRequests(workspace), GraphqlCalls(workspace))
+        shared += (GeneratedClientRequests(workspace),)
         # one parse per file for the shared pass; Next.js routes and other protocols read the files they pick
-        return [SharedPass(workspace, shared), NextRoutes(workspace), ChannelCollector(workspace)]
+        files = [NextRoutes(workspace), NestRoutes(workspace), ChannelCollector(workspace)]
+        # functions imported from other packages of the monorepo, followed into their source
+        return [SharedPass(workspace, shared), *files, WorkspacePackageCalls(workspace)]

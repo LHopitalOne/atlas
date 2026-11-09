@@ -8,8 +8,11 @@ from atlas_bridge.adapters.treesitter.javascript.calls.verbs import VerbRequests
 from atlas_bridge.adapters.treesitter.javascript.channels.collector import ChannelCollector
 from atlas_bridge.adapters.treesitter.javascript.collector import FileCollector, SharedPass
 from atlas_bridge.adapters.treesitter.javascript.extractor import JavaScriptExtractor
+from atlas_bridge.adapters.treesitter.javascript.generated.collector import GeneratedClientRequests
+from atlas_bridge.adapters.treesitter.javascript.packages.collector import WorkspacePackageCalls
 from atlas_bridge.adapters.treesitter.javascript.policy import JavaScriptTestPolicy
 from atlas_bridge.adapters.treesitter.javascript.routes.express import ExpressRoutes
+from atlas_bridge.adapters.treesitter.javascript.routes.nest import NestRoutes
 from atlas_bridge.adapters.treesitter.javascript.routes.nextjs import NextRoutes
 from atlas_bridge.adapters.treesitter.javascript.source import JsSource
 from atlas_bridge.core.http import Extraction
@@ -43,11 +46,13 @@ class TreeSpy(FileCollector):
 class FilePassTest(unittest.TestCase):
     def test_the_extractor_reads_every_file_in_one_pass(self):
         ws = Repository.workspace(FILES)
-        shared, files, channels = JavaScriptExtractor().collectors(ws)
+        shared, files, nest, channels, packages = JavaScriptExtractor().collectors(ws)
         self.assertIsInstance(shared, SharedPass)
         self.assertIsInstance(files, NextRoutes)  # routes named by their files read the files it picks by path
+        self.assertIsInstance(nest, NestRoutes)  # controllers: only files that import @nestjs/common
         self.assertIsInstance(channels, ChannelCollector)  # other protocols: only files that name their libraries
-        kinds = [ExpressRoutes, RequestCalls, KeyedRequests, GraphqlCalls]
+        self.assertIsInstance(packages, WorkspacePackageCalls)  # functions imported from other packages of a monorepo
+        kinds = [ExpressRoutes, RequestCalls, KeyedRequests, GraphqlCalls, GeneratedClientRequests]
         self.assertEqual([type(c) for c in shared.collectors], kinds)
         out = shared.collect()
         self.assertEqual([str(r.path) for r in out.routes], ['/x'])

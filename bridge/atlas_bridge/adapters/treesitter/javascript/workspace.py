@@ -22,9 +22,17 @@ class JavaScriptWorkspace(Workspace):
 
     POLICY = JavaScriptTestPolicy  # used when the workspace is not given the extractor's policy
 
-    def __init__(self, repo: str, sources: list[SourceFile], policy: JavaScriptTestPolicy | None = None):
+    def __init__(
+        self, repo: str, sources: list[SourceFile], policy: JavaScriptTestPolicy | None = None, root: str = ''
+    ):
         self._policy = policy if policy is not None else self.POLICY()
+        self._root = root
         super().__init__(repo, [JsSource.adopt(s) for s in sources])
+
+    @property
+    def root(self) -> str:
+        """The repository's folder on disk ('' when the files were not read from one)."""
+        return self._root
 
     def index(self):
         self._scanned = [
