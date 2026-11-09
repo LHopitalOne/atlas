@@ -15,7 +15,7 @@ from .value import Value
 
 
 class ChannelValues(RustValues):
-    """RustValues followed further, for the address a socket connects to or binds ('127.0.0.1:41710'):
+    """RustValues followed further, for the address a socket connects to or binds ('127.0.0.1:9000'):
 
     - a parameter is the argument of each call by path that reaches its fn (`Sender::connect(&addr)`), or of the
       call being followed into the fn;
@@ -40,7 +40,9 @@ class ChannelValues(RustValues):
     ENV_READS = frozenset({('env', 'var'), ('env', 'var_os'), ('dotenv', 'var'), ('dotenvy', 'var')})
     DEFAULTS = frozenset({'unwrap_or', 'unwrap_or_else'})  # Result/Option methods whose argument is the fallback
     PARSE = 'parse'  # `"0.0.0.0:80".parse()`: the same address, as a SocketAddr
-    INTEGER = re.compile(r'\d+')  # the digits of an integer literal without its suffix: '8080u16' -> '8080'
+    # An integer literal: its base prefix, its digits (with `_` separators) and an optional type suffix ('8_080u16').
+    INTEGER = re.compile(r'(?P<base>0[xob])?(?P<digits>[0-9a-fA-F_]+?)(?P<suffix>[ui](?:8|16|32|64|128|size))?')
+    BASES = {None: 10, '0x': 16, '0o': 8, '0b': 2}
 
     def __init__(self, workspace, functions, structs, types):
         super().__init__(workspace)
@@ -61,8 +63,15 @@ class ChannelValues(RustValues):
         return super().resolve(node, scope, depth) if self._steps <= self.MAX_STEPS else []
 
     def _integer(self, node, scope, depth):
-        m = self.INTEGER.match(RustSyntax.text(node))
-        return [Value(m.group(), node, [])] if m else []
+        """An integer literal in decimal: '8_080u16' -> '8080', '0x1F90' -> '8080'."""
+        m = self.INTEGER.fullmatch(RustSyntax.text(node))
+        if m is None:
+            return []
+        try:
+            number = int(m.group('digits').replace('_', ''), self.BASES[m.group('base')])
+        except ValueError:
+            return []
+        return [Value(str(number), node, [])]
 
     def _identifier(self, node, scope, depth):
         return self._named(RustSyntax.text(node), node, scope, depth)

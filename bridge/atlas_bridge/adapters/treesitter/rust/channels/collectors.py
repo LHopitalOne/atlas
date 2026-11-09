@@ -13,17 +13,20 @@ from .table import EntryPoints
 
 class ChannelCalls(RustCallCollector):
     """One call per port a sending entry point's address can hold (`TcpStream::connect(addr)`), with the names
-    around it as hints."""
+    around it as hints; a connected UDP socket only when it then sends (EntryPoint.then)."""
 
     CAPTURE = 'call'
 
-    def __init__(self, workspace, values, sites):
+    def __init__(self, workspace, values, sites, followups):
         super().__init__(workspace, values)
         self._sites = sites
+        self._followups = followups
 
     def calls(self, file, node) -> list:
         site = self._sites.site(file, node)
         if site is None or site.entry.role != EntryPoints.SEND:
+            return []
+        if site.entry.then and not self._followups.follows(file, site):
             return []
         values = [v.text for v in self._values.values(file, site.address)]
         function = RequestContext.function_name(node)
@@ -61,7 +64,7 @@ class ChannelRoutes(RouteCollector):
         site = self._sites.site(file, node)
         if site is None or site.entry.role != EntryPoints.RECEIVE or self.workspace.is_test(file, node):
             return []
-        if site.entry.then and not self._followups.used(file, node, site.entry.then):
+        if site.entry.then and not self._followups.follows(file, site):
             return []
         if site.entry.unless and self._followups.handed(node, site.entry.unless):
             return []

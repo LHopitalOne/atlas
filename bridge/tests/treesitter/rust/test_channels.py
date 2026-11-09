@@ -144,6 +144,7 @@ async fn send(sock: &UdpSocket, buf: &[u8]) {
     tokio::net::TcpStream::connect(("db", PORT)).await.unwrap();
     sock.send_to(buf, "[::1]:6200").await.unwrap();
     sock.connect(format!("{}:{}", "relay", 6300)).await.unwrap();
+    sock.send(buf).await.unwrap();
 }
 """
             )
@@ -223,6 +224,44 @@ fn send(sock: UdpSocket, peers: Peers, addr: String) {
             .calls
         )
         self.assertEqual(channels(calls), [])
+
+    def test_integer_literals_in_any_base_and_a_connect_that_never_sends(self):
+        calls = (
+            RustRepo(
+                """
+use std::net::UdpSocket;
+
+const HEX: u16 = 0x1F90;
+
+pub struct Probe {
+    sock: UdpSocket,
+}
+
+impl Probe {
+    fn open(&self) {
+        self.sock.connect(("relay", 8_125u16)).unwrap();
+    }
+
+    fn flush(&self, buf: &[u8]) {
+        self.sock.send(buf).unwrap();
+    }
+}
+
+fn local_ip() -> std::net::IpAddr {
+    let sock = UdpSocket::bind("0.0.0.0:0").unwrap();
+    sock.connect("8.8.8.8:80").unwrap();
+    sock.local_addr().unwrap().ip()
+}
+
+fn emit(sock: &UdpSocket) {
+    sock.send_to(b"x", ("peer", HEX)).unwrap();
+}
+"""
+            )
+            .extract()
+            .calls
+        )
+        self.assertEqual([(c, p) for c, p, _, _ in channels(calls)], [('udp', '/8080'), ('udp', '/8125')])
 
     def test_calls_in_tests_are_marked(self):
         calls = (

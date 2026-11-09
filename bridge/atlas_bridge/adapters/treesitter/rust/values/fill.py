@@ -7,7 +7,7 @@ from .format import FormatMacro
 
 class FormatFill:
     """Every string a format can produce from a few values per placeholder: "{host}:{}" with host '127.0.0.1' and
-    port '41710' -> '127.0.0.1:41710'. A placeholder nobody can resolve stays '{}'."""
+    port '9000' -> '127.0.0.1:9000'. A placeholder nobody can resolve stays '{}'."""
 
     MAX_VALUES = 8  # strings one format may produce
     UNKNOWN = '{}'

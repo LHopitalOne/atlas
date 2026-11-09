@@ -15,6 +15,35 @@ class Followups:
     def __init__(self, workspace):
         self._workspace = workspace
 
+    def follows(self, file, site) -> bool:
+        """Whether one of the methods of the site's entry point (EntryPoint.then) follows it: on the value an instance
+        call is made on (`sock.connect(a)` then `sock.send(b)`), else on what the call returns."""
+        if site.entry.instance:
+            return self.used_on(file, site.call, site.entry.then)
+        return self.used(file, site.call, site.entry.then)
+
+    def used_on(self, file, call, methods) -> bool:
+        """Whether one of `methods` is called on the value `call` is made on (`sock.connect(a)`, or the first argument
+        of `UdpSocket::connect(&sock, a)`): a name in the same fn, or `self.field` in an impl of the same type."""
+        fn = RustSyntax.method(call)
+        args = RustSyntax.args(call)
+        recv = RustSyntax.unwrap(fn.child_by_field_name('value') if fn is not None else (args[0] if args else None))
+        scope = RustSyntax.ancestor(call, ('function_item',))
+        if recv is None or scope is None:
+            return False
+        if recv.type == 'identifier':
+            return any(self._root(c) == RustSyntax.text(recv) for c in self._calls(scope, methods))
+        base = RustSyntax.unwrap(recv.child_by_field_name('value')) if recv.type == 'field_expression' else None
+        if base is None or base.type != 'self':
+            return False
+        field, owner = RustSyntax.text(recv.child_by_field_name('field')), CrateFunctions.impl_type(call)
+        return any(
+            self._root(c) == 'self' and self._field(c) == field and CrateFunctions.impl_type(c) == owner
+            for f in self._workspace.files
+            for c in f.nodes('call')
+            if self._method(c) in methods
+        )
+
     def used(self, file, call, methods) -> bool:
         node = call
         while file.has_outer_call(node):

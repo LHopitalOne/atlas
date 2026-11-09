@@ -4,7 +4,7 @@ import re
 
 
 class SocketAddress:
-    """'127.0.0.1:41710', '[::1]:8125', 'localhost:9000/' -> '/41710', '/8125', '/9000'. An address whose port is not
+    """'127.0.0.1:5000', '[::1]:6000', 'localhost:9000/' -> '/5000', '/6000', '/9000'. An address whose port is not
     known, or is 0 (any free port: the caller's own end, never a service's), names no channel."""
 
     PORT = re.compile(r':(\d{1,5})/?$')  # the port at the end of 'host:port'

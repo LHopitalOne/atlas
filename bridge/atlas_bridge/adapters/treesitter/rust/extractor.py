@@ -32,13 +32,14 @@ class RustExtractor(LanguageExtractor):
         functions, structs = CrateFunctions(workspace), CrateStructs(workspace)
         types = ValueTypes(workspace, functions, structs)
         channels, sites = ChannelValues(workspace, functions, structs, types), ChannelSites(types)
+        followups = Followups(workspace)
         return [
             RouterRoutes(workspace, graph),
             ActixAttributeRoutes(workspace, graph, attributes),
-            ChannelRoutes(workspace, channels, sites, Followups(workspace)),
+            ChannelRoutes(workspace, channels, sites, followups),
             TraitPathCalls(workspace, values),
             ClientCalls(workspace, values),
-            ChannelCalls(workspace, channels, sites),
+            ChannelCalls(workspace, channels, sites, followups),
         ]
 
     def extract(self, repo, files, paths) -> Extraction:
