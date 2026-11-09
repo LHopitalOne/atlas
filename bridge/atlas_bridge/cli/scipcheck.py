@@ -37,9 +37,11 @@ class ScipCheck:
     def _index(self, repo):
         os.makedirs(self._dir, exist_ok=True)
         written = []
-        for indexer in (cls() for cls in self._indexers()):
-            if not indexer.applies(repo.path):
-                continue
+        indexers = [i for i in (cls() for cls in self._indexers()) if i.applies(repo.path)]
+        if not indexers:
+            markers = ', '.join(sorted({m for cls in self._indexers() for m in cls.MARKERS}))
+            self._report(f'  scip      {repo.name}: skipped, no project file at its root ({markers})')
+        for indexer in indexers:
             try:
                 written.append(indexer.index(repo.name, repo.path, self._dir))
             except BridgeError as e:  # no Node.js, no Docker, no rust-analyzer, or the indexer failed
