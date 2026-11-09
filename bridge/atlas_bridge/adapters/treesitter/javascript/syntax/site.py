@@ -11,7 +11,8 @@ class CallSite:
     REQUEST_METHODS = ('request', 'requestPromise')
     DIRECT = ('fetch', 'axios', 'got', 'ky')  # functions that send a request when called
     GLOBALS = ('window', 'globalThis', 'self', 'global')  # `window.fetch(...)` is `fetch(...)`
-    NAMES = (*ROUTE_VERBS, *REQUEST_METHODS, *DIRECT, 'route', 'use')
+    AJAX = ('ajax', 'getJSON')  # jQuery's request functions other than get / post
+    NAMES = (*ROUTE_VERBS, *REQUEST_METHODS, *DIRECT, *AJAX, 'route', 'use')
     # typescript reads `await http.get<T>(url)` as a call of `(await http.get)`: the callee may sit in an await
     MEMBER = '(member_expression property: (property_identifier) @name)'
     QUERY = (

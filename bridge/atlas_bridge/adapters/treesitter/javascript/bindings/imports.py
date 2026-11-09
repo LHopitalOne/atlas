@@ -4,17 +4,30 @@ from ..syntax.nodes import JsSyntax
 
 
 class ImportTable:
-    """name -> (module source, imported name or 'default') for `import` statements and `x = require('...')`."""
+    """name -> (module source, imported name or 'default') for `import` statements and `x = require('...')`; a
+    namespace (`import * as api from './api'`, `const api = require('./api')`) -> its module source."""
 
     DEFAULT = 'default'
+    NAMESPACE = 'namespace_import'
 
     def __init__(self, source):
         self._source = source
         self._names = None
+        self._namespaces = {}
 
     def get(self, name):
         """(module source, imported name or 'default') for an imported name, or None."""
         return self._table().get(name)
+
+    def namespace(self, name):
+        """The module source a name holds the whole module of (`api` in `api.get()`), or None."""
+        self._table()
+        return self._namespaces.get(name)
+
+    def namespace_sources(self):
+        """The module sources the file holds whole modules of."""
+        self._table()
+        return set(self._namespaces.values())
 
     def exported_name(self, name):
         """The name a module exports `name` under: the imported name, or `name` itself for a default import."""
@@ -61,6 +74,7 @@ class ImportTable:
             source = JsSyntax.require(value)
             if name is not None and name.type == 'identifier' and source:
                 self._names[JsSyntax.text(name)] = (source, self.DEFAULT)
+                self._namespaces[JsSyntax.text(name)] = source
 
     def _import_statement(self, node):
         source = node.child_by_field_name('source')
@@ -71,6 +85,8 @@ class ImportTable:
         for c in clause.named_children:
             if c.type == 'identifier':
                 self._names[JsSyntax.text(c)] = (src, self.DEFAULT)
+            elif c.type == self.NAMESPACE and c.named_children:
+                self._namespaces[JsSyntax.text(c.named_children[0])] = src
             elif c.type == 'named_imports':
                 for spec in c.named_children:
                     name, alias = spec.child_by_field_name('name'), spec.child_by_field_name('alias')

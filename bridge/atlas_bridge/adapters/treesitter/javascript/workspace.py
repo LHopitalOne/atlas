@@ -1,6 +1,7 @@
 """JavaScriptWorkspace: the javascript / typescript files of a repository, and which of them are worth reading."""
 
 from ..kit import SourceFile, Workspace
+from .calls.jquery import JQueryRequests
 from .calls.libraries import EntryPoints
 from .clients.registry import ClientRegistry
 from .linker import ModuleLinker
@@ -19,6 +20,7 @@ class JavaScriptWorkspace(Workspace):
     METHODS += ('requestPromise', 'use')
     PRECHECK = (b'fetch', b'axios', b'got(', b'ky(') + tuple(f'.{m}{c}'.encode() for m in METHODS for c in '(<')
     PRECHECK += EntryPoints.MENTIONS  # files that import a data fetching or GraphQL library
+    PRECHECK += JQueryRequests.MENTIONS  # `$.ajax(`, `$.getJSON(`
 
     POLICY = JavaScriptTestPolicy  # used when the workspace is not given the extractor's policy
 

@@ -46,6 +46,10 @@ class DocumentForwarder(Forwarder):
         self._linker.release()
         return found
 
+    @staticmethod
+    def _key(c):
+        return c.file, c.line, c.method, str(c.path), c.protocol
+
     def _module(self, source):
         if source.path not in self._modules:
             self._modules[source.path] = self._workspace.module(source, self._linker)
