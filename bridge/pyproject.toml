@@ -5,25 +5,31 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "atlas-bridge"
 version = "0.1.0"
-description = "Draw Graphify graph.json files on the Atlas map."
+description = "Map repositories with Graphify, find the HTTP links between them, and draw them on the Atlas map."
 license = "Apache-2.0"
 requires-python = ">=3.10"
-
-[project.optional-dependencies]
-# Finding HTTP routes and requests in source code (python -m atlas_bridge links)
-links = [
+dependencies = [
+    # Graphify builds each repository's code graph (graphify update); its tree-sitter pins agree with ours below
+    "graphifyy>=0.9.100,<0.10",
     "tree-sitter>=0.25,<0.26",
-    "tree-sitter-python>=0.25",
-    "tree-sitter-rust>=0.24",
-    "tree-sitter-javascript>=0.25",
-    "tree-sitter-typescript>=0.23",
+    "tree-sitter-python>=0.25,<0.26",
+    "tree-sitter-rust>=0.24,<0.25",
+    "tree-sitter-javascript>=0.25,<0.26",
+    "tree-sitter-typescript>=0.23,<0.25",
 ]
 
+[project.optional-dependencies]
+links = []  # kept so `pip install 'atlas-bridge[links]'` still works; the grammars are now always installed
+
 [project.scripts]
+atlas = "atlas_bridge.cli:atlas_main"
 atlas-bridge = "atlas_bridge.__main__:main"
 
 [tool.setuptools.packages.find]
 include = ["atlas_bridge*"]
+
+[tool.setuptools.package-data]
+"atlas_bridge.adapters.page" = ["atlas.html"]  # the prebuilt page: npm run build:page
 
 [tool.ruff]
 line-length = 120
@@ -61,6 +67,7 @@ modules = [
     "atlas_bridge.adapters.graphify",
     "atlas_bridge.adapters.atlas",
     "atlas_bridge.adapters.treesitter",
+    "atlas_bridge.adapters.page",
 ]
 
 [[tool.importlinter.contracts]]
