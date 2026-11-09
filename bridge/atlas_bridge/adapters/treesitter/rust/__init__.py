@@ -1,4 +1,5 @@
-"""rust: HTTP routes (axum, actix-web) and requests (reqwest/hyper clients, request-trait impls) via tree-sitter."""
+"""rust: HTTP routes (axum, actix-web), requests (reqwest/hyper clients, request-trait impls) and TCP/UDP sockets via
+tree-sitter."""
 
 from .extractor import RustExtractor
 

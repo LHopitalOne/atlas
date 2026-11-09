@@ -22,6 +22,8 @@ class RustFile(SourceFile):
     (const_item) @const
     (static_item) @const
     (use_declaration) @use
+    (struct_item) @struct
+    (struct_expression) @init
     """
     ENTRY_STEMS = ('mod', 'lib', 'main')  # files named after their folder's module
     DEFAULT_FRAMEWORK = 'axum'
@@ -54,7 +56,8 @@ class RustFile(SourceFile):
         return self.test or self._file_test
 
     def nodes(self, capture: str) -> list:
-        """The nodes of one capture of QUERY, in source order: 'fn', 'call', 'impl', 'attr', 'const' or 'use'."""
+        """The nodes of one capture of QUERY, in source order: 'fn', 'call', 'impl', 'attr', 'const', 'use',
+        'struct' (declarations) or 'init' (struct expressions)."""
         return self._nodes.get(capture, [])
 
     def key(self, node):

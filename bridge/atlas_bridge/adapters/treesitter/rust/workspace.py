@@ -60,7 +60,11 @@ class RustWorkspace(Workspace):
         node = RustSyntax.unwrap(node)
         if node is None or node.type not in RustSyntax.NAMES:
             return None
-        cands = self._consts.get(ItemPath.segments(node)[-1], [])
+        return self.const_named(file, ItemPath.segments(node)[-1])
+
+    def const_named(self, file, name):
+        """The value of the const or static called `name` (the same file's first), as (file, value node), or None."""
+        cands = self._consts.get(name, [])
         if not cands:
             return None
         return max(cands, key=lambda c: c[0] is file)
@@ -68,6 +72,10 @@ class RustWorkspace(Workspace):
     def binding(self, file, node):
         """The value of the latest `let` of this identifier before it, or None."""
         return self._bindings.value(file, node)
+
+    def binding_named(self, file, name, at):
+        """The value of the latest `let <name>` before node `at` in its function, or None."""
+        return self._bindings.named(file, name, at)
 
     @staticmethod
     def in_test(node):

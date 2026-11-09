@@ -13,11 +13,15 @@ class LetBindings:
 
     def value(self, file, node):
         """The value of the latest `let name = value` before `node` in its function, or None."""
-        scope = RustSyntax.ancestor(node, ('function_item',))
+        return self.named(file, RustSyntax.text(node), node)
+
+    def named(self, file, name, at):
+        """The value of the latest `let <name> = value` before node `at` in its function, or None."""
+        scope = RustSyntax.ancestor(at, ('function_item',))
         if scope is None:
             return None
-        starts, lets = self._lets(file, scope).get(RustSyntax.text(node), ((), ()))
-        pos = node.start_byte
+        starts, lets = self._lets(file, scope).get(name, ((), ()))
+        pos = at.start_byte
         for i in range(bisect.bisect_left(starts, pos) - 1, -1, -1):
             let, block = lets[i]
             if let.end_byte <= pos and block.start_byte <= pos <= block.end_byte:  # in scope at `node`

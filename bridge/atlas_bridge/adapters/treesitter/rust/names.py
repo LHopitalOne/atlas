@@ -26,6 +26,14 @@ class ItemPath:
         return [s for s in cls.strip_generics(RustSyntax.text(node)).split('::') if s]
 
     @classmethod
+    def imported(cls, file, node):
+        """A path's segments with its first one expanded by the file's `use` declarations: with
+        `use std::net::UdpSocket`, 'UdpSocket::bind' -> ['std', 'net', 'UdpSocket', 'bind']."""
+        segs = cls.segments(node)
+        full = file.imported(segs[0]) if segs else None
+        return full.split('::') + segs[1:] if full else segs
+
+    @classmethod
     def last(cls, node):
         """The type name a path ends with: 'crate::x::Foo<T>' -> 'Foo'."""
         return cls.strip_generics(RustSyntax.text(node)).split('::')[-1]
