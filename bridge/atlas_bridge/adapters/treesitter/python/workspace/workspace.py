@@ -43,7 +43,7 @@ class PythonWorkspace(Workspace):
         self.locals = LocalIndex()
         self.attributes = ClassAttributes()
         self.callers = CallerIndex(self.sources, self._functions, graph=self.graph, repo=self.repo)
-        self.settings = DjangoSettings(self.sources)
+        self.settings = DjangoSettings(self.sources, self.names)
 
     def _read(self, source):
         caps = source.captures(self.QUERY)

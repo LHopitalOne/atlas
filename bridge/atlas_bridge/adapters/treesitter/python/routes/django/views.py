@@ -7,9 +7,11 @@ from ...verbs import HttpVerbs
 
 class ViewMethods:
     """`View.as_view()` serves the verbs its class (or, when it defines none, its direct bases) defines methods for;
-    a decorated view (`csrf_exempt(View.as_view())`) is read through; any other view serves ANY."""
+    a decorated view (`csrf_exempt(View.as_view())`) is read through; any other view serves ANY. A route helper
+    call that passes views as keywords named like HTTP methods (`GET=view`) serves those methods."""
 
     BASES = ('identifier', 'attribute')
+    SEQUENCES = frozenset({'tuple', 'parenthesized_expression'})  # `GET=(view, options)`: the view comes first
 
     def __init__(self, workspace):
         self._workspace = workspace
@@ -25,6 +27,18 @@ class ViewMethods:
             if pos and pos[0].type == 'call':  # a decorated view: csrf_exempt(View.as_view())
                 return self.handler_and_methods(source, pos[0])
         return PythonSyntax.text(view), frozenset({ANY})
+
+    @classmethod
+    def keyword_views(cls, call):
+        """[(METHOD, handler text)] of the keyword arguments of a call named like HTTP methods (GET=, POST=...)."""
+        _, kw = PythonSyntax.call_args(call)
+        out = []
+        for key, view in kw.items():
+            if key in HttpVerbs.METHODS and view is not None:
+                while view.type in cls.SEQUENCES and view.named_children:
+                    view = view.named_children[0]
+                out.append((key, PythonSyntax.text(view)))
+        return out
 
     def _find_class(self, source, expr):
         """(file, class node) of a class expression: by import, else by name (production code first)."""
