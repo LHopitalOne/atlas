@@ -219,3 +219,40 @@ class DecoratorsAreNotRequestsTest(unittest.TestCase):
             }
         )
         self.assertEqual(requests_(ex), set())
+
+
+class NestedRoutersTest(unittest.TestCase):
+    def test_a_router_included_in_a_router_is_under_its_whole_prefix(self):
+        ex = extract(
+            {
+                'app/routes/notes/items.py': """
+                from fastapi import APIRouter
+                router = APIRouter()
+
+                @router.get('/draft')
+                async def draft(): ...
+                """,
+                'app/routes/notes/__init__.py': """
+                from fastapi import APIRouter
+                from . import items
+                router = APIRouter(prefix='/api/notes')
+                router.include_router(items.router)
+                """,
+                'app/routes/admin.py': """
+                from fastapi import APIRouter
+                from app.routes.notes import router as notes_router
+                router = APIRouter(prefix='/admin')
+                router.include_router(notes_router, prefix='/v2')
+
+                @router.get('/stats')
+                async def stats(): ...
+                """,
+                'app/main.py': """
+                from fastapi import FastAPI
+                from app.routes.admin import router as admin_router
+                app = FastAPI()
+                app.include_router(admin_router, prefix='/x')
+                """,
+            }
+        )
+        self.assertEqual(routes(ex), {('/x/admin/v2/api/notes/draft', ('GET',)), ('/x/admin/stats', ('GET',))})
