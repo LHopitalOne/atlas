@@ -4,6 +4,7 @@ from .base import RequestCollector
 from .clients import ClientFetch, RequestMethods
 from .direct import DirectRequests
 from .graphql.idiom import GraphqlTransport
+from .jquery import JQueryRequests
 from .verbs import VerbRequests
 
 
@@ -11,7 +12,14 @@ class RequestCalls(RequestCollector):
     """Hands each call site to the first idiom that claims it, so requests come out in source order and each file's
     bindings are resolved in that order too."""
 
-    IDIOMS = (GraphqlTransport, DirectRequests, ClientFetch, RequestMethods, VerbRequests)  # asked in this order
+    IDIOMS = (
+        GraphqlTransport,
+        DirectRequests,
+        JQueryRequests,
+        ClientFetch,
+        RequestMethods,
+        VerbRequests,
+    )  # asked in this order
 
     def __init__(self, workspace):
         super().__init__(workspace)

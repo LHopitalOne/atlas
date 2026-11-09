@@ -20,6 +20,7 @@ class UrlValues(ValueResolver):
         'binary_expression': '_binary',
         'ternary_expression': '_ternary',
         'identifier': '_identifier',
+        'shorthand_property_identifier': '_identifier',  # `{ url }`
         'number': '_number',
         'call_expression': '_call',
         'new_expression': '_url_object',
