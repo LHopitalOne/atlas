@@ -37,6 +37,12 @@ class Reading:
     SERVICE = 'service'  # a gRPC service: the constructor's last name ('/<Service>')
     RPC = 'rpc'  # a gRPC method of a client: '<origin channel>/<Method>'
     IMPLEMENTATION = 'implementation'  # gRPC addService(<pkg>.<Service>.service, {Method: impl}): one per method
+    JOB = 'job'  # a job added to a queue: '<origin channel>/<job name>'
+    JOBS = 'jobs'  # jobs added at once: '<origin channel>/<name>' for the `name` of each object of a list
+    WORKER = (
+        'worker'  # a queue's worker: '/<queue>/<job>' for each job name its processor dispatches on, else every job
+    )
+    PROCESSOR = 'processor'  # a class decorated as a queue's worker: the same, read from its `process` method
 
 
 @dataclass(frozen=True)
@@ -85,6 +91,8 @@ REDIS = frozenset({'ioredis', 'redis', '@redis/client'})
 GRPC = frozenset({'@grpc/grpc-js', 'grpc'})
 NET = frozenset({'net'})
 DGRAM = frozenset({'dgram'})
+BULLMQ = frozenset({'bullmq'})
+NEST_BULLMQ = frozenset({'@nestjs/bullmq'})
 
 SOCKET = 'websocket'  # the object `new WebSocket(url)` makes
 PORT = Arg(0, key='port')
@@ -93,6 +101,7 @@ TOPICS = Arg(0, key='topic', many='topics', positional=False)
 # a `ws` server without a path takes every path; with `noServer` the code routes upgrades itself
 SERVER_PATH = Arg(0, key='path', default='/', unless='noServer', positional=False)
 CONNECT_SEND = ('CONNECT', 'SEND')
+QUEUE = 'bullmq.queue'  # the object `new Queue(name)` makes, or a queue NestJS injects
 
 ENTRIES = (
     # WebSocket (browser global, `ws`): the client opens a URL, then sends on it; a `ws` server listens on a path
@@ -132,6 +141,15 @@ ENTRIES = (
     Entry(DGRAM, Form.CALL, 'createSocket', Role.MAKE, makes='dgram.socket'),
     Entry(DGRAM, Form.ON_CALL, 'send', Role.SEND, Protocol.UDP, Reading.PORT, Arg(1, long_index=3), on='dgram.socket'),
     Entry(DGRAM, Form.ON_CALL, 'bind', Role.RECEIVE, Protocol.UDP, Reading.PORT, PORT, on='dgram.socket'),
+    # bullmq: new Queue(name), queue.add(jobName, data), queue.addBulk([{ name, data }]); new Worker(name, processor)
+    # runs the jobs of the queue. @nestjs/bullmq: @InjectQueue(name) injects a queue, @Processor(name) on a WorkerHost
+    # class makes its process(job) the worker
+    Entry(BULLMQ, Form.NEW, 'Queue', Role.MAKE, Protocol.TASK, Reading.NAME, Arg(0), makes=QUEUE),
+    Entry(NEST_BULLMQ, Form.CALL, 'InjectQueue', Role.MAKE, Protocol.TASK, Reading.NAME, Arg(0), makes=QUEUE),
+    Entry(BULLMQ, Form.ON_CALL, 'add', Role.SEND, Protocol.TASK, Reading.JOB, Arg(0), on=QUEUE, min_args=1),
+    Entry(BULLMQ, Form.ON_CALL, 'addBulk', Role.SEND, Protocol.TASK, Reading.JOBS, Arg(0, key='name'), on=QUEUE),
+    Entry(BULLMQ, Form.NEW, 'Worker', Role.RECEIVE, Protocol.TASK, Reading.WORKER, Arg(0)),
+    Entry(NEST_BULLMQ, Form.CALL, 'Processor', Role.RECEIVE, Protocol.TASK, Reading.PROCESSOR, Arg(0, key='name')),
 )
 
 # what a module's default export is called in ENTRIES (`import WebSocket from 'ws'`); '' for a namespace of functions

@@ -8,7 +8,7 @@ Requests: verb calls on requests/httpx/aiohttp/session/client-like receivers, `.
 callers that supply them. Payloads: `reverse('route-name')` URLs handed to another service. Service URLs:
 module-level names bound to absolute URLs (settings). Channels (channels/): Kafka, RabbitMQ, Redis pub/sub, socket,
 asyncio and websockets sends and receives from one table of library entry points, gRPC servicers and stubs, and
-Strawberry GraphQL root fields.
+Strawberry GraphQL root fields. Tasks (tasks/): Celery task definitions and the calls that hand them to workers.
 """
 
 from ....core.http import Extraction
@@ -19,6 +19,7 @@ from .config import SettingUrls
 from .files import SlashedFiles
 from .policy import PythonTestPolicy
 from .routes import DecoratorRoutes, DjangoRoutes, Registrations, UrlRuleRoutes
+from .tasks import TaskEndpoints
 from .workspace import PythonWorkspace
 
 
@@ -28,7 +29,8 @@ class PythonExtractor(LanguageExtractor):
     GRAMMARS = frozenset({'python'})
     POLICY = PythonTestPolicy
     PREFIXED = (DecoratorRoutes, UrlRuleRoutes)  # share one read of the blueprint and router registrations
-    CHANNELS = (ChannelEndpoints, GrpcServicers, GrpcStubs, StrawberryFields)  # links over other protocols
+    # links over other protocols
+    CHANNELS = (ChannelEndpoints, GrpcServicers, GrpcStubs, StrawberryFields, TaskEndpoints)
     OTHERS = (DjangoRoutes, RequestCalls, PayloadCalls, SettingUrls, *CHANNELS)
 
     def workspace(self, repo, sources):

@@ -12,7 +12,7 @@ class ChannelFile:
     """One file as the channel readers see it: its JsModule, the libraries its names come from, its channel values,
     and what it exports to the files that import it."""
 
-    DECLARATIONS = frozenset({'function_declaration', 'class_declaration'})
+    DECLARATIONS = frozenset({'function_declaration', 'class_declaration', 'enum_declaration'})
     EXPORTS = frozenset({'module.exports', 'exports'})
 
     def __init__(self, module, graph):

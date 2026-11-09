@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from ..bindings.binding import ParamBinding, ValueBinding
 from ..syntax.members import Members
 from ..syntax.nodes import JsSyntax
+from .properties import ParameterProperties
 from .table import ANY_NAME, CLIENT_METHODS, ENTRIES, Entry, Form
 
 
@@ -120,9 +121,19 @@ class Matcher:
         obj = JsSyntax.unwrap(expr.child_by_field_name('object'))
         if obj is not None and obj.type == 'this':
             field = JsSyntax.text(expr.child_by_field_name('property'))
-            return next(filter(None, (self.origin(v, depth + 1) for v in Members.of_this(expr, field))), None)
+            found = next(filter(None, (self.origin(v, depth + 1) for v in Members.of_this(expr, field))), None)
+            return found if found is not None else self._injected(expr, field)
         inner = self.origin(obj, depth + 1)
         return inner if inner is not None and inner.entry.nested else None
+
+    def _injected(self, expr, field):
+        """A constructor parameter property a decorator injects (`@InjectQueue('mail') private queue: Queue`)."""
+        param = ParameterProperties.of(expr, field)
+        for call in ParameterProperties.decorators(param) if param is not None else ():
+            found = self.match(call)
+            if found is not None and found.entry.makes:
+                return found
+        return None
 
     def _bound(self, ident, depth):
         binding = self._file.module.scopes.binding(ident, JsSyntax.text(ident))

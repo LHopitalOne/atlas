@@ -22,8 +22,8 @@ class FunctionSites:
             return params[1:]
         return params
 
-    def of(self, scope) -> list[CallSite]:
-        """The call sites of the function around `scope` (without `*args` at the call), at most MAX_SITES. Sites in
+    def of(self, scope, most=MAX_SITES) -> list[CallSite]:
+        """The call sites of the function around `scope` (without `*args` at the call), at most `most`. Sites in
         test code supply a function outside it nothing: a test picks its own topics and ports, not the service's."""
         func = scope.func
         if func is None:
@@ -37,7 +37,7 @@ class FunctionSites:
             found = [(source, call) for source, call in found if not self._workspace.is_test(source, call)]
         params = self.params(func)
         sites = [CallSite.at(source, call, params) for source, call in found]
-        return [s for s in sites if not s.splat][: self.MAX_SITES]
+        return [s for s in sites if not s.splat][:most]
 
     def _typed(self, scope, found):
         """The calls of a method on objects of its class that the calls by name left out."""

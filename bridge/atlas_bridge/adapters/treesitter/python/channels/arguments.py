@@ -60,7 +60,7 @@ class ChannelArguments:
 
     def literals(self, node, scope) -> list[str]:
         """The literal texts a value may have, its parameters settled at the function's call sites."""
-        values = self._values.settled(node, scope)
+        values = self._values.settled(node, scope, limit=self._values.MAX_CHANNELS)
         return [v.text for v in values if v.is_literal and not Marker.is_unresolved(v.text)]
 
     def _names(self, node, scope):
