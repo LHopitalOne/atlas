@@ -2,6 +2,7 @@
 
 from ..kit import LanguageExtractor
 from .calls.composite import RequestCalls
+from .channels.collector import ChannelCollector
 from .collector import SharedPass
 from .policy import JavaScriptTestPolicy
 from .routes.express import ExpressRoutes
@@ -26,4 +27,5 @@ class JavaScriptExtractor(LanguageExtractor):
         return JavaScriptWorkspace(repo, sources, self.POLICY())
 
     def collectors(self, workspace) -> list:
-        return [SharedPass(workspace, (ExpressRoutes(workspace), RequestCalls(workspace)))]  # one parse per file
+        shared = SharedPass(workspace, (ExpressRoutes(workspace), RequestCalls(workspace)))  # one parse per file
+        return [shared, ChannelCollector(workspace)]
