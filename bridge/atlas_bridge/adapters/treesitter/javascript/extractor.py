@@ -12,12 +12,14 @@ from .policy import JavaScriptTestPolicy
 from .routes.express import ExpressRoutes
 from .routes.nest import NestRoutes
 from .routes.nextjs import NextRoutes
+from .routes.resolvers import GraphqlResolvers
 from .workspace import JavaScriptWorkspace
 
 
 class JavaScriptExtractor(LanguageExtractor):
     """Routes: Express, Koa-router, Fastify and Hono, with the prefixes of `app.use('/prefix', router)` across files;
-    Next.js API routes named by their files (`pages/api/`, `app/**/route.ts`).
+    Next.js API routes named by their files (`pages/api/`, `app/**/route.ts`); the root fields of a GraphQL resolver
+    map (graphql-yoga, graphql-tools, Apollo Server).
 
     Requests: `fetch(url, {method})`, `axios(config)`, `axios.get(url)`, `<client>.get/post/...(url)`,
     `<client>.request(config)`, and the keys of data fetching hooks (`useSWR('/api/notes')`). URLs are resolved from
@@ -48,6 +50,6 @@ class JavaScriptExtractor(LanguageExtractor):
         shared = (ExpressRoutes(workspace), RequestCalls(workspace), KeyedRequests(workspace), GraphqlCalls(workspace))
         shared += (GeneratedClientRequests(workspace),)
         # one parse per file for the shared pass; Next.js routes and other protocols read the files they pick
-        files = [NextRoutes(workspace), NestRoutes(workspace), ChannelCollector(workspace)]
+        files = [NextRoutes(workspace), NestRoutes(workspace), GraphqlResolvers(workspace), ChannelCollector(workspace)]
         # functions imported from other packages of the monorepo, followed into their source
         return [SharedPass(workspace, shared), *files, WorkspacePackageCalls(workspace)]
