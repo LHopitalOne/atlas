@@ -3,6 +3,7 @@ imports from other files of the repository."""
 
 from dataclasses import dataclass
 
+from ..syntax.functions import Functions
 from ..syntax.nodes import JsSyntax
 
 
@@ -17,7 +18,9 @@ class Location:
 class ObjectPaths:
     """Follows an expression of one file to the expression its value is written as.
 
-    `config.orders.baseUrl` -> the `baseUrl` property of the object literal `config` is bound to;
+    `config.orders.baseUrl` -> the `baseUrl` property of the object literal `config` is bound to; `desk.eventsUrl()`
+    on an instance of a class of the repository (`new DeskClient()`, a parameter typed `DeskClient`) -> what that
+    method returns;
     `const { baseUrl, endpoints } = config.orders` binds each name to the property of that object; an imported
     name is followed to what the other file exports (`export const config = {...} as const`) when the module linker
     can read that file. `Object.freeze({...})` is its object.
@@ -70,6 +73,52 @@ class ObjectPaths:
         target = self._linker.module(self._module.path, imported[0]) if imported and self._linker else None
         value = target.exports.value(imported[1]) if target is not None else None
         return target.objects.origin(value, depth + 1) if value is not None else None
+
+    def returned(self, fn, depth=0) -> Location | None:
+        """Where the value a method call returns is written (`fn` is the callee `desk.eventsUrl`): the expression the
+        method of the receiver's class returns, when the receiver is an instance of a class of the repository."""
+        receiver = self._unwrap(fn.child_by_field_name('object'))
+        key = fn.child_by_field_name('property')
+        if receiver is None or receiver.type != 'identifier' or key is None or depth > self.MAX_DEPTH:
+            return None
+        found = self._class(receiver, depth)
+        if found is None:
+            return None
+        body = found.node.child_by_field_name('body')
+        for method in body.named_children if body is not None else ():
+            if method.type == 'method_definition' and JsSyntax.text(
+                method.child_by_field_name('name')
+            ) == JsSyntax.text(key):
+                value = Functions.returned(method)
+                return Location(found.module, value) if value is not None else None
+        return None
+
+    def _class(self, receiver, depth):
+        """The class declaration an instance comes from: `const x = new C(...)`, or a parameter typed `C`."""
+        name = JsSyntax.text(receiver)
+        binding = self._module.scopes.binding(receiver, name)
+        if binding is None:
+            return None
+        made = JsSyntax.unwrap(binding.initializer)
+        if made is not None and made.type == 'new_expression':
+            ctor = made.child_by_field_name('constructor')
+            type_name = JsSyntax.text(ctor) if ctor is not None and ctor.type == 'identifier' else ''
+        else:
+            type_name = binding.annotated_type(name)
+        return self._declared_class(type_name, depth) if type_name else None
+
+    def _declared_class(self, name, depth):
+        """The class `name` is declared as in this file, or imported as from another file of the repository."""
+        for child in self._module.source.root.named_children:
+            node = child.child_by_field_name('declaration') if child.type == 'export_statement' else child
+            if (
+                node is not None
+                and node.type in Functions.CLASSES
+                and JsSyntax.text(node.child_by_field_name('name')) == name
+            ):
+                return Location(self._module, node)
+        found = self._imported(name, depth + 1)
+        return found if found is not None and found.node.type in Functions.CLASSES else None
 
     def property(self, location: Location, key, depth=0) -> Location | None:
         """Where property `key` of the object literal at `location` is written."""

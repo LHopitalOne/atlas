@@ -1,4 +1,5 @@
-"""Global request functions: fetch, axios, got, ky."""
+"""Global request functions: fetch, axios, got, ky, and the EventSource a browser opens a Server-Sent Events stream
+with."""
 
 from ..syntax.nodes import JsSyntax
 from ..syntax.site import CallSite
@@ -6,9 +7,10 @@ from .base import RequestCollector
 
 
 class DirectRequests(RequestCollector):
-    """`fetch(url, {method})`, `window.fetch(url)`, `axios(config)`, `axios(url, {method})`, `got(url)`, `ky(url)`."""
+    """`fetch(url, {method})`, `window.fetch(url)`, `axios(config)`, `axios(url, {method})`, `got(url)`, `ky(url)`;
+    `new EventSource(url, {withCredentials})` is a GET of its URL."""
 
-    NAMES = frozenset(CallSite.DIRECT)
+    NAMES = frozenset(CallSite.DIRECT + CallSite.STREAMS)
 
     def claims(self, module, site):
         return super().claims(module, site) and (not site.is_member or site.on_global())

@@ -5,11 +5,12 @@ import re
 from dataclasses import dataclass, replace
 
 from .....core.http import ANY
-from ...kit import UrlTemplate
+from ...kit import StringTemplate, UrlTemplate
 from ..module import JsModule
 from ..syntax.functions import Functions
 from ..syntax.nodes import JsSyntax
 from ..syntax.params import Params
+from ..syntax.properties import ParameterProperties
 from ..values.urls import UrlText
 from .arguments import Arguments
 from .callers import Callers
@@ -45,6 +46,29 @@ class OpenRequest:
         kind = fn.type == 'method_definition'
         return cls('', Functions.name(fn), owner, kind, params, template, method, method_default, frozenset(hints))
 
+    @classmethod
+    def at_constructor(cls, node, url_node, template, method, method_default, hints):
+        """The open request of a URL a method reads from fields its class's constructor sets from its parameters
+        (`fetch(this.url)` after `constructor(private url: URL)`): settled where the class is made. None when the
+        URL reads no such field."""
+        fields = [
+            n for n in JsSyntax.walk(url_node, {'member_expression'}) if n.child_by_field_name('object').type == 'this'
+        ]
+        ctor = ParameterProperties.constructor(node) if fields else None
+        if ctor is None or Functions.named_ancestor(node) == ctor:
+            return None
+        for field in fields:
+            key = JsSyntax.text(field.child_by_field_name('property'))
+            param = ParameterProperties.source_param(node, key)
+            if not param:
+                return None
+            template = template.replace('{' + StringTemplate.placeholder(JsSyntax.text(field)) + '}', '{' + param + '}')
+        _, owner = Functions.enclosing(node)
+        params = Params.of(ctor)
+        return cls(
+            '', ParameterProperties.CONSTRUCTOR, owner, True, params, template, method, method_default, frozenset(hints)
+        )
+
 
 class Forwarder:
     """Settles open requests at the calls of their functions (Callers): a call that fills in a path settles the
@@ -61,6 +85,7 @@ class Forwarder:
     def __init__(self, workspace):
         self._workspace = workspace
         self._modules = {}
+        self._linker = workspace.linker()  # the callers' arguments are followed into the files they import
         self._arguments = {}
         self._callers = Callers(workspace, self._module)
 
@@ -103,7 +128,7 @@ class Forwarder:
 
     def _module(self, source):
         if source.path not in self._modules:
-            self._modules[source.path] = JsModule(source)
+            self._modules[source.path] = JsModule(source, self._linker)
         return self._modules[source.path]
 
     def _args(self, module) -> Arguments:
@@ -113,7 +138,7 @@ class Forwarder:
 
     def _at(self, open_, module, call):
         """([the requests settled at this call], [the requests opened one level up])."""
-        hints = set(open_.hints) | {open_.function}
+        hints = set(open_.hints) | {self._callers.name_of(open_)}
         settled, again = [], []
         envs, fallbacks = self._bind(open_, module, call, hints)
         for env in envs:

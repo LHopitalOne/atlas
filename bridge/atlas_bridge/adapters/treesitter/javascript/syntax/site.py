@@ -4,12 +4,14 @@ from .nodes import JsSyntax
 
 
 class CallSite:
-    """`fetch(url)`, `app.get('/p', h)`, `api.request(config)`: a call node, its callee name, arguments and receiver."""
+    """`fetch(url)`, `app.get('/p', h)`, `api.request(config)`, `new EventSource(url)`: a call (or `new`) node, its
+    callee name, arguments and receiver."""
 
     VERBS = ('get', 'post', 'put', 'patch', 'delete', 'head', 'options')
     ROUTE_VERBS = (*VERBS, 'all', 'del')
     REQUEST_METHODS = ('request', 'requestPromise')
     DIRECT = ('fetch', 'axios', 'got', 'ky')  # functions that send a request when called
+    STREAMS = ('EventSource',)  # `new EventSource(url)`: a GET of the URL whose response streams Server-Sent Events
     GLOBALS = ('window', 'globalThis', 'self', 'global')  # `window.fetch(...)` is `fetch(...)`
     AJAX = ('ajax', 'getJSON')  # jQuery's request functions other than get / post
     NAMES = (*ROUTE_VERBS, *REQUEST_METHODS, *DIRECT, *AJAX, 'route', 'use')
@@ -17,13 +19,15 @@ class CallSite:
     MEMBER = '(member_expression property: (property_identifier) @name)'
     QUERY = (
         f'(call_expression function: [(identifier) @name {MEMBER} (await_expression {MEMBER})] '
-        '(#any-of? @name ' + ' '.join(f'"{n}"' for n in NAMES) + ')) @call'
+        '(#any-of? @name ' + ' '.join(f'"{n}"' for n in NAMES) + ')) @call '
+        '(new_expression constructor: [(identifier) @name (member_expression property: (property_identifier) @name)] '
+        '(#any-of? @name ' + ' '.join(f'"{n}"' for n in STREAMS) + ')) @call'
     )
 
     def __init__(self, node, name):
         self._node = node
         self._name = name
-        function = JsSyntax.unwrap(node.child_by_field_name('function'))
+        function = JsSyntax.unwrap(node.child_by_field_name('function') or node.child_by_field_name('constructor'))
         self._member = function.type != 'identifier'
         self._receiver = JsSyntax.unwrap(function.child_by_field_name('object')) if self._member else None
         self._args = JsSyntax.args(node)

@@ -1,9 +1,10 @@
 """Python channel collectors: messaging and socket libraries read from one table of their entry points, gRPC
-servicers and stubs, and Strawberry GraphQL schemas."""
+servicers and stubs, Socket.IO events, and Strawberry GraphQL schemas."""
 
 from .collector import ChannelEndpoints
 from .graphql import StrawberryFields
 from .grpc import GrpcNames, GrpcServicers, GrpcStubs
+from .socketio import SocketIoEvents
 from .table import Argument, ChannelTable, Endpoint, LibraryType, Role, Shape, Wrapper
 
 __all__ = [
@@ -17,6 +18,7 @@ __all__ = [
     'LibraryType',
     'Role',
     'Shape',
+    'SocketIoEvents',
     'StrawberryFields',
     'Wrapper',
 ]

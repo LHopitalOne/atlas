@@ -25,6 +25,7 @@ class Form:
     METHOD = 'method'  # `x.<callee>(...)` in a file that imports the library
     ON_CALL = 'on_call'  # `x.<callee>(...)` on an object made by entry `on`
     ON_NEW = 'on_new'  # `new x.<Name>(...)` on an object made by entry `on`
+    ON_MEMBER = 'on_member'  # `x.<name>` (no call) on an object made by entry `on`: a getter like `socket.broadcast`
 
 
 class Reading:
@@ -43,6 +44,8 @@ class Reading:
         'worker'  # a queue's worker: '/<queue>/<job>' for each job name its processor dispatches on, else every job
     )
     PROCESSOR = 'processor'  # a class decorated as a queue's worker: the same, read from its `process` method
+    ROOT = 'root'  # always '/': Socket.IO's main namespace, which a server serves without naming it
+    EVENT = 'event'  # a Socket.IO event: '<origin namespace>:<event name>' ('/quiz:join', '/:chat message')
 
 
 @dataclass(frozen=True)
@@ -76,6 +79,7 @@ class Entry:
     nested: bool = False  # members of the object it makes are that object too (`proto.inventory.v1`)
     min_args: int = 0
     max_args: int = 99
+    hands: bool = False  # the object it makes is its callback's first parameter, not what it returns
 
     def fits(self, count):
         return self.min_args <= count <= self.max_args
@@ -93,6 +97,9 @@ NET = frozenset({'net'})
 DGRAM = frozenset({'dgram'})
 BULLMQ = frozenset({'bullmq'})
 NEST_BULLMQ = frozenset({'@nestjs/bullmq'})
+SIO_CLIENT = frozenset({'socket.io-client'})
+SIO_SERVER = frozenset({'socket.io'})
+SIO = SIO_CLIENT | SIO_SERVER
 
 SOCKET = 'websocket'  # the object `new WebSocket(url)` makes
 PORT = Arg(0, key='port')
@@ -102,6 +109,32 @@ TOPICS = Arg(0, key='topic', many='topics', positional=False)
 SERVER_PATH = Arg(0, key='path', default='/', unless='noServer', positional=False)
 CONNECT_SEND = ('CONNECT', 'SEND')
 QUEUE = 'bullmq.queue'  # the object `new Queue(name)` makes, or a queue NestJS injects
+SIO_SOCKET = 'socketio.socket'  # one connection to a namespace: a client's socket, or the server's end of it
+SIO_MANAGER = 'socketio.manager'  # a client's connection manager, which opens sockets to namespaces
+SIO_NAMESPACE = 'socketio.namespace'  # a server's namespace (the Server itself is the main one), or a broadcast on it
+EMIT = ('EMIT',)
+WS_ = Protocol.WEBSOCKET
+MAIN = Arg(0, default='/')  # a Socket.IO namespace, the main one when none is given
+SIO_NARROWS = ('to', 'in', 'except', 'timeout', 'compress')  # methods that return the same emitter, narrowed
+SIO_GETTERS = ('broadcast', 'volatile', 'local')
+# Socket.IO's own events, which no application emits: connection lifecycle and the Manager's reconnection events
+SIO_RESERVED = frozenset(
+    {
+        'connect',
+        'connection',
+        'connect_error',
+        'disconnect',
+        'disconnecting',
+        'error',
+        'newListener',
+        'removeListener',
+        'reconnect',
+        'reconnect_attempt',
+        'reconnect_error',
+        'reconnect_failed',
+        'ping',
+    }
+)
 
 ENTRIES = (
     # WebSocket (browser global, `ws`): the client opens a URL, then sends on it; a `ws` server listens on a path
@@ -150,10 +183,40 @@ ENTRIES = (
     Entry(BULLMQ, Form.ON_CALL, 'addBulk', Role.SEND, Protocol.TASK, Reading.JOBS, Arg(0, key='name'), on=QUEUE),
     Entry(BULLMQ, Form.NEW, 'Worker', Role.RECEIVE, Protocol.TASK, Reading.WORKER, Arg(0)),
     Entry(NEST_BULLMQ, Form.CALL, 'Processor', Role.RECEIVE, Protocol.TASK, Reading.PROCESSOR, Arg(0, key='name')),
+    # Socket.IO: a client connects to the namespace its URL names (`io('http://h/chat')`, `manager.socket('/chat')`);
+    # a server's namespaces are the main one ('/') and `io.of(name)`; `nsp.on('connection', (socket) => ...)` hands
+    # each connection to its callback. Both ends emit(event, ...) and receive with on/once(event, handler); to(room),
+    # in, except, timeout, compress and the getters broadcast, volatile, local narrow an emit to the same namespace.
+    *(
+        Entry(SIO_CLIENT, Form.CALL, name, Role.MAKE, Protocol.WEBSOCKET, Reading.URL, MAIN, makes=SIO_SOCKET)
+        for name in ('io', 'connect', 'io.connect')
+    ),
+    Entry(SIO_CLIENT, Form.NEW, 'Manager', Role.MAKE, makes=SIO_MANAGER),
+    Entry(SIO_CLIENT, Form.ON_CALL, 'socket', Role.MAKE, WS_, Reading.NAME, MAIN, on=SIO_MANAGER, makes=SIO_SOCKET),
+    Entry(SIO_SERVER, Form.NEW, 'Server', Role.MAKE, WS_, Reading.ROOT, makes=SIO_NAMESPACE),
+    Entry(SIO_SERVER, Form.ON_CALL, 'of', Role.MAKE, WS_, Reading.NAME, Arg(0), on=SIO_NAMESPACE, makes=SIO_NAMESPACE),
+    Entry(
+        SIO_SERVER, Form.ON_CALL, 'on', Role.MAKE, WS_, Reading.ORIGIN, on=SIO_NAMESPACE, makes=SIO_SOCKET, hands=True
+    ),
+    *(
+        Entry(SIO, form, name, Role.MAKE, WS_, Reading.ORIGIN, on=made, makes=made)
+        for made in (SIO_SOCKET, SIO_NAMESPACE)
+        for form, names in ((Form.ON_CALL, SIO_NARROWS), (Form.ON_MEMBER, SIO_GETTERS))
+        for name in names
+    ),
+    *(
+        Entry(SIO, Form.ON_CALL, name, Role.SEND, WS_, Reading.EVENT, Arg(0), EMIT, on=made, min_args=1)
+        for made in (SIO_SOCKET, SIO_NAMESPACE)
+        for name in ('emit', 'emitWithAck')
+    ),
+    *(
+        Entry(SIO, Form.ON_CALL, name, Role.RECEIVE, WS_, Reading.EVENT, Arg(0), EMIT, on=SIO_SOCKET, min_args=2)
+        for name in ('on', 'once')
+    ),
 )
 
 # what a module's default export is called in ENTRIES (`import WebSocket from 'ws'`); '' for a namespace of functions
-DEFAULT_EXPORTS = {'ws': 'WebSocket', 'isomorphic-ws': 'WebSocket'}
+DEFAULT_EXPORTS = {'ws': 'WebSocket', 'isomorphic-ws': 'WebSocket', 'socket.io-client': 'io'}
 # methods every gRPC client has, which are not RPCs of its service
 CLIENT_METHODS = frozenset(
     {

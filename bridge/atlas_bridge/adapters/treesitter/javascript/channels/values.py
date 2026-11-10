@@ -3,11 +3,12 @@
 from ..bindings.binding import ParamBinding
 from ..syntax.members import Members
 from ..syntax.nodes import JsSyntax
+from ..syntax.params import Params
+from ..syntax.properties import ParameterProperties
 from ..values.resolver import UrlValues
 from ..values.urls import UrlText
 from .callers import Callers
 from .enums import EnumMembers
-from .properties import ParameterProperties
 
 
 class ChannelValues(UrlValues):
@@ -19,6 +20,7 @@ class ChannelValues(UrlValues):
 
     HANDLERS = {**UrlValues.HANDLERS, 'shorthand_property_identifier': '_identifier'}
     CONVERSIONS = frozenset({'Number', 'parseInt', 'parseFloat', 'String'})
+    BRANCHES = {'ternary_expression': ('consequence', 'alternative'), 'binary_expression': ('left', 'right')}
 
     def __init__(self, scopes, file):
         super().__init__(scopes)
@@ -87,10 +89,30 @@ class ChannelValues(UrlValues):
                 return self.resolve(args[0], hints, depth)
             returned = [(f, self._returned(n)) for f, n in self._imported(fn) if n.type in self.FUNCTIONS]
             value = self._first([(f, r) for f, r in returned if r is not None], hints, depth)
+            if value is None:
+                value = self._fallback(fn, args, hints, depth)
             if value is not None:
                 hints.add(JsSyntax.text(fn))
                 return value
         return super()._call(node, hints, depth)
+
+    def _fallback(self, fn, args, hints, depth):
+        """The argument a helper returns when what it reads first is not set: `intFromEnv(name, fallback)` returning
+        `raw ? parseInt(raw) : fallback` or `process.env[name] ?? fallback`. Only a parameter the helper returns as
+        one branch of a conditional or of `??` / `||` counts, read with this call's argument for it."""
+        bound = self._scopes.lookup(fn, JsSyntax.text(fn))
+        helpers = [bound] if bound is not None else [n for _, n in self._imported(fn)]
+        for helper in (h for h in helpers if h.type in self.FUNCTIONS):
+            body = JsSyntax.unwrap(self._returned(helper))
+            fields = self.BRANCHES.get(body.type, ()) if body is not None else ()
+            if body is not None and body.type == 'binary_expression':
+                fields = fields if JsSyntax.text(body.child_by_field_name('operator')) in self.FALLBACKS else ()
+            names = {JsSyntax.text(JsSyntax.unwrap(body.child_by_field_name(f))) for f in fields}
+            for param in Params.of(helper):
+                if param.name in names and param.index < len(args):
+                    value = self.resolve(args[param.index], hints, depth + 1)
+                    return value if UrlText.literal(value) else None
+        return None
 
     def _definitions(self, node):
         """[(file, expression)] a name may hold when this file binds it to no value: an import, or a parameter (its

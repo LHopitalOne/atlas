@@ -5,7 +5,7 @@ from ..syntax.functions import Functions
 from ..syntax.nodes import JsSyntax
 from ..values.urls import UrlText
 from .jobs import JobReadings
-from .table import Reading
+from .table import SIO_RESERVED, Reading
 
 
 class ChannelReadings:
@@ -21,7 +21,10 @@ class ChannelReadings:
         self._jobs = JobReadings(file)
 
     def of(self, match, hints) -> list[str]:
-        """The channel paths of a match, in the order found, without repeats; hints gathers the names read."""
+        """The channel paths of a match, in the order found, without repeats; hints gathers the names read. A match
+        made in another file (an object its callers pass) is read with that file's values."""
+        if match.file is not None and match.file is not self._file:
+            return ChannelReadings(match.file).of(match, hints)
         reader = {
             Reading.URL: self._urls,
             Reading.NAME: self._names,
@@ -34,6 +37,8 @@ class ChannelReadings:
             Reading.JOBS: lambda m, h: self._queued(self.of(m.origin, h), self._jobs.bulk(self._first(m), h)),
             Reading.WORKER: lambda m, h: self._queued(self._names(m, h), self._jobs.of_processor(self._second(m), h)),
             Reading.PROCESSOR: lambda m, h: self._queued(self._names(m, h), self._jobs.of_class(m.node, h)),
+            Reading.ROOT: lambda m, h: ['/'],
+            Reading.EVENT: self._events,
         }.get(match.entry.reading)
         return list(dict.fromkeys(reader(match, hints))) if reader is not None else []
 
@@ -64,6 +69,16 @@ class ChannelReadings:
         for value in self._raw(match, hints):
             if value and not UrlText.PLACEHOLDER.search(value) and not any(c.isspace() for c in value):
                 yield '/' + value.strip('/')
+
+    def _events(self, match, hints):
+        """'<namespace>:<event>' for each namespace the emitter is on and each literal event name it emits or
+        handles; Socket.IO's own events (connect, disconnect, ...) are no channel."""
+        events = [
+            e for e in self._raw(match, hints) if e and e not in SIO_RESERVED and not UrlText.PLACEHOLDER.search(e)
+        ]
+        for namespace in self.of(match.origin, hints) if events else ():
+            for event in events:
+                yield f'/{namespace.strip("/")}:{event}'
 
     def _ports(self, match, hints):
         for value in self._raw(match, hints):

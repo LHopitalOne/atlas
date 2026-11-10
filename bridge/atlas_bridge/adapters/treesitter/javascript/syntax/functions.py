@@ -39,6 +39,17 @@ class Functions:
             return JsSyntax.text(parent.child_by_field_name('name') or parent.child_by_field_name('property'))
         return ''
 
+    @staticmethod
+    def returned(fn):
+        """The expression a function returns: an arrow function's expression body, or its first `return` value."""
+        body = fn.child_by_field_name('body')
+        if body is None:
+            return None
+        if body.type != 'statement_block':
+            return body
+        ret = next(JsSyntax.walk(body, {'return_statement'}), None)
+        return ret.named_children[0] if ret is not None and ret.named_children else None
+
     @classmethod
     def enclosing(cls, node):
         """(nearest named function, enclosing class name); anonymous callbacks are skipped."""
