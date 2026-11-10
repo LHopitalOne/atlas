@@ -15,6 +15,29 @@ import { openInspector } from './inspector.js';
 import { renderLegend } from './legend.js';
 import { $ } from '../util/dom.js';
 import { esc } from '../util/format.js';
+import { mapList } from '../model/maps.js';
+
+/** A dataset button's value: a synthetic size is a number; Self and map keys stay strings. */
+const datasetOf = v => (/^\d+$/.test(v) ? +v : v);
+
+/** Builds with embedded maps offer those maps, and only those, in the dataset control. */
+function mapButtons() {
+  const maps = mapList();
+  if (!maps.length) return;
+  const group = $('#scale'),
+    sel = $('#scaleSel');
+  group.setAttribute('aria-label', 'Map');
+  sel.setAttribute('aria-label', 'Map');
+  group.innerHTML =
+    '<span class="thumb" aria-hidden="true"></span>' +
+    maps
+      .map(
+        (m, i) =>
+          `<button role="radio" data-v="${esc(m.key)}" aria-checked="${i === 0}" tabindex="${i === 0 ? 0 : -1}">${esc(m.label)}</button>`,
+      )
+      .join('');
+  sel.innerHTML = maps.map(m => `<option value="${esc(m.key)}">${esc(m.label)}</option>`).join('');
+}
 
 /* segmented controls: radiogroups with a sliding thumb and arrow-key navigation */
 export function syncThumb(el) {
@@ -112,7 +135,8 @@ export function init() {
     store.userColor = true;
     setMode(v);
   });
-  radioGroup($('#scale'), v => loadDataset(v === 'self' ? 'self' : +v));
+  mapButtons();
+  radioGroup($('#scale'), v => loadDataset(datasetOf(v)));
   $('#issues').addEventListener('click', () => toggleIssues());
   $('#fit').addEventListener('click', () => fitAll());
   $('#dirBtn').addEventListener('click', () => startDirections());
@@ -120,5 +144,5 @@ export function init() {
   DOCK.addEventListener('pointerleave', () => showTip(null));
   DOCK.addEventListener('focusin', e => showTip(e.target.closest('button')));
   DOCK.addEventListener('focusout', () => showTip(null));
-  $('#scaleSel').addEventListener('change', e => loadDataset(e.target.value === 'self' ? 'self' : +e.target.value));
+  $('#scaleSel').addEventListener('change', e => loadDataset(datasetOf(e.target.value)));
 }

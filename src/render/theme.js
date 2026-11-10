@@ -34,6 +34,7 @@ export function readTheme() {
     edge: g('--edge'),
     grid: g('--grid'),
     route: g('--route'),
+    proof: g('--proof'),
     node: g('--node'),
     other: g('--other'),
   });

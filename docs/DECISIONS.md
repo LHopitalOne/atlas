@@ -117,6 +117,24 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
 - **Composer:** grows with the text, Enter sends, Shift+Enter adds a line, Send becomes Stop while answering, Escape
   closes the panel and returns focus to the map.
 
+## HTTP links
+
+- **Every link is proven down to the line, or says how it is not.** A link's proof shows the line that sends the
+  request and the route line that serves it, each with a few lines of code and a GitHub link at the commit the map
+  was built from, plus what SCIP checked. Its badge says how sure it is: confirmed by SCIP, read from syntax,
+  inferred, ambiguous. Why: a map of service calls is only worth acting on if anyone can check any line of it.
+- **Accuracy is shown with the links, including how it was measured.** Production links found and false links, on
+  an answer key built without the tool, with what the key's builders did and whether the finder was tuned on it.
+  Maps without a key say they are unmeasured. Why: numbers without their method are marketing.
+- **Links are arcs drawn at every zoom,** from the function that sends to the endpoint that serves, with a marker on
+  the endpoint. Why: cross-repository calls are the reason to open the map; they must not wait for street level.
+- **Impact separates proof from inference.** "If this changes" counts the call sites that send requests (proven),
+  then the files that reach them through Graphify's call graph, labelled inferred.
+- **Requests no route was found for are listed, never drawn.** Drawing a guess would be a false link.
+- **Links inside one repository stay apart from links between repositories.** A frontend calling its own API is
+  drawn fainter, listed in its own folded section and kept out of the accuracy numbers until an answer key covers it.
+  Why: they outnumber the cross-service links six to one and are not measured.
+
 ## Directions
 
 - **Either end can be a repository, domain, service or endpoint.** Typing or clicking works in both fields. After the

@@ -36,6 +36,7 @@ export function requestRender() {
 /** Is something flowing on the map (dots along a selection's contracts, a route, or an answer's trail)? */
 function flowing() {
   if (store.dimT <= 0.02 || reduceMotion) return false;
+  if (store.linkId >= 0 || store.httpImpact) return true;
   if (store.selectedId >= 0) return store.focusEdges.length > 0 && store.focusEdges.length <= 900;
   if (store.focusId === ROUTE_FOCUS) return routeActive();
   return store.focusId === ASK_FOCUS && store.askSet.length > 0 && store.askHops.length > 0;

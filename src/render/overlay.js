@@ -11,6 +11,7 @@ import { scrR } from './frame.js';
 import { css, theme } from './theme.js';
 import { LC, rrect, tw } from './canvas.js';
 import { drawLabels } from './labels.js';
+import { drawHttp, drawHttpTip } from './http.js';
 import { reduceMotion } from '../util/dom.js';
 import { fmt, SANS } from '../util/format.js';
 import { clamp } from '../util/math.js';
@@ -38,6 +39,7 @@ export function drawOverlay(now, V, I) {
   store.offHits = [];
   const fx = { g, k, I, now, V, SX, SY, on, sel, hasF, dimF };
   drawTerritoryHover(fx);
+  drawHttp(fx);
   drawSelectionFlow(fx);
   drawRouteFlow(fx);
   drawRings(fx);
@@ -45,6 +47,7 @@ export function drawOverlay(now, V, I) {
   drawOffscreenChips(fx);
   drawReticle(fx);
   drawLabels(fx, pins);
+  drawHttpTip(fx);
   oc.globalAlpha = 1;
 }
 

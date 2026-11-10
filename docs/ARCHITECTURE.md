@@ -91,6 +91,18 @@ source is available, read_source. `ask/local.js` (pure) answers common questions
 `[[ref]]`; `ask/format.js` (pure) turns answers into safe HTML with numbered citations and follow-ups. `ask/demo.js` (pure) scripts simulated answers for the prototype
 (`ASK_ENGINE = 'demo'`): the rendering walkthrough and offline answers, played by `ui/ask.js`, which is the panel. "Show on map" is a focus mode like routes: `store.askSet` makes `computeSetFocus` light up the cited items.
 
+## HTTP links between repositories
+
+`model/http.js` (pure) indexes `spec.links` into `G.http`: links grouped by the arc they draw (caller to endpoint),
+by node, plus `httpImpact` (everything in other repositories that calls an endpoint, a file or a repository) and the
+arc geometry shared by drawing and picking. `render/http.js` draws every arc on the overlay, coloured by proof, with
+an endpoint marker and arrowhead at every zoom, flow dots on the hot ones and a tooltip on hover. `app/http.js` picks
+arcs (`pick()` tries nodes first, then arcs, then territories), opens a link's proof (`store.linkId`) and toggles
+the impact view (`store.httpImpact`, `'n<id>'` or `'r<id>'`); `computeHttpFocus` in `app/focus.js` lights them up.
+`ui/proof.js` builds the proof, endpoint and accuracy HTML; `ui/links.js` is the links panel, the home panel of maps
+that have links. Builds with `--maps=key:spec.json:Label,...` embed real maps, each parsed only when shown
+(`model/maps.js`); the dataset control then offers those maps instead of Self and the synthetic sizes.
+
 ## URL
 
 `#<dataset>[-node-<id>][-route-<from>-<to>[-avoid][-any][-by<detail>]][-issues][-<colour>]`, ends as

@@ -6,6 +6,7 @@ import { camFor, fitNodes, flyTo, flyToTerr, viewCenter, zoomAt } from './camera
 import { same, setHover } from './focus.js';
 import { setRouteEnd } from './route.js';
 import { describe, deselect, pick, select } from './selection.js';
+import { openLink } from './http.js';
 import { ov, WHERE } from '../dom.js';
 import { requestRender } from '../render/frame.js';
 import { announce } from '../ui/feedback.js';
@@ -23,6 +24,7 @@ const endPtr = e => {
       const h = pick(e.offsetX, e.offsetY, e.pointerType === 'touch' ? 14 : 7);
       if (!h) deselect();
       else if (h.t === 'n') select(h.id, 'map');
+      else if (h.t === 'h') openLink(h.id, 'map');
       else if (route.picking) setRouteEnd(route.picking, { t: h.t, id: h.id });
       else {
         deselect();
@@ -139,6 +141,7 @@ export function init() {
         flyTo(camFor((c.x - cam.x) / cam.k, (c.y - cam.y) / cam.k, Math.min(store.KMAX, cam.k * 2)));
         keyHover();
       } else if (store.hover.t === 'n') select(store.hover.id, 'map');
+      else if (store.hover.t === 'h') openLink(store.hover.id, 'map');
       else {
         flyToTerr(store.hover.t, store.hover.id);
         requestAnimationFrame(keyHover);

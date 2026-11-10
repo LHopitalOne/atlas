@@ -11,6 +11,7 @@ import { setMode, toggleIssues } from '../ui/controls.js';
 import { renderRoute, startDirections } from '../ui/directions.js';
 import { closeSource, sourceOpen } from '../ui/code-view.js';
 import { askOpen, closeAsk, openAsk } from '../ui/ask.js';
+import { closeLinksPanel, toggleLinksPanel } from '../ui/links.js';
 
 const zoomStep = f => {
   const c = viewCenter();
@@ -27,6 +28,7 @@ function escape() {
     store.attnOpen = false;
     renderAttn();
   } else if (askOpen()) closeAsk();
+  else if (store.linksOpen && store.G && store.G.http) closeLinksPanel();
 }
 /** Single-key shortcuts (ignored while typing). */
 const SHORTCUTS = {
@@ -35,6 +37,7 @@ const SHORTCUTS = {
   i: () => toggleIssues(),
   d: () => startDirections(),
   a: () => openAsk(),
+  l: () => store.G && store.G.http && toggleLinksPanel(),
   c: () => {
     store.userColor = true;
     setMode(store.colorMode === 'health' ? 'repo' : 'health');

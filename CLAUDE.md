@@ -54,6 +54,8 @@ E2E uses your Playwright browsers; set `CHROMIUM_PATH` to use another Chromium. 
 | Roles and impact | `src/graph/insights.js` (pure) |
 | Asking about the code | `src/ask/` (tools, offline answers, demo scripts, Claude engine, formatting), `src/ui/ask.js` (panel and playback); `ASK_ENGINE` in `src/config.js` picks simulated or Claude answers |
 | What a component does | `src/ui/about.js` (summary, provenance, roles, impact, Copy for AI), `src/ui/code-view.js` (source view) |
+| HTTP links between repositories (proofs, impact, arcs, links panel) | `src/model/http.js` (pure), `src/app/http.js`, `src/render/http.js`, `src/ui/proof.js`, `src/ui/links.js`; spec in `docs/GRAPH_SPEC.md` |
+| The demo page (real Sentry and Open edX maps) | `tools/demo/build.sh`, `docs/DEMO.md` |
 | Panels | `src/ui/*.js` |
 | Styles and markup | `src/index.html` (shadcn-style tokens on `:root`) |
 | Public JS API | `loadGraph(spec)` in `src/main.js`, exposed as `window.Atlas` |

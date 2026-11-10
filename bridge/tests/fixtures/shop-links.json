@@ -1,0 +1,102 @@
+{
+ "repos": {
+  "api": {
+   "routes": 2,
+   "calls": 2,
+   "test_calls": 0
+  },
+  "web": {
+   "routes": 0,
+   "calls": 3,
+   "test_calls": 0
+  }
+ },
+ "links": [
+  {
+   "caller": "web",
+   "target": "api",
+   "status": "matched",
+   "reason": "named target, one route fits",
+   "call": {
+    "file": "src/api.js",
+    "line": 5,
+    "function": "placeOrder",
+    "method": "POST",
+    "path": "/orders",
+    "kind": "request",
+    "route_name": "",
+    "test": false
+   },
+   "route": {
+    "repo": "api",
+    "file": "app/main.py",
+    "line": 10,
+    "methods": [
+     "POST"
+    ],
+    "path": "/orders",
+    "handler": "post_order",
+    "name": "",
+    "framework": "fastapi"
+   },
+   "verification": "confirmed",
+   "assumptions": [
+    {
+     "at": "src/api.js:5",
+     "name": "BASE",
+     "means": "src/api.js:2-2",
+     "verdict": "confirmed"
+    }
+   ]
+  },
+  {
+   "caller": "web",
+   "target": "api",
+   "status": "inferred",
+   "reason": "fits if the base URL is the api service",
+   "call": {
+    "file": "src/api.js",
+    "line": 10,
+    "function": "loadOrder",
+    "method": "GET",
+    "path": "/orders/{id}",
+    "kind": "request",
+    "route_name": "",
+    "test": false
+   },
+   "route": {
+    "repo": "api",
+    "file": "app/main.py",
+    "line": 15,
+    "methods": [
+     "GET"
+    ],
+    "path": "/orders/{order_id}",
+    "handler": "read_order",
+    "name": "",
+    "framework": "fastapi"
+   },
+   "verification": "unverified",
+   "assumptions": []
+  },
+  {
+   "caller": "web",
+   "target": "api",
+   "status": "unmatched",
+   "reason": "api: no route fits (GET /users/{id})",
+   "call": {
+    "file": "src/api.js",
+    "line": 14,
+    "function": "loadUser",
+    "method": "GET",
+    "path": "/users/{id}",
+    "kind": "request",
+    "route_name": "",
+    "test": false
+   },
+   "route": null,
+   "verification": "unverified",
+   "assumptions": []
+  }
+ ]
+}

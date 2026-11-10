@@ -16,6 +16,7 @@ import { pushRecent } from '../ui/search.js';
 import { $ } from '../util/dom.js';
 import { closeSource } from '../ui/code-view.js';
 import { syncAskContext } from '../ui/ask.js';
+import { pickLink } from './http.js';
 
 let opener = null;
 export function pick(px, py, tolPx = 7) {
@@ -48,6 +49,8 @@ export function pick(px, py, tolPx = 7) {
       }
     if (best >= 0) return { t: 'n', id: best };
   }
+  const link = pickLink(px, py);
+  if (link) return link;
   for (let r = 0; r < g.R; r++)
     if (Math.hypot(wx - g.rx[r], wy - g.ry[r]) < g.rR[r]) {
       if (V.dAct > 0.5) {
@@ -64,6 +67,10 @@ export const describe = h => {
   if (!h) return '';
   if (h.t === 'r') return `Repository ${g.repoName[h.id]}`;
   if (h.t === 'd') return `Domain ${g.domName[h.id]} in ${g.repoName[g.domRepo[h.id]]}`;
+  if (h.t === 'h') {
+    const l = g.http.links[g.http.groups[h.id].links[0]];
+    return `HTTP link ${l.method} ${l.path} from ${g.repoName[l.call.repo]} to ${g.repoName[l.route.repo]}`;
+  }
   const s = g.own(h.id);
   return h.id < g.S
     ? `Service ${g.svcName[h.id]} in ${g.repoName[g.domRepo[g.svcDom[h.id]]]}, ${g.domName[g.svcDom[h.id]]}`
@@ -79,8 +86,10 @@ export function select(id, via) {
   if (!inspOpen() && document.activeElement && !INSP.contains(document.activeElement)) opener = document.activeElement;
   if (id !== store.selectedId) {
     store.impactId = -1;
+    if (store.httpImpact[0] !== 'r') store.httpImpact = '';
     closeSource(false);
   }
+  store.linkId = -1;
   store.selectedId = id;
   expanded.clear();
   pushRecent(id);
@@ -103,9 +112,11 @@ export function select(id, via) {
   writeHash();
 }
 export function deselect(restore) {
-  if (store.selectedId < 0) return;
+  if (store.selectedId < 0 && store.linkId < 0) return;
   store.selectedId = -1;
+  store.linkId = -1;
   store.impactId = -1;
+  if (store.httpImpact[0] === 'n') store.httpImpact = '';
   closeSource(false);
   store.placeDirty = true;
   app.classList.remove('has-insp');

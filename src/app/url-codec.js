@@ -2,7 +2,7 @@
  * URL hash codec. Pure: converts between view state and a plain "#name" (letters, digits, hyphens only),
  * the only hash format that survives being shared as an artifact link.
  *
- *   self | 25k                              dataset
+ *   self | 25k | <map key>                  dataset (map keys are lowercase letters and digits)
  *   -node-<id>                              selected node
  *   -route-<end>-<end>[-avoid][-any][-by<detail>]   end = <serviceId> | r<repoId> | d<domainId> | x (unset)
  *   -issues                                 issues-only mode
@@ -10,6 +10,9 @@
  */
 export const SC_NAME = { self: 'self', 281: '281', 5000: '5k', 25000: '25k', 100000: '100k' };
 export const SC_NUM = { self: 'self', 281: 281, '5k': 5000, '25k': 25000, '100k': 100000 };
+
+/** A map key: what an embedded real map is called in the hash. */
+const MAP_KEY = /^[a-z][a-z0-9]*$/;
 
 const endToken = e => (!e ? 'x' : e.t === 's' ? String(e.id) : e.t + e.id);
 const tokenToEnd = v =>
@@ -26,7 +29,7 @@ const tokenToEnd = v =>
  * @returns {string} hash without the leading "#"
  */
 export function formatHash(v) {
-  let n = SC_NAME[v.dataset];
+  let n = SC_NAME[v.dataset] || v.dataset;
   const r = v.route;
   if (r.from || r.to)
     n += `-route-${endToken(r.from)}-${endToken(r.to)}${r.avoid ? '-avoid' : ''}${r.links === 'any' ? '-any' : ''}${r.detailSet ? '-by' + r.detail : ''}`;
@@ -42,7 +45,7 @@ export function formatHash(v) {
  */
 export function parseHash(hash) {
   const p = decodeURIComponent(hash.replace(/^#/, '')).split('-');
-  const o = { n: SC_NUM[p[0]] || 'self' };
+  const o = { n: SC_NUM[p[0]] || (MAP_KEY.test(p[0]) ? p[0] : 'self') };
   for (let i = 1; i < p.length; i++) {
     const t = p[i];
     if (t === 'node') {

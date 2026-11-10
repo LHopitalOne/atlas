@@ -29,3 +29,18 @@ export const ASK_ENGINE = 'demo';
 
 /** Ask Atlas playback timing (ms). */
 export const ASK_PLAYBACK = { think: 520, tick: 28, tokensPerTick: 2 };
+
+/** HTTP links between repositories (see render/http.js and app/http.js). */
+export const HTTP_PICK_PX = 6; // how close the pointer must be to a link's arc to hover or click it
+export const HTTP_FIT_KMAX = 2.4; // closest zoom when flying to a link's two ends
+export const HTTP_FIT_PAD = 0.2; // margin around a link when flying to it, as a share of its size
+export const HTTP_ARC = {
+  width: 1.5, // arc width at rest, px
+  hotWidth: 2.6, // ...when selected, hovered or part of an impact view
+  restAlpha: 0.8, // arc opacity at rest
+  withinAlpha: 0.22, // ...for links inside one repository (a frontend calling its own API), which are many
+  dimAlpha: 0.1, // ...while something else has the focus
+  arrowPx: 6, // arrowhead length at the endpoint end
+  endpointPx: 3.2, // endpoint marker radius, drawn at every zoom so endpoints show before their streets do
+  flowSpeed: 0.11, // flow dots, screen px per ms
+};

@@ -86,16 +86,22 @@ const svcBox = (q, side) =>
     ? [q.x + q.rr + 6, q.y - 8, q.x + q.rr + 10 + q.w, q.y + 8]
     : [q.x - q.rr - 10 - q.w, q.y - 8, q.x - q.rr - 6, q.y + 8];
 
+/** The two ends of an HTTP link group (the caller and the endpoint). */
+const linkEnds = (g, gid) => (g.http ? [g.http.groups[gid].from, g.http.groups[gid].to] : []);
+
 /** Pinned labels (selection, hover, route ends) always show; their space is reserved first. */
 function reservePinned(fx, pins) {
   const { g } = fx;
   const geo = key => labelGeometry(fx, key);
   const pinned = [];
   if (store.selectedId >= 0) pinned.push((store.selectedId < g.S ? 's' : 'l') + store.selectedId);
+  const leafKey = i => (i < g.S ? 's' : 'l') + i;
   if (store.hover) {
-    if (store.hover.t === 'n') pinned.push((store.hover.id < g.S ? 's' : 'l') + store.hover.id);
+    if (store.hover.t === 'n') pinned.push(leafKey(store.hover.id));
+    else if (store.hover.t === 'h') linkEnds(g, store.hover.id).forEach(i => pinned.push(leafKey(i)));
     else pinned.push(store.hover.t + store.hover.id);
   }
+  if (store.linkId >= 0) linkEnds(g, store.linkId).forEach(i => pinned.push(leafKey(i)));
   for (const [end] of pins) pinned.push(end.t + end.id);
   const pinnedSet = new Set(pinned);
   for (const key of pinned) {

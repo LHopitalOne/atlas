@@ -1,6 +1,7 @@
 /**
  * Graph specs: validate and lay out a real graph given as JSON (docs/GRAPH_SPEC.md), such as Atlas's own code index.
  */
+import { httpIndex, validateLinks } from './http.js';
 import { finish } from './layout.js';
 
 /**
@@ -42,6 +43,7 @@ export function validateSpec(spec) {
       errs.push(`edges[${i}] refers to a node outside 0..${N - 1}`);
     if (![0, 1, 2, 3].includes(st)) errs.push(`edges[${i}] has status ${st}; use 0, 1, 2 or 3`);
   });
+  errs.push(...validateLinks(spec, N));
   return errs.slice(0, 20);
 }
 
@@ -167,5 +169,6 @@ export function buildSpec(spec) {
   g.doc = i => info(i)[0];
   g.sig = i => info(i)[1];
   g.end = i => info(i)[2];
+  if (spec.links) g.http = httpIndex(spec, g);
   return g;
 }
