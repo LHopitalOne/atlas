@@ -112,6 +112,33 @@ class RouteTest(unittest.TestCase):
             [('GET', '/api/v1/orders/{id}'), ('GET', '/inline/i'), ('GET', '/misc/m'), ('POST', '/api/v1/users')],
         )
 
+    def test_routers_made_by_factories_and_fastify_plugins(self):
+        found = routes(
+            {
+                'src/server.ts': "import { adminRouter } from './routes/admin';\n"
+                "import { apiRoutes } from './routes/api';\n"
+                'const app = express();\n'
+                "app.use('/admin', adminRouter(bank));\n"
+                "app.use('/local', localRouter());\n"
+                "app.use('/unknown', makeIt());\n"
+                'const fastify = Fastify();\n'
+                "fastify.register(apiRoutes, { prefix: '/api' });\n"
+                'fastify.register(cors);\n'
+                'function localRouter() {\n'
+                '  const r = Router();\n'
+                "  r.get('/l', l);\n"
+                '  return r;\n'
+                '}\n',
+                'src/routes/admin.ts': 'export function adminRouter(bank) {\n'
+                '  const router = Router();\n'
+                "  router.post('/questions', (req, res) => res.json(bank));\n"
+                '  return router;\n'
+                '}\n',
+                'src/routes/api.ts': "export const apiRoutes = async (app) => {\n  app.post('/orders', create);\n};\n",
+            }
+        )
+        self.assertEqual(sorted(found), [('GET', '/local/l'), ('POST', '/admin/questions'), ('POST', '/api/orders')])
+
 
 if __name__ == '__main__':
     unittest.main()

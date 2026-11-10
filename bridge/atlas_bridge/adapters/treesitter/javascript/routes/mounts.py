@@ -4,6 +4,7 @@ import os
 
 from ..declarations.records import RouteDeclaration
 from ..syntax.nodes import JsSyntax
+from .factories import RouterFunctions
 from .files import FileRoutes
 
 
@@ -38,12 +39,16 @@ class MountGraph:
         return [p + prefix for parent, prefix in found for p in self._prefixes(parent, seen | {parent})]
 
     def _target(self, f: FileRoutes, child):
-        """The router a mounted expression stands for."""
+        """The router a mounted expression stands for: a router, a function that makes one (`adminRouter(bank)`,
+        called where it is mounted) or a plugin the framework calls with one (Fastify's `register(apiRoutes)`)."""
+        made = child.type == 'call_expression' and not JsSyntax.require(child)
+        if made:
+            child = JsSyntax.unwrap(child.child_by_field_name('function'))
         if child.type == 'identifier':
             name = JsSyntax.text(child)
             imported = f.module.imports.get(name)
             if imported is None:
-                return (f.path, name)
+                return (f.path, RouterFunctions.receiver(f.module, name) or (None if made else name))
             source, member = imported
         else:
             source, member = JsSyntax.require(child), f.module.imports.DEFAULT
@@ -53,7 +58,7 @@ class MountGraph:
         if target is None:
             return None
         if member != f.module.imports.DEFAULT:
-            return (target.path, member)
+            return (target.path, RouterFunctions.receiver(target.module, member) or member)
         return (target.path, target.module.imports.default_export() or self.EVERY)
 
     def _resolve(self, path, source):
