@@ -8,3 +8,7 @@ __pycache__/
 *.egg-info/
 graphify-out/
 .coverage
+
+# Python build output
+bridge/build/
+*.egg-info/
