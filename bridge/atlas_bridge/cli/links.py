@@ -17,6 +17,7 @@ from ..usecases.verify import LinkVerifier
 from ..usecases.within import NoRouteRule, WithinRepoRule
 from .command import Command
 from .inputs import Aliases, GraphInput, JsonFile, RepositoryInput, ScipInput
+from .judge import JudgePass
 
 
 class LinksCommand(Command):
@@ -59,6 +60,12 @@ class LinksCommand(Command):
             help="also link browser code to its own repository's server routes (a monorepo's frontend and backend)",
         )
         parser.add_argument(
+            '--jev',
+            action='store_true',
+            help='let Jev (a decision model on OpenRouter; needs OPENROUTER_API_KEY) choose among the routes the code '
+            'leaves open for a request; its picks are marked judged',
+        )
+        parser.add_argument(
             '--library',
             action='append',
             default=[],
@@ -85,7 +92,11 @@ class LinksCommand(Command):
         extraction.calls += self._through_libraries(libraries, extractor, graph)
         named = NamedChannels(FileMentions({r.name: r.path for r in repos}), names)
         extraction.routes += named.routes(extraction.calls, extraction.routes)
-        links = self._verified(finder.find(extraction), indexes)
+        links = finder.find(extraction)
+        if args.jev:
+            folders = {r.name: r.path for r in repos}
+            links = JudgePass(self.report).run(links, extraction, folders, args.include_tests, args.within)
+        links = self._verified(links, indexes)
         report = LinkReport(names, extraction, links)
         JsonFile.write(args.out, LinkFilePresenter().present(report), indent=1)
         found = sum(link.route is not None for link in report.links)

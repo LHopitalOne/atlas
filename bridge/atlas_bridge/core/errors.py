@@ -16,6 +16,9 @@ BridgeError
 │   ├── IndexerFailedError      a SCIP indexer ran but did not produce an index
 │   ├── GraphifyUnavailableError the graphify command is not installed
 │   └── GraphifyFailedError     graphify ran but wrote no graph.json
+├── JudgeError                  asking a decision model about a link failed
+│   ├── JudgeUnavailableError   no API key for the model
+│   └── JudgeFailedError        the model's service refused or failed every request
 └── OutputError                 writing the result failed
     ├── OutputWriteError        the output folder cannot be written
     └── PageTemplateError       the prebuilt Atlas page is missing from the installation
@@ -112,6 +115,20 @@ class GraphifyUnavailableError(ExtractionError):
 class GraphifyFailedError(ExtractionError):
     def __init__(self, repo: str, problem: str):
         super().__init__(f'graphify could not map {repo}: {problem}')
+
+
+class JudgeError(BridgeError):
+    pass
+
+
+class JudgeUnavailableError(JudgeError):
+    def __init__(self, variable: str):
+        super().__init__(f'{variable} is not set', f'export {variable}=... (an OpenRouter key), or leave out --jev')
+
+
+class JudgeFailedError(JudgeError):
+    def __init__(self, problem: str):
+        super().__init__(f'the decision model could not be reached: {problem}', 'try again, or leave out --jev')
 
 
 class OutputError(BridgeError):

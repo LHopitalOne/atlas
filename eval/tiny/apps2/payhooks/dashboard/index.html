@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Payhooks dashboard</title>
+  </head>
+  <body data-merchant-url="http://127.0.0.1:46020">
+    <header>
+      <h1>Payhooks demo shop</h1>
+      <p>Provider having trouble? Check the <a href="https://www.githubstatus.com/">status page</a>.</p>
+    </header>
+    <form id="checkout">
+      <label>Card number <input name="card" value="4571 7360 0000 0000" /></label>
+      <label>Amount (EUR) <input name="amount" type="number" step="0.01" value="12.50" /></label>
+      <button type="submit">Pay</button>
+    </form>
+    <p>Balance: <output id="balance">-</output> EUR</p>
+    <ul id="orders"></ul>
+    <script type="module" src="./dist/main.js"></script>
+  </body>
+</html>

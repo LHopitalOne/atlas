@@ -1,10 +1,11 @@
 """Ports: what the use cases need from the outside world, as abstract classes adapters implement."""
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 from ..core.callgraph import Function, Site, Target
 from ..core.evidence import Assumption, Verdict
-from ..core.http import Extraction
+from ..core.http import Call, Extraction, Route
 
 
 class Extractor(ABC):
@@ -55,3 +56,28 @@ class ChannelMentions(ABC):
     @abstractmethod
     def mentions(self, repo: str, name: str) -> list[tuple[str, int, str]]:
         """[(file, line, the text around it)] of each place `repo` names `name`."""
+
+
+@dataclass(frozen=True)
+class JudgeCase:
+    """A request the rules could not settle, and the routes the code leaves possible for it."""
+
+    call: Call
+    candidates: tuple[Route, ...]
+
+
+@dataclass(frozen=True)
+class Choice:
+    """Which candidate a judge picked (an index into the case's candidates), or None for none of them, and how sure."""
+
+    index: int | None
+    probability: float
+
+
+class RouteJudge(ABC):
+    """Picks, for a request, the route that receives it among a few candidates, reading the code around the call.
+    Selects, never invents: it can only answer with a candidate or none."""
+
+    @abstractmethod
+    def choose(self, cases: list[JudgeCase]) -> list[Choice]:
+        """One Choice per case, in order."""

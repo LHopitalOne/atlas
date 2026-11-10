@@ -1,0 +1,29 @@
+RECV A01 game-server join:player-web room=arena-1 name=alice
+RECV H01 game-server POST /admin/questions count=3
+RECV A05 game-server join:quiz-bot room=arena-1 name=trivia-bot
+RECV A02 game-server answer:player-web question=0e39e406-5f2a-44de-88c7-055234ba555c
+RECV A06 game-server answer:quiz-bot question=0e39e406-5f2a-44de-88c7-055234ba555c
+RECV A02 game-server answer:player-web question=e9061aaa-0279-4a58-b274-e5dc641c438d
+RECV A06 game-server answer:quiz-bot question=e9061aaa-0279-4a58-b274-e5dc641c438d
+RECV A02 game-server answer:player-web question=d7c1733d-3dc7-4776-9394-5402b5f3be06
+RECV A06 game-server answer:quiz-bot question=d7c1733d-3dc7-4776-9394-5402b5f3be06
+RECV H02 game-server GET /api/leaderboard
+RECV O02 player-web ASSET 200 https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap
+RECV O03 player-web ASSET 200 https://opentdb.com/
+RECV A03 player-web question round=1/3
+RECV A04 player-web round_result round=1 final=false
+RECV A03 player-web question round=2/3
+RECV A04 player-web round_result round=2 final=false
+RECV A03 player-web question round=3/3
+RECV A04 player-web round_result round=3 final=true
+RECV O01 quiz-bot GET opentdb.com/api.php amount=3
+RECV A07 quiz-bot question round=1
+RECV A08 quiz-bot round_result round=1 final=False
+RECV A07 quiz-bot question round=2
+RECV A08 quiz-bot round_result round=2 final=False
+RECV A07 quiz-bot question round=3
+RECV A08 quiz-bot round_result round=3 final=True
+RECV U01 scorekeeper udp room=arena-1 round=1 from=127.0.0.1:60689
+RECV U01 scorekeeper udp room=arena-1 round=2 from=127.0.0.1:60689
+RECV U01 scorekeeper udp room=arena-1 round=3 from=127.0.0.1:60689
+RECV H03 scorekeeper GET /scores

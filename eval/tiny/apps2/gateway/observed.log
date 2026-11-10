@@ -1,0 +1,15 @@
+RECV L01 GET /users route=/users
+RECV L02 GET /users/1 route=/users/{id}
+RECV L03 POST /users route=/users
+RECV L04 GET /users/1/wishlist route=/users/{id}/wishlist
+RECV L05 GET /v1/orders rule=/v1/orders
+RECV L06 POST /v1/orders rule=/v1/orders
+RECV L07 GET /v1/orders/2 rule=/v1/orders/<int:order_id>
+RECV L08 GET /v1/orders/2/items rule=/v1/orders/<int:order_id>/items
+RECV L09 GET /api/dashboard/1
+RECV L10 GET /users/1 route=/users/{id}
+RECV L11 GET /v1/orders rule=/v1/orders
+RECV L12 GET /internal/buyers/1/verify route=/internal/buyers/{id}/verify
+RECV O01 GET open.er-api.com /v6/latest/USD status=200
+RECV O02 GET unpkg.com /dayjs@1.11.13/dayjs.min.js status=200
+RECV O03 LINK github.com /bazaarly status=200

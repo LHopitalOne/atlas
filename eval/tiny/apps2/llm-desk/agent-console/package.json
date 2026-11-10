@@ -1,0 +1,18 @@
+{
+  "name": "agent-console",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Command-line console for support agents working the llm-desk queue",
+  "bin": { "agent-console": "src/cli.ts" },
+  "scripts": {
+    "start": "tsx src/cli.ts",
+    "shift": "tsx src/cli.ts shift fixtures/tickets.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

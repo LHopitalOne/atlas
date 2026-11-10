@@ -1,0 +1,590 @@
+{
+ "project": "studynotes",
+ "services": {
+  "notes-server": "notes-server",
+  "notes-web": "notes-web",
+  "reminder-cron": "reminder-cron",
+  "indexer": "indexer"
+ },
+ "links": [
+  {
+   "id": "T01",
+   "protocol": "http",
+   "caller": "notes-web",
+   "target": "notes-server",
+   "operation": "MUTATION",
+   "channel": "/trpc/notes.create",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "env.apiUrl (NOTES_API_URL)"
+    },
+    {
+     "file": "src/lib/trpc.ts",
+     "line": 8,
+     "function": "createTRPCClient httpBatchLink({ url })"
+    },
+    {
+     "file": "src/commands/notes.ts",
+     "line": 14,
+     "function": "createNote"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 7,
+     "function": "studySession"
+    }
+   ],
+   "receive": {
+    "file": "src/routers/notes.ts",
+    "line": 22,
+    "handler": "notesRouter.create (publicProcedure.input(noteInput).mutation)"
+   },
+   "idiom": "@trpc/client createTRPCClient<AppRouter> with httpBatchLink(url=`${env.apiUrl}/trpc`, env from NOTES_API_URL) exported from src/lib/trpc.ts and imported via tsconfig path alias '@/lib/trpc'; proxy call trpc.notes.create.mutate(...); procedure path comes from property chain, receiver path = standalone basePath '/trpc/' + appRouter key 'notes' + nested router key 'create'",
+   "runtime": "observed"
+  },
+  {
+   "id": "T02",
+   "protocol": "http",
+   "caller": "notes-web",
+   "target": "notes-server",
+   "operation": "QUERY",
+   "channel": "/trpc/notes.list",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "env.apiUrl (NOTES_API_URL)"
+    },
+    {
+     "file": "src/lib/trpc.ts",
+     "line": 8,
+     "function": "createTRPCClient httpBatchLink({ url })"
+    },
+    {
+     "file": "src/commands/notes.ts",
+     "line": 18,
+     "function": "listNotes"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 23,
+     "function": "studySession (Promise.all, batched with tags.list)"
+    }
+   ],
+   "receive": {
+    "file": "src/routers/notes.ts",
+    "line": 14,
+    "handler": "notesRouter.list (publicProcedure.query)"
+   },
+   "idiom": "@trpc/client createTRPCClient<AppRouter> with httpBatchLink(url=`${env.apiUrl}/trpc`, env from NOTES_API_URL) exported from src/lib/trpc.ts and imported via tsconfig path alias '@/lib/trpc'; proxy call trpc.notes.list.query(...); procedure path comes from property chain, receiver path = standalone basePath '/trpc/' + appRouter key 'notes' + nested router key 'list'; called concurrently with tags.list so httpBatchLink sends one GET /trpc/notes.list,tags.list?batch=1",
+   "runtime": "observed"
+  },
+  {
+   "id": "T03",
+   "protocol": "http",
+   "caller": "notes-web",
+   "target": "notes-server",
+   "operation": "QUERY",
+   "channel": "/trpc/notes.byId",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "env.apiUrl (NOTES_API_URL)"
+    },
+    {
+     "file": "src/lib/trpc.ts",
+     "line": 8,
+     "function": "createTRPCClient httpBatchLink({ url })"
+    },
+    {
+     "file": "src/commands/notes.ts",
+     "line": 22,
+     "function": "openNote"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 26,
+     "function": "studySession"
+    }
+   ],
+   "receive": {
+    "file": "src/routers/notes.ts",
+    "line": 16,
+    "handler": "notesRouter.byId (publicProcedure.input(...).query)"
+   },
+   "idiom": "@trpc/client createTRPCClient<AppRouter> with httpBatchLink(url=`${env.apiUrl}/trpc`, env from NOTES_API_URL) exported from src/lib/trpc.ts and imported via tsconfig path alias '@/lib/trpc'; proxy call trpc.notes.byId.query(...); procedure path comes from property chain, receiver path = standalone basePath '/trpc/' + appRouter key 'notes' + nested router key 'byId'",
+   "runtime": "observed"
+  },
+  {
+   "id": "T04",
+   "protocol": "http",
+   "caller": "notes-web",
+   "target": "notes-server",
+   "operation": "MUTATION",
+   "channel": "/trpc/notes.delete",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "env.apiUrl (NOTES_API_URL)"
+    },
+    {
+     "file": "src/lib/trpc.ts",
+     "line": 8,
+     "function": "createTRPCClient httpBatchLink({ url })"
+    },
+    {
+     "file": "src/commands/notes.ts",
+     "line": 26,
+     "function": "deleteNote"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 34,
+     "function": "studySession"
+    }
+   ],
+   "receive": {
+    "file": "src/routers/notes.ts",
+    "line": 28,
+    "handler": "notesRouter.delete (publicProcedure.input(...).mutation)"
+   },
+   "idiom": "@trpc/client createTRPCClient<AppRouter> with httpBatchLink(url=`${env.apiUrl}/trpc`, env from NOTES_API_URL) exported from src/lib/trpc.ts and imported via tsconfig path alias '@/lib/trpc'; proxy call trpc.notes.delete.mutate(...); procedure path comes from property chain, receiver path = standalone basePath '/trpc/' + appRouter key 'notes' + nested router key 'delete'",
+   "runtime": "observed"
+  },
+  {
+   "id": "T05",
+   "protocol": "http",
+   "caller": "notes-web",
+   "target": "notes-server",
+   "operation": "QUERY",
+   "channel": "/trpc/tags.list",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "env.apiUrl (NOTES_API_URL)"
+    },
+    {
+     "file": "src/lib/trpc.ts",
+     "line": 8,
+     "function": "createTRPCClient httpBatchLink({ url })"
+    },
+    {
+     "file": "src/commands/tags.ts",
+     "line": 4,
+     "function": "tagCommands.list"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 23,
+     "function": "studySession (Promise.all, batched with notes.list)"
+    }
+   ],
+   "receive": {
+    "file": "src/routers/tags.ts",
+    "line": 7,
+    "handler": "tagsRouter.list (publicProcedure.query)"
+   },
+   "idiom": "@trpc/client createTRPCClient<AppRouter> with httpBatchLink(url=`${env.apiUrl}/trpc`, env from NOTES_API_URL) exported from src/lib/trpc.ts and imported via tsconfig path alias '@/lib/trpc'; proxy call trpc.tags.list.query(...); procedure path comes from property chain, receiver path = standalone basePath '/trpc/' + appRouter key 'tags' + nested router key 'list'; called concurrently with notes.list so httpBatchLink sends one GET /trpc/notes.list,tags.list?batch=1",
+   "runtime": "observed"
+  },
+  {
+   "id": "T06",
+   "protocol": "http",
+   "caller": "notes-web",
+   "target": "notes-server",
+   "operation": "MUTATION",
+   "channel": "/trpc/tags.attach",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "env.apiUrl (NOTES_API_URL)"
+    },
+    {
+     "file": "src/lib/trpc.ts",
+     "line": 8,
+     "function": "createTRPCClient httpBatchLink({ url })"
+    },
+    {
+     "file": "src/commands/tags.ts",
+     "line": 5,
+     "function": "tagCommands.attach"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 19,
+     "function": "studySession"
+    }
+   ],
+   "receive": {
+    "file": "src/routers/tags.ts",
+    "line": 15,
+    "handler": "tagsRouter.attach (publicProcedure.input(...).mutation)"
+   },
+   "idiom": "@trpc/client createTRPCClient<AppRouter> with httpBatchLink(url=`${env.apiUrl}/trpc`, env from NOTES_API_URL) exported from src/lib/trpc.ts and imported via tsconfig path alias '@/lib/trpc'; proxy call trpc.tags.attach.mutate(...); procedure path comes from property chain, receiver path = standalone basePath '/trpc/' + appRouter key 'tags' + nested router key 'attach'",
+   "runtime": "observed"
+  },
+  {
+   "id": "T07",
+   "protocol": "graphql",
+   "caller": "notes-web",
+   "target": "notes-server",
+   "operation": "QUERY",
+   "channel": "searchNotes",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 3,
+     "function": "env.graphqlUrl (NOTES_GRAPHQL_URL)"
+    },
+    {
+     "file": "src/lib/search.ts",
+     "line": 4,
+     "function": "new GraphQLClient(env.graphqlUrl)"
+    },
+    {
+     "file": "src/lib/search.ts",
+     "line": 8,
+     "function": "SEARCH_NOTES gql document (query SearchNotes { searchNotes })"
+    },
+    {
+     "file": "src/lib/search.ts",
+     "line": 34,
+     "function": "searchNotes -> graphql.request(SEARCH_NOTES, vars)"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 29,
+     "function": "studySession"
+    }
+   ],
+   "receive": {
+    "file": "src/graphql/schema.ts",
+    "line": 38,
+    "handler": "resolvers.Query.searchNotes (graphql-yoga createSchema, served at /graphql)"
+   },
+   "idiom": "graphql-request GraphQLClient(env.graphqlUrl <- NOTES_GRAPHQL_URL = http://.../graphql) module singleton; named operation in a gql template constant; client.request(DOC, vars); receiver is a graphql-yoga resolver map on a plain node:http server with graphqlEndpoint '/graphql'",
+   "runtime": "observed"
+  },
+  {
+   "id": "T08",
+   "protocol": "graphql",
+   "caller": "notes-web",
+   "target": "notes-server",
+   "operation": "MUTATION",
+   "channel": "saveSearch",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 3,
+     "function": "env.graphqlUrl (NOTES_GRAPHQL_URL)"
+    },
+    {
+     "file": "src/lib/search.ts",
+     "line": 4,
+     "function": "new GraphQLClient(env.graphqlUrl)"
+    },
+    {
+     "file": "src/lib/search.ts",
+     "line": 21,
+     "function": "SAVE_SEARCH gql document (mutation SaveSearch { saveSearch })"
+    },
+    {
+     "file": "src/lib/search.ts",
+     "line": 39,
+     "function": "saveSearch -> graphql.request(SAVE_SEARCH, vars)"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 31,
+     "function": "studySession"
+    }
+   ],
+   "receive": {
+    "file": "src/graphql/schema.ts",
+    "line": 48,
+    "handler": "resolvers.Mutation.saveSearch"
+   },
+   "idiom": "same graphql-request client as T07; mutation document in gql template constant, field saveSearch resolved by graphql-yoga Mutation resolver",
+   "runtime": "observed"
+  },
+  {
+   "id": "T09",
+   "protocol": "http",
+   "caller": "reminder-cron",
+   "target": "notes-server",
+   "operation": "QUERY",
+   "channel": "/trpc/notes.due",
+   "send": [
+    {
+     "file": "reminder_cron/settings.py",
+     "line": 15,
+     "function": "Settings.from_env notes_api_url (NOTES_API_URL)"
+    },
+    {
+     "file": "reminder_cron/job.py",
+     "line": 13,
+     "function": "ReminderJob.__init__ NotesApi(settings.notes_api_url)"
+    },
+    {
+     "file": "reminder_cron/notes_api.py",
+     "line": 25,
+     "function": "NotesApi.__init__ httpx.Client(base_url=f'{base_url}/trpc')"
+    },
+    {
+     "file": "reminder_cron/notes_api.py",
+     "line": 32,
+     "function": "NotesApi.due_notes -> self._http.get('/notes.due', params={'input': json})"
+    },
+    {
+     "file": "reminder_cron/job.py",
+     "line": 17,
+     "function": "ReminderJob.run_once"
+    }
+   ],
+   "receive": {
+    "file": "src/routers/notes.ts",
+    "line": 34,
+    "handler": "notesRouter.due (publicProcedure.input(...).query)"
+   },
+   "idiom": "Python httpx.Client with base_url f'{NOTES_API_URL}/trpc' and relative path '/notes.due' (httpx joins to /trpc/notes.due); tRPC query wire format GET ?input=<json>, no tRPC client; HTTP GET on the wire",
+   "runtime": "observed"
+  },
+  {
+   "id": "T10",
+   "protocol": "http",
+   "caller": "reminder-cron",
+   "target": "notes-server",
+   "operation": "MUTATION",
+   "channel": "/trpc/notes.markReminded",
+   "send": [
+    {
+     "file": "reminder_cron/settings.py",
+     "line": 15,
+     "function": "Settings.from_env notes_api_url (NOTES_API_URL)"
+    },
+    {
+     "file": "reminder_cron/job.py",
+     "line": 13,
+     "function": "ReminderJob.__init__ NotesApi(settings.notes_api_url)"
+    },
+    {
+     "file": "reminder_cron/notes_api.py",
+     "line": 25,
+     "function": "NotesApi.__init__ httpx.Client(base_url=f'{base_url}/trpc')"
+    },
+    {
+     "file": "reminder_cron/notes_api.py",
+     "line": 36,
+     "function": "NotesApi.mark_reminded -> self._http.post('/notes.markReminded', json=...)"
+    },
+    {
+     "file": "reminder_cron/job.py",
+     "line": 26,
+     "function": "ReminderJob.run_once"
+    }
+   ],
+   "receive": {
+    "file": "src/routers/notes.ts",
+    "line": 38,
+    "handler": "notesRouter.markReminded (publicProcedure.input(...).mutation)"
+   },
+   "idiom": "same httpx.Client base_url '/trpc' as T09; tRPC mutation wire format POST with raw JSON input body; HTTP POST on the wire",
+   "runtime": "observed"
+  },
+  {
+   "id": "T11",
+   "protocol": "http",
+   "caller": "reminder-cron",
+   "target": "outside",
+   "host": "httpbin.org",
+   "operation": "POST",
+   "channel": "/anything/email",
+   "send": [
+    {
+     "file": "reminder_cron/settings.py",
+     "line": 16,
+     "function": "Settings.from_env mailer_url (MAILER_URL default https://httpbin.org/anything/email)"
+    },
+    {
+     "file": "reminder_cron/job.py",
+     "line": 14,
+     "function": "ReminderJob.__init__ EchoMailer(settings.mailer_url)"
+    },
+    {
+     "file": "reminder_cron/mailer.py",
+     "line": 11,
+     "function": "EchoMailer.__init__ self._url = url"
+    },
+    {
+     "file": "reminder_cron/mailer.py",
+     "line": 22,
+     "function": "EchoMailer.send_reminder -> httpx.post(self._url, json=payload)"
+    },
+    {
+     "file": "reminder_cron/job.py",
+     "line": 21,
+     "function": "ReminderJob.run_once"
+    }
+   ],
+   "receive": {
+    "host": "httpbin.org"
+   },
+   "idiom": "full URL is an env-var default in a frozen dataclass Settings.from_env, passed through constructor into an attribute, module-level httpx.post(self._url, json=...)",
+   "runtime": "observed"
+  },
+  {
+   "id": "T12",
+   "protocol": "grpc",
+   "caller": "notes-server",
+   "target": "indexer",
+   "operation": "CALL",
+   "channel": "studynotes.indexer.v1.Indexer/IndexNote",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 4,
+     "function": "config.indexerAddr (INDEXER_ADDR)"
+    },
+    {
+     "file": "src/clients/indexer.ts",
+     "line": 17,
+     "function": "new proto.studynotes.indexer.v1.Indexer(config.indexerAddr, insecure)"
+    },
+    {
+     "file": "src/clients/indexer.ts",
+     "line": 37,
+     "function": "indexer.indexNote -> unary('indexNote', ...)"
+    },
+    {
+     "file": "src/clients/indexer.ts",
+     "line": 24,
+     "function": "unary -> client[method](request, ...)"
+    },
+    {
+     "file": "src/routers/notes.ts",
+     "line": 24,
+     "function": "notesRouter.create mutation"
+    }
+   ],
+   "receive": {
+    "file": "src/service.rs",
+    "line": 19,
+    "handler": "IndexerService::index_note (impl Indexer, registered via IndexerServer::new in src/main.rs:22)"
+   },
+   "idiom": "@grpc/grpc-js + @grpc/proto-loader loadSync(proto/indexer.proto) -> loadPackageDefinition -> new proto.studynotes.indexer.v1.Indexer(addr <- INDEXER_ADDR); method name passed as a string to a generic promisified unary() helper doing client[method](...); receiver is a tonic service trait impl generated by tonic-prost-build (protox, no protoc)",
+   "runtime": "observed"
+  },
+  {
+   "id": "T13",
+   "protocol": "grpc",
+   "caller": "notes-server",
+   "target": "indexer",
+   "operation": "CALL",
+   "channel": "studynotes.indexer.v1.Indexer/Search",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 4,
+     "function": "config.indexerAddr (INDEXER_ADDR)"
+    },
+    {
+     "file": "src/clients/indexer.ts",
+     "line": 17,
+     "function": "new proto.studynotes.indexer.v1.Indexer(config.indexerAddr, insecure)"
+    },
+    {
+     "file": "src/clients/indexer.ts",
+     "line": 40,
+     "function": "indexer.search -> unary('search', ...)"
+    },
+    {
+     "file": "src/clients/indexer.ts",
+     "line": 24,
+     "function": "unary -> client[method](request, ...)"
+    },
+    {
+     "file": "src/graphql/schema.ts",
+     "line": 40,
+     "function": "resolvers.Query.searchNotes"
+    }
+   ],
+   "receive": {
+    "file": "src/service.rs",
+    "line": 38,
+    "handler": "IndexerService::search"
+   },
+   "idiom": "same dynamic grpc-js client and string-keyed unary() helper as T12, called from a GraphQL resolver (GraphQL in -> gRPC out)",
+   "runtime": "observed"
+  },
+  {
+   "id": "T14",
+   "protocol": "grpc",
+   "caller": "notes-server",
+   "target": "indexer",
+   "operation": "CALL",
+   "channel": "studynotes.indexer.v1.Indexer/RemoveNote",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 4,
+     "function": "config.indexerAddr (INDEXER_ADDR)"
+    },
+    {
+     "file": "src/clients/indexer.ts",
+     "line": 17,
+     "function": "new proto.studynotes.indexer.v1.Indexer(config.indexerAddr, insecure)"
+    },
+    {
+     "file": "src/clients/indexer.ts",
+     "line": 44,
+     "function": "indexer.removeNote -> client.removeNote({ noteId }, cb)"
+    },
+    {
+     "file": "src/routers/notes.ts",
+     "line": 30,
+     "function": "notesRouter.delete mutation"
+    }
+   ],
+   "receive": {
+    "file": "src/service.rs",
+    "line": 58,
+    "handler": "IndexerService::remove_note"
+   },
+   "idiom": "direct callback-style call on the dynamic grpc-js client (camelCase method removeNote of the proto rpc RemoveNote), fire-and-forget",
+   "runtime": "observed"
+  }
+ ],
+ "not_links": [
+  {
+   "what": "import type { AppRouter } from '@studynotes/server' (tsconfig path to ../notes-server/src/routers/index.ts)",
+   "where": "notes-web:src/lib/trpc.ts:2",
+   "why": "type-only import erased at runtime; shares the router type, not a network call"
+  },
+  {
+   "what": "nc -z port probes against 45010/45011/45020",
+   "where": "studynotes:run.sh:29",
+   "why": "test only: readiness check in run.sh"
+  },
+  {
+   "what": "run.sh launches notes-web session (tsx src/main.ts) and reminder-cron --once",
+   "where": "studynotes:run.sh:54",
+   "why": "test only: process launches by the driver; the network links are the ones the launched code makes (T01-T11)"
+  },
+  {
+   "what": "EchoMailer sender 'reminders@studynotes.local' and recipient default 'student@example.edu'",
+   "where": "reminder-cron:reminder_cron/mailer.py:10",
+   "why": "email addresses in a JSON payload, not hosts that are contacted"
+  },
+  {
+   "what": "notes-server listens: createHTTPServer(...).listen(TRPC_PORT) and createServer(yoga).listen(GRAPHQL_PORT); indexer Server::builder().serve(INDEXER_LISTEN)",
+   "where": "notes-server:src/index.ts:9",
+   "why": "server bind sites, not outbound calls"
+  }
+ ]
+}

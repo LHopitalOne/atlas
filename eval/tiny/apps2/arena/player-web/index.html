@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="arena-server" content="http://localhost:44010" />
+    <title>Arena Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <link href="./styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <main id="app">
+      <h1>Arena</h1>
+      <form id="join-form">
+        <input name="name" placeholder="Your name" required />
+        <input name="room" placeholder="Room" value="arena-1" required />
+        <button type="submit">Join</button>
+      </form>
+      <section id="question" hidden>
+        <p id="question-meta"></p>
+        <h2 id="question-text"></h2>
+        <div id="choices"></div>
+      </section>
+      <ol id="scores"></ol>
+    </main>
+    <footer>
+      Questions courtesy of <a href="https://opentdb.com/" target="_blank" rel="noopener">Open Trivia DB</a>
+    </footer>
+    <script type="module" src="./dist/main.js"></script>
+  </body>
+</html>

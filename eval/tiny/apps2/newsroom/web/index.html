@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="newsroom-api" content="http://127.0.0.1:41010" />
+    <title>Newsroom</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600&display=swap" />
+    <style>
+      body { font-family: 'Source Serif 4', Georgia, serif; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; }
+      #stories button { all: unset; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Newsroom</h1>
+      <p>Top stories from <a href="https://news.ycombinator.com/">Hacker News</a>, summarised.</p>
+    </header>
+    <ol id="stories"></ol>
+    <section id="detail"></section>
+    <script type="module" src="/dist/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,498 @@
+{
+ "project": "payhooks",
+ "services": {
+  "provider": "provider",
+  "merchant": "merchant",
+  "dashboard": "dashboard",
+  "ledger": "ledger"
+ },
+ "links": [
+  {
+   "id": "L01",
+   "protocol": "http",
+   "caller": "merchant",
+   "target": "provider",
+   "operation": "POST",
+   "channel": "/v1/merchants",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 4,
+     "function": "config.providerUrl (PROVIDER_URL env)"
+    },
+    {
+     "file": "src/clients/provider.ts",
+     "line": 32,
+     "function": "registerWebhook"
+    },
+    {
+     "file": "src/clients/provider.ts",
+     "line": 20,
+     "function": "providerPost"
+    },
+    {
+     "file": "src/server.ts",
+     "line": 23,
+     "function": "registerWithProvider"
+    }
+   ],
+   "receive": {
+    "file": "app/routes.py",
+    "line": 34,
+    "handler": "register_merchant"
+   },
+   "idiom": "startup self-registration: generic fetch wrapper providerPost(path, body) does fetch(new URL(path, config.providerUrl)) with PROVIDER_URL env base; literal path '/v1/merchants' passed from registerWebhook; body carries the merchant's own webhook_url; receiver path = APIRouter(prefix='/v1') + '/merchants'",
+   "runtime": "observed"
+  },
+  {
+   "id": "L02",
+   "protocol": "http",
+   "caller": "merchant",
+   "target": "provider",
+   "operation": "POST",
+   "channel": "/v1/payments",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 4,
+     "function": "config.providerUrl (PROVIDER_URL env)"
+    },
+    {
+     "file": "src/clients/provider.ts",
+     "line": 39,
+     "function": "createPayment"
+    },
+    {
+     "file": "src/clients/provider.ts",
+     "line": 20,
+     "function": "providerPost"
+    },
+    {
+     "file": "src/routes/api.ts",
+     "line": 19,
+     "function": "POST /orders handler"
+    }
+   ],
+   "receive": {
+    "file": "app/routes.py",
+    "line": 41,
+    "handler": "create_payment"
+   },
+   "idiom": "same providerPost fetch wrapper (new URL(path, base)); literal '/v1/payments'; called from inside the merchant's own POST /api/orders route; receiver = APIRouter prefix '/v1' + '/payments'",
+   "runtime": "observed"
+  },
+  {
+   "id": "L03",
+   "protocol": "http",
+   "caller": "merchant",
+   "target": "provider",
+   "operation": "POST",
+   "channel": "/v1/payments/{payment_id}/refunds",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 4,
+     "function": "config.providerUrl (PROVIDER_URL env)"
+    },
+    {
+     "file": "src/clients/provider.ts",
+     "line": 49,
+     "function": "refundPayment"
+    },
+    {
+     "file": "src/clients/provider.ts",
+     "line": 20,
+     "function": "providerPost"
+    },
+    {
+     "file": "src/routes/api.ts",
+     "line": 30,
+     "function": "POST /orders/:orderId/refund handler"
+    }
+   ],
+   "receive": {
+    "file": "app/routes.py",
+    "line": 51,
+    "handler": "refund_payment"
+   },
+   "idiom": "providerPost fetch wrapper with a template-literal path containing encodeURIComponent(paymentId), split over a multi-line generic call; receiver = APIRouter prefix '/v1' + '/payments/{payment_id}/refunds'",
+   "runtime": "observed"
+  },
+  {
+   "id": "L04",
+   "protocol": "http",
+   "caller": "provider",
+   "target": "merchant",
+   "operation": "POST",
+   "channel": "/webhooks/payhooks",
+   "send": [
+    {
+     "file": "app/routes.py",
+     "line": 36,
+     "function": "register_merchant (stores the URL received at run time)"
+    },
+    {
+     "file": "app/settlement.py",
+     "line": 34,
+     "function": "SettlementService.settle"
+    },
+    {
+     "file": "app/settlement.py",
+     "line": 41,
+     "function": "SettlementService.refund"
+    },
+    {
+     "file": "app/webhooks.py",
+     "line": 37,
+     "function": "WebhookDispatcher.deliver"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/webhooks.ts",
+    "line": 25,
+    "handler": "webhookRoutes POST /payhooks handler"
+   },
+   "idiom": "webhook: no URL in provider code; merchant composes new URL('/webhooks/payhooks', config.publicUrl) (merchant src/server.ts:20) and sends it in the L01 body; provider stores it in an in-memory dataclass and httpx.AsyncClient.post(merchant.webhook_url, content=signed body) from a FastAPI BackgroundTasks job; receiver = Fastify plugin registered with prefix '/webhooks' + '/payhooks', HMAC-verified raw body",
+   "runtime": "observed"
+  },
+  {
+   "id": "L05",
+   "protocol": "kafka",
+   "caller": "provider",
+   "target": "ledger",
+   "operation": "PUBLISH",
+   "channel": "payments.settled",
+   "send": [
+    {
+     "file": "app/topics.py",
+     "line": 1,
+     "function": "SETTLED_TOPIC constant"
+    },
+    {
+     "file": "app/events.py",
+     "line": 37,
+     "function": "EventPublisher.payment_settled"
+    },
+    {
+     "file": "app/events.py",
+     "line": 33,
+     "function": "EventPublisher._publish"
+    },
+    {
+     "file": "app/settlement.py",
+     "line": 32,
+     "function": "SettlementService.settle"
+    }
+   ],
+   "receive": {
+    "file": "src/consumer.rs",
+    "line": 60,
+    "handler": "consumer::run (match arm SETTLED_TOPIC -> Book::credit)"
+   },
+   "idiom": "aiokafka AIOKafkaProducer.send_and_wait(topic, ...) in a private _publish helper; topic comes from a constants module via a per-event method; consumer is rskafka partition_client(topic, 0) + StreamConsumerBuilder wrapped in a subscribe() helper, two streams merged with futures::stream::select and dispatched by topic",
+   "runtime": "observed"
+  },
+  {
+   "id": "L06",
+   "protocol": "kafka",
+   "caller": "provider",
+   "target": "ledger",
+   "operation": "PUBLISH",
+   "channel": "payments.refunded",
+   "send": [
+    {
+     "file": "app/topics.py",
+     "line": 2,
+     "function": "REFUNDED_TOPIC constant"
+    },
+    {
+     "file": "app/events.py",
+     "line": 40,
+     "function": "EventPublisher.payment_refunded"
+    },
+    {
+     "file": "app/events.py",
+     "line": 33,
+     "function": "EventPublisher._publish"
+    },
+    {
+     "file": "app/settlement.py",
+     "line": 39,
+     "function": "SettlementService.refund"
+    }
+   ],
+   "receive": {
+    "file": "src/consumer.rs",
+    "line": 61,
+    "handler": "consumer::run (match arm REFUNDED_TOPIC -> Book::debit)"
+   },
+   "idiom": "same publisher helper as L05 with the second topic constant; same rskafka subscribe() helper, second stream in the select",
+   "runtime": "observed"
+  },
+  {
+   "id": "L07",
+   "protocol": "http",
+   "caller": "merchant",
+   "target": "ledger",
+   "operation": "GET",
+   "channel": "/balances/{merchant_id}",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 5,
+     "function": "config.ledgerUrl (LEDGER_URL env)"
+    },
+    {
+     "file": "src/clients/ledger.ts",
+     "line": 13,
+     "function": "axios.create"
+    },
+    {
+     "file": "src/clients/ledger.ts",
+     "line": 18,
+     "function": "fetchBalance"
+    },
+    {
+     "file": "src/routes/api.ts",
+     "line": 57,
+     "function": "GET /balance handler"
+    }
+   ],
+   "receive": {
+    "file": "src/api.rs",
+    "line": 11,
+    "handler": "get_balance"
+   },
+   "idiom": "axios instance (axios.create with baseURL from LEDGER_URL env) .get with template path; receiver is an axum 0.8 Router .route with {merchant_id} path param",
+   "runtime": "observed"
+  },
+  {
+   "id": "L08",
+   "protocol": "sse",
+   "caller": "dashboard",
+   "target": "merchant",
+   "operation": "GET",
+   "channel": "/api/orders/:orderId/events",
+   "send": [
+    {
+     "file": "src/api.ts",
+     "line": 24,
+     "function": "apiUrl"
+    },
+    {
+     "file": "src/api.ts",
+     "line": 53,
+     "function": "watchOrder"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/api.ts",
+    "line": 34,
+    "handler": "apiRoutes GET /orders/:orderId/events (hijacked raw SSE stream)"
+   },
+   "idiom": "Server-Sent Events: new EventSource(apiUrl(template path)) + addEventListener('status'); base URL set by configure() from index.html data-merchant-url (browser) or MERCHANT_URL env (Node driver, eventsource package assigned to globalThis); receiver = Fastify plugin prefix '/api' + route, reply.hijack() and reply.raw.write('event: status')",
+   "runtime": "observed"
+  },
+  {
+   "id": "L09",
+   "protocol": "http",
+   "caller": "dashboard",
+   "target": "merchant",
+   "operation": "POST",
+   "channel": "/api/orders",
+   "send": [
+    {
+     "file": "src/api.ts",
+     "line": 24,
+     "function": "apiUrl"
+    },
+    {
+     "file": "src/api.ts",
+     "line": 35,
+     "function": "placeOrder"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/api.ts",
+    "line": 15,
+    "handler": "apiRoutes POST /orders"
+   },
+   "idiom": "fetch(apiUrl('/orders'), {method:'POST'}) where apiUrl prepends the configured base + '/api'; receiver = Fastify register(apiRoutes, {prefix:'/api'}) + '/orders'",
+   "runtime": "observed"
+  },
+  {
+   "id": "L10",
+   "protocol": "http",
+   "caller": "dashboard",
+   "target": "merchant",
+   "operation": "POST",
+   "channel": "/api/orders/:orderId/refund",
+   "send": [
+    {
+     "file": "src/api.ts",
+     "line": 24,
+     "function": "apiUrl"
+    },
+    {
+     "file": "src/api.ts",
+     "line": 44,
+     "function": "refundOrder"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/api.ts",
+    "line": 24,
+    "handler": "apiRoutes POST /orders/:orderId/refund"
+   },
+   "idiom": "fetch(apiUrl(template path), {method:'POST'}) without body; receiver = Fastify prefix '/api' + '/orders/:orderId/refund'",
+   "runtime": "observed"
+  },
+  {
+   "id": "L11",
+   "protocol": "http",
+   "caller": "dashboard",
+   "target": "merchant",
+   "operation": "GET",
+   "channel": "/api/balance",
+   "send": [
+    {
+     "file": "src/api.ts",
+     "line": 24,
+     "function": "apiUrl"
+    },
+    {
+     "file": "src/api.ts",
+     "line": 49,
+     "function": "getBalance"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/api.ts",
+    "line": 55,
+    "handler": "apiRoutes GET /balance"
+   },
+   "idiom": "fetch(apiUrl('/balance')) nested inside json<T>(await fetch(...)); receiver = Fastify prefix '/api' + '/balance' (which then calls L07)",
+   "runtime": "observed"
+  },
+  {
+   "id": "L12",
+   "protocol": "http",
+   "caller": "merchant",
+   "target": "outside",
+   "host": "lookup.binlist.net",
+   "operation": "GET",
+   "channel": "/{bin}",
+   "send": [
+    {
+     "file": "src/clients/bins.ts",
+     "line": 1,
+     "function": "BINLIST_URL constant"
+    },
+    {
+     "file": "src/clients/bins.ts",
+     "line": 24,
+     "function": "lookupBin"
+    },
+    {
+     "file": "src/routes/api.ts",
+     "line": 17,
+     "function": "POST /orders handler"
+    }
+   ],
+   "receive": {
+    "host": "lookup.binlist.net"
+   },
+   "idiom": "global fetch with template literal `${BINLIST_URL}/${bin}` and Accept-Version header; module-level constant base URL",
+   "runtime": "observed"
+  },
+  {
+   "id": "L13",
+   "protocol": "http",
+   "caller": "merchant",
+   "target": "outside",
+   "host": "httpbin.org",
+   "operation": "GET",
+   "channel": "/anything/bins/{bin}",
+   "send": [
+    {
+     "file": "src/clients/bins.ts",
+     "line": 2,
+     "function": "ECHO_URL constant"
+    },
+    {
+     "file": "src/clients/bins.ts",
+     "line": 17,
+     "function": "echoLookup"
+    },
+    {
+     "file": "src/clients/bins.ts",
+     "line": 28,
+     "function": "lookupBin (fallback when binlist is not ok)"
+    }
+   ],
+   "receive": {
+    "host": "httpbin.org"
+   },
+   "idiom": "fallback branch: global fetch to `${ECHO_URL}/${bin}` where the constant already contains part of the path; only taken when binlist answers non-2xx (run.sh triggers it with BIN 00000000, which binlist rejects with 400)",
+   "runtime": "observed"
+  },
+  {
+   "id": "L14",
+   "protocol": "http",
+   "caller": "dashboard",
+   "target": "outside",
+   "host": "www.githubstatus.com",
+   "operation": "LINK",
+   "channel": "/",
+   "send": [
+    {
+     "file": "index.html",
+     "line": 11,
+     "function": "index.html <a href> status page"
+    }
+   ],
+   "receive": {
+    "host": "www.githubstatus.com"
+   },
+   "idiom": "plain <a href> to another site's status page in the dashboard's static index.html",
+   "runtime": "observed"
+  }
+ ],
+ "not_links": [
+  {
+   "what": "run.sh curl health checks against ledger /healthz, provider /v1/healthz and merchant /healthz",
+   "where": "payhooks:run.sh:34,77",
+   "why": "test only: readiness polling in run.sh, not a service"
+  },
+  {
+   "what": "run.sh docker exec rpk cluster health / rpk topic create payments.settled payments.refunded",
+   "where": "payhooks:run.sh:57,60",
+   "why": "test only: broker setup in run.sh"
+  },
+  {
+   "what": "dashboard driver fetch(href, {method:'HEAD'}) to the status page parsed out of index.html",
+   "where": "dashboard:scripts/drive.ts:44",
+   "why": "test only: the Node driver follows the L14 <a href> so the outside LINK shows up at run time; the link itself is index.html"
+  },
+  {
+   "what": "provider FastAPI BackgroundTasks.add_task(settlement.settle / settlement.refund)",
+   "where": "provider:app/routes.py:47,60",
+   "why": "in-process background task inside the provider, not a cross-service link (it leads to L04/L05/L06)"
+  },
+  {
+   "what": "merchant OrderBook EventEmitter emit/on('order:<id>') feeding the SSE stream",
+   "where": "merchant:src/orders.ts:34",
+   "why": "in-process event emitter inside the merchant, not a network link"
+  },
+  {
+   "what": "dashboard index.html <script type=module src=./dist/main.js>",
+   "where": "dashboard:index.html:20",
+   "why": "same-origin local bundle, not another site"
+  },
+  {
+   "what": "merchant onSend hook / /healthz route and ledger /healthz route",
+   "where": "merchant:src/server.ts:17",
+   "why": "health endpoints with no in-app caller (only run.sh polls them)"
+  }
+ ]
+}

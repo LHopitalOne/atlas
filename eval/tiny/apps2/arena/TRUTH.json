@@ -1,0 +1,610 @@
+{
+ "project": "arena",
+ "services": {
+  "game-server": "game-server",
+  "player-web": "player-web",
+  "quiz-bot": "quiz-bot",
+  "scorekeeper": "scorekeeper"
+ },
+ "links": [
+  {
+   "id": "A01",
+   "protocol": "websocket",
+   "caller": "player-web",
+   "target": "game-server",
+   "operation": "EMIT",
+   "channel": "/quiz:join",
+   "send": [
+    {
+     "file": "src/protocol.ts",
+     "line": 5,
+     "function": "QuizEvents.JOIN"
+    },
+    {
+     "file": "src/quiz-client.ts",
+     "line": 17,
+     "function": "QuizClient constructor (io(serverUrl + QUIZ_NAMESPACE))"
+    },
+    {
+     "file": "scripts/play.ts",
+     "line": 22,
+     "function": "top-level driver (client.join)"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 50,
+     "function": "join form submit handler (client.join)"
+    },
+    {
+     "file": "src/quiz-client.ts",
+     "line": 37,
+     "function": "QuizClient.join"
+    },
+    {
+     "file": "src/quiz-client.ts",
+     "line": 60,
+     "function": "QuizClient.send"
+    }
+   ],
+   "receive": {
+    "file": "src/game/namespace.ts",
+    "line": 37,
+    "handler": "socket.on(QuizEvents.JOIN) handler in registerQuizNamespace"
+   },
+   "idiom": "socket.io-client wrapper class: join() calls private send(QuizEvents.JOIN, ...) which does this.socket.emit(event, payload); event name from shared constants object, namespace '/quiz' appended to the server URL in io(); server registers socket.on(QuizEvents.JOIN) inside io.of(QUIZ_NAMESPACE).on('connection')",
+   "runtime": "observed"
+  },
+  {
+   "id": "A02",
+   "protocol": "websocket",
+   "caller": "player-web",
+   "target": "game-server",
+   "operation": "EMIT",
+   "channel": "/quiz:answer",
+   "send": [
+    {
+     "file": "src/protocol.ts",
+     "line": 6,
+     "function": "QuizEvents.ANSWER"
+    },
+    {
+     "file": "src/quiz-client.ts",
+     "line": 17,
+     "function": "QuizClient constructor (io(serverUrl + QUIZ_NAMESPACE))"
+    },
+    {
+     "file": "scripts/play.ts",
+     "line": 13,
+     "function": "onQuestion callback (client.answer)"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 33,
+     "function": "choice button click handler (client.answer)"
+    },
+    {
+     "file": "src/quiz-client.ts",
+     "line": 41,
+     "function": "QuizClient.answer"
+    },
+    {
+     "file": "src/quiz-client.ts",
+     "line": 60,
+     "function": "QuizClient.send"
+    }
+   ],
+   "receive": {
+    "file": "src/game/namespace.ts",
+    "line": 46,
+    "handler": "socket.on(QuizEvents.ANSWER) handler in registerQuizNamespace"
+   },
+   "idiom": "same wrapper: answer() -> send(QuizEvents.ANSWER, ...) -> socket.emit with a variable event name; called from the onQuestion callback",
+   "runtime": "observed"
+  },
+  {
+   "id": "A03",
+   "protocol": "websocket",
+   "caller": "game-server",
+   "target": "player-web",
+   "operation": "EMIT",
+   "channel": "/quiz:question",
+   "send": [
+    {
+     "file": "src/events.ts",
+     "line": 7,
+     "function": "QuizEvents.QUESTION"
+    },
+    {
+     "file": "src/game/namespace.ts",
+     "line": 15,
+     "function": "registerQuizNamespace (io.of(QUIZ_NAMESPACE))"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 57,
+     "function": "QuizRoom.playRound"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 96,
+     "function": "QuizRoom.askQuestion"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 104,
+     "function": "QuizRoom.broadcast"
+    }
+   ],
+   "receive": {
+    "file": "src/quiz-client.ts",
+    "line": 45,
+    "handler": "QuizClient.onQuestion (socket.on(QuizEvents.QUESTION, handler); handler from scripts/play.ts:11 / src/main.ts:25)"
+   },
+   "idiom": "server room broadcast: askQuestion() -> broadcast(QuizEvents.QUESTION, payload) -> this.nsp.to(roomId).emit(event, payload) where nsp = io.of('/quiz') passed into QuizRoom; client subscribes in wrapper method onQuestion",
+   "runtime": "observed"
+  },
+  {
+   "id": "A04",
+   "protocol": "websocket",
+   "caller": "game-server",
+   "target": "player-web",
+   "operation": "EMIT",
+   "channel": "/quiz:round_result",
+   "send": [
+    {
+     "file": "src/events.ts",
+     "line": 8,
+     "function": "QuizEvents.ROUND_RESULT"
+    },
+    {
+     "file": "src/game/namespace.ts",
+     "line": 15,
+     "function": "registerQuizNamespace (io.of(QUIZ_NAMESPACE))"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 74,
+     "function": "QuizRoom.playRound"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 100,
+     "function": "QuizRoom.announceResult"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 104,
+     "function": "QuizRoom.broadcast"
+    }
+   ],
+   "receive": {
+    "file": "src/quiz-client.ts",
+    "line": 49,
+    "handler": "QuizClient.onRoundResult (socket.on(QuizEvents.ROUND_RESULT, handler); handler from scripts/play.ts:15 / src/main.ts:39)"
+   },
+   "idiom": "same room broadcast helper with QuizEvents.ROUND_RESULT; client subscribes in wrapper method onRoundResult",
+   "runtime": "observed"
+  },
+  {
+   "id": "A05",
+   "protocol": "websocket",
+   "caller": "quiz-bot",
+   "target": "game-server",
+   "operation": "EMIT",
+   "channel": "/quiz:join",
+   "send": [
+    {
+     "file": "quiz_bot/protocol.py",
+     "line": 8,
+     "function": "QuizEvent.JOIN"
+    },
+    {
+     "file": "quiz_bot/player.py",
+     "line": 16,
+     "function": "QuizBotNamespace.__init__ (super().__init__(NAMESPACE))"
+    },
+    {
+     "file": "quiz_bot/__main__.py",
+     "line": 28,
+     "function": "QuizBot.play (sio.connect namespaces=[NAMESPACE])"
+    },
+    {
+     "file": "quiz_bot/player.py",
+     "line": 22,
+     "function": "QuizBotNamespace.on_connect"
+    }
+   ],
+   "receive": {
+    "file": "src/game/namespace.ts",
+    "line": 37,
+    "handler": "socket.on(QuizEvents.JOIN) handler in registerQuizNamespace"
+   },
+   "idiom": "python-socketio class-based AsyncClientNamespace bound to '/quiz' via super().__init__(NAMESPACE); on_connect does await self.emit(QuizEvent.JOIN, ...) with a StrEnum member (namespace implicit)",
+   "runtime": "observed"
+  },
+  {
+   "id": "A06",
+   "protocol": "websocket",
+   "caller": "quiz-bot",
+   "target": "game-server",
+   "operation": "EMIT",
+   "channel": "/quiz:answer",
+   "send": [
+    {
+     "file": "quiz_bot/protocol.py",
+     "line": 9,
+     "function": "QuizEvent.ANSWER"
+    },
+    {
+     "file": "quiz_bot/player.py",
+     "line": 16,
+     "function": "QuizBotNamespace.__init__ (super().__init__(NAMESPACE))"
+    },
+    {
+     "file": "quiz_bot/__main__.py",
+     "line": 28,
+     "function": "QuizBot.play (sio.connect namespaces=[NAMESPACE])"
+    },
+    {
+     "file": "quiz_bot/player.py",
+     "line": 29,
+     "function": "QuizBotNamespace.on_question"
+    }
+   ],
+   "receive": {
+    "file": "src/game/namespace.ts",
+    "line": 46,
+    "handler": "socket.on(QuizEvents.ANSWER) handler in registerQuizNamespace"
+   },
+   "idiom": "class-based namespace: self.emit(QuizEvent.ANSWER, ...) from inside the on_question handler",
+   "runtime": "observed"
+  },
+  {
+   "id": "A07",
+   "protocol": "websocket",
+   "caller": "game-server",
+   "target": "quiz-bot",
+   "operation": "EMIT",
+   "channel": "/quiz:question",
+   "send": [
+    {
+     "file": "src/events.ts",
+     "line": 7,
+     "function": "QuizEvents.QUESTION"
+    },
+    {
+     "file": "src/game/namespace.ts",
+     "line": 15,
+     "function": "registerQuizNamespace (io.of(QUIZ_NAMESPACE))"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 57,
+     "function": "QuizRoom.playRound"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 96,
+     "function": "QuizRoom.askQuestion"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 104,
+     "function": "QuizRoom.broadcast"
+    }
+   ],
+   "receive": {
+    "file": "quiz_bot/player.py",
+    "line": 24,
+    "handler": "QuizBotNamespace.on_question"
+   },
+   "idiom": "same room broadcast as A03; Python receiver is a method named on_<event> on an AsyncClientNamespace subclass (no event string at the receive site)",
+   "runtime": "observed"
+  },
+  {
+   "id": "A08",
+   "protocol": "websocket",
+   "caller": "game-server",
+   "target": "quiz-bot",
+   "operation": "EMIT",
+   "channel": "/quiz:round_result",
+   "send": [
+    {
+     "file": "src/events.ts",
+     "line": 8,
+     "function": "QuizEvents.ROUND_RESULT"
+    },
+    {
+     "file": "src/game/namespace.ts",
+     "line": 15,
+     "function": "registerQuizNamespace (io.of(QUIZ_NAMESPACE))"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 74,
+     "function": "QuizRoom.playRound"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 100,
+     "function": "QuizRoom.announceResult"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 104,
+     "function": "QuizRoom.broadcast"
+    }
+   ],
+   "receive": {
+    "file": "quiz_bot/player.py",
+    "line": 31,
+    "handler": "QuizBotNamespace.on_round_result"
+   },
+   "idiom": "same room broadcast as A04; receiver is the on_round_result method of the class-based namespace",
+   "runtime": "observed"
+  },
+  {
+   "id": "H01",
+   "protocol": "http",
+   "caller": "quiz-bot",
+   "target": "game-server",
+   "operation": "POST",
+   "channel": "/admin/questions",
+   "send": [
+    {
+     "file": "quiz_bot/settings.py",
+     "line": 15,
+     "function": "Settings.from_env (GAME_SERVER_URL)"
+    },
+    {
+     "file": "quiz_bot/__main__.py",
+     "line": 16,
+     "function": "QuizBot.__init__"
+    },
+    {
+     "file": "quiz_bot/admin.py",
+     "line": 11,
+     "function": "GameAdminClient.__init__ (httpx.AsyncClient base_url)"
+    },
+    {
+     "file": "quiz_bot/__main__.py",
+     "line": 24,
+     "function": "QuizBot.seed"
+    },
+    {
+     "file": "quiz_bot/admin.py",
+     "line": 15,
+     "function": "GameAdminClient.seed_questions"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/admin.ts",
+    "line": 8,
+    "handler": "router.post('/questions') handler in adminRouter (mounted app.use('/admin') at src/server.ts:25)"
+   },
+   "idiom": "httpx.AsyncClient(base_url=settings.game_server_url <- GAME_SERVER_URL env) held by a client class; literal relative path '/admin/questions'; receiver path = express Router mount '/admin' + '/questions'",
+   "runtime": "observed"
+  },
+  {
+   "id": "H02",
+   "protocol": "http",
+   "caller": "player-web",
+   "target": "game-server",
+   "operation": "GET",
+   "channel": "/api/leaderboard",
+   "send": [
+    {
+     "file": "scripts/play.ts",
+     "line": 4,
+     "function": "serverUrl <- GAME_SERVER_URL env"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 3,
+     "function": "serverUrl <- meta[name=arena-server]"
+    },
+    {
+     "file": "scripts/play.ts",
+     "line": 25,
+     "function": "top-level driver (client.fetchLeaderboard)"
+    },
+    {
+     "file": "src/main.ts",
+     "line": 15,
+     "function": "renderLeaderboard"
+    },
+    {
+     "file": "src/quiz-client.ts",
+     "line": 53,
+     "function": "QuizClient.fetchLeaderboard"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/leaderboard.ts",
+    "line": 8,
+    "handler": "router.get('/leaderboard') handler in leaderboardRouter (mounted app.use('/api') at src/server.ts:26)"
+   },
+   "idiom": "global fetch(new URL('/api/leaderboard', this.serverUrl)) in the wrapper class; base URL injected through the constructor; receiver path = Router mount '/api' + '/leaderboard'",
+   "runtime": "observed"
+  },
+  {
+   "id": "H03",
+   "protocol": "http",
+   "caller": "game-server",
+   "target": "scorekeeper",
+   "operation": "GET",
+   "channel": "/scores",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 9,
+     "function": "config.scorekeeper.baseUrl <- SCOREKEEPER_URL env"
+    },
+    {
+     "file": "src/server.ts",
+     "line": 14,
+     "function": "new ScorekeeperClient(config.scorekeeper.baseUrl)"
+    },
+    {
+     "file": "src/routes/leaderboard.ts",
+     "line": 11,
+     "function": "router.get('/leaderboard') handler"
+    },
+    {
+     "file": "src/clients/scorekeeper.ts",
+     "line": 10,
+     "function": "ScorekeeperClient.fetchScores"
+    }
+   ],
+   "receive": {
+    "file": "src/http.rs",
+    "line": 11,
+    "handler": "handle (tiny_http match arm (Method::Get, \"/scores\"))"
+   },
+   "idiom": "native fetch with template literal `${this.baseUrl}/scores` in a client class; Rust receiver is a tiny_http match on (method, url) tuple rather than a router registration",
+   "runtime": "observed"
+  },
+  {
+   "id": "U01",
+   "protocol": "udp",
+   "caller": "game-server",
+   "target": "scorekeeper",
+   "operation": "SEND",
+   "channel": "44020",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 11,
+     "function": "config.scorekeeper.udpPort <- SCOREKEEPER_UDP_PORT env (host on line 10)"
+    },
+    {
+     "file": "src/server.ts",
+     "line": 13,
+     "function": "new ScoreReporter(udpHost, udpPort)"
+    },
+    {
+     "file": "src/game/quiz-room.ts",
+     "line": 73,
+     "function": "QuizRoom.playRound (reporter.report)"
+    },
+    {
+     "file": "src/scoring/udp-reporter.ts",
+     "line": 22,
+     "function": "ScoreReporter.report"
+    }
+   ],
+   "receive": {
+    "file": "src/udp.rs",
+    "line": 8,
+    "handler": "run_udp_listener (UdpSocket::bind; addr from SCOREKEEPER_UDP_ADDR default 127.0.0.1:44020 at src/main.rs:11)"
+   },
+   "idiom": "node:dgram udp4 socket held in a class; socket.send(buffer, port, host) with host/port injected from config; one JSON datagram per round; Rust std::net::UdpSocket::bind + recv_from loop on a thread",
+   "runtime": "observed"
+  },
+  {
+   "id": "O01",
+   "protocol": "http",
+   "caller": "quiz-bot",
+   "target": "outside",
+   "host": "opentdb.com",
+   "operation": "GET",
+   "channel": "/api.php",
+   "send": [
+    {
+     "file": "quiz_bot/trivia.py",
+     "line": 9,
+     "function": "OPENTDB_URL module constant"
+    },
+    {
+     "file": "quiz_bot/__main__.py",
+     "line": 23,
+     "function": "QuizBot.seed"
+    },
+    {
+     "file": "quiz_bot/trivia.py",
+     "line": 43,
+     "function": "OpenTriviaClient.fetch"
+    }
+   ],
+   "receive": {
+    "host": "opentdb.com"
+   },
+   "idiom": "module-level URL constant passed to an injected httpx.AsyncClient.get with params dict (amount, type), retried on response_code 5 (rate limit)",
+   "runtime": "observed"
+  },
+  {
+   "id": "O02",
+   "protocol": "http",
+   "caller": "player-web",
+   "target": "outside",
+   "host": "fonts.googleapis.com",
+   "operation": "GET",
+   "channel": "/css2",
+   "send": [
+    {
+     "file": "index.html",
+     "line": 8,
+     "function": "<link rel=stylesheet href>"
+    }
+   ],
+   "receive": {
+    "host": "fonts.googleapis.com"
+   },
+   "idiom": "Google Fonts stylesheet <link href=\"https://fonts.googleapis.com/css2?family=...\"> in index.html <head>",
+   "runtime": "observed"
+  },
+  {
+   "id": "O03",
+   "protocol": "http",
+   "caller": "player-web",
+   "target": "outside",
+   "host": "opentdb.com",
+   "operation": "LINK",
+   "channel": "/",
+   "send": [
+    {
+     "file": "index.html",
+     "line": 27,
+     "function": "<a href> in footer"
+    }
+   ],
+   "receive": {
+    "host": "opentdb.com"
+   },
+   "idiom": "attribution <a href=\"https://opentdb.com/\" target=_blank> in the page footer",
+   "runtime": "observed"
+  }
+ ],
+ "not_links": [
+  {
+   "what": "curl GET /healthz against scorekeeper and game-server (readiness polling)",
+   "where": "arena:run.sh:38",
+   "why": "test only: run.sh readiness loop; /healthz routes (game-server src/server.ts:22, scorekeeper src/http.rs:16) have no in-app caller"
+  },
+  {
+   "what": "fetch(url) for every external href/src found in index.html",
+   "where": "player-web:scripts/check-assets.ts:9",
+   "why": "test/dev tooling run by run.sh to observe the HTML links O02/O03 on the page's behalf; URLs are not written here"
+  },
+  {
+   "what": "<link href=\"./styles.css\"> and <script src=\"./dist/main.js\">",
+   "where": "player-web:index.html:9",
+   "why": "same-origin local assets (also index.html:29), not another site or service"
+  },
+  {
+   "what": "<meta name=\"arena-server\" content=\"http://localhost:44010\">",
+   "where": "player-web:index.html:6",
+   "why": "configuration value read by src/main.ts:3 as the base URL; the requests it feeds are A01/A02/H02, the meta tag itself loads nothing"
+  },
+  {
+   "what": "socket.io namespace handshake io(`${serverUrl}/quiz`) / sio.connect(url, namespaces=['/quiz'])",
+   "where": "player-web:src/quiz-client.ts:17",
+   "why": "transport for the EMIT links A01-A08 (also quiz-bot:quiz_bot/__main__.py:28); not counted as separate links"
+  },
+  {
+   "what": "socket.on('disconnect') and socket.once('connect' / 'connect_error')",
+   "where": "game-server:src/game/namespace.ts:51",
+   "why": "built-in Socket.IO lifecycle events, not application events (also player-web:src/quiz-client.ts:26-27)"
+  }
+ ]
+}

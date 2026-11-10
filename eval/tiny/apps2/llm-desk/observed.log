@@ -1,0 +1,16 @@
+RECV R1 XREADGROUP desk.tickets.triaged id=1794325349674-0 ticket=tkt_1001 team=infrastructure
+RECV R1 XREADGROUP desk.tickets.triaged id=1794325349674-1 ticket=tkt_1003 team=accounts
+RECV R1 XREADGROUP desk.tickets.triaged id=1794325349844-0 ticket=tkt_1002 team=accounts
+RECV O3 POST httpbin.org/post rows=2
+RECV S1 GET /api/events/stream agent=dana
+RECV H1 POST /api/tickets id=tkt_1001 customer=acme-corp
+RECV H1 POST /api/tickets id=tkt_1002 customer=globex
+RECV H1 POST /api/tickets id=tkt_1003 customer=initech
+RECV O1 POST openrouter.ai/api/alpha/decisions ticket=tkt_1003 status=200
+RECV O1 POST openrouter.ai/api/alpha/decisions ticket=tkt_1001 status=200
+RECV O1 POST openrouter.ai/api/alpha/decisions ticket=tkt_1002 status=200
+RECV H2 GET /api/tickets team=None urgent=True count=1
+RECV H3 GET /api/tickets/tkt_1001
+RECV H4 POST /api/tickets/tkt_1001/reply agent=dana use_draft=True
+RECV O2 POST openrouter.ai/api/v1/chat/completions ticket=tkt_1001 model=openai/gpt-4o-mini
+RECV H5 PATCH /api/tickets/tkt_1001 status=closed

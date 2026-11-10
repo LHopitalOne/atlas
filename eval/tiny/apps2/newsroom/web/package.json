@@ -1,0 +1,19 @@
+{
+  "name": "newsroom-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "openapi-ts": "openapi-ts",
+    "build": "esbuild src/main.ts --bundle --format=esm --outfile=dist/main.js",
+    "serve": "tsx server.ts",
+    "drive": "tsx scripts/drive.ts"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "^0.99.0",
+    "@types/node": "^26.6.6",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.15",
+    "typescript": "5.9"
+  }
+}

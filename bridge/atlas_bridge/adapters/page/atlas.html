@@ -224,6 +224,7 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 .lg-row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sw-line{width:20px;height:0;border-top:2px solid var(--c)}
 .sw-line.dash{border-top-style:dashed}
+.sw-line.dot{border-top-style:dotted}
 .lg-row.lg-static{cursor:default}
 .lg-row.lg-static:hover{background:none}
 .lg-note{padding:2px 6px 0;font-size:12px;color:var(--muted-foreground)}
@@ -1316,6 +1317,11 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
       cls: "badge-inferred",
       note: "The route fits only under an assumption the code does not show, such as a base URL prefix."
     },
+    judged: {
+      label: "Chosen by Jev",
+      cls: "badge-inferred",
+      note: "The code leaves several routes possible. Jev, a small decision model, read the lines around the call and chose this route; the probability it gave is in the reason below."
+    },
     ambiguous: {
       label: "Ambiguous",
       cls: "badge-warning",
@@ -1332,7 +1338,7 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
       note: "Sent to a host none of these repositories serves: a third-party API, a CDN, an analytics or ad script, or a site a visitor is linked to."
     }
   };
-  var PROOF_ORDER = ["scip", "syntax", "matched", "inferred", "ambiguous", "contradicted", "outside"];
+  var PROOF_ORDER = ["scip", "syntax", "matched", "inferred", "judged", "ambiguous", "contradicted", "outside"];
   var isOutside = (l) => l.proof === "outside";
   var rank = (p) => {
     const i = PROOF_ORDER.indexOf(p);
@@ -5474,6 +5480,7 @@ FLOW: ${flowLine}`;
   function arcStyle(proof) {
     if (proof === "scip" || proof === "syntax") return [theme.proof, null];
     if (proof === "inferred") return [theme.st[3], [5, 4]];
+    if (proof === "judged") return [theme.st[3], [1, 3]];
     if (proof === "ambiguous") return [theme.st[1], [5, 4]];
     if (proof === "contradicted") return [theme.st[2], [2, 3]];
     if (proof === "outside") return [theme.muted, [2, 4]];
@@ -5589,7 +5596,8 @@ FLOW: ${flowLine}`;
     for (const p of PROOF_ORDER) {
       if (!c[p]) continue;
       const [col, dash] = arcStyle(p);
-      h += keyRow(`<span class="sw-line${dash ? " dash" : ""}" style="--c:${css(col)}"></span>`, PROOF[p].label, c[p]);
+      const style = !dash ? "" : dash[0] <= 2 ? " dot" : " dash";
+      h += keyRow(`<span class="sw-line${style}" style="--c:${css(col)}"></span>`, PROOF[p].label, c[p]);
     }
     if (within) {
       const col = css(theme.text, Math.max(HTTP_ARC.withinAlpha, 0.45));

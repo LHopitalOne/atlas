@@ -1,0 +1,6 @@
+node_modules/
+.venv/
+target/
+.run/
+dist/
+__pycache__/

@@ -76,12 +76,23 @@ class LinkRecord:
 
     # how the page badges a link: (status, verification) -> proof; statuses other than matched need no verification
     PROOF = {'confirmed': 'scip', 'syntax': 'syntax', 'unverified': 'matched', 'contradicted': 'contradicted'}
-    EDGE_STATUS = {'scip': 0, 'syntax': 0, 'matched': 0, 'outside': 0, 'contradicted': 1, 'ambiguous': 1, 'inferred': 3}
+    EDGE_STATUS = {
+        'scip': 0,
+        'syntax': 0,
+        'matched': 0,
+        'outside': 0,
+        'contradicted': 1,
+        'ambiguous': 1,
+        'inferred': 3,
+        'judged': 3,
+    }
 
     @property
     def proof(self):
         """scip (confirmed by SCIP), syntax (read straight from the code), matched (read from the code, names not
-        confirmed), contradicted, inferred or ambiguous."""
+        confirmed), contradicted, inferred, judged (chosen by a decision model), ambiguous or outside."""
+        if self.verification == 'judged':
+            return 'judged'  # chosen by a decision model among the routes the code left open
         if self.status != 'matched':
             return self.status
         return self.PROOF.get(self.verification, 'matched')

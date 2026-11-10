@@ -16,6 +16,7 @@ from ..usecases.draw import GROUPINGS, MapDrawer
 from ..usecases.link import LinkFinder, LinkReport
 from .budget import MapBudget
 from .inputs import GraphInput, JsonFile
+from .judge import JudgePass
 from .links import LinksCommand
 from .scipcheck import ScipCheck
 
@@ -25,7 +26,7 @@ class MapPipeline:
 
     def __init__(self, options, report):
         """options: parsed map arguments (out_dir, refresh, aliases, include_tests, verify, sandbox, group, title,
-        graph_json, within)."""
+        graph_json, within, jev)."""
         self._o = options
         self._report = report
         self._runner = GraphifyRunner(self._still_mapping)
@@ -87,6 +88,8 @@ class MapPipeline:
         except (BridgeError, ImportError) as e:
             self._report(f'  links     none found: {e}')
             return []
+        if getattr(self._o, 'jev', False):
+            links = self._judged(links, extraction, repos)
         if self._o.verify:
             links = ScipCheck(self._o.out_dir, self._report, self._o.sandbox).verify(repos, links)
         else:
@@ -102,6 +105,15 @@ class MapPipeline:
             f'services, {len(links) - len(found) - outside} requests with no route found'
         )
         return links
+
+    def _judged(self, links, extraction, repos):
+        """Jev's picks among the routes the code leaves open; the rules' links unchanged when it cannot be asked."""
+        try:
+            folders = {r.name: r.path for r in repos}
+            return JudgePass(self._report).run(links, extraction, folders, self._o.include_tests, self._o.within)
+        except BridgeError as e:
+            self._report(f'  jev       not asked: {e}')
+            return links
 
     def _spec(self, graph):
         code = CodeGraph()

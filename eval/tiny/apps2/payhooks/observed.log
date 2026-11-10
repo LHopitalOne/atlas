@@ -1,0 +1,23 @@
+RECV L01 http POST /v1/merchants name=payhooks-demo-shop
+RECV L02 http POST /v1/payments payment=pay_eeafcee942b7
+RECV L02 http POST /v1/payments payment=pay_9169610c8240
+RECV L03 http POST /v1/payments/pay_eeafcee942b7/refunds amount=1250
+RECV L04 http POST /webhooks/payhooks type=payment.settled payment=pay_eeafcee942b7
+RECV L04 http POST /webhooks/payhooks type=payment.refunded payment=pay_eeafcee942b7
+RECV L04 http POST /webhooks/payhooks type=payment.settled payment=pay_9169610c8240
+RECV L05 kafka payments.settled payment=pay_eeafcee942b7
+RECV L05 kafka payments.settled payment=pay_9169610c8240
+RECV L06 kafka payments.refunded payment=pay_eeafcee942b7
+RECV L07 http GET /balances/mer_1d8e662c48a1
+RECV L08 sse GET /api/orders/ord_c05429e3/events
+RECV L08 sse GET /api/orders/ord_c05429e3/events
+RECV L08 sse GET /api/orders/ord_5a0bca9d/events
+RECV L09 http POST /api/orders amount=1250
+RECV L09 http POST /api/orders amount=990
+RECV L10 http POST /api/orders/ord_c05429e3/refund
+RECV L11 http GET /api/balance
+RECV L12 outside GET lookup.binlist.net/45717360 status=429
+RECV L12 outside GET lookup.binlist.net/00000000 status=429
+RECV L13 outside GET httpbin.org/anything/bins/45717360 status=200
+RECV L13 outside GET httpbin.org/anything/bins/00000000 status=200
+RECV L14 outside LINK www.githubstatus.com/ status=200

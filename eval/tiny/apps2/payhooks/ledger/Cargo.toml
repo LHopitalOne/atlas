@@ -1,0 +1,12 @@
+[package]
+name = "ledger"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "0.8", default-features = false, features = ["http1", "json", "tokio"] }
+futures = { version = "0.3", default-features = false, features = ["std"] }
+rskafka = { version = "0.6", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "sync", "time"] }

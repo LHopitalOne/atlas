@@ -44,6 +44,12 @@ class MapCommand(Command):
             '--graph-json', action='store_true', help='write graph.json even for very large graphs (over 200,000 nodes)'
         )
         parser.add_argument('--no-open', action='store_true', help='write the page without opening a browser')
+        parser.add_argument(
+            '--jev',
+            action='store_true',
+            help='let Jev (a decision model on OpenRouter; needs OPENROUTER_API_KEY) choose among the routes the code '
+            'leaves open for a request; its picks are marked "Chosen by Jev"',
+        )
 
     def run(self, args):
         start = time.monotonic()

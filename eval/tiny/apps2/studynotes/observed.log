@@ -1,0 +1,14 @@
+RECV T01 trpc mutation /trpc/notes.create
+RECV T02 trpc query /trpc/notes.list
+RECV T03 trpc query /trpc/notes.byId
+RECV T04 trpc mutation /trpc/notes.delete
+RECV T05 trpc query /trpc/tags.list
+RECV T06 trpc mutation /trpc/tags.attach
+RECV T07 graphql QUERY searchNotes query="cycle"
+RECV T08 graphql MUTATION saveSearch query="cycle"
+RECV T09 trpc query /trpc/notes.due
+RECV T10 trpc mutation /trpc/notes.markReminded
+RECV T11 https POST httpbin.org/anything/email to=student@example.edu
+RECV T12 grpc IndexNote note_id=a34bed7b-0c9c-41b5-a8f0-173643d771ec terms=16
+RECV T13 grpc Search query="cycle" hits=2
+RECV T14 grpc RemoveNote note_id=1bddd145-a56c-4592-820b-9253c9dbe2d9 removed=true

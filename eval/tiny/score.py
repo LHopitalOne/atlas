@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Score a links.json against a tiny app's TRUTH.json, for every protocol.
 
-A TRUTH link is found when the finder reports a link with the same caller and target services whose receiving end is
-the TRUTH link's: the same file within 2 lines of its `receive` line, or (for HTTP-like protocols) the same
+A TRUTH link to an outside host (target "outside", with "host") is found when the finder sends the same call (file
+and line of a send site) to that host. Any other TRUTH link is found when the finder reports a link with the same
+caller and target services whose receiving end is the TRUTH link's: the same file within 2 lines of its `receive` line, or (for HTTP-like protocols) the same
 normalised channel with a compatible operation. Finder links that match no TRUTH link are false links, unless their
 call site is listed under the app's not_links. A sampled key (eval/devset) judges only links made at the call sites it
 covers; the others are counted as unjudged.
@@ -15,7 +16,8 @@ import re
 import sys
 
 PARAMETER = re.compile(r'\{[^}]*\}')  # '{id}' and '{*rest}' alike: parameter names differ between the two sides
-HTTP_LIKE = {'http', 'websocket', 'graphql'}
+HTTP_LIKE = {'http', 'websocket', 'graphql', 'sse'}
+HTTP_OVER = {'graphql', 'sse'}  # carried by an HTTP request: a finder link of protocol http is one
 
 
 def norm(path):
@@ -41,11 +43,21 @@ def channel(protocol, name):
     return name
 
 
+OUTSIDE = 'outside'  # a TRUTH link to a host none of the services serves: target 'outside', host 'api.x.com'
+
+
+def sent_at(t, f):
+    """The finder link is made at one of the TRUTH link's send sites (the same file and line)."""
+    return any(s['file'] == f['call']['file'] and s['line'] == f['call']['line'] for s in t['send'])
+
+
 def same_link(t, f):
+    if t['target'] == OUTSIDE:  # found when the finder sends the same call to the same host
+        return f.get('status') == OUTSIDE and t['caller'] == f['caller'] and t['host'] == f['target'] and sent_at(t, f)
     r = f.get('route')
     if not r or t['caller'] != f['caller'] or t['target'] != f['target']:
         return False
-    if r.get('protocol', 'http') != t['protocol'] and not (t['protocol'] == 'graphql' and r.get('protocol') == 'http'):
+    if r.get('protocol', 'http') != t['protocol'] and not (t['protocol'] in HTTP_OVER and r.get('protocol') == 'http'):
         return False
     rec = t['receive']
     if rec['file'] == r['file'] and abs(rec['line'] - r['line']) <= 2:
@@ -72,7 +84,7 @@ def judged(truth, f):
 
 
 def score(truth, found):
-    links = [f for f in found['links'] if f.get('route')]
+    links = [f for f in found['links'] if f.get('route') or f.get('status') == OUTSIDE]
     rows, matched = [], set()
     for t in truth['links']:
         hits = [i for i, f in enumerate(links) if same_link(t, f)]
@@ -90,7 +102,7 @@ def score(truth, found):
         'project': truth['project'],
         'rows': rows,
         'false': [f'{f["caller"]} -> {f["target"]} {f["call"]["method"]} {f["call"]["path"]} => '
-                  f'{f["route"]["path"]} at {f["call"]["file"]}:{f["call"]["line"]}' for f in false],
+                  f'{(f.get("route") or {}).get("path", "outside")} at {f["call"]["file"]}:{f["call"]["line"]}' for f in false],
         'summary': {
             'recall': f'{sum(r["found"] for r in rows)}/{len(rows)}',
             'by_protocol': {p: f'{g}/{t}' for p, (g, t) in sorted(by_protocol.items())},

@@ -16,6 +16,7 @@ import { MONO, SANS } from '../util/format.js';
 export function arcStyle(proof) {
   if (proof === 'scip' || proof === 'syntax') return [theme.proof, null];
   if (proof === 'inferred') return [theme.st[3], [5, 4]];
+  if (proof === 'judged') return [theme.st[3], [1, 3]];
   if (proof === 'ambiguous') return [theme.st[1], [5, 4]];
   if (proof === 'contradicted') return [theme.st[2], [2, 3]];
   if (proof === 'outside') return [theme.muted, [2, 4]];

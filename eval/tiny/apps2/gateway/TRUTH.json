@@ -1,0 +1,635 @@
+{
+ "project": "gateway",
+ "services": {
+  "edge": "edge",
+  "spa": "spa",
+  "users": "users",
+  "orders": "orders"
+ },
+ "links": [
+  {
+   "id": "L01",
+   "protocol": "http",
+   "caller": "spa",
+   "target": "users",
+   "operation": "GET",
+   "channel": "/users",
+   "send": [
+    {
+     "service": "spa",
+     "file": "src/api/client.ts",
+     "line": 5,
+     "function": "http (axios.create baseURL '/api')"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/users.ts",
+     "line": 5,
+     "function": "listUsers"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 7,
+     "function": "usersProxy (createProxyMiddleware)"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 10,
+     "function": "usersProxy pathRewrite {'^/api': ''}"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/users.rs",
+    "line": 10,
+    "handler": "list_users"
+   },
+   "idiom": "spa axios instance (baseURL '/api') http.get('/users') -> /api/users; edge mounts http-proxy-middleware with pathFilter '/api/users' and pathRewrite {'^/api': ''} to target USERS_URL; users receiver path = Router::nest('/users', ...) + route('/') -> /users",
+   "runtime": "observed"
+  },
+  {
+   "id": "L02",
+   "protocol": "http",
+   "caller": "spa",
+   "target": "users",
+   "operation": "GET",
+   "channel": "/users/{id}",
+   "send": [
+    {
+     "service": "spa",
+     "file": "src/api/client.ts",
+     "line": 5,
+     "function": "http (axios.create baseURL '/api')"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/users.ts",
+     "line": 10,
+     "function": "getUser"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 7,
+     "function": "usersProxy (createProxyMiddleware)"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 10,
+     "function": "usersProxy pathRewrite {'^/api': ''}"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/users.rs",
+    "line": 11,
+    "handler": "get_user"
+   },
+   "idiom": "spa axios instance (baseURL '/api') http.get(`/users/${id}`) template literal; edge mounts http-proxy-middleware with pathFilter '/api/users' and pathRewrite {'^/api': ''} to target USERS_URL; users receiver path = Router::nest('/users', ...) + route('/{id}')",
+   "runtime": "observed"
+  },
+  {
+   "id": "L03",
+   "protocol": "http",
+   "caller": "spa",
+   "target": "users",
+   "operation": "POST",
+   "channel": "/users",
+   "send": [
+    {
+     "service": "spa",
+     "file": "src/api/client.ts",
+     "line": 5,
+     "function": "http (axios.create baseURL '/api')"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/users.ts",
+     "line": 15,
+     "function": "registerUser"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 7,
+     "function": "usersProxy (createProxyMiddleware)"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 10,
+     "function": "usersProxy pathRewrite {'^/api': ''}"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/users.rs",
+    "line": 10,
+    "handler": "create_user"
+   },
+   "idiom": "spa axios instance (baseURL '/api') http.post('/users', body); edge mounts http-proxy-middleware with pathFilter '/api/users' and pathRewrite {'^/api': ''} to target USERS_URL; users receiver path = Router::nest('/users', ...) + route('/') method-chained get(...).post(create_user)",
+   "runtime": "observed"
+  },
+  {
+   "id": "L04",
+   "protocol": "http",
+   "caller": "spa",
+   "target": "users",
+   "operation": "GET",
+   "channel": "/users/{id}/wishlist",
+   "send": [
+    {
+     "service": "spa",
+     "file": "src/api/client.ts",
+     "line": 5,
+     "function": "http (axios.create baseURL '/api')"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/users.ts",
+     "line": 20,
+     "function": "getWishlist"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 7,
+     "function": "usersProxy (createProxyMiddleware)"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 10,
+     "function": "usersProxy pathRewrite {'^/api': ''}"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/wishlist.rs",
+    "line": 9,
+    "handler": "get_wishlist"
+   },
+   "idiom": "spa axios instance (baseURL '/api') http.get(`/users/${userId}/wishlist`); edge mounts http-proxy-middleware with pathFilter '/api/users' and pathRewrite {'^/api': ''} to target USERS_URL; users receiver path = Router::nest('/users', ...) + nested again: .nest('/{id}/wishlist', wishlist::router()) (users.rs:12, path capture in the nest prefix) + route('/') in another file",
+   "runtime": "observed"
+  },
+  {
+   "id": "L05",
+   "protocol": "http",
+   "caller": "spa",
+   "target": "orders",
+   "operation": "GET",
+   "channel": "/v1/orders",
+   "send": [
+    {
+     "service": "spa",
+     "file": "src/api/client.ts",
+     "line": 5,
+     "function": "http (axios.create baseURL '/api')"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/orders.ts",
+     "line": 4,
+     "function": "ORDERS const '/orders'"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/orders.ts",
+     "line": 7,
+     "function": "listOrders"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 16,
+     "function": "ordersProxy (createProxyMiddleware)"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 19,
+     "function": "ordersProxy pathRewrite fn ^/api/orders -> /v1/orders"
+    }
+   ],
+   "receive": {
+    "file": "app/blueprints/orders.py",
+    "line": 11,
+    "handler": "list_orders"
+   },
+   "idiom": "spa axios instance (baseURL '/api') http.get(ORDERS, {params: {buyer}}) with path in a module const; edge http-proxy-middleware with function pathFilter startsWith('/api/orders') and function pathRewrite '/api/orders' -> '/v1/orders' to ORDERS_URL; orders receiver path = Blueprint url_prefix '/v1/orders' + @orders_bp.get('')",
+   "runtime": "observed"
+  },
+  {
+   "id": "L06",
+   "protocol": "http",
+   "caller": "spa",
+   "target": "orders",
+   "operation": "POST",
+   "channel": "/v1/orders",
+   "send": [
+    {
+     "service": "spa",
+     "file": "src/api/client.ts",
+     "line": 5,
+     "function": "http (axios.create baseURL '/api')"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/orders.ts",
+     "line": 4,
+     "function": "ORDERS const '/orders'"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/orders.ts",
+     "line": 12,
+     "function": "placeOrder"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 16,
+     "function": "ordersProxy (createProxyMiddleware)"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 19,
+     "function": "ordersProxy pathRewrite fn ^/api/orders -> /v1/orders"
+    }
+   ],
+   "receive": {
+    "file": "app/blueprints/orders.py",
+    "line": 18,
+    "handler": "place_order"
+   },
+   "idiom": "spa axios instance (baseURL '/api') http.post(ORDERS, body); edge http-proxy-middleware with function pathFilter startsWith('/api/orders') and function pathRewrite '/api/orders' -> '/v1/orders' to ORDERS_URL; orders receiver path = Blueprint url_prefix '/v1/orders' + @orders_bp.post('')",
+   "runtime": "observed"
+  },
+  {
+   "id": "L07",
+   "protocol": "http",
+   "caller": "spa",
+   "target": "orders",
+   "operation": "GET",
+   "channel": "/v1/orders/{order_id}",
+   "send": [
+    {
+     "service": "spa",
+     "file": "src/api/client.ts",
+     "line": 5,
+     "function": "http (axios.create baseURL '/api')"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/orders.ts",
+     "line": 4,
+     "function": "ORDERS const '/orders'"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/orders.ts",
+     "line": 17,
+     "function": "getOrder"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 16,
+     "function": "ordersProxy (createProxyMiddleware)"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 19,
+     "function": "ordersProxy pathRewrite fn ^/api/orders -> /v1/orders"
+    }
+   ],
+   "receive": {
+    "file": "app/blueprints/orders.py",
+    "line": 36,
+    "handler": "get_order"
+   },
+   "idiom": "spa axios instance (baseURL '/api') http.get(`${ORDERS}/${id}`) const interpolated in a template literal; edge http-proxy-middleware with function pathFilter startsWith('/api/orders') and function pathRewrite '/api/orders' -> '/v1/orders' to ORDERS_URL; orders receiver path = Blueprint url_prefix '/v1/orders' + @orders_bp.get('/<int:order_id>')",
+   "runtime": "observed"
+  },
+  {
+   "id": "L08",
+   "protocol": "http",
+   "caller": "spa",
+   "target": "orders",
+   "operation": "GET",
+   "channel": "/v1/orders/{order_id}/items",
+   "send": [
+    {
+     "service": "spa",
+     "file": "src/api/client.ts",
+     "line": 5,
+     "function": "http (axios.create baseURL '/api')"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/orders.ts",
+     "line": 4,
+     "function": "ORDERS const '/orders'"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/orders.ts",
+     "line": 22,
+     "function": "getOrderItems"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 16,
+     "function": "ordersProxy (createProxyMiddleware)"
+    },
+    {
+     "service": "edge",
+     "file": "src/proxies.ts",
+     "line": 19,
+     "function": "ordersProxy pathRewrite fn ^/api/orders -> /v1/orders"
+    }
+   ],
+   "receive": {
+    "file": "app/blueprints/items.py",
+    "line": 8,
+    "handler": "list_items"
+   },
+   "idiom": "spa axios instance (baseURL '/api') http.get(`${ORDERS}/${id}/items`); edge http-proxy-middleware with function pathFilter startsWith('/api/orders') and function pathRewrite '/api/orders' -> '/v1/orders' to ORDERS_URL; orders receiver path = nested blueprint: items_bp url_prefix '/<int:order_id>/items' registered on orders_bp (orders.py:8, prefix '/v1/orders') + @items_bp.get('')",
+   "runtime": "observed"
+  },
+  {
+   "id": "L09",
+   "protocol": "http",
+   "caller": "spa",
+   "target": "edge",
+   "operation": "GET",
+   "channel": "/api/dashboard/{userId}",
+   "send": [
+    {
+     "service": "spa",
+     "file": "src/api/client.ts",
+     "line": 5,
+     "function": "http (axios.create baseURL '/api')"
+    },
+    {
+     "service": "spa",
+     "file": "src/api/dashboard.ts",
+     "line": 5,
+     "function": "getDashboard"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/dashboard.ts",
+    "line": 8,
+    "handler": "dashboardRouter.get('/:userId') handler"
+   },
+   "idiom": "spa axios instance (baseURL '/api') http.get(`/dashboard/${userId}`); edge hand-written express Router mounted with app.use('/api/dashboard', dashboardRouter) (server.ts:16) + get('/:userId')",
+   "runtime": "observed"
+  },
+  {
+   "id": "L10",
+   "protocol": "http",
+   "caller": "edge",
+   "target": "users",
+   "operation": "GET",
+   "channel": "/users/{id}",
+   "send": [
+    {
+     "service": "edge",
+     "file": "src/config.ts",
+     "line": 3,
+     "function": "config.usersUrl <- USERS_URL"
+    },
+    {
+     "service": "edge",
+     "file": "src/upstreams.ts",
+     "line": 26,
+     "function": "fetchUser"
+    },
+    {
+     "service": "edge",
+     "file": "src/upstreams.ts",
+     "line": 18,
+     "function": "getJson (fetch)"
+    },
+    {
+     "service": "edge",
+     "file": "src/routes/dashboard.ts",
+     "line": 12,
+     "function": "dashboardRouter.get('/:userId') handler"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/users.rs",
+    "line": 11,
+    "handler": "get_user"
+   },
+   "idiom": "global fetch via a generic getJson<T>(url) helper; URL built with new URL(`/users/${encodeURIComponent(id)}`, config.usersUrl); called inside Promise.all in the aggregation route; receiver = nest('/users') + route('/{id}')",
+   "runtime": "observed"
+  },
+  {
+   "id": "L11",
+   "protocol": "http",
+   "caller": "edge",
+   "target": "orders",
+   "operation": "GET",
+   "channel": "/v1/orders",
+   "send": [
+    {
+     "service": "edge",
+     "file": "src/config.ts",
+     "line": 4,
+     "function": "config.ordersUrl <- ORDERS_URL"
+    },
+    {
+     "service": "edge",
+     "file": "src/upstreams.ts",
+     "line": 31,
+     "function": "fetchOrdersForBuyer"
+    },
+    {
+     "service": "edge",
+     "file": "src/upstreams.ts",
+     "line": 18,
+     "function": "getJson (fetch)"
+    },
+    {
+     "service": "edge",
+     "file": "src/routes/dashboard.ts",
+     "line": 13,
+     "function": "dashboardRouter.get('/:userId') handler"
+    }
+   ],
+   "receive": {
+    "file": "app/blueprints/orders.py",
+    "line": 11,
+    "handler": "list_orders"
+   },
+   "idiom": "global fetch via getJson<T>; URL is a template literal `${config.ordersUrl}/v1/orders?${qs}` with URLSearchParams query; bypasses the edge's own /api/orders proxy; receiver = Blueprint url_prefix '/v1/orders' + get('')",
+   "runtime": "observed"
+  },
+  {
+   "id": "L12",
+   "protocol": "http",
+   "caller": "orders",
+   "target": "users",
+   "operation": "GET",
+   "channel": "/internal/buyers/{id}/verify",
+   "send": [
+    {
+     "service": "orders",
+     "file": "app/factory.py",
+     "line": 14,
+     "function": "create_app (USERS_SERVICE_URL env)"
+    },
+    {
+     "service": "orders",
+     "file": "app/clients/users.py",
+     "line": 18,
+     "function": "UsersClient.verify_buyer"
+    },
+    {
+     "service": "orders",
+     "file": "app/clients/users.py",
+     "line": 19,
+     "function": "UsersClient.verify_buyer (requests.Session.get)"
+    },
+    {
+     "service": "orders",
+     "file": "app/blueprints/orders.py",
+     "line": 25,
+     "function": "place_order"
+    }
+   ],
+   "receive": {
+    "file": "src/routes/internal.rs",
+    "line": 11,
+    "handler": "verify_buyer"
+   },
+   "idiom": "requests.Session held by a client class built in the app factory with base_url from app.config <- USERS_SERVICE_URL env, stored in app.extensions; f-string path; direct service-to-service call that skips the gateway; receiver = nest('/internal') + route('/buyers/{id}/verify')",
+   "runtime": "observed"
+  },
+  {
+   "id": "O01",
+   "protocol": "http",
+   "caller": "orders",
+   "target": "outside",
+   "host": "open.er-api.com",
+   "operation": "GET",
+   "channel": "/v6/latest/USD",
+   "send": [
+    {
+     "service": "orders",
+     "file": "app/clients/fx.py",
+     "line": 7,
+     "function": "RATES_API const"
+    },
+    {
+     "service": "orders",
+     "file": "app/clients/fx.py",
+     "line": 20,
+     "function": "FxClient.rate (requests.get)"
+    },
+    {
+     "service": "orders",
+     "file": "app/blueprints/orders.py",
+     "line": 30,
+     "function": "place_order"
+    }
+   ],
+   "receive": {
+    "host": "open.er-api.com"
+   },
+   "idiom": "module-level base URL constant 'https://open.er-api.com/v6/latest' + f-string '/{self.base}' (USD) in requests.get inside a client class",
+   "runtime": "observed"
+  },
+  {
+   "id": "O02",
+   "protocol": "http",
+   "caller": "spa",
+   "target": "outside",
+   "host": "unpkg.com",
+   "operation": "GET",
+   "channel": "/dayjs@1.11.13/dayjs.min.js",
+   "send": [
+    {
+     "service": "spa",
+     "file": "index.html",
+     "line": 7,
+     "function": "<script src>"
+    }
+   ],
+   "receive": {
+    "host": "unpkg.com"
+   },
+   "idiom": "classic <script src> in index.html <head> loading dayjs from the unpkg CDN; used as a global (declare const dayjs) in src/main.ts",
+   "runtime": "observed"
+  },
+  {
+   "id": "O03",
+   "protocol": "http",
+   "caller": "spa",
+   "target": "outside",
+   "host": "github.com",
+   "operation": "LINK",
+   "channel": "/bazaarly",
+   "send": [
+    {
+     "service": "spa",
+     "file": "index.html",
+     "line": 12,
+     "function": "<a href>"
+    }
+   ],
+   "receive": {
+    "host": "github.com"
+   },
+   "idiom": "<a href target=_blank> in the page header to the company GitHub page",
+   "runtime": "observed"
+  }
+ ],
+ "not_links": [
+  {
+   "what": "driver overrides the axios instance baseURL to an absolute gateway origin so the SPA api module can run in Node",
+   "where": "spa:scripts/drive.ts:20",
+   "why": "test only: smoke driver; in the browser '/api' is same-origin"
+  },
+  {
+   "what": "driver calls listUsers/getUser/registerUser/getWishlist/placeOrder/listOrders/getOrder/getOrderItems/getDashboard",
+   "where": "spa:scripts/drive.ts:23",
+   "why": "test only: these invoke the real api module functions; the links are the api module call sites, not the driver"
+  },
+  {
+   "what": "driver fetch() of the script src and a href it parses out of index.html",
+   "where": "spa:scripts/drive.ts:47",
+   "why": "test only: plays the browser's part for O02/O03; the links are the index.html tags"
+  },
+  {
+   "what": "readiness curl loop against users '/', orders '/' and edge '/healthz'",
+   "where": "gateway:run.sh:42",
+   "why": "test only: run.sh driver, not a service"
+  },
+  {
+   "what": "edge GET /healthz route",
+   "where": "edge:src/server.ts:18",
+   "why": "no in-app caller; only run.sh probes it"
+  },
+  {
+   "what": "<script type=\"module\" src=\"/src/main.ts\">",
+   "where": "spa:index.html:21",
+   "why": "same-origin module entry of the SPA itself, not another service or outside host"
+  },
+  {
+   "what": "spa main.ts calls getDashboard/getWishlist/listUsers/placeOrder/getOrderItems",
+   "where": "spa:src/main.ts:9",
+   "why": "callers of the api module functions; the URL is written and sent in src/api/*.ts (already listed as send)"
+  },
+  {
+   "what": "orders before_request link logger and users log_received middleware",
+   "where": "orders:app/linklog.py:14",
+   "why": "logging only (prints RECV lines), makes no request"
+  }
+ ]
+}

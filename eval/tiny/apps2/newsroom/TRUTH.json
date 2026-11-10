@@ -1,0 +1,446 @@
+{
+ "project": "newsroom",
+ "services": {
+  "web": "web",
+  "api": "api",
+  "summarizer": "summarizer"
+ },
+ "links": [
+  {
+   "id": "W01",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/v1/stories/top",
+   "send": [
+    {
+     "file": "src/newsroom.ts",
+     "line": 9,
+     "function": "loadFrontPage"
+    },
+    {
+     "file": "src/generated/sdk.gen.ts",
+     "line": 24,
+     "function": "listTopStories"
+    },
+    {
+     "file": "src/generated/client/client.gen.ts",
+     "line": 101,
+     "function": "client.request"
+    }
+   ],
+   "receive": {
+    "file": "app/routers/stories.py",
+    "line": 15,
+    "handler": "list_top_stories"
+   },
+   "idiom": "@hey-api/openapi-ts generated SDK (src/generated/sdk.gen.ts, generated from the api's openapi.json) called from app module src/newsroom.ts (used by src/main.ts in the browser and scripts/drive.ts in Node); baseUrl set once via client.setConfig in src/api.ts:7 (<- <meta name=newsroom-api> in index.html / NEWSROOM_API_URL in the driver); the generated function writes the literal OpenAPI path ('/api/v1/stories/top', query {limit}) and the generic generated client sends it with fetch at client.gen.ts:101; receiver path = app prefix API_PREFIX '/api/v1' (main.py:36) + APIRouter prefix '/stories' (stories.py:10) + route '/top'",
+   "runtime": "observed"
+  },
+  {
+   "id": "W02",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/v1/stories/{story_id}",
+   "send": [
+    {
+     "file": "src/newsroom.ts",
+     "line": 15,
+     "function": "openStory"
+    },
+    {
+     "file": "src/generated/sdk.gen.ts",
+     "line": 29,
+     "function": "getStory"
+    },
+    {
+     "file": "src/generated/client/client.gen.ts",
+     "line": 101,
+     "function": "client.request"
+    }
+   ],
+   "receive": {
+    "file": "app/routers/stories.py",
+    "line": 21,
+    "handler": "get_story"
+   },
+   "idiom": "@hey-api/openapi-ts generated SDK (src/generated/sdk.gen.ts, generated from the api's openapi.json) called from app module src/newsroom.ts (used by src/main.ts in the browser and scripts/drive.ts in Node); baseUrl set once via client.setConfig in src/api.ts:7 (<- <meta name=newsroom-api> in index.html / NEWSROOM_API_URL in the driver); the generated function writes the literal OpenAPI path with a {story_id} placeholder filled from options.path by the generated client and the generic generated client sends it with fetch at client.gen.ts:101; receiver path = app prefix API_PREFIX '/api/v1' (main.py:36) + APIRouter prefix '/stories' (stories.py:10) + route '/{story_id}'",
+   "runtime": "observed"
+  },
+  {
+   "id": "W03",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/v1/summaries",
+   "send": [
+    {
+     "file": "src/newsroom.ts",
+     "line": 21,
+     "function": "askForSummary"
+    },
+    {
+     "file": "src/generated/sdk.gen.ts",
+     "line": 35,
+     "function": "requestSummary"
+    },
+    {
+     "file": "src/generated/client/client.gen.ts",
+     "line": 101,
+     "function": "client.request"
+    }
+   ],
+   "receive": {
+    "file": "app/routers/summaries.py",
+    "line": 14,
+    "handler": "request_summary"
+   },
+   "idiom": "@hey-api/openapi-ts generated SDK (src/generated/sdk.gen.ts, generated from the api's openapi.json) called from app module src/newsroom.ts (used by src/main.ts in the browser and scripts/drive.ts in Node); baseUrl set once via client.setConfig in src/api.ts:7 (<- <meta name=newsroom-api> in index.html / NEWSROOM_API_URL in the driver); the generated function writes the literal OpenAPI path ('/api/v1/summaries', JSON body {story_id}; the post( call starts on sdk.gen.ts:34, url on :35) and the generic generated client sends it with fetch at client.gen.ts:101; receiver path = app prefix API_PREFIX '/api/v1' (main.py:36) + APIRouter prefix '/summaries' (summaries.py:11) + route '' (empty string, multi-line @router.post decorator)",
+   "runtime": "observed"
+  },
+  {
+   "id": "W04",
+   "protocol": "http",
+   "caller": "web",
+   "target": "api",
+   "operation": "GET",
+   "channel": "/api/v1/summaries/{story_id}",
+   "send": [
+    {
+     "file": "src/newsroom.ts",
+     "line": 28,
+     "function": "waitForSummary"
+    },
+    {
+     "file": "src/generated/sdk.gen.ts",
+     "line": 46,
+     "function": "getSummary"
+    },
+    {
+     "file": "src/generated/client/client.gen.ts",
+     "line": 101,
+     "function": "client.request"
+    }
+   ],
+   "receive": {
+    "file": "app/routers/summaries.py",
+    "line": 35,
+    "handler": "get_summary"
+   },
+   "idiom": "@hey-api/openapi-ts generated SDK (src/generated/sdk.gen.ts, generated from the api's openapi.json) called from app module src/newsroom.ts (used by src/main.ts in the browser and scripts/drive.ts in Node); baseUrl set once via client.setConfig in src/api.ts:7 (<- <meta name=newsroom-api> in index.html / NEWSROOM_API_URL in the driver); the generated function writes the literal OpenAPI path with a {story_id} placeholder, called in a polling loop and the generic generated client sends it with fetch at client.gen.ts:101; receiver path = app prefix API_PREFIX '/api/v1' (main.py:36) + APIRouter prefix '/summaries' (summaries.py:11) + route '/{story_id}'",
+   "runtime": "observed"
+  },
+  {
+   "id": "H01",
+   "protocol": "http",
+   "caller": "web",
+   "target": "outside",
+   "host": "fonts.googleapis.com",
+   "operation": "GET",
+   "channel": "/css2",
+   "send": [
+    {
+     "file": "index.html",
+     "line": 9,
+     "function": "<link rel=stylesheet>"
+    }
+   ],
+   "receive": {
+    "host": "fonts.googleapis.com"
+   },
+   "idiom": "Google Fonts stylesheet loaded by a <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=...\"> in the static index.html head",
+   "runtime": "observed"
+  },
+  {
+   "id": "H02",
+   "protocol": "http",
+   "caller": "web",
+   "target": "outside",
+   "host": "news.ycombinator.com",
+   "operation": "LINK",
+   "channel": "/",
+   "send": [
+    {
+     "file": "index.html",
+     "line": 18,
+     "function": "<a href>"
+    }
+   ],
+   "receive": {
+    "host": "news.ycombinator.com"
+   },
+   "idiom": "plain <a href=\"https://news.ycombinator.com/\"> anchor in the header copy of index.html",
+   "runtime": "observed"
+  },
+  {
+   "id": "A01",
+   "protocol": "http",
+   "caller": "api",
+   "target": "outside",
+   "host": "hacker-news.firebaseio.com",
+   "operation": "GET",
+   "channel": "/v0/topstories.json",
+   "send": [
+    {
+     "file": "app/config.py",
+     "line": 7,
+     "function": "HN_API_BASE"
+    },
+    {
+     "file": "app/main.py",
+     "line": 20,
+     "function": "lifespan"
+    },
+    {
+     "file": "app/clients/hackernews.py",
+     "line": 13,
+     "function": "HackerNewsClient.__init__"
+    },
+    {
+     "file": "app/clients/hackernews.py",
+     "line": 22,
+     "function": "HackerNewsClient.top_story_ids"
+    }
+   ],
+   "receive": {
+    "host": "hacker-news.firebaseio.com"
+   },
+   "idiom": "httpx.AsyncClient(base_url=...) built in a client class; base 'https://hacker-news.firebaseio.com/v0' is a module constant overridable by HN_API_BASE env (Settings.hn_api_base), passed in at lifespan; relative literal path '/topstories.json' merged with base path /v0; called from GET /stories/top via top_stories()",
+   "runtime": "observed"
+  },
+  {
+   "id": "A02",
+   "protocol": "http",
+   "caller": "api",
+   "target": "outside",
+   "host": "hacker-news.firebaseio.com",
+   "operation": "GET",
+   "channel": "/v0/item/{id}.json",
+   "send": [
+    {
+     "file": "app/config.py",
+     "line": 7,
+     "function": "HN_API_BASE"
+    },
+    {
+     "file": "app/main.py",
+     "line": 20,
+     "function": "lifespan"
+    },
+    {
+     "file": "app/clients/hackernews.py",
+     "line": 13,
+     "function": "HackerNewsClient.__init__"
+    },
+    {
+     "file": "app/clients/hackernews.py",
+     "line": 28,
+     "function": "HackerNewsClient.item"
+    }
+   ],
+   "receive": {
+    "host": "hacker-news.firebaseio.com"
+   },
+   "idiom": "same httpx base_url client; f-string path f'/item/{item_id}.json'; reached from three call sites: top_stories() via asyncio.gather (hackernews.py:38), get_story (stories.py:24), request_summary (summaries.py:27)",
+   "runtime": "observed"
+  },
+  {
+   "id": "R01",
+   "protocol": "redis",
+   "caller": "api",
+   "target": "summarizer",
+   "operation": "PUBLISH",
+   "channel": "newsroom:summaries:jobs",
+   "send": [
+    {
+     "file": "app/config.py",
+     "line": 13,
+     "function": "Settings.jobs_queue"
+    },
+    {
+     "file": "app/main.py",
+     "line": 21,
+     "function": "lifespan"
+    },
+    {
+     "file": "app/routers/summaries.py",
+     "line": 30,
+     "function": "request_summary"
+    },
+    {
+     "file": "app/queue.py",
+     "line": 19,
+     "function": "SummaryQueue.enqueue"
+    }
+   ],
+   "receive": {
+    "file": "src/main.rs",
+    "line": 71,
+    "handler": "run (BRPOP loop -> Worker::handle)"
+   },
+   "idiom": "Redis list used as a work queue: redis.asyncio LPUSH of a JSON job by a SummaryQueue class whose queue name comes from Settings (env SUMMARY_JOBS_QUEUE, default 'newsroom:summaries:jobs'); the Rust worker BRPOPs the same key (name from its own env-backed Settings, config.rs:21) on a multiplexed tokio connection",
+   "runtime": "observed"
+  },
+  {
+   "id": "S01",
+   "protocol": "http",
+   "caller": "summarizer",
+   "target": "api",
+   "operation": "POST",
+   "channel": "/api/v1/internal/summaries/{job_id}/result",
+   "send": [
+    {
+     "file": "src/config.rs",
+     "line": 18,
+     "function": "Settings::from_env"
+    },
+    {
+     "file": "src/main.rs",
+     "line": 61,
+     "function": "run"
+    },
+    {
+     "file": "src/main.rs",
+     "line": 40,
+     "function": "Worker::handle"
+    },
+    {
+     "file": "src/api_client.rs",
+     "line": 21,
+     "function": "NewsroomApi::submit_summary"
+    },
+    {
+     "file": "src/api_client.rs",
+     "line": 17,
+     "function": "NewsroomApi::endpoint"
+    },
+    {
+     "file": "src/api_client.rs",
+     "line": 23,
+     "function": "NewsroomApi::submit_summary"
+    }
+   ],
+   "receive": {
+    "file": "app/routers/internal.py",
+    "line": 14,
+    "handler": "receive_summary"
+   },
+   "idiom": "reqwest Client .post(url).json(..).send() where url = format!(\"{}/api/v1{}\", base_url, path) built by an endpoint() helper; base from NEWSROOM_API_URL env; path format!(\"/internal/summaries/{job_id}/result\"); receiver router has include_in_schema=False (not in openapi.json) with prefix '/internal/summaries' under app prefix '/api/v1'",
+   "runtime": "observed"
+  },
+  {
+   "id": "S02",
+   "protocol": "http",
+   "caller": "summarizer",
+   "target": "outside",
+   "host": "hacker-news.firebaseio.com",
+   "operation": "GET",
+   "channel": "/v0/item/{id}.json",
+   "send": [
+    {
+     "file": "src/config.rs",
+     "line": 20,
+     "function": "Settings::from_env"
+    },
+    {
+     "file": "src/main.rs",
+     "line": 60,
+     "function": "run"
+    },
+    {
+     "file": "src/main.rs",
+     "line": 30,
+     "function": "Worker::handle"
+    },
+    {
+     "file": "src/hn.rs",
+     "line": 17,
+     "function": "HackerNews::comment"
+    },
+    {
+     "file": "src/hn.rs",
+     "line": 18,
+     "function": "HackerNews::comment"
+    }
+   ],
+   "receive": {
+    "host": "hacker-news.firebaseio.com"
+   },
+   "idiom": "reqwest GET with format!(\"{}/item/{}.json\", base, id); base default 'https://hacker-news.firebaseio.com/v0' via unwrap_or_else on HN_API_BASE env, stored in a HackerNews wrapper struct; fetches each story's top comment ids from the job",
+   "runtime": "observed"
+  },
+  {
+   "id": "R02",
+   "protocol": "redis",
+   "caller": "summarizer",
+   "target": "api",
+   "operation": "PUBLISH",
+   "channel": "newsroom:summaries:done",
+   "send": [
+    {
+     "file": "src/config.rs",
+     "line": 23,
+     "function": "Settings::from_env"
+    },
+    {
+     "file": "src/main.rs",
+     "line": 43,
+     "function": "Worker::handle"
+    }
+   ],
+   "receive": {
+    "file": "app/events.py",
+    "line": 16,
+    "handler": "listen_for_done"
+   },
+   "idiom": "Redis pub/sub: redis crate AsyncCommands::publish on a separate multiplexed connection with channel from env-backed Settings (SUMMARY_DONE_CHANNEL); api subscribes with redis.asyncio pubsub.subscribe(channel) in a background asyncio task started in the FastAPI lifespan (main.py:23), channel from Settings.done_channel (config.py:15)",
+   "runtime": "observed"
+  }
+ ],
+ "not_links": [
+  {
+   "what": "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">",
+   "where": "web:index.html:8",
+   "why": "resource hint only (opens a connection early), fetches nothing; the real request to that host is H01"
+  },
+  {
+   "what": "drive script fetch of the outside URLs parsed from index.html",
+   "where": "web:scripts/drive.ts:17",
+   "why": "test only: makes H01/H02 observable from Node (stands in for the browser loading the stylesheet / a user following the anchor)"
+  },
+  {
+   "what": "drive script calls loadFrontPage/openStory/askForSummary/waitForSummary",
+   "where": "web:scripts/drive.ts:45",
+   "why": "test driver; the links themselves are W01-W04 in src/newsroom.ts (also used by src/main.ts in the browser)"
+  },
+  {
+   "what": "run.sh curl of api /healthz and web / (wait loop and smoke check)",
+   "where": "newsroom:run.sh:30",
+   "why": "test only: readiness probe driver, not a service"
+  },
+  {
+   "what": "run.sh curl GET / against the web static server",
+   "where": "newsroom:run.sh:67",
+   "why": "test only: smoke check that index.html is served"
+  },
+  {
+   "what": "<script type=\"module\" src=\"/dist/main.js\">",
+   "where": "web:index.html:22",
+   "why": "same-origin bundle served by web's own static server (server.ts), not another service or host"
+  },
+  {
+   "what": "GET /healthz on api",
+   "where": "api:app/main.py:39",
+   "why": "only called by run.sh readiness loop; no in-app caller"
+  },
+  {
+   "what": "default base URLs 'http://127.0.0.1:8000' in web/src/api.ts:3 and summarizer/src/config.rs:18",
+   "where": "web:src/api.ts:3",
+   "why": "fallback defaults overridden at runtime (meta tag / NEWSROOM_API_URL); they point at the same api service, not a separate link"
+  }
+ ]
+}

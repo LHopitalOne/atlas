@@ -26,6 +26,11 @@ export const PROOF = {
     cls: 'badge-inferred',
     note: 'The route fits only under an assumption the code does not show, such as a base URL prefix.',
   },
+  judged: {
+    label: 'Chosen by Jev',
+    cls: 'badge-inferred',
+    note: 'The code leaves several routes possible. Jev, a small decision model, read the lines around the call and chose this route; the probability it gave is in the reason below.',
+  },
   ambiguous: {
     label: 'Ambiguous',
     cls: 'badge-warning',
@@ -42,7 +47,7 @@ export const PROOF = {
     note: 'Sent to a host none of these repositories serves: a third-party API, a CDN, an analytics or ad script, or a site a visitor is linked to.',
   },
 };
-export const PROOF_ORDER = ['scip', 'syntax', 'matched', 'inferred', 'ambiguous', 'contradicted', 'outside'];
+export const PROOF_ORDER = ['scip', 'syntax', 'matched', 'inferred', 'judged', 'ambiguous', 'contradicted', 'outside'];
 
 /** A link to a host none of the repositories serves. */
 export const isOutside = l => l.proof === 'outside';

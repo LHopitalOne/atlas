@@ -256,3 +256,28 @@ class NestedRoutersTest(unittest.TestCase):
             }
         )
         self.assertEqual(routes(ex), {('/x/admin/v2/api/notes/draft', ('GET',)), ('/x/admin/stats', ('GET',))})
+
+    def test_a_router_made_inside_the_app_factory(self):
+        ex = extract(
+            {
+                'desk/api/tickets.py': """
+                from fastapi import APIRouter
+                router = APIRouter(prefix='/tickets')
+
+                @router.post('')
+                async def create(): ...
+                """,
+                'desk/main.py': """
+                from fastapi import APIRouter, FastAPI
+                from desk.api import tickets
+
+                def create_app():
+                    app = FastAPI()
+                    api = APIRouter(prefix='/api')
+                    api.include_router(tickets.router)
+                    app.include_router(api)
+                    return app
+                """,
+            }
+        )
+        self.assertEqual(routes(ex), {('/api/tickets', ('POST',))})

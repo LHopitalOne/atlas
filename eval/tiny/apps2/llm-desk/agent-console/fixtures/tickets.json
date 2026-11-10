@@ -1,0 +1,17 @@
+[
+  {
+    "customer": "acme-corp",
+    "subject": "Checkout returns 500 for every customer",
+    "body": "Since 10 minutes all our customers get a 500 error when paying. We are losing orders right now."
+  },
+  {
+    "customer": "globex",
+    "subject": "Invoice shows wrong VAT rate",
+    "body": "Our October invoice charged 21% VAT but we are registered in Germany at 19%. Please correct it when you can."
+  },
+  {
+    "customer": "initech",
+    "subject": "Cannot add a second admin user",
+    "body": "When I invite a colleague as admin the invitation email never arrives. Not urgent, just annoying."
+  }
+]

@@ -3,14 +3,16 @@
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from ..values import PythonValueResolver
+from ..workspace.names import Symbol
 
 
 class Registrations:
     """`app.register_blueprint(bp, url_prefix=...)` and `app.include_router(router, prefix=...)`: the prefix each
     blueprint or router (by the file and position of its constructor call) is registered under. A router included in
     another router (`parent.include_router(child)`, FastAPI's nested routers; Flask's nested blueprints) is also
-    under the parent's whole prefix: the parent's own `prefix=` and whatever the parent is registered under. Read
-    once per workspace and shared by the collectors that need it."""
+    under the parent's whole prefix: the parent's own `prefix=` and whatever the parent is registered under, also when
+    the parent is made inside the function that wires the app. Read once per workspace and shared by the collectors
+    that need it."""
 
     NAMES = frozenset({'register_blueprint', 'include_router'})
     PREFIXES = ('url_prefix', 'prefix')
@@ -28,7 +30,7 @@ class Registrations:
     def _register(self, source, call):
         pos, kw = PythonSyntax.call_args(call)
         target = pos[0] if pos else kw.get('blueprint') or kw.get('router')
-        found = self._workspace.names.value(source, target) if target is not None else None
+        found = self._value(source, target) if target is not None else None
         if found is None:
             return
         key = (found.source.path, found.node.start_byte)
@@ -42,13 +44,25 @@ class Registrations:
 
     def _router(self, source, receiver):
         """(key, own prefix) of the router or blueprint a registration is made on; None for an app or the unknown."""
-        found = self._workspace.names.value(source, receiver) if receiver is not None else None
+        found = self._value(source, receiver) if receiver is not None else None
         if found is None or found.node.type != 'call' or PythonSyntax.callee(found.node) in self.APPS:
             return None
         _, kw = PythonSyntax.call_args(found.node)
         node = next((kw[k] for k in self.PREFIXES if k in kw), None)
         own = self._literal(node, Scope.module(found.source)) if node is not None else ''
         return (found.source.path, found.node.start_byte), own or ''
+
+    def _value(self, source, node):
+        """What a name means: a module-level value, else (`api = APIRouter(prefix='/api')` inside `create_app()`)
+        its last assignment in the enclosing function before this use."""
+        found = self._workspace.names.value(source, node)
+        if found is not None or node.type != 'identifier':
+            return found
+        func = PythonSyntax.ancestor(node, PythonSyntax.FUNCTION)
+        if func is None:
+            return None
+        assigned = self._workspace.locals.before(source, func, PythonSyntax.text(node), node.start_byte)
+        return Symbol(Symbol.VALUE, source, assigned[-1].value) if assigned else None
 
     def _literal(self, node, scope):
         v = self._values.resolve(node, scope)[0]

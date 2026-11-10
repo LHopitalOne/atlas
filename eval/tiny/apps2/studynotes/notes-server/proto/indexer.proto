@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package studynotes.indexer.v1;
+
+// Full-text index for study notes. Kept intentionally small.
+service Indexer {
+  rpc IndexNote(IndexNoteRequest) returns (IndexNoteReply);
+  rpc Search(SearchRequest) returns (SearchReply);
+  rpc RemoveNote(RemoveNoteRequest) returns (RemoveNoteReply);
+}
+
+message IndexNoteRequest {
+  string note_id = 1;
+  string title = 2;
+  string body = 3;
+}
+
+message IndexNoteReply {
+  uint32 term_count = 1;
+}
+
+message SearchRequest {
+  string query = 1;
+  uint32 limit = 2;
+}
+
+message SearchHit {
+  string note_id = 1;
+  float score = 2;
+}
+
+message SearchReply {
+  repeated SearchHit hits = 1;
+}
+
+message RemoveNoteRequest {
+  string note_id = 1;
+}
+
+message RemoveNoteReply {
+  bool removed = 1;
+}

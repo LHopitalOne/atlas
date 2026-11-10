@@ -1,0 +1,529 @@
+{
+ "project": "llm-desk",
+ "services": {
+  "desk": "desk",
+  "agent-console": "agent-console",
+  "analytics": "analytics"
+ },
+ "links": [
+  {
+   "id": "H1",
+   "protocol": "http",
+   "caller": "agent-console",
+   "target": "desk",
+   "operation": "POST",
+   "channel": "/api/tickets",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "config (deskUrl <- DESK_URL)"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 17,
+     "function": "main"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 21,
+     "function": "DeskClient.constructor"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 46,
+     "function": "DeskClient.createTicket"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 30,
+     "function": "DeskClient.send"
+    },
+    {
+     "file": "src/shift.ts",
+     "line": 58,
+     "function": "runShift"
+    }
+   ],
+   "receive": {
+    "file": "desk/api/tickets.py",
+    "line": 10,
+    "handler": "create_ticket"
+   },
+   "idiom": "DeskClient (agent-console/src/deskClient.ts) keeps the base URL in a private field (from config.deskUrl <- DESK_URL env, passed in cli.ts), each method builds its path and calls the private generic send() which does fetch(this.baseUrl + path); literal path '/api/tickets'; receiver path = APIRouter(prefix='/api') in main.py + APIRouter(prefix='/tickets') in api/tickets.py + route ''",
+   "runtime": "observed"
+  },
+  {
+   "id": "H2",
+   "protocol": "http",
+   "caller": "agent-console",
+   "target": "desk",
+   "operation": "GET",
+   "channel": "/api/tickets",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "config (deskUrl <- DESK_URL)"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 17,
+     "function": "main"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 21,
+     "function": "DeskClient.constructor"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 54,
+     "function": "DeskClient.listTickets"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 30,
+     "function": "DeskClient.send"
+    },
+    {
+     "file": "src/shift.ts",
+     "line": 63,
+     "function": "runShift"
+    },
+    {
+     "file": "src/shift.ts",
+     "line": 64,
+     "function": "runShift"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 21,
+     "function": "main (queue command)"
+    }
+   ],
+   "receive": {
+    "file": "desk/api/tickets.py",
+    "line": 18,
+    "handler": "list_tickets"
+   },
+   "idiom": "DeskClient (agent-console/src/deskClient.ts) keeps the base URL in a private field (from config.deskUrl <- DESK_URL env, passed in cli.ts), each method builds its path and calls the private generic send() which does fetch(this.baseUrl + path); template path `/api/tickets${qs}` with a URLSearchParams query string; receiver path = APIRouter(prefix='/api') in main.py + APIRouter(prefix='/tickets') in api/tickets.py + route ''",
+   "runtime": "observed"
+  },
+  {
+   "id": "H3",
+   "protocol": "http",
+   "caller": "agent-console",
+   "target": "desk",
+   "operation": "GET",
+   "channel": "/api/tickets/{ticket_id}",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "config (deskUrl <- DESK_URL)"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 17,
+     "function": "main"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 21,
+     "function": "DeskClient.constructor"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 58,
+     "function": "DeskClient.getTicket"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 30,
+     "function": "DeskClient.send"
+    },
+    {
+     "file": "src/shift.ts",
+     "line": 67,
+     "function": "runShift"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 26,
+     "function": "main (show command)"
+    }
+   ],
+   "receive": {
+    "file": "desk/api/tickets.py",
+    "line": 25,
+    "handler": "get_ticket"
+   },
+   "idiom": "DeskClient (agent-console/src/deskClient.ts) keeps the base URL in a private field (from config.deskUrl <- DESK_URL env, passed in cli.ts), each method builds its path and calls the private generic send() which does fetch(this.baseUrl + path); template path with encodeURIComponent(id); receiver path = APIRouter(prefix='/api') in main.py + APIRouter(prefix='/tickets') in api/tickets.py + route '/{ticket_id}' (ticket resolved by a Depends(load_ticket) dependency)",
+   "runtime": "observed"
+  },
+  {
+   "id": "H4",
+   "protocol": "http",
+   "caller": "agent-console",
+   "target": "desk",
+   "operation": "POST",
+   "channel": "/api/tickets/{ticket_id}/reply",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "config (deskUrl <- DESK_URL)"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 17,
+     "function": "main"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 21,
+     "function": "DeskClient.constructor"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 62,
+     "function": "DeskClient.reply"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 30,
+     "function": "DeskClient.send"
+    },
+    {
+     "file": "src/shift.ts",
+     "line": 69,
+     "function": "runShift"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 30,
+     "function": "main (reply command)"
+    }
+   ],
+   "receive": {
+    "file": "desk/api/tickets.py",
+    "line": 31,
+    "handler": "reply_to_ticket"
+   },
+   "idiom": "DeskClient (agent-console/src/deskClient.ts) keeps the base URL in a private field (from config.deskUrl <- DESK_URL env, passed in cli.ts), each method builds its path and calls the private generic send() which does fetch(this.baseUrl + path); template path `/api/tickets/${id}/reply`; receiver path = APIRouter(prefix='/api') in main.py + APIRouter(prefix='/tickets') in api/tickets.py + route '/{ticket_id}/reply'",
+   "runtime": "observed"
+  },
+  {
+   "id": "H5",
+   "protocol": "http",
+   "caller": "agent-console",
+   "target": "desk",
+   "operation": "PATCH",
+   "channel": "/api/tickets/{ticket_id}",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "config (deskUrl <- DESK_URL)"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 17,
+     "function": "main"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 21,
+     "function": "DeskClient.constructor"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 70,
+     "function": "DeskClient.setStatus"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 30,
+     "function": "DeskClient.send"
+    },
+    {
+     "file": "src/shift.ts",
+     "line": 70,
+     "function": "runShift"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 35,
+     "function": "main (close command)"
+    }
+   ],
+   "receive": {
+    "file": "desk/api/tickets.py",
+    "line": 37,
+    "handler": "update_ticket"
+   },
+   "idiom": "DeskClient (agent-console/src/deskClient.ts) keeps the base URL in a private field (from config.deskUrl <- DESK_URL env, passed in cli.ts), each method builds its path and calls the private generic send() which does fetch(this.baseUrl + path); same template path as H3 but method 'PATCH' passed as the first argument of send(); receiver path = APIRouter(prefix='/api') in main.py + APIRouter(prefix='/tickets') in api/tickets.py + route '/{ticket_id}'",
+   "runtime": "observed"
+  },
+  {
+   "id": "S1",
+   "protocol": "http",
+   "caller": "agent-console",
+   "target": "desk",
+   "operation": "GET",
+   "channel": "/api/events/stream",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 2,
+     "function": "config (deskUrl <- DESK_URL)"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 17,
+     "function": "main"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 21,
+     "function": "DeskClient.constructor"
+    },
+    {
+     "file": "src/deskClient.ts",
+     "line": 74,
+     "function": "DeskClient.eventsUrl"
+    },
+    {
+     "file": "src/shift.ts",
+     "line": 47,
+     "function": "runShift"
+    },
+    {
+     "file": "src/liveFeed.ts",
+     "line": 20,
+     "function": "LiveFeed.open"
+    },
+    {
+     "file": "src/shift.ts",
+     "line": 51,
+     "function": "runShift"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 38,
+     "function": "main (watch command)"
+    },
+    {
+     "file": "src/cli.ts",
+     "line": 43,
+     "function": "main (watch command)"
+    }
+   ],
+   "receive": {
+    "file": "desk/api/events.py",
+    "line": 10,
+    "handler": "event_stream"
+   },
+   "idiom": "Server-Sent Events subscription: DeskClient.eventsUrl() returns new URL('/api/events/stream', this.baseUrl), handed to a LiveFeed (EventEmitter) whose open() does fetch(this.url, {accept: text/event-stream}) and parses the streamed body; receiver is a FastAPI StreamingResponse (media_type text/event-stream) at APIRouter(prefix='/api') + APIRouter(prefix='/events') + '/stream'",
+   "runtime": "observed"
+  },
+  {
+   "id": "R1",
+   "protocol": "redis",
+   "caller": "desk",
+   "target": "analytics",
+   "operation": "PUBLISH",
+   "channel": "desk.tickets.triaged",
+   "send": [
+    {
+     "file": "desk/config.py",
+     "line": 21,
+     "function": "Settings.triaged_stream"
+    },
+    {
+     "file": "desk/bus.py",
+     "line": 12,
+     "function": "TriagedTicketPublisher.__init__"
+    },
+    {
+     "file": "desk/bus.py",
+     "line": 25,
+     "function": "TriagedTicketPublisher.publish"
+    },
+    {
+     "file": "desk/service.py",
+     "line": 35,
+     "function": "Desk.triage"
+    }
+   ],
+   "receive": {
+    "file": "src/consumer.ts",
+    "line": 24,
+    "handler": "TriagedStreamConsumer.start"
+   },
+   "idiom": "Redis stream: desk does redis.asyncio XADD (self._redis.xadd(self._stream, fields, maxlen=...)) with the stream name from pydantic-settings (DESK_TRIAGED_STREAM, default 'desk.tickets.triaged'); analytics reads it with ioredis xreadgroup('GROUP', group, consumer, ..., 'STREAMS', this.cfg.stream, '>') where the stream name comes from loadConfig() (TRIAGED_STREAM env, same default), consumer group created with XGROUP CREATE MKSTREAM",
+   "runtime": "observed"
+  },
+  {
+   "id": "O1",
+   "protocol": "http",
+   "caller": "desk",
+   "target": "outside",
+   "host": "openrouter.ai",
+   "operation": "POST",
+   "channel": "/api/alpha/decisions",
+   "send": [
+    {
+     "file": "desk/config.py",
+     "line": 14,
+     "function": "Settings.openrouter_url"
+    },
+    {
+     "file": "desk/triage/jev.py",
+     "line": 9,
+     "function": "DECISIONS_PATH (module constant)"
+    },
+    {
+     "file": "desk/triage/jev.py",
+     "line": 30,
+     "function": "JevTriager.__init__"
+    },
+    {
+     "file": "desk/triage/jev.py",
+     "line": 62,
+     "function": "JevTriager.triage"
+    },
+    {
+     "file": "desk/service.py",
+     "line": 30,
+     "function": "Desk.triage"
+    },
+    {
+     "file": "desk/api/tickets.py",
+     "line": 14,
+     "function": "create_ticket"
+    }
+   ],
+   "receive": {
+    "host": "openrouter.ai"
+   },
+   "idiom": "httpx.AsyncClient(base_url=settings.openrouter_url) built in a class constructor, POST to the module constant DECISIONS_PATH; base URL from pydantic-settings field default 'https://openrouter.ai'; invoked from a FastAPI BackgroundTasks task (Jev typesafe/jev-1.14 noul decisions)",
+   "runtime": "observed"
+  },
+  {
+   "id": "O2",
+   "protocol": "http",
+   "caller": "desk",
+   "target": "outside",
+   "host": "openrouter.ai",
+   "operation": "POST",
+   "channel": "/api/v1/chat/completions",
+   "send": [
+    {
+     "file": "desk/config.py",
+     "line": 15,
+     "function": "Settings.openrouter_base_url"
+    },
+    {
+     "file": "desk/triage/drafts.py",
+     "line": 20,
+     "function": "ReplyDrafter.__init__"
+    },
+    {
+     "file": "desk/triage/drafts.py",
+     "line": 30,
+     "function": "ReplyDrafter.draft"
+    },
+    {
+     "file": "desk/service.py",
+     "line": 40,
+     "function": "Desk.reply"
+    }
+   ],
+   "receive": {
+    "host": "openrouter.ai"
+   },
+   "idiom": "official openai Python SDK: AsyncOpenAI(base_url=settings.openrouter_base_url = 'https://openrouter.ai/api/v1') and client.chat.completions.create(model='openai/gpt-4o-mini', max_tokens=120, ...); no URL path appears in the call, the SDK appends /chat/completions",
+   "runtime": "observed"
+  },
+  {
+   "id": "O3",
+   "protocol": "http",
+   "caller": "analytics",
+   "target": "outside",
+   "host": "httpbin.org",
+   "operation": "POST",
+   "channel": "/post",
+   "send": [
+    {
+     "file": "src/config.ts",
+     "line": 18,
+     "function": "loadConfig (reportUrl <- REPORT_URL)"
+    },
+    {
+     "file": "src/index.ts",
+     "line": 8,
+     "function": "module top level"
+    },
+    {
+     "file": "src/reporter.ts",
+     "line": 11,
+     "function": "CountsReporter.report"
+    },
+    {
+     "file": "src/index.ts",
+     "line": 14,
+     "function": "flush"
+    }
+   ],
+   "receive": {
+    "host": "httpbin.org"
+   },
+   "idiom": "global fetch(this.endpoint, {method: 'POST', body: JSON}) in a reporter class; the full URL 'https://httpbin.org/post' is a config default (REPORT_URL env) passed to the constructor; flushed on a setInterval timer and on SIGTERM",
+   "runtime": "observed"
+  }
+ ],
+ "not_links": [
+  {
+   "what": "curl GET /healthz readiness probe against desk",
+   "where": "llm-desk:run.sh:56",
+   "why": "test only: run.sh waits for desk to come up; /healthz has no in-app caller"
+  },
+  {
+   "what": "docker exec redis-cli ping",
+   "where": "llm-desk:run.sh:50",
+   "why": "test only: run.sh readiness check of the Redis container"
+  },
+  {
+   "what": "agent-console shift invocation (node --import tsx src/cli.ts shift ...)",
+   "where": "llm-desk:run.sh:67",
+   "why": "run.sh only launches the agent-console CLI; the HTTP/SSE requests it then makes are links H1-H5 and S1"
+  },
+  {
+   "what": "background.add_task(desk.triage, ticket.id)",
+   "where": "desk:desk/api/tickets.py:14",
+   "why": "FastAPI BackgroundTasks runs Desk.triage in the same process after the response; an in-process call, not a link (it does lead to O1 and R1)"
+  },
+  {
+   "what": "self.events.publish(...) / EventBroker.stream() asyncio.Queue fan-out",
+   "where": "desk:desk/store.py:45",
+   "why": "in-process pub/sub that feeds the SSE response of S1; not a separate link"
+  },
+  {
+   "what": "xgroup('CREATE', stream, group, '0', 'MKSTREAM') and xack(stream, group, id)",
+   "where": "analytics:src/consumer.ts:51",
+   "why": "consumer-group bookkeeping on the same stream as R1 (xack at src/consumer.ts:38), not a separate message flow"
+  },
+  {
+   "what": "GET /healthz route",
+   "where": "desk:desk/main.py:40",
+   "why": "declared endpoint with no in-app caller (only run.sh probes it)"
+  },
+  {
+   "what": "Redis.from_url(settings.redis_url) / new Redis(cfg.redisUrl)",
+   "where": "desk:desk/bus.py:11",
+   "why": "connection setup to the Redis infrastructure (also analytics:src/consumer.ts:14); the service-to-service link is R1 over the stream"
+  }
+ ]
+}

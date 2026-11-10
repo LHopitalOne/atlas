@@ -1,0 +1,12 @@
+[project]
+name = "quiz-bot"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "python-socketio[asyncio_client]>=5.11",
+    "aiohttp>=3.10",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+quiz-bot = "quiz_bot.__main__:main"

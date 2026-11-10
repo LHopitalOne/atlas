@@ -46,6 +46,7 @@ class Verification(Enum):
     SYNTAX = 'syntax'  # it rests on no name lookup at all: read straight from the code, nothing for an index to check
     CONTRADICTED = 'contradicted'  # at least one assumption is wrong
     UNVERIFIED = 'unverified'  # no index for the repository, some names unresolved, or not a matched link
+    JUDGED = 'judged'  # the code left several routes open; a decision model read the lines around the call and chose
 
     @classmethod
     def of(cls, verdicts) -> 'Verification':

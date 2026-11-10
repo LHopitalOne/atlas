@@ -1,0 +1,4 @@
+body { font-family: 'Press Start 2P', system-ui, sans-serif; background: #111; color: #eee; margin: 0; padding: 16px; }
+#choices button { display: block; margin: 8px 0; width: 100%; }
+footer { margin-top: 32px; font-size: 10px; }
+footer a { color: #8cf; }

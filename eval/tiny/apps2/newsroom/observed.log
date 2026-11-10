@@ -1,0 +1,12 @@
+RECV A01 GET hacker-news.firebaseio.com/v0/topstories.json (caller api)
+RECV A02 GET hacker-news.firebaseio.com/v0/item/50439193.json (caller api)
+RECV H01 GET fonts.googleapis.com/css2 (caller web index.html, 200)
+RECV H02 GET news.ycombinator.com/ (caller web index.html, 200)
+RECV R01 CONSUME newsroom:summaries:jobs job=b82712f6badd47e788d7720034ed652c story=50439193
+RECV R02 SUBSCRIBE newsroom:summaries:done job=b82712f6badd47e788d7720034ed652c story=50439193
+RECV S01 POST /api/v1/internal/summaries/b82712f6badd47e788d7720034ed652c/result story=50439193
+RECV S02 GET hacker-news.firebaseio.com/v0/item/50439636.json (caller summarizer)
+RECV W01 GET /api/v1/stories/top limit=8
+RECV W02 GET /api/v1/stories/50439193
+RECV W03 POST /api/v1/summaries story=50439193
+RECV W04 GET /api/v1/summaries/50439193
