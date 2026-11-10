@@ -1,6 +1,7 @@
 """ModuleLinker: the files of the repository that relative imports name, read on demand for the values they export."""
 
 import posixpath
+import re
 
 from .source import JsSource
 
@@ -14,11 +15,15 @@ class ModuleLinker:
     MODULE_EXTS = ('', '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs')  # how an import names a file
     SCRIPT_EXTS = ('.js', '.mjs', '.cjs', '.jsx')  # extensions an import may spell out for a typescript file
     INDEX = 'index'
+    # a path alias, not a package: '@/lib/api', '~/utils', '$lib/constants' (SvelteKit), '#app/x', 'src/x' (baseUrl);
+    # '@scope/name' is a package
+    ALIAS = re.compile(r'^(?:@|~~?|[#$][\w-]*|src)/(?P<rest>.+)$')
 
     def __init__(self, sources, factory):
         self._by_path = {s.path: s for s in sources}
         self._factory = factory  # JsSource, linker -> JsModule
         self._modules = {}
+        self._aliased = {}  # alias import -> the only file it can name, or None
 
     def module(self, importer: str, source: str):
         """The module a relative import of the file `importer` names, or None (a package, or a file not read)."""
@@ -33,10 +38,30 @@ class ModuleLinker:
         return self._modules[path]
 
     def path(self, importer: str, source: str):
-        """The repository path a relative import names, or None."""
+        """The repository path a relative import names, or the only file a path alias can name; else None."""
         if not source.startswith('.'):
+            return self._alias(source)
+        return self._file(posixpath.normpath(posixpath.join(posixpath.dirname(importer), source)))
+
+    def _alias(self, source):
+        """`$lib/constants` -> 'src/lib/constants.ts' when that is the one file whose path ends in 'lib/constants' or
+        'constants' after a folder (the alias's folder is configured where this does not look: svelte.config.js,
+        vite.config.ts, a generated tsconfig). Two files that fit leave it unknown."""
+        m = self.ALIAS.match(source)
+        if m is None:
             return None
-        base = posixpath.normpath(posixpath.join(posixpath.dirname(importer), source))
+        if source not in self._aliased:
+            rest = m.group('rest')
+            fits = {p for p in self._by_path if self._ends_in(p, rest)}
+            self._aliased[source] = fits.pop() if len(fits) == 1 else None
+        return self._aliased[source]
+
+    def _ends_in(self, path, rest):
+        stem = posixpath.splitext(path)[0] if path.endswith(self.MODULE_EXTS[1:]) else path
+        stem = stem.removesuffix('/' + self.INDEX) if not rest.endswith(self.INDEX) else stem
+        return stem == rest or stem.endswith('/' + rest)
+
+    def _file(self, base):
         stems = [base, base + '/' + self.INDEX]
         stems += [base.removesuffix(ext) for ext in self.SCRIPT_EXTS if base.endswith(ext)]
         for stem in stems:

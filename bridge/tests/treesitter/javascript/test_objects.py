@@ -87,6 +87,30 @@ class ObjectValueTest(unittest.TestCase):
         self.assertEqual(found[('GET', '/users/me')].file, 'src/api.ts')
 
 
+class AliasImportTest(unittest.TestCase):
+    """A base URL imported through a path alias (`$lib/...` in SvelteKit, `@/...` in Vite and Next) is followed to
+    the one file the alias can name."""
+
+    def test_sveltekit_lib_alias(self):
+        found = calls(
+            {
+                'src/lib/constants.ts': "export const BASE = '';\nexport const API_BASE = `${BASE}/api/v1`;\n",
+                'src/lib/apis/chats.ts': "import { API_BASE } from '$lib/constants';\n"
+                "export const pinned = () => fetch(`${API_BASE}/chats/pinned`, { method: 'GET' });\n",
+            }
+        )
+        self.assertEqual(sorted(found), [('GET', '/api/v1/chats/pinned')])
+
+    def test_two_files_that_fit_leave_it_unknown_and_packages_are_not_aliases(self):
+        ws = Repository.workspace(
+            [('src/a/config.ts', 'export const A = 1;\n'), ('src/b/config.ts', 'export const B = 2;\n')]
+        )
+        linker = ws.linker()
+        self.assertIsNone(linker.path('src/x.ts', '@/config'))
+        self.assertEqual(linker.path('src/x.ts', '@/a/config'), 'src/a/config.ts')
+        self.assertIsNone(linker.path('src/x.ts', '@scope/config'))
+
+
 class LinkerTest(unittest.TestCase):
     def test_which_import_may_name_a_file(self):
         names = ModuleLinker.may_name
