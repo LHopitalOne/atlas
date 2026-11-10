@@ -38,7 +38,7 @@ class RustExtractor(LanguageExtractor):
             ActixAttributeRoutes(workspace, graph, attributes),
             ChannelRoutes(workspace, channels, sites, followups),
             TraitPathCalls(workspace, values),
-            ClientCalls(workspace, values),
+            ClientCalls(workspace, values, channels),
             ChannelCalls(workspace, channels, sites, followups),
         ]
 
