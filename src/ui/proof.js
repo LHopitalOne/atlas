@@ -4,7 +4,7 @@
  * on an answer key, and the HTTP sections of a node's inspector (served here, called from, sends, impact).
  */
 import { store } from '../state.js';
-import { groupsFrom, groupsInto, httpImpact, PROOF, siteUrl, withinKind } from '../model/http.js';
+import { groupsFrom, groupsInto, httpImpact, PROOF, protocolName, siteUrl, withinKind } from '../model/http.js';
 import { impactOf } from '../graph/insights.js';
 import { dotHTML, ICON_X, nameAttrs } from './fragments.js';
 import { esc, fmt } from '../util/format.js';
@@ -33,7 +33,7 @@ function siteHTML(g, site, title, detail) {
   const url = siteUrl(g.http, site);
   return (
     `<div class="site"><div class="site-h"><span class="site-t">${title}</span><span class="site-r" ${nameAttrs}>${esc(g.repoName[site.repo])}</span></div>` +
-    `<div class="site-loc"><span class="mono" ${nameAttrs}>${esc(site.file)}:${site.line}</span>${url ? `<a class="linkbtn" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="Open this line on GitHub at the commit the map was built from">GitHub ↗</a>` : ''}</div>` +
+    `<div class="site-loc"><span class="mono" ${nameAttrs}>${esc(site.file)}${site.line ? `:${site.line}` : ''}</span>${url ? `<a class="linkbtn" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="Open this line on GitHub at the commit the map was built from">GitHub ↗</a>` : ''}</div>` +
     (detail ? `<div class="site-fn">${detail}</div>` : '') +
     codeHTML(site) +
     '</div>'
@@ -67,14 +67,15 @@ export function linkInspectorHTML(gid) {
     a = first.call.repo,
     b = first.route.repo;
   let h = `<button class="handle" data-handle aria-label="Resize panel"></button><div class="ins-head"><nav class="crumbs" aria-label="Repositories" ${nameAttrs}><button data-terr="r${a}">${esc(g.repoName[a])}</button><span class="slash" aria-hidden="true">→</span><button data-terr="r${b}">${esc(g.repoName[b])}</button></nav>`;
-  h += `<h2 class="ins-title mono" id="insTitle" tabindex="-1" ${nameAttrs}>${esc(first.method)} ${esc(first.path)}</h2><div class="kindrow">${proofBadge(gr.proof)}<span class="badge badge-outline">${gr.within ? 'Inside one repository' : 'HTTP link'}</span></div>`;
+  h += `<h2 class="ins-title mono" id="insTitle" tabindex="-1" ${nameAttrs}>${esc(first.method)} ${esc(first.path)}</h2><div class="kindrow">${proofBadge(gr.proof)}<span class="badge badge-outline">${gr.within ? 'Inside one repository' : gr.proof === 'outside' ? 'Leaves the repositories' : `${protocolName(first.protocol || 'http')} link`}</span></div>`;
   h += `<button class="btn btn-ghost btn-icon close" data-close aria-label="Close panel">${ICON_X}</button></div><div class="ins-body scroll">`;
   h += `<div class="about"><p class="about-text">${esc(PROOF[gr.proof].note)}</p><div class="prov">Why it matched: ${esc(first.reason || 'the method and path fit one route')}${gr.within ? '. No answer key covers links inside one repository yet.' : ''}</div></div>`;
   for (const li of gr.links) {
     const l = H.links[li];
     h += `<div class="sec proof">${siteHTML(g, l.call, 'Sends the request', callDetail(l.call))}`;
     h += `<div class="hop" aria-hidden="true"><span>↓</span><span class="mono">${esc(l.method)} ${esc(l.path)}</span></div>`;
-    if (li === gr.links[0]) h += siteHTML(g, l.route, 'Serves it', routeDetail(l.route));
+    if (li === gr.links[0])
+      h += siteHTML(g, l.route, l.proof === 'outside' ? 'Goes to' : 'Serves it', routeDetail(l.route));
     h += checksHTML(l.checks) + '</div>';
   }
   h += `<div class="sec"><div class="sec-h"><h3>Ends</h3></div>${nodeRow(g, gr.from)}${nodeRow(g, gr.to)}</div>`;

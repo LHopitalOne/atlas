@@ -21,7 +21,7 @@ const keyRow = (swatch, label, n) =>
 
 /** The links between services, one row per proof in the line style the map draws, then their protocols. */
 function linksGroup(H) {
-  if (!H || !H.links.length) return '';
+  if (!H || !(H.links.length || H.unmatched.length)) return '';
   const c = proofCounts(H),
     within = H.links.filter(isWithin).length;
   let h = `<div class="lg-group"><div class="lg-h">Links between services</div>`;
@@ -34,6 +34,8 @@ function linksGroup(H) {
     const col = css(theme.text, Math.max(HTTP_ARC.withinAlpha, 0.45)); // drawn fainter on the map, by its proof
     h += keyRow(`<span class="sw-line" style="--c:${col}"></span>`, 'Inside one repository', within);
   }
+  if (H.unmatched.length)
+    h += keyRow(`<span class="sw-dot" style="--c:${css(theme.st[2])}"></span>`, 'No route found', H.unmatched.length);
   const protocols = protocolCounts(H)
     .map(([p, n]) => `${esc(protocolName(p))} ${fmt(n)}`)
     .join(' · ');

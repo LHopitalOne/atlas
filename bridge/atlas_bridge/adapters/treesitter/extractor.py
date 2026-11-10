@@ -1,10 +1,10 @@
 """TreeSitterExtractor: the Extractor port, implemented by handing each file to the language that reads it, plus the
-service URLs in configuration files."""
+service URLs in configuration files and the resources pages load from other sites."""
 
 from ...core.http import Extraction
 from ...usecases.ports import Extractor
 from .javascript import JavaScriptExtractor
-from .kit import ConfigFiles, RepositoryFiles, TestPathPolicy
+from .kit import ConfigFiles, PageTags, RepositoryFiles, TestPathPolicy
 from .python import PythonExtractor
 from .rust import RustExtractor
 
@@ -18,7 +18,7 @@ class TreeSitterExtractor(Extractor):
     def extract(self, repo: str, root: str) -> Extraction:
         files = RepositoryFiles(root)
         paths = files.paths()
-        out = Extraction(urls=ConfigFiles(files).urls(repo))
+        out = Extraction(urls=ConfigFiles(files).urls(repo), calls=PageTags(files).calls(repo))
         for language in (cls(self._graph) for cls in self.LANGUAGES):
             mine = [p for p in paths if language.handles(p)]
             if mine:

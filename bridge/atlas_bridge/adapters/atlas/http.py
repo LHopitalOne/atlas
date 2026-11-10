@@ -2,7 +2,7 @@
 every link an edge from the function that sends the request to that endpoint, and every link keeps its proof
 (both lines of code, the method and path, and how sure we are) in the spec's `links` list."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from ...core.model import CodeGraph, Ref, Status
 from .records import LinkRecord, RouteSite
@@ -45,17 +45,28 @@ class HttpLayer:
     """Adds HTTP links to a map. Call add_files() on the code graph before drawing it, so every file a link
     touches is on the map, then let AtlasSpecPresenter ask for endpoints() and present() while it numbers nodes."""
 
+    OUTSIDE = 'outside services'  # the territory of the hosts no repository serves, one file per host
+
     def __init__(self, records: list[LinkRecord], source: CodeSource | None = None, accuracy: dict | None = None):
-        self._records = records
+        self._records = [self._outside(r) for r in records]
         self._source = source or CodeSource()
         self.accuracy = accuracy
         self._endpoints: dict[Ref, list[Endpoint]] = {}
-        for r in records:
+        for r in self._records:
             if r.route is not None:
                 e = Endpoint(r.route)
                 at = self._endpoints.setdefault(Ref(r.route.repo, r.route.file), [])
                 if e not in at:
                     at.append(e)
+
+    @classmethod
+    def _outside(cls, r):
+        """A request that leaves the repositories reaches an endpoint of its host, in the outside territory."""
+        if r.status != 'outside' or r.route is not None:
+            return r
+        method = r.call.method if r.call.method and r.call.method != 'ANY' else 'GET'
+        route = RouteSite(cls.OUTSIDE, r.target, 0, (method,), r.call.path or '/', r.target, 'outside service')
+        return replace(r, route=route)
 
     def add_files(self, graph: CodeGraph):
         for r in self._records:

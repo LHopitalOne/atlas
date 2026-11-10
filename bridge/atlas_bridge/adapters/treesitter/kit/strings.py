@@ -3,6 +3,7 @@
 import re
 from dataclasses import dataclass, field
 
+from ....core.http import Call
 from .syntax import Syntax
 
 
@@ -70,7 +71,10 @@ class UrlTemplate:
         hints = []
         m = cls.SCHEME.match(v)
         if m:
-            hints.append(m.group(1).split(':')[0])
+            host = m.group(1).split(':')[0]
+            hints.append(host)
+            if '.' in host and '{' not in host:  # a public name ('api.linkedin.com'), not a service's ('api')
+                hints.append(Call.ORIGIN + host.lower())  # where the request goes when no repository serves it
             if ':' in m.group(1):
                 hints.append(m.group(1))  # 'localhost:18381': the port tells local services apart
             v = v[m.end() :] or '/'

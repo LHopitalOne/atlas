@@ -8,7 +8,7 @@ import { store } from '../state.js';
 import { openLink, toggleHttpImpact } from '../app/http.js';
 import { select } from '../app/selection.js';
 import { LINKS } from '../dom.js';
-import { httpImpact, isWithin, PROOF_ORDER, proofCounts, repoPairs, withinKind } from '../model/http.js';
+import { httpImpact, isOutside, isWithin, PROOF_ORDER, proofCounts, repoPairs, withinKind } from '../model/http.js';
 import { renderAttn, syncLegend } from './attention.js';
 import { closeAsk } from './ask.js';
 import { ICON_X, nameAttrs } from './fragments.js';
@@ -45,11 +45,18 @@ export function closeLinksPanel() {
 export const toggleLinksPanel = () => (store.linksOpen ? closeLinksPanel() : openLinksPanel());
 
 function headerHTML(g, H) {
-  const cross = H.links.filter(l => !isWithin(l)),
+  const cross = H.links.filter(l => !isWithin(l) && !isOutside(l)),
     repos = new Set(cross.flatMap(l => [l.call.repo, l.route.repo])),
-    within = H.links.length - cross.length,
-    more = within ? `, plus ${fmt(within)} inside one repository` : '';
-  return `<div class="ph"><div><h2 id="linksTitle">HTTP links</h2><p>${fmt(cross.length)} requests between ${fmt(repos.size)} repositories${more}, each proven down to the line</p></div><button class="btn btn-ghost btn-icon" data-lclose aria-label="Close HTTP links">${ICON_X}</button></div>`;
+    within = H.links.filter(isWithin).length,
+    outside = H.links.filter(isOutside).length,
+    parts = [
+      cross.length ? `${fmt(cross.length)} requests between ${fmt(repos.size)} repositories` : '',
+      within ? `${fmt(within)} inside one repository` : '',
+      outside ? `${fmt(outside)} to outside services` : '',
+    ].filter(Boolean),
+    said =
+      parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}` : parts[0] || 'No links';
+  return `<div class="ph"><div><h2 id="linksTitle">HTTP links</h2><p>${said}, each proven down to the line</p></div><button class="btn btn-ghost btn-icon" data-lclose aria-label="Close HTTP links">${ICON_X}</button></div>`;
 }
 
 function proofLegendHTML(H) {
@@ -95,7 +102,7 @@ function unmatchedHTML(g, H) {
         `<button class="row" data-id="${u.from}"><span class="g ev" style="--c:var(--destructive)" aria-hidden="true"></span><span class="rn mono" ${nameAttrs}>${esc(u.method)} ${esc(u.path)}<span class="rs">${esc(g.repoName[u.call.repo])} · ${esc(u.call.file)}:${u.call.line} · ${esc(u.reason)}</span></span><span class="rm"></span></button>`,
     )
     .join('');
-  return `<details class="sec unmatched"><summary class="sec-h"><h3>Requests with no route found</h3><span>${fmt(H.unmatched.length)}</span></summary><p class="impact-text pad">Not drawn as links: the finder could not tell which route serves them.</p>${rows}</details>`;
+  return `<details class="sec unmatched"><summary class="sec-h"><h3>Requests with no route found</h3><span>${fmt(H.unmatched.length)}</span></summary><p class="impact-text pad">Not drawn as links: no route on this map has their path, or several could take them. One with no route may be code left behind when an endpoint was removed, or be served by code that is not on the map.</p>${rows}</details>`;
 }
 
 /** Render the panel for the current map (hidden on maps without links). */

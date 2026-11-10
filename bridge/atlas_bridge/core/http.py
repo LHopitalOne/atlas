@@ -245,6 +245,7 @@ class Call:
 
     REQUEST = 'request'
     PAYLOAD = 'payload'
+    ORIGIN = '//'  # marks the hint that is the host of an absolute URL the code writes: '//api.linkedin.com'
 
     repo: str
     file: str
@@ -262,6 +263,11 @@ class Call:
     @property
     def is_payload(self):
         return self.kind == self.PAYLOAD
+
+    @property
+    def host(self) -> str:
+        """The host of the absolute URL the request is sent to, when the code writes one ('api.linkedin.com')."""
+        return next((h[len(self.ORIGIN) :] for h in sorted(self.hints) if h.startswith(self.ORIGIN)), '')
 
 
 @dataclass

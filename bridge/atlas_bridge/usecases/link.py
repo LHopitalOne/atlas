@@ -257,22 +257,29 @@ class LinkFinder:
 
     RULES = (PayloadRule, NamedTargetRule, PathOnlyRule)  # asked in this order; the first that applies decides
 
-    def __init__(self, repos, aliases=None, include_tests=False, rules=RULES):
+    def __init__(self, repos, aliases=None, include_tests=False, rules=RULES, fallbacks=()):
+        """fallbacks: rules asked, in order, about a call no rule links (one that leaves the repositories, one with
+        no route): they report it instead of dropping it."""
         self._names = ServiceNames(repos, aliases)
         self._include_tests = include_tests
         self._rules = rules
+        self._fallbacks = fallbacks
 
     def find(self, extraction: Extraction) -> list[Link]:
         self._names.learn(extraction.urls)
         routes = RouteIndex(extraction.routes)
         rules = [rule(self._names, routes) for rule in self._rules]
+        fallbacks = [rule(self._names, routes) for rule in self._fallbacks]
         links = []
         for call in dict.fromkeys(extraction.calls):  # one call read twice (two senders know it) is one call
             if call.test and not self._include_tests:
                 continue
             rule = next((r for r in rules if r.applies(call)), None)
-            if rule:
-                links += self._decided(call, rule.links(call))
+            found = self._decided(call, rule.links(call)) if rule else []
+            if not found:
+                rule = next((r for r in fallbacks if r.applies(call)), None)
+                found = rule.links(call) if rule else []
+            links += found
         return links
 
     @staticmethod

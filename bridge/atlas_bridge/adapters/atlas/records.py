@@ -76,7 +76,7 @@ class LinkRecord:
 
     # how the page badges a link: (status, verification) -> proof; statuses other than matched need no verification
     PROOF = {'confirmed': 'scip', 'syntax': 'syntax', 'unverified': 'matched', 'contradicted': 'contradicted'}
-    EDGE_STATUS = {'scip': 0, 'syntax': 0, 'matched': 0, 'contradicted': 1, 'ambiguous': 1, 'inferred': 3}
+    EDGE_STATUS = {'scip': 0, 'syntax': 0, 'matched': 0, 'outside': 0, 'contradicted': 1, 'ambiguous': 1, 'inferred': 3}
 
     @property
     def proof(self):
@@ -98,7 +98,7 @@ class LinkRecord:
 class LinkFile:
     """Parses the links JSON; production links only (calls made only by tests and tooling are left out)."""
 
-    STATUSES = frozenset({'matched', 'ambiguous', 'inferred', 'unmatched'})
+    STATUSES = frozenset({'matched', 'ambiguous', 'inferred', 'unmatched', 'outside'})
 
     def __init__(self, source: str = 'links JSON'):
         self._source = source

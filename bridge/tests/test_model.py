@@ -6,7 +6,7 @@ from atlas_bridge.core.model import CodeGraph, Ref, Status
 class ModelTest(unittest.TestCase):
     def test_certainty_order(self):
         order = sorted(Status, key=lambda s: s.certainty)
-        self.assertEqual(order, [Status.MATCHED, Status.INFERRED, Status.AMBIGUOUS, Status.UNMATCHED])
+        self.assertEqual(order, [Status.MATCHED, Status.INFERRED, Status.AMBIGUOUS, Status.UNMATCHED, Status.OUTSIDE])
 
     def test_repeated_link_keeps_most_certain(self):
         g, a, b = CodeGraph(), Ref('r', 'a.py'), Ref('r', 'b.py')

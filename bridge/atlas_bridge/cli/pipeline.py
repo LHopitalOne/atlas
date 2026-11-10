@@ -11,7 +11,7 @@ from ..adapters.linkfile import LinkFilePresenter
 from ..adapters.page import AtlasPage
 from ..core.errors import BridgeError, GraphFormatError, OutputWriteError
 from ..core.http import Extraction
-from ..core.model import CodeGraph
+from ..core.model import CodeGraph, Status
 from ..usecases.draw import GROUPINGS, MapDrawer
 from ..usecases.link import LinkFinder, LinkReport
 from .budget import MapBudget
@@ -82,7 +82,8 @@ class MapPipeline:
             for repo in repos:
                 extraction.extend(extractor.extract(repo.name, repo.path))
             rules = LinksCommand._rules(self._o.within)  # the same rule order as `links --within`
-            links = LinkFinder(names, self._o.aliases, self._o.include_tests, rules).find(extraction)
+            fallbacks = LinksCommand._fallbacks(self._o.within)
+            links = LinkFinder(names, self._o.aliases, self._o.include_tests, rules, fallbacks).find(extraction)
         except (BridgeError, ImportError) as e:
             self._report(f'  links     none found: {e}')
             return []
@@ -95,9 +96,10 @@ class MapPipeline:
         self._records = LinkFile(self._out('links.json')).parse(data)
         found = [link for link in links if link.route is not None]
         inside = sum(link.source == link.target for link in found)
+        outside = sum(link.status == Status.OUTSIDE for link in links)
         self._report(
-            f'  links     {len(found) - inside} between repositories, {inside} inside one, '
-            f'{len(links) - len(found)} requests with no route found'
+            f'  links     {len(found) - inside} between repositories, {inside} inside one, {outside} to outside '
+            f'services, {len(links) - len(found) - outside} requests with no route found'
         )
         return links
 

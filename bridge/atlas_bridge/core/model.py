@@ -14,11 +14,12 @@ class Status(IntEnum):
     AMBIGUOUS = 1  # the link exists, but its target is uncertain
     UNMATCHED = 2  # the caller expects something nothing provides
     INFERRED = 3  # derived by resolution or heuristics
+    OUTSIDE = 4  # sent to a host none of the repositories serves (a third-party API, a CDN, an ad script)
 
     @property
     def certainty(self):
         """Lower is more certain: a matched link beats an inferred one, which beats an ambiguous guess."""
-        return (0, 2, 3, 1)[self]
+        return (0, 2, 3, 1, 4)[self]
 
 
 class Kind(IntEnum):

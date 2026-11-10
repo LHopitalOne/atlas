@@ -6,6 +6,7 @@ from .files import RepositoryFiles, TestPathPolicy
 from .grammar import Grammar
 from .language import LanguageExtractor
 from .mentions import FileMentions
+from .pages import PageTags
 from .resolver import ValueResolver
 from .source import SourceFile
 from .strings import StringTemplate, UrlTemplate
@@ -19,6 +20,7 @@ __all__ = [
     'ConfigFiles',
     'EnvFile',
     'FileMentions',
+    'PageTags',
     'Grammar',
     'LanguageExtractor',
     'RepositoryFiles',

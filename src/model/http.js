@@ -36,8 +36,16 @@ export const PROOF = {
     cls: 'badge-destructive',
     note: 'SCIP resolves a name this link rests on to a different definition than the finder assumed.',
   },
+  outside: {
+    label: 'Outside service',
+    cls: 'badge-outline',
+    note: 'Sent to a host none of these repositories serves: a third-party API, a CDN, an analytics or ad script, or a site a visitor is linked to.',
+  },
 };
-export const PROOF_ORDER = ['scip', 'syntax', 'matched', 'inferred', 'ambiguous', 'contradicted'];
+export const PROOF_ORDER = ['scip', 'syntax', 'matched', 'inferred', 'ambiguous', 'contradicted', 'outside'];
+
+/** A link to a host none of the repositories serves. */
+export const isOutside = l => l.proof === 'outside';
 const rank = p => {
   const i = PROOF_ORDER.indexOf(p);
   return i < 0 ? PROOF_ORDER.length : i;

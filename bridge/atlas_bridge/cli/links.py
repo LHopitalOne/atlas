@@ -7,12 +7,14 @@ from ..adapters.linkfile import LinkFilePresenter
 from ..adapters.scip import ScipCallGraph, ScipIndex, ScipOracle
 from ..core.errors import LibraryIndexError
 from ..core.http import Extraction
+from ..core.model import Status
 from ..usecases.channels import OwnChannelRule
 from ..usecases.hops import LibraryHops
 from ..usecases.link import LinkFinder, LinkReport
 from ..usecases.mentions import NamedChannels
+from ..usecases.outside import OutsideRule
 from ..usecases.verify import LinkVerifier
-from ..usecases.within import WithinRepoRule
+from ..usecases.within import NoRouteRule, WithinRepoRule
 from .command import Command
 from .inputs import Aliases, GraphInput, JsonFile, RepositoryInput, ScipInput
 
@@ -74,7 +76,9 @@ class LinksCommand(Command):
         indexes = self._indexes(args)
         graph = ScipCallGraph(indexes, {lib.name for lib in libraries}) if indexes else None
         extractor = TreeSitterExtractor(None if args.no_scip_search else graph)
-        finder = LinkFinder(names, Aliases.parse(args.alias), args.include_tests, self._rules(args.within))
+        finder = LinkFinder(
+            names, Aliases.parse(args.alias), args.include_tests, self._rules(args.within), self._fallbacks(args.within)
+        )
         extraction = Extraction()
         for repo in repos:
             extraction.extend(extractor.extract(repo.name, repo.path))
@@ -85,7 +89,9 @@ class LinksCommand(Command):
         report = LinkReport(names, extraction, links)
         JsonFile.write(args.out, LinkFilePresenter().present(report), indent=1)
         found = sum(link.route is not None for link in report.links)
-        self.report(f'{args.out}: {found} links, {len(report.links) - found} unmatched calls')
+        outside = sum(link.status == Status.OUTSIDE for link in report.links)
+        no_route = len(report.links) - found - outside
+        self.report(f'{args.out}: {found} links, {outside} to outside services, {no_route} with no route')
         if args.graphify_out:
             base = GraphifyLinkWriter(GraphInput.parse(args.graph).load() if args.graph else None)
             JsonFile.write(args.graphify_out, base.present(report.links))
@@ -111,6 +117,12 @@ class LinksCommand(Command):
         *before, path_only = LinkFinder.RULES
         mine = (OwnChannelRule, WithinRepoRule) if within else (OwnChannelRule,)
         return (*before, *mine, path_only)
+
+    @staticmethod
+    def _fallbacks(within):
+        """For a call nothing links: a request that leaves the repositories, and (with --within) browser code calling
+        a route its own server does not have."""
+        return (OutsideRule, NoRouteRule) if within else (OutsideRule,)
 
     @staticmethod
     def _indexes(args):
