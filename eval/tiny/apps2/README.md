@@ -34,3 +34,28 @@ llm-desk was 0 / 10 before one general fix made while reading it (a FastAPI rout
 function, `api = APIRouter(prefix='/api')` in `create_app()`, now gives its prefix). `--jev` adds nothing here: the
 misses are requests the finder does not read at all (Socket.IO events, tRPC procedure proxies, generated clients'
 option objects, SDK calls), and Jev only chooses among routes for requests that were read.
+
+## After teaching the missed idioms (three general mechanisms per family, tuned on these apps)
+
+| App | Found | False links |
+| --- | --- | --- |
+| arena | 15 / 15 | 0 |
+| studynotes | 14 / 14 | 0 |
+| newsroom | 12 / 12 | 0 |
+| payhooks | 13 / 14 | 0 |
+| gateway | 14 / 15 | 0 |
+| llm-desk | 9 / 10 | 0 |
+| **All** | **77 / 80** | **0** |
+
+What was added: Socket.IO events (JS and Python, namespaces, rooms), EventSource as a GET, Node dgram ports from env
+helpers; tRPC procedures and vanilla clients, graphql-request and Apollo clients, GraphQL resolver maps, tonic gRPC
+servers; httpx/aiohttp base URLs (settings, env defaults, a base with an unknown start), URL helpers called with a
+path, generated SDK functions (`client.get({ url })`), absolute URLs read from configuration, Redis lists and streams
+in Python, JS and Rust, Express factory routers and Fastify `register` prefixes, Rust `match` routes.
+
+Since these apps were used to tune, they are no longer unseen code. On code never tuned on, Open WebUI gained 10
+links (7 internal, 3 outside), all checked by hand; the first ten apps, the devset, Sentry and Open edX are unchanged
+(Sentry 38/38 precise), all with 0 false links.
+
+Still missed: gateway L09 (an axios `baseURL` that would need the gateway's proxy rewrites modelled), llm-desk O2 (the
+`openai` SDK writes no URL), payhooks L04 (the webhook URL exists only at run time).
