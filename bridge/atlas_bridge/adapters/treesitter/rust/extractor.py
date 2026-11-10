@@ -1,5 +1,5 @@
 """RustExtractor: HTTP routes (axum, actix-web) and requests (reqwest/hyper clients, request-trait impls), and TCP and
-UDP channels both ways (std, tokio and async-std sockets).
+UDP channels both ways (std, tokio and async-std sockets), and gRPC services served with tonic.
 
 Routes come from evaluating router expressions (`.route` chains, `.nest`, `.merge`, let-bound routers and crate fns
 returning routers) and from actix-web attribute routes. Requests come from types implementing a request trait whose
@@ -13,7 +13,7 @@ from ..kit import LanguageExtractor
 from .calls import CallOrder, ClientCalls, TraitPathCalls
 from .channels import ChannelCalls, ChannelRoutes, ChannelSites, Followups
 from .policy import RustTestPolicy
-from .routes import ActixAttributeRoutes, ActixAttributes, RouterGraph, RouterRoutes, UniqueRoutes
+from .routes import ActixAttributeRoutes, ActixAttributes, RouterGraph, RouterRoutes, TonicServices, UniqueRoutes
 from .values import ChannelValues, CrateFunctions, CrateStructs, RustValues, ValueTypes
 from .workspace import RustWorkspace
 
@@ -37,6 +37,7 @@ class RustExtractor(LanguageExtractor):
             RouterRoutes(workspace, graph),
             ActixAttributeRoutes(workspace, graph, attributes),
             ChannelRoutes(workspace, channels, sites, followups),
+            TonicServices(workspace),
             TraitPathCalls(workspace, values),
             ClientCalls(workspace, values),
             ChannelCalls(workspace, channels, sites, followups),
