@@ -1,4 +1,5 @@
-"""The HTTP links the Atlas map shows, read from the links JSON the `links` command writes (adapters/linkfile.py).
+"""The links the Atlas map shows (HTTP, and topics, queues and tasks), read from the links JSON the `links`
+command writes (adapters/linkfile.py).
 
 Each record keeps what the page needs to prove a link: the line that sends the request, the route line that serves
 it, and what a precise index said about the names in between.
@@ -32,10 +33,24 @@ class RouteSite:
     path: str
     handler: str
     framework: str
+    protocol: str = 'http'
+
+    REQUESTS = frozenset({'http', 'websocket', 'graphql'})  # addressed by method and path; the others by channel
+
+    @property
+    def is_request(self):
+        return self.protocol in self.REQUESTS
+
+    @property
+    def channel(self):
+        """What the page shows after the method: the path, or a topic, queue or task by its bare name."""
+        return self.path if self.is_request else self.path.strip('/')
 
     @property
     def label(self):
-        return f'{"|".join(self.methods)} {self.path}'
+        """'GET|POST /api/x', or 'KAFKA events' for a channel that has no methods."""
+        verb = '|'.join(self.methods) if self.is_request else self.protocol.upper()
+        return f'{verb} {self.channel}'
 
 
 @dataclass(frozen=True)
@@ -130,6 +145,7 @@ class LinkFile:
             r['path'],
             r.get('handler') or '',
             r.get('framework') or '',
+            r.get('protocol') or 'http',
         )
 
     @staticmethod

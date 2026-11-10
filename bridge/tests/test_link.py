@@ -39,6 +39,10 @@ class FindLinksTest(unittest.TestCase):
             [('sentry', 'snuba', '/{dataset}/snql', Status.MATCHED), ('sentry', 'snuba', '/{storage}', Status.MATCHED)],
         )
 
+    def test_a_call_read_twice_links_once(self):
+        twice = call('/{d}/snql', 'POST', ['_snuba_pool'])
+        self.assertEqual(len(links(twice, twice)), 1)
+
     def test_unmatched_and_ambiguous(self):
         both = Route('snuba', 'views.py', 40, P('/{x}/snql'), frozenset({'POST'}))
         found = summary(

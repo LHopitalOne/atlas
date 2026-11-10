@@ -29,9 +29,16 @@ class Endpoint:
             'name': r.label,
             'kind': self.KIND,
             'loc': f'{r.file}:{r.line}',
-            'doc': f'HTTP route served by {served}.' if served else 'HTTP route.',
+            'doc': f'{self._kind} served by {served}.' if served else f'{self._kind}.',
             'sig': f'{r.label} -> {r.handler}' if r.handler else r.label,
         }
+
+    @property
+    def _kind(self):
+        r = self.route
+        if r.protocol == 'http':
+            return 'HTTP route'
+        return f'{r.protocol.upper()} {"route" if r.is_request else "channel"}'
 
 
 class HttpLayer:
@@ -84,8 +91,8 @@ class HttpLayer:
         return {
             'from': source,
             'to': target,
-            'method': r.call.method or '|'.join(route.methods),
-            'path': route.path,
+            'method': (r.call.method or '|'.join(route.methods)) if route.is_request else route.protocol.upper(),
+            'path': route.channel,
             'proof': r.proof,
             'reason': r.reason,
             'call': self._site(index[r.call.repo], r.call.repo, r.call.file, r.call.line, function=r.call.function),

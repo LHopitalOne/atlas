@@ -267,7 +267,7 @@ class LinkFinder:
         routes = RouteIndex(extraction.routes)
         rules = [rule(self._names, routes) for rule in self._rules]
         links = []
-        for call in extraction.calls:
+        for call in dict.fromkeys(extraction.calls):  # one call read twice (two senders know it) is one call
             if call.test and not self._include_tests:
                 continue
             rule = next((r for r in rules if r.applies(call)), None)

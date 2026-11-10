@@ -14,6 +14,7 @@ import unittest
 
 from atlas_bridge.adapters import GraphifyReader
 from atlas_bridge.adapters.atlas import AtlasSpecPresenter, CodeSource, HttpLayer, LinkFile, RepoOrigin
+from atlas_bridge.adapters.atlas.http import Endpoint
 from atlas_bridge.cli import main
 from atlas_bridge.core.errors import LinkFormatError
 from atlas_bridge.core.model import CodeGraph
@@ -161,3 +162,34 @@ class SourceTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ChannelLinkTest(unittest.TestCase):
+    """A Kafka topic has no method and its name is not a URL path: it reads as 'KAFKA events'."""
+
+    KAFKA = {
+        'caller': 'sentry',
+        'target': 'snuba',
+        'status': 'inferred',
+        'call': {'file': 'backend.py', 'line': 233, 'method': 'ANY', 'path': '/events', 'protocol': 'kafka'},
+        'route': {
+            'repo': 'snuba',
+            'file': 'errors.yaml',
+            'line': 399,
+            'methods': ['ANY'],
+            'path': '/events',
+            'handler': 'events',
+            'framework': 'named',
+            'protocol': 'kafka',
+        },
+    }
+
+    def test_label_and_leaf(self):
+        (record,) = LinkFile().parse({'links': [self.KAFKA]})
+        self.assertEqual(record.route.label, 'KAFKA events')
+        self.assertEqual(Endpoint(record.route).leaf()['doc'], 'KAFKA channel served by events (named).')
+
+    def test_http_routes_keep_method_and_path(self):
+        http = dict(self.KAFKA, route=dict(self.KAFKA['route'], protocol='http', methods=['POST']))
+        (record,) = LinkFile().parse({'links': [http]})
+        self.assertEqual(record.route.label, 'POST /events')
