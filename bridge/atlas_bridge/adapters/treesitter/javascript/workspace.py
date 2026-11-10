@@ -18,7 +18,9 @@ class JavaScriptWorkspace(Workspace):
     # carry TypeScript type arguments: `http.get<Series>(url)`
     METHODS = ('get', 'post', 'put', 'delete', 'del', 'patch', 'head', 'options', 'all', 'route', 'request')
     METHODS += ('requestPromise', 'use')
-    PRECHECK = (b'fetch', b'axios', b'got(', b'ky(') + tuple(f'.{m}{c}'.encode() for m in METHODS for c in '(<')
+    PRECHECK = (b'fetch', b'axios', b'got(', b'ky(', b'EventSource') + tuple(
+        f'.{m}{c}'.encode() for m in METHODS for c in '(<'
+    )
     PRECHECK += EntryPoints.MENTIONS  # files that import a data fetching or GraphQL library
     PRECHECK += JQueryRequests.MENTIONS  # `$.ajax(`, `$.getJSON(`
 
