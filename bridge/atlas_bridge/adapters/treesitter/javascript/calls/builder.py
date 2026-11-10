@@ -5,6 +5,7 @@ from dataclasses import replace
 from .....core.http import ANY
 from ...kit import UrlTemplate
 from ..bindings.receivers import Receivers
+from ..channels.files import ModuleGraph
 from ..syntax.functions import Functions
 from ..syntax.nodes import JsSyntax
 from ..values.assignments import Assignments
@@ -28,6 +29,7 @@ class RequestBuilder:
         self._params = None  # ParamValues of the file, made when a request is opened
         self._assignments = Assignments()
         self.opens = []  # OpenRequest: URLs made of their function's parameters, settled at its callers later
+        self._graph = None  # ModuleGraph of the files a configured URL is read through (made on first use)
 
     @property
     def module(self):
@@ -90,6 +92,8 @@ class RequestBuilder:
     def _build(self, node, obj, url_node, method, require_path, given):
         hints = set()
         value = self._module.values.resolve(url_node, hints)
+        if value is not None and not UrlText.matchable(value):
+            value = self._configured(url_node, hints) or value
         unknown_path = value is not None and UrlText.unknown_path(value)  # 'https://host/{*path}'
         unknown_path = unknown_path and not self._valued(url_node, value)
         if value is None or unknown_path or not UrlText.matchable(value):
@@ -111,6 +115,24 @@ class RequestBuilder:
         hints.update(JsSyntax.names_in(url_node))
         client = self._client(obj, receiver, hints, relative=not url.hints and '://' not in value)
         return [self._pending(node, method, url.path, hints, client)]
+
+    def _configured(self, url_node, hints):
+        """The one absolute URL a field of the class holds (`fetch(this.endpoint)`), read where configuration gives
+        it: a constructor argument, a config object a function returns, an environment default (ChannelValues)."""
+        node = JsSyntax.unwrap(url_node)
+        if node.type != 'member_expression' or JsSyntax.unwrap(node.child_by_field_name('object')).type != 'this':
+            return None
+        if self._graph is None:
+            self._graph = ModuleGraph(self._workspace)
+        found = self._graph.adopt(self._module).values.candidates(node, hints)
+        absolute = [v for v in found if UrlText.AUTHORITY.match(v)]
+        return absolute[0] if len(absolute) == 1 else None
+
+    def release(self):
+        """Release the files read for configured URLs."""
+        if self._graph is not None:
+            self._graph.clear()
+            self._graph = None
 
     def _valued(self, url_node, value):
         """A URL to a public host whose path is values the function holds itself, not ones its callers pass

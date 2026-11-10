@@ -84,5 +84,37 @@ class ValuesOnAPublicHostTest(unittest.TestCase):
         self.assertNotIn(('GET', '/{endpoint}'), calls)  # a path, not a value
 
 
+CONFIG = """
+export function loadConfig(env = process.env) {
+  return { reportUrl: env.REPORT_URL ?? 'https://collector.example.org/v1/report', port: 8080 };
+}
+"""
+REPORTER = """
+export class Reporter {
+  constructor(private readonly endpoint: string, private readonly other: string) {}
+
+  async report(rows) {
+    await fetch(this.endpoint, { method: 'POST', body: JSON.stringify(rows) });
+    await fetch(this.other);
+  }
+}
+"""
+MAIN = """
+import { loadConfig } from './config';
+import { Reporter } from './reporter';
+
+const cfg = loadConfig();
+const reporter = new Reporter(cfg.reportUrl, process.env.OTHER_URL);
+"""
+
+
+class ConfiguredFieldTest(unittest.TestCase):
+    def test_a_field_set_from_configuration_holds_its_absolute_url(self):
+        found = Repository({'src/config.ts': CONFIG, 'src/reporter.ts': REPORTER, 'src/main.ts': MAIN}).extract()
+        calls = {(c.method, str(c.path)): c for c in found.calls}
+        self.assertEqual(calls['POST', '/v1/report'].host, 'collector.example.org')
+        self.assertEqual(len(calls), 1)  # `this.other` holds nothing the code shows
+
+
 if __name__ == '__main__':
     unittest.main()

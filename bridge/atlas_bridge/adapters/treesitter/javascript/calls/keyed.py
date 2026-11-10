@@ -29,6 +29,7 @@ class KeyedRequests(CallCollector, FileCollector):
             if key is not None:
                 self._pending += builder.build(call, None, key, 'GET', require_path=True)
         self._opens += builder.opens
+        builder.release()
 
     def finish(self) -> Extraction:
         pending = self._pending + Forwarder(self.workspace).settle(self._opens)
