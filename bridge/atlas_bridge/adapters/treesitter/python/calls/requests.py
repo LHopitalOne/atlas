@@ -5,6 +5,7 @@ from ...kit import CallCollector
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from ..values import PythonValueResolver
+from .bases import ClientBases
 from .book import CallBook
 from .idioms import RequestMethodIdiom, RequestTarget, UrlopenIdiom, VerbIdiom
 from .methods import MethodOptions
@@ -31,6 +32,7 @@ class RequestCalls(CallCollector):
         self._settler = Settler(workspace, self._book, self._values, self._methods, self._sites)
         self._idioms = {name: idiom(self._methods) for idiom in self.IDIOMS for name in idiom.NAMES}
         self._senders = Senders(workspace)
+        self._bases = ClientBases(workspace)
 
     def collect(self) -> Extraction:
         for source, call, name in self.workspace.calls(self._idioms):
@@ -56,11 +58,27 @@ class RequestCalls(CallCollector):
         methods = target.methods
         if methods is None:
             methods = self._methods.options(scope, target.method_node) if target.method_node is not None else [ANY]
-        hints = self._sites.hints_for(scope, receiver)
+        made = self._sites.origin(scope, receiver) if receiver is not None else ''
+        base = self._bases.of(scope, receiver, made)
+        hints = self._sites.hints_for(scope, receiver) | base.hints
         origin = self._sites.origin_assumption(scope, receiver)
         assumptions = (origin,) if origin is not None else ()
         run = RequestRun(target.client)
-        for v in self._values.resolve(target.url, scope)[: self.MAX_ALTS]:
+        for v in self._urls(target.url, scope, base)[: self.MAX_ALTS]:
             for m in methods:
                 pending = PendingRequest(v.text, m, hints | v.hints, assumptions=assumptions)
                 self._settler.settle(scope, call, pending, run)
+
+    def _urls(self, node, scope, base):
+        """The values of a request's URL: joined to its client's base URL when it has one and the URL is relative;
+        read from configuration when it is a name the literal resolver leaves unknown (ClientBases.absolute)."""
+        values = self._values.resolve(node, scope)
+        if not any(v.is_known for v in values):
+            values = self._bases.absolute(node, scope) or values
+        if not base.values:
+            return values
+        out = []
+        for v in values:
+            joined = [ClientBases.joined(b, v) for b in base.values]
+            out += [j for j in joined if j is not None] or [v]
+        return out

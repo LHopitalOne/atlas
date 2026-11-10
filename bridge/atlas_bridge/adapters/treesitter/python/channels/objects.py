@@ -21,6 +21,7 @@ class ObjectFields:
 
     DEFAULTS = frozenset({'field', 'Field'})  # dataclasses.field, pydantic.Field
     DEFAULT_KEYWORDS = ('default', 'default_factory')
+    OWN_CLASS = 'cls'  # the name a classmethod's first parameter has by convention
 
     def __init__(self, workspace, origins):
         self._workspace = workspace
@@ -37,15 +38,27 @@ class ObjectFields:
         return out
 
     def _classes(self, node, scope):
-        """[(source, class node)] a callee or annotation names in this repository."""
+        """[(source, class node)] a callee or annotation names in this repository. `cls` in a classmethod is the
+        class around it: `return cls(port=...)` in `Settings.from_env()` makes a Settings."""
         out = []
         for n in PythonSyntax.walk(node, ('identifier', 'attribute')) if node is not None else ():
             if n.parent is not None and n.parent.type == 'attribute' and n.parent != node:
+                continue
+            if self._is_own_class(n, scope):
+                out.append((scope.source, scope.cls))
                 continue
             found = self._workspace.names.expression(scope.source, n)
             if found is not None and found.is_class:
                 out.append((found.source, found.node))
         return out
+
+    @classmethod
+    def _is_own_class(cls, node, scope):
+        """`cls`, the first parameter of a method of the class around the scope."""
+        if node.type != 'identifier' or scope.cls is None or scope.func is None:
+            return False
+        params = PythonSyntax.params(scope.func)
+        return bool(params) and params[0][0] == cls.OWN_CLASS == PythonSyntax.text(node)
 
     def _field(self, source, cls, attr, call, scope):
         if call is not None:
