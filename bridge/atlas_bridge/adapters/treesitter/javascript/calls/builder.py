@@ -94,7 +94,7 @@ class RequestBuilder:
             if value is not None and obj is None:
                 value = self.params.resolve(url_node, hints)  # a parameter's member stays '{param.key}'
                 value = UrlText.untailed(value) if unknown_path else value  # the path is the callers'
-                self._open(node, value, method, given, hints)
+                self._open(node, value, method, given, hints, url_node)
             return []  # entirely dynamic here: nothing to match
         path_like = UrlText.path_like(value)
         if require_path and not path_like:
@@ -110,13 +110,16 @@ class RequestBuilder:
         client = self._client(obj, receiver, hints, relative=not url.hints and '://' not in value)
         return [self._pending(node, method, url.path, hints, client)]
 
-    def _open(self, node, value, method, given, hints):
+    def _open(self, node, value, method, given, hints, url_node=None):
         """Keep a URL made of the enclosing function's parameters; `{ method }` from a parameter is filled in too."""
         options, keys = given
         given = self._given(options, keys) if options is not None else None
         if method == ANY and given is not None and JsSyntax.unwrap(given).type in self.NAMES:
             method = '{' + JsSyntax.text(given) + '}'
-        self._keep(OpenRequest.at(node, value, method, '', hints))
+        found = OpenRequest.at(node, value, method, '', hints)
+        if found is None and url_node is not None:
+            found = OpenRequest.at_constructor(node, url_node, value, method, '', hints)
+        self._keep(found)
 
     def _keep(self, found):
         if found is not None:

@@ -1,9 +1,10 @@
 """The value of a URL expression as a template: literals, template strings, `+`, bindings, URL builders, URL objects
-(`url.href`, `url.toString()`), helper functions that return a URL, and members of object literals reached through
-destructuring and imports (`const { baseUrl } = config.api`)."""
+(`url.href`, `url.toString()`), helper functions and methods of the repository's classes that return a URL, and
+members of object literals reached through destructuring and imports (`const { baseUrl } = config.api`)."""
 
 from ...kit import StringTemplate, ValueResolver
 from ..bindings.scopes import Scopes
+from ..syntax.functions import Functions
 from ..syntax.nodes import JsSyntax
 from .objects import ObjectPaths
 from .urls import UrlText
@@ -90,7 +91,23 @@ class UrlValues(ValueResolver):
         ):
             return self.resolve(fn.child_by_field_name('object'), hints, depth)
         returned = self._helper(fn, hints, depth) if fn is not None and fn.type == 'identifier' else None
+        if returned is None and fn is not None and fn.type == 'member_expression':
+            returned = self._method(fn, hints, depth)
         return returned if returned is not None else self._builder(node, hints, depth)
+
+    def _method(self, fn, hints, depth):
+        """What a method of a class of the repository returns, called on an instance (`desk.eventsUrl()`), when that
+        is a URL with a known path."""
+        found = self._objects.returned(fn) if self._objects is not None and depth < self.MAX_DEPTH else None
+        if found is None:
+            return None
+        names = set()
+        value = found.module.values.resolve(found.node, names, depth + 1)
+        if not UrlText.literal(value) or not UrlText.path_like(value) or len(value) > self.MAX_URL:
+            return None
+        hints.add(JsSyntax.text(fn))
+        hints.update(names)
+        return value
 
     def _helper(self, fn, hints, depth):
         """What a function declared in this file returns (its parameters stay placeholders), when that is a URL."""
@@ -110,14 +127,7 @@ class UrlValues(ValueResolver):
 
     @staticmethod
     def _returned(fn):
-        """The expression a function returns: an arrow function's expression body, or its first `return` value."""
-        body = fn.child_by_field_name('body')
-        if body is None:
-            return None
-        if body.type != 'statement_block':
-            return body
-        ret = next(JsSyntax.walk(body, {'return_statement'}), None)
-        return ret.named_children[0] if ret is not None and ret.named_children else None
+        return Functions.returned(fn)
 
     def _member(self, node, hints, depth):
         """`url.href` / `url.pathname` of a URL object is that URL."""

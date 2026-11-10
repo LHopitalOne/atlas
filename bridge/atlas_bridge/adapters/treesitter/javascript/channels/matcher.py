@@ -6,8 +6,8 @@ from ..bindings.binding import ParamBinding, ValueBinding
 from ..syntax.functions import Functions
 from ..syntax.members import Members
 from ..syntax.nodes import JsSyntax
+from ..syntax.properties import ParameterProperties
 from .callers import Callers
-from .properties import ParameterProperties
 from .table import ANY_NAME, CLIENT_METHODS, ENTRIES, Entry, Form
 
 

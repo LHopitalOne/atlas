@@ -4,11 +4,11 @@ from ..bindings.binding import ParamBinding
 from ..syntax.members import Members
 from ..syntax.nodes import JsSyntax
 from ..syntax.params import Params
+from ..syntax.properties import ParameterProperties
 from ..values.resolver import UrlValues
 from ..values.urls import UrlText
 from .callers import Callers
 from .enums import EnumMembers
-from .properties import ParameterProperties
 
 
 class ChannelValues(UrlValues):

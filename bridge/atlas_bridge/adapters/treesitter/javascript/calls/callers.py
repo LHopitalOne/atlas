@@ -25,6 +25,8 @@ class Callers:
     """Finds the calls of an open request's function across the workspace."""
 
     MAX_SITES = 200  # calls one open request is settled at
+    CALLS = frozenset({'call_expression', 'new_expression'})
+    CONSTRUCTOR = 'constructor'
 
     def __init__(self, workspace, modules):
         self._workspace = workspace
@@ -36,12 +38,12 @@ class Callers:
         """([(module, call)] of the function, [(module, Handoff)] of calls that pass it to another function)."""
         direct, handoffs = [], []
         for source in self._workspace.sources:
-            if not source.mentions(open_.function.encode()):
+            if not source.mentions(self.name_of(open_).encode()):
                 continue
             module = self._modules(source)
             if not self._may_call(module, open_):
                 continue
-            for call in JsSyntax.walk(source.root, {'call_expression'}):
+            for call in JsSyntax.walk(source.root, self.CALLS):
                 if self._calls(module, open_, call):
                     direct.append((module, call))
                 elif not open_.method_of_class:
@@ -52,12 +54,17 @@ class Callers:
         """The file may name the function: its own file, or one that imports it by name or its whole module."""
         if module.path == open_.path:
             return True
+        if self._constructs(open_):
+            return self._imports(module, open_)
         if open_.method_of_class:
             return False
         sources = module.imports.namespace_sources()
         return self._imports(module, open_) or any(ModuleLinker.may_name(module.path, s, open_.path) for s in sources)
 
     def _calls(self, module, open_, call):
+        if call.type == 'new_expression' or self._constructs(open_):
+            ctor = JsSyntax.unwrap(call.child_by_field_name('constructor'))
+            return self._constructs(open_) and ctor is not None and self._names(module, open_, ctor)
         fn = JsSyntax.unwrap(call.child_by_field_name('function'))
         if open_.method_of_class:
             ok = fn.type == 'member_expression' and JsSyntax.text(fn.child_by_field_name('object')) == 'this'
@@ -71,20 +78,32 @@ class Callers:
         if node is None:
             return False
         if node.type == 'identifier':
-            if JsSyntax.text(node) != open_.function:
+            if JsSyntax.text(node) != self.name_of(open_):
                 return False
             return module.path == open_.path or self._imports(module, open_)
-        if node.type != 'member_expression' or JsSyntax.text(node.child_by_field_name('property')) != open_.function:
+        if node.type != 'member_expression' or JsSyntax.text(node.child_by_field_name('property')) != self.name_of(
+            open_
+        ):
             return False
         source = module.imports.namespace(JsSyntax.text(node.child_by_field_name('object')))
         return source is not None and ModuleLinker.may_name(module.path, source, open_.path)
 
-    @staticmethod
-    def _imports(module, open_):
-        """The module imports the open request's function from its file (not a function of a package that has
-        the same name)."""
-        imported = module.imports.get(open_.function)
+    @classmethod
+    def _imports(cls, module, open_):
+        """The module imports the open request's function (or the class it constructs) from its file (not a name
+        of a package that has the same name)."""
+        imported = module.imports.get(cls.name_of(open_))
         return imported is not None and ModuleLinker.may_name(module.path, imported[0], open_.path)
+
+    @classmethod
+    def _constructs(cls, open_):
+        """The open request is a constructor's: `new <class>(...)` fills it in."""
+        return open_.method_of_class and open_.function == cls.CONSTRUCTOR
+
+    @classmethod
+    def name_of(cls, open_):
+        """The name its callers call it by: the class of a constructor, else the function."""
+        return open_.owner if cls._constructs(open_) else open_.function
 
     def _handoffs(self, module, open_, call):
         """A call that passes the function itself as an argument, and the calls of the parameter it lands in."""
