@@ -70,8 +70,13 @@ links_step() {
   # Sentry's frontend calling its own API: shown on the map, but no answer key covers it, so it is not scored
   (cd bridge && "$PY" -m atlas_bridge links "sentry=$(folder sentry)" --within -o "$WORK/sentry-within-all.json")
   python3 tools/demo/within.py "$WORK/sentry-within-all.json" > "$WORK/sentry-within.json"
-  python3 eval/score.py eval/sentry/answer-key.json "$WORK/sentry-links.json" > "$WORK/sentry-score.txt"
-  python3 eval/score.py eval/openedx/answer-key.json "$WORK/openedx-links.json" > "$WORK/openedx-score.txt"
+  # each key judges its own protocol: the HTTP keys the HTTP links, Sentry's Kafka key the Kafka links
+  for key in sentry openedx; do python3 tools/demo/protocol.py http "$WORK/$key-links.json" > "$WORK/$key-http.json"; done
+  python3 tools/demo/protocol.py kafka "$WORK/sentry-links.json" > "$WORK/sentry-kafka.json"
+  python3 eval/score.py eval/sentry/answer-key.json "$WORK/sentry-http.json" > "$WORK/sentry-score.txt"
+  python3 eval/score.py eval/openedx/answer-key.json "$WORK/openedx-http.json" > "$WORK/openedx-score.txt"
+  python3 eval/tiny/score.py eval/sentry/kafka-key.json "$WORK/sentry-kafka.json" --json > "$WORK/sentry-kafka-score.json"
+  echo "score     sentry kafka $(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["summary"])' "$WORK/sentry-kafka-score.json")"
   echo "score     sentry  $(tail -1 "$WORK/sentry-score.txt")"
   echo "score     openedx $(tail -1 "$WORK/openedx-score.txt")"
 }
@@ -84,7 +89,9 @@ spec_one() { # key title repos...
     graphs+=("$r=$WORK/mirror/$r/graphify-out/graph.json")
     folders+=(--repo "$r=$(folder "$r")")
   done
-  python3 tools/demo/accuracy.py "$WORK/$key-score.txt" "tools/demo/$key.json" > "$WORK/$key-accuracy.json"
+  local kafka=() # the channel key's score, where there is one
+  [[ -f $WORK/$key-kafka-score.json ]] && kafka=("$WORK/$key-kafka-score.json")
+  python3 tools/demo/accuracy.py "$WORK/$key-score.txt" "tools/demo/$key.json" ${kafka[@]+"${kafka[@]}"} > "$WORK/$key-accuracy.json"
   (cd bridge && "$PY" -m atlas_bridge spec "${graphs[@]}" --title "$title" "${folders[@]}" \
     --links "$WORK/$key-links.json" ${more[@]+"${more[@]}"} --accuracy "$WORK/$key-accuracy.json" -o "$WORK/$key-spec.json")
 }

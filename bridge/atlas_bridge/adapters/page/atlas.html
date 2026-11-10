@@ -21,7 +21,7 @@
   --muted:#f5f5f5; --muted-foreground:#737373; --accent:#f5f5f5; --border:#e5e5e5; --input:#e5e5e5; --ring:#a1a1a1;
   --primary:#171717; --primary-foreground:#fafafa;
   --halo:#fafafa; --edge:rgba(0,0,0,.13); --grid:rgba(0,0,0,.075); --faint:#d4d4d4; --node:#404040;
-  --warning:#d97706; --destructive:#e7000b; --inferred:#7c3aed; --route:#0070f3;
+  --warning:#d97706; --destructive:#e7000b; --inferred:#7c3aed; --route:#0070f3; --proof:#15803d;
   --r0:#0070f3; --r1:#7928ca; --r2:#eb367f; --r3:#0d9488; --r4:#65a30d; --other:#a3a3a3;
   --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 16px -6px rgba(0,0,0,.08);
   color-scheme:light;
@@ -32,7 +32,7 @@
     --muted:#171717; --muted-foreground:#a1a1a1; --accent:#262626; --border:rgba(255,255,255,.1); --input:rgba(255,255,255,.15); --ring:#737373;
     --primary:#ededed; --primary-foreground:#0a0a0a;
     --halo:#000000; --edge:rgba(255,255,255,.15); --grid:rgba(255,255,255,.075); --faint:#404040; --node:#d4d4d4;
-    --warning:#fbbf24; --destructive:#ff6467; --inferred:#a78bfa; --route:#3291ff;
+    --warning:#fbbf24; --destructive:#ff6467; --inferred:#a78bfa; --route:#3291ff; --proof:#4ade80;
     --r0:#3291ff; --r1:#a855f7; --r2:#f472b6; --r3:#2dd4bf; --r4:#a3e635; --other:#525252;
     --shadow:0 0 0 1px rgba(0,0,0,.5),0 10px 30px -10px rgba(0,0,0,.8);
     color-scheme:dark;
@@ -43,7 +43,7 @@
   --muted:#171717; --muted-foreground:#a1a1a1; --accent:#262626; --border:rgba(255,255,255,.1); --input:rgba(255,255,255,.15); --ring:#737373;
   --primary:#ededed; --primary-foreground:#0a0a0a;
   --halo:#000000; --edge:rgba(255,255,255,.15); --grid:rgba(255,255,255,.075); --faint:#404040; --node:#d4d4d4;
-  --warning:#fbbf24; --destructive:#ff6467; --inferred:#a78bfa; --route:#3291ff;
+  --warning:#fbbf24; --destructive:#ff6467; --inferred:#a78bfa; --route:#3291ff; --proof:#4ade80;
   --r0:#3291ff; --r1:#a855f7; --r2:#f472b6; --r3:#2dd4bf; --r4:#a3e635; --other:#525252;
   --shadow:0 0 0 1px rgba(0,0,0,.5),0 10px 30px -10px rgba(0,0,0,.8);
   color-scheme:dark;
@@ -241,6 +241,7 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 .dock{position:relative;display:flex;align-items:center;justify-content:space-between;padding:4px;border-bottom:1px solid var(--border)}
 .dock button{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;color:var(--muted-foreground);transition:background-color .15s ease,color .15s ease,transform 160ms var(--ease-out)}
 .dock button:focus-visible{background:var(--accent);color:var(--foreground)}
+.dock button[hidden]{display:none}
 .zoom-ic{display:grid;place-items:center;width:22px;height:34px;margin-left:2px;color:var(--muted-foreground);flex:none}
 .zslider{--p:50%;flex:1;min-width:64px;height:34px;margin:0 8px 0 2px;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer;touch-action:none}
 .zslider::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:linear-gradient(to right,color-mix(in srgb,var(--foreground) 55%,transparent) 0 var(--p),var(--border) var(--p) 100%)}
@@ -381,6 +382,50 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
   .btn:active,.dock button:active,.toggle-group button:active{transform:none}
   .spin{animation-duration:1.6s}
 }
+
+/* ---------- HTTP links: proofs, accuracy, links panel ---------- */
+#route.on ~ #links,#attn.on ~ #links,#ask.on ~ #links{display:none}
+.dock button[aria-pressed="true"]{color:var(--foreground);background:var(--accent)}
+.badge-scip{background:color-mix(in srgb,var(--proof) 15%,transparent);color:var(--proof)}
+.badge-syntax{background:color-mix(in srgb,var(--route) 13%,transparent);color:var(--route)}
+.sec.proof{display:grid;gap:8px;padding:12px 8px 0}
+.site{display:grid;gap:4px;min-width:0}
+.site-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.site-t{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted-foreground)}
+.site-r{font-size:12px;font-weight:500}
+.site-loc{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;min-width:0}
+.site-loc .linkbtn{white-space:nowrap;flex:none;margin:0}
+.site-loc .mono{font:400 12px var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl;text-align:left}
+.site-fn{font-size:12px;color:var(--muted-foreground)}
+.site-fn code,.checks code{font:500 12px var(--mono);color:var(--foreground)}
+.pcode{margin:2px 0 0;padding:6px 0;border-radius:8px;background:var(--muted);font:400 11.5px/1.55 var(--mono);overflow-x:auto;max-width:100%}
+.pcode code{display:grid;min-width:max-content}
+.pcode .pl{display:block;padding:0 10px 0 0;white-space:pre}
+.pcode .pl.hit{background:color-mix(in srgb,var(--route) 14%,transparent);box-shadow:inset 2px 0 0 var(--route)}
+.pcode .ln{display:inline-block;width:42px;padding-right:10px;text-align:right;color:var(--muted-foreground);user-select:none;position:sticky;left:0;background:inherit}
+.hop{display:flex;align-items:center;gap:8px;padding:0 2px;color:var(--route);font-size:12px}
+.hop .mono{font:500 12px var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.checks ul{margin:4px 0 0;padding:0 0 0 16px;display:grid;gap:4px;font-size:12px;color:var(--muted-foreground)}
+.checks .mono{font:400 11.5px var(--mono)}
+.acc{margin:2px 0 4px;padding:12px;border-radius:8px;border:1px solid var(--border);background:color-mix(in srgb,var(--proof) 5%,var(--card));display:grid;gap:8px}
+.acc-h{font-size:12px;font-weight:600}
+.acc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.acc-s{display:grid;gap:1px}
+.acc-s b{font-size:20px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.acc-s span{font-size:11.5px;line-height:1.3;color:var(--muted-foreground)}
+.acc-note{margin:0;font-size:12px;line-height:1.45;color:var(--muted-foreground);text-wrap:pretty}
+.acc-link{justify-self:start;margin:0}
+.proof-legend{display:flex;flex-wrap:wrap;gap:6px 12px;padding:10px 4px 0;font-size:12px}
+.proof-legend span{display:inline-flex;align-items:center;gap:5px}
+.proof-legend b{font-weight:600;font-variant-numeric:tabular-nums}
+.imp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 8px;font-size:13px}
+.imp-row .rn{min-width:0;overflow:hidden}
+.imp-row .rs{display:block;color:var(--muted-foreground);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.unmatched summary{cursor:pointer;list-style:none}
+.unmatched summary::-webkit-details-marker{display:none}
+.unmatched summary h3::before{content:"▸ ";color:var(--muted-foreground)}
+.unmatched[open] summary h3::before{content:"▾ "}
+.impact-text.pad{padding:0 8px}
 
 /* ---------- about: what it does, roles, signature, impact ---------- */
 .about{display:grid;gap:10px;padding:14px 8px 16px;border-bottom:1px solid var(--border)}
@@ -596,6 +641,7 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
   <section class="lpanel card" id="route" aria-label="Directions"></section>
   <section class="lpanel card" id="attn" aria-labelledby="attnTitle"></section>
   <section class="lpanel card ask" id="ask" aria-label="Ask Atlas"></section>
+  <section class="lpanel card" id="links" aria-labelledby="linksTitle"></section>
 
   <div class="toolbar card" role="toolbar" aria-label="Map controls">
     <span class="count" id="count"></span>
@@ -634,6 +680,7 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
         <span class="dock-tip" id="dockTip" aria-hidden="true"></span>
         <button id="fit" aria-label="Fit to screen" data-tip="Fit to screen" data-kbd="F"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button id="dirBtn" aria-label="Get directions" data-tip="Directions"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5l6.5 6.5L8 14.5 1.5 8z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 9.5V8a1 1 0 011-1h3M8.6 5.4L10 7 8.6 8.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button id="linksBtn" aria-label="HTTP links" data-tip="HTTP links" data-kbd="L" aria-pressed="false" hidden><svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="3" cy="12" r="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M13 2.5l1.6 1.6L13 5.7 11.4 4.1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M4.5 10.6C5.5 6 8 4.2 11 4.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
         <span class="dsep" aria-hidden="true"></span>
         <span class="zoom-ic" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.8" stroke="currentColor" stroke-width="1.5"/><path d="M10.6 10.6L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         <input type="range" id="zoom" class="zslider" min="0" max="1000" step="1" value="500" aria-label="Zoom" title="Zoom (scroll, pinch, or + and −)">
@@ -654,6 +701,7 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 
 <script type="application/json" id="selfGraph">__ATLAS_SPEC__</script>
 <script type="application/json" id="selfSource">{}</script>
+<script type="application/json" id="mapIndex">[]</script>
 <script>
 var Atlas = (() => {
   var __defProp = Object.defineProperty;
@@ -698,6 +746,9 @@ var Atlas = (() => {
     hoverTO: 0,
     selectedId: -1,
     impactId: -1,
+    linkId: -1,
+    httpImpact: "",
+    linksOpen: false,
     askSet: [],
     askHops: [],
     askGroups: [],
@@ -760,6 +811,7 @@ var Atlas = (() => {
   var RT = $("#route");
   var ASK = $("#ask");
   var ATTN = $("#attn");
+  var LINKS = $("#links");
   var INSP = $("#insp");
   var Q = $("#q");
   var RES = $("#results");
@@ -1061,6 +1113,7 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
       edge: g("--edge"),
       grid: g("--grid"),
       route: g("--route"),
+      proof: g("--proof"),
       node: g("--node"),
       other: g("--other")
     });
@@ -1238,6 +1291,171 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
     return { hops, via: [...via] };
   }
 
+  // src/model/http.js
+  var PROOF = {
+    scip: {
+      label: "Confirmed by SCIP",
+      cls: "badge-scip",
+      note: "Every name the link rests on resolves, in a SCIP index of the code, to the definition the finder assumed."
+    },
+    syntax: {
+      label: "Read from syntax",
+      cls: "badge-syntax",
+      note: "The method and path are written at the call site: there is no name to resolve, so nothing for SCIP to check."
+    },
+    matched: {
+      label: "Matched",
+      cls: "badge-secondary",
+      note: "Read from the code, but no SCIP index could check the names it rests on."
+    },
+    inferred: {
+      label: "Inferred",
+      cls: "badge-inferred",
+      note: "The route fits only under an assumption the code does not show, such as a base URL prefix."
+    },
+    ambiguous: {
+      label: "Ambiguous",
+      cls: "badge-warning",
+      note: "More than one route could take this request."
+    },
+    contradicted: {
+      label: "Contradicted by SCIP",
+      cls: "badge-destructive",
+      note: "SCIP resolves a name this link rests on to a different definition than the finder assumed."
+    }
+  };
+  var PROOF_ORDER = ["scip", "syntax", "matched", "inferred", "ambiguous", "contradicted"];
+  var rank = (p) => {
+    const i = PROOF_ORDER.indexOf(p);
+    return i < 0 ? PROOF_ORDER.length : i;
+  };
+  function validateLinks(spec, N) {
+    const errs = [], node = (v) => Number.isInteger(v) && v >= 0 && v < N, repo = (v) => Number.isInteger(v) && v >= 0 && v < spec.repos.length;
+    if (spec.links === void 0) return errs;
+    if (!Array.isArray(spec.links)) return ["spec.links must be an array"];
+    spec.links.forEach((l, i) => {
+      if (!l || !node(l.from) || !node(l.to)) errs.push(`links[${i}] needs from and to node ids in 0..${N - 1}`);
+      else if (!PROOF[l.proof]) errs.push(`links[${i}] has proof ${l.proof}; use ${PROOF_ORDER.join(", ")}`);
+      else if (!l.call || !l.route || !repo(l.call.repo) || !repo(l.route.repo))
+        errs.push(`links[${i}] needs call and route sites with a repo index`);
+    });
+    if (spec.unmatched !== void 0 && !Array.isArray(spec.unmatched)) errs.push("spec.unmatched must be an array");
+    return errs;
+  }
+  var repoOf = (g, i) => g.domRepo[g.svcDom[g.own(i)]];
+  function contractOf(g, a, b) {
+    for (let j = g.AO[a]; j < g.AO[a + 1]; j++) {
+      const e = g.AE[j];
+      if (g.CS[e] === a && g.CD[e] === b) return e;
+    }
+    return -1;
+  }
+  function httpIndex(spec, g) {
+    const links = spec.links || [], at = /* @__PURE__ */ new Map(), groups = [];
+    links.forEach((l, i) => {
+      const key = l.from + ">" + l.to;
+      if (!at.has(key)) {
+        at.set(key, groups.length);
+        const within = l.call.repo === l.route.repo;
+        groups.push({ from: l.from, to: l.to, e: contractOf(g, l.from, l.to), links: [], proof: l.proof, within });
+      }
+      const gr = groups[at.get(key)];
+      gr.links.push(i);
+      if (rank(l.proof) < rank(gr.proof)) gr.proof = l.proof;
+    });
+    const byFrom = /* @__PURE__ */ new Map(), byTo = /* @__PURE__ */ new Map(), push = (m, k, v) => m.has(k) ? m.get(k).push(v) : m.set(k, [v]);
+    groups.forEach((gr, i) => {
+      push(byFrom, gr.from, i);
+      push(byTo, gr.to, i);
+    });
+    return {
+      links,
+      groups,
+      byFrom,
+      byTo,
+      repos: spec.repos.map((r) => ({ url: r.url || "", commit: r.commit || "" })),
+      unmatched: spec.unmatched || [],
+      accuracy: spec.meta && spec.meta.accuracy || null
+    };
+  }
+  function siteUrl(H, site) {
+    const r = H.repos[site.repo];
+    if (!r || !r.url || !r.commit) return "";
+    const path = site.file.split("/").map(encodeURIComponent).join("/");
+    return `${r.url}/blob/${r.commit}/${path}#L${site.line}`;
+  }
+  function groupsInto(g, H, target) {
+    const out = [];
+    if (target.t === "r") {
+      H.groups.forEach((gr, i) => {
+        if (repoOf(g, gr.to) === target.id && repoOf(g, gr.from) !== target.id) out.push(i);
+      });
+      return out;
+    }
+    const id = target.id, ids = id < g.S ? [id, ...range(g.sLs[id], g.sLe[id])] : [id];
+    for (const n of ids) for (const i of H.byTo.get(n) || []) out.push(i);
+    return out;
+  }
+  function groupsFrom(g, H, id) {
+    const ids = id < g.S ? [id, ...range(g.sLs[id], g.sLe[id])] : [id], out = [];
+    for (const n of ids) for (const i of H.byFrom.get(n) || []) out.push(i);
+    return out;
+  }
+  function range(a, b) {
+    const out = [];
+    for (let i = a; i < b; i++) out.push(i);
+    return out;
+  }
+  function httpImpact(g, H, target) {
+    const groups = groupsInto(g, H, target), links = [], endpoints = /* @__PURE__ */ new Set(), callers2 = /* @__PURE__ */ new Set(), repos = /* @__PURE__ */ new Set();
+    let within = 0;
+    for (const i of groups) {
+      const gr = H.groups[i];
+      links.push(...gr.links);
+      if (gr.within) within += gr.links.length;
+      endpoints.add(gr.to);
+      callers2.add(g.own(gr.from));
+      if (!gr.within) repos.add(repoOf(g, gr.from));
+    }
+    return { groups, links, within, endpoints: [...endpoints], callers: [...callers2], repos: [...repos] };
+  }
+  function repoPairs(g, H) {
+    const m = /* @__PURE__ */ new Map();
+    H.groups.forEach((gr, i) => {
+      const l = H.links[gr.links[0]], a = l.call.repo, b = l.route.repo, k = a + ">" + b;
+      if (!m.has(k)) m.set(k, { a, b, groups: [] });
+      m.get(k).groups.push(i);
+    });
+    return [...m.values()].sort(
+      (x, y) => (x.a === x.b) - (y.a === y.b) || y.groups.length - x.groups.length || x.a - y.a || x.b - y.b
+    );
+  }
+  var isWithin = (l) => l.call.repo === l.route.repo;
+  function proofCounts(H) {
+    const c = {};
+    for (const l of H.links) if (!isWithin(l)) c[l.proof] = (c[l.proof] || 0) + 1;
+    return c;
+  }
+  function arcCtrl(x0, y0, x1, y1) {
+    const dx = x1 - x0, dy = y1 - y0;
+    return [(x0 + x1) / 2 - dy * 0.18, (y0 + y1) / 2 + dx * 0.18];
+  }
+  function arcDistance(px, py, x0, y0, x1, y1, steps = 24) {
+    const [cx, cy] = arcCtrl(x0, y0, x1, y1);
+    let best = Infinity, ax = x0, ay = y0;
+    for (let s = 1; s <= steps; s++) {
+      const t = s / steps, u = 1 - t, bx = u * u * x0 + 2 * u * t * cx + t * t * x1, by = u * u * y0 + 2 * u * t * cy + t * t * y1;
+      best = Math.min(best, segDist(px, py, ax, ay, bx, by));
+      ax = bx;
+      ay = by;
+    }
+    return best;
+  }
+  function segDist(px, py, ax, ay, bx, by) {
+    const dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy, t = L ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / L)) : 0;
+    return Math.hypot(px - ax - t * dx, py - ay - t * dy);
+  }
+
   // src/ui/feedback.js
   var srTO = 0;
   function announce(t) {
@@ -1316,6 +1534,22 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
         if (e >= 0) store.focusEdges.push(e);
       }
     }
+    if (g.http && store.httpImpact === "n" + id) addHttpImpact(g, { t: "n", id }, add);
+    paintFocus(id < g.S ? id : -1);
+  }
+  function addHttpImpact(g, target, add) {
+    const im = httpImpact(g, g.http, target);
+    for (const i of im.groups) {
+      const gr = g.http.groups[i];
+      for (const n of [gr.from, gr.to]) {
+        add(n);
+        add(g.own(n));
+      }
+      if (gr.e >= 0) store.focusEdges.push(gr.e);
+    }
+  }
+  function paintFocus(id) {
+    const g = store.G;
     for (let j = 0; j < store.A.svcs.n; j++) store.A.svcs.fl[j * 2] = 0;
     for (let j = 0; j < store.A.leaves.n; j++) store.A.leaves.fl[j * 2] = 0;
     for (const i of store.focusList) {
@@ -1324,7 +1558,7 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
     }
     patch(LY.svcs, 2, store.A.svcs.fl);
     patch(LY.leaves, 2, store.A.leaves.fl);
-    const fe = store.focusEdges.slice(0, 2e4), spokes = id < g.S ? g.sLe[id] - g.sLs[id] : 0, n = fe.length + spokes;
+    const fe = store.focusEdges.slice(0, 2e4), spokes = id >= 0 ? g.sLe[id] - g.sLs[id] : 0, n = fe.length + spokes;
     const seg = new Float32Array(n * 4), prm = new Float32Array(n * 4), col = new Uint8Array(n * 4);
     const strong = [
       [theme.text, 0.55],
@@ -1362,13 +1596,44 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
   var same = (a, b) => !a && !b || a && b && a.t === b.t && a.id === b.id;
   var ROUTE_FOCUS = 2 ** 30;
   var ASK_FOCUS = 2 ** 30 + 1;
+  var LINK_FOCUS = 2 ** 30 + 2;
+  var HTTP_FOCUS = 2 ** 30 + 3;
   var routeActive = () => route.path.length > 1;
+  var httpFocusId = () => store.linkId >= 0 ? LINK_FOCUS : store.httpImpact && store.G.http ? HTTP_FOCUS : -1;
+  function computeHttpFocus() {
+    const g = store.G;
+    for (const i of store.focusList) store.inF[i] = 0;
+    store.focusList = [];
+    store.focusEdges = [];
+    const add = (i) => {
+      if (i >= 0 && !store.inF[i]) {
+        store.inF[i] = 1;
+        store.focusList.push(i);
+      }
+    };
+    if (store.linkId >= 0) {
+      const gr = g.http.groups[store.linkId];
+      for (const n of [gr.from, gr.to]) {
+        add(n);
+        add(g.own(n));
+      }
+      if (gr.e >= 0) store.focusEdges.push(gr.e);
+    }
+    if (store.httpImpact) addHttpImpact(g, { t: store.httpImpact[0], id: +store.httpImpact.slice(1) }, add);
+    paintFocus(-1);
+  }
   function updateFocus() {
-    const hid = store.hover && store.hover.t === "n" ? store.hover.id : -1, id = store.selectedId >= 0 ? store.selectedId : routeActive() || store.askSet.length ? -1 : hid;
+    const hid = store.hover && store.hover.t === "n" ? store.hover.id : -1, hf = store.selectedId >= 0 ? -1 : httpFocusId(), id = store.selectedId >= 0 ? store.selectedId : hf >= 0 || routeActive() || store.askSet.length ? -1 : hid;
     if (id >= 0) {
       if (id !== store.focusId) {
         computeFocus(id);
         store.focusId = id;
+      }
+      store.focusGoal = 1;
+    } else if (hf >= 0) {
+      if (store.focusId !== hf) {
+        computeHttpFocus();
+        store.focusId = hf;
       }
       store.focusGoal = 1;
     } else if (routeActive()) {
@@ -1384,7 +1649,7 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
       }
       store.focusGoal = 1;
     } else store.focusGoal = 0;
-    store.dimGoal = store.selectedId >= 0 || store.focusId === ROUTE_FOCUS && routeActive() || store.focusId === ASK_FOCUS && store.askSet.length ? 1 : 0;
+    store.dimGoal = store.selectedId >= 0 || hf >= 0 || store.focusId === ROUTE_FOCUS && routeActive() || store.focusId === ASK_FOCUS && store.askSet.length ? 1 : 0;
     requestRender();
   }
   function computeRouteFocus() {
@@ -1525,6 +1790,27 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
   };
   var ASK_ENGINE = "demo";
   var ASK_PLAYBACK = { think: 520, tick: 28, tokensPerTick: 2 };
+  var HTTP_PICK_PX = 6;
+  var HTTP_FIT_KMAX = 2.4;
+  var HTTP_FIT_PAD = 0.2;
+  var HTTP_ARC = {
+    width: 1.5,
+    // arc width at rest, px
+    hotWidth: 2.6,
+    // ...when selected, hovered or part of an impact view
+    restAlpha: 0.8,
+    // arc opacity at rest
+    withinAlpha: 0.22,
+    // ...for links inside one repository (a frontend calling its own API), which are many
+    dimAlpha: 0.1,
+    // ...while something else has the focus
+    arrowPx: 6,
+    // arrowhead length at the endpoint end
+    endpointPx: 3.2,
+    // endpoint marker radius, drawn at every zoom so endpoints show before their streets do
+    flowSpeed: 0.11
+    // flow dots, screen px per ms
+  };
 
   // src/render/minimap.js
   var mm = $("#mm");
@@ -1620,10 +1906,11 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
   // src/app/url-codec.js
   var SC_NAME = { self: "self", 281: "281", 5e3: "5k", 25e3: "25k", 1e5: "100k" };
   var SC_NUM = { self: "self", 281: 281, "5k": 5e3, "25k": 25e3, "100k": 1e5 };
+  var MAP_KEY = /^[a-z][a-z0-9]*$/;
   var endToken = (e) => !e ? "x" : e.t === "s" ? String(e.id) : e.t + e.id;
   var tokenToEnd = (v) => v === "x" ? null : /^\d+$/.test(v) ? { t: "s", id: +v } : /^[rd]\d+$/.test(v) ? { t: v[0], id: +v.slice(1) } : void 0;
   function formatHash(v) {
-    let n = SC_NAME[v.dataset];
+    let n = SC_NAME[v.dataset] || v.dataset;
     const r = v.route;
     if (r.from || r.to)
       n += `-route-${endToken(r.from)}-${endToken(r.to)}${r.avoid ? "-avoid" : ""}${r.links === "any" ? "-any" : ""}${r.detailSet ? "-by" + r.detail : ""}`;
@@ -1634,7 +1921,7 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
   }
   function parseHash(hash) {
     const p = decodeURIComponent(hash.replace(/^#/, "")).split("-");
-    const o = { n: SC_NUM[p[0]] || "self" };
+    const o = { n: SC_NUM[p[0]] || (MAP_KEY.test(p[0]) ? p[0] : "self") };
     for (let i = 1; i < p.length; i++) {
       const t = p[i];
       if (t === "node") {
@@ -2342,13 +2629,13 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
       flushPara();
       flushList();
     }
-    const parsed = streaming ? null : parseFlow(flow, isValid);
+    const parsed2 = streaming ? null : parseFlow(flow, isValid);
     return {
       html: out.join(""),
       refs,
-      groups: groups.concat(flowGroups(parsed)),
+      groups: groups.concat(flowGroups(parsed2)),
       followups,
-      flow: parsed,
+      flow: parsed2,
       summary: streaming ? null : summary
     };
   }
@@ -4836,6 +5123,185 @@ FLOW: ${flowLine}`;
     ].join("\n");
   }
 
+  // src/app/http.js
+  function pickLink(px, py, tolPx = HTTP_PICK_PX) {
+    const g = store.G, H = g && g.http;
+    if (!H) return null;
+    const SX = (x) => x * cam.k + cam.x, SY = (y) => y * cam.k + cam.y;
+    let best = -1, bd = tolPx;
+    H.groups.forEach((gr, i) => {
+      const x0 = SX(g.PX[gr.from]), y0 = SY(g.PY[gr.from]), x1 = SX(g.PX[gr.to]), y1 = SY(g.PY[gr.to]);
+      const d = arcDistance(px, py, x0, y0, x1, y1);
+      if (d < bd) {
+        bd = d;
+        best = i;
+      }
+    });
+    return best >= 0 ? { t: "h", id: best } : null;
+  }
+  function fitLink(g, gr) {
+    const xs = [], ys = [];
+    for (const i of [gr.from, gr.to, g.own(gr.from), g.own(gr.to)]) {
+      xs.push(g.PX[i] - g.PR[i], g.PX[i] + g.PR[i]);
+      ys.push(g.PY[i] - g.PR[i], g.PY[i] + g.PR[i]);
+    }
+    const x0 = g.PX[gr.from], y0 = g.PY[gr.from], x1 = g.PX[gr.to], y1 = g.PY[gr.to], [cx, cy] = arcCtrl(x0, y0, x1, y1);
+    xs.push(0.25 * x0 + 0.5 * cx + 0.25 * x1);
+    ys.push(0.25 * y0 + 0.5 * cy + 0.25 * y1);
+    const padX = (Math.max(...xs) - Math.min(...xs)) * HTTP_FIT_PAD, padY = (Math.max(...ys) - Math.min(...ys)) * HTTP_FIT_PAD;
+    return fitBox(
+      Math.min(...xs) - padX,
+      Math.min(...ys) - padY,
+      Math.max(...xs) + padX,
+      Math.max(...ys) + padY,
+      store.KMIN,
+      HTTP_FIT_KMAX
+    );
+  }
+  function openLink(gid, via) {
+    const g = store.G, gr = g.http.groups[gid];
+    closeSource(false);
+    store.selectedId = -1;
+    store.impactId = -1;
+    store.httpImpact = "";
+    store.linkId = gid;
+    store.hover = null;
+    store.placeDirty = true;
+    updateFocus();
+    openLinkInspector(gid);
+    flyTo(fitLink(g, gr));
+    const l = g.http.links[gr.links[0]];
+    announce(`Link ${l.method} ${l.path} from ${g.repoName[l.call.repo]} to ${g.repoName[l.route.repo]}.`);
+    if (via === "list" || via === "map")
+      requestAnimationFrame(() => {
+        const t = document.getElementById("insTitle");
+        if (t) t.focus({ preventScroll: true });
+      });
+    writeHash();
+  }
+  function toggleHttpImpact(key) {
+    const g = store.G, on = store.httpImpact !== key;
+    store.httpImpact = on ? key : "";
+    store.focusId = -1;
+    updateFocus();
+    const target = { t: key[0], id: +key.slice(1) }, im = httpImpact(g, g.http, target);
+    if (target.t === "n" && store.selectedId === target.id) openInspector(target.id);
+    for (const b of document.querySelectorAll("[data-http-impact]")) {
+      const pressed = b.dataset.httpImpact === store.httpImpact;
+      b.setAttribute("aria-pressed", String(pressed));
+      b.textContent = pressed ? "Hide on map" : b.dataset.label || "Show on map";
+    }
+    if (on && im.groups.length) {
+      const ends = im.groups.flatMap((i) => [g.http.groups[i].from, g.http.groups[i].to]);
+      flyTo(fitNodes([...ends, ...ends.map(g.own)], 1.6));
+    } else if (on && target.t === "r") flyToTerr("r", target.id);
+    const name = target.t === "r" ? g.repoName[target.id] : g.name(target.id);
+    announce(on ? `Showing what calls ${name} from other repositories.` : "Impact view off.");
+  }
+
+  // src/ui/proof.js
+  var plural = (n, one, many2) => `${fmt(n)} ${n === 1 ? one : many2}`;
+  var proofBadge = (p) => `<span class="badge ${PROOF[p].cls}" title="${esc(PROOF[p].note)}">${esc(PROOF[p].label)}</span>`;
+  function codeHTML(site) {
+    if (!site.code || !site.code.length) return "";
+    const indents = site.code.filter((t) => t.trim()).map((t) => t.length - t.trimStart().length), cut = indents.length ? Math.min(...indents) : 0;
+    const rows = site.code.map((t, k) => {
+      t = t.slice(cut);
+      const n = site.start + k;
+      return `<span class="pl${n === site.line ? " hit" : ""}"><span class="ln" aria-hidden="true">${n}</span>${esc(t) || " "}</span>`;
+    });
+    return `<pre class="pcode" tabindex="0" aria-label="Code around line ${site.line}"><code>${rows.join("")}</code></pre>`;
+  }
+  function siteHTML(g, site, title, detail) {
+    const url = siteUrl(g.http, site);
+    return `<div class="site"><div class="site-h"><span class="site-t">${title}</span><span class="site-r" ${nameAttrs}>${esc(g.repoName[site.repo])}</span></div><div class="site-loc"><span class="mono" ${nameAttrs}>${esc(site.file)}:${site.line}</span>${url ? `<a class="linkbtn" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="Open this line on GitHub at the commit the map was built from">GitHub \u2197</a>` : ""}</div>` + (detail ? `<div class="site-fn">${detail}</div>` : "") + codeHTML(site) + "</div>";
+  }
+  var callDetail = (c) => c.function ? `in <code ${nameAttrs}>${esc(c.function)}</code>` : "";
+  var routeDetail = (r) => r.handler ? `handled by <code ${nameAttrs}>${esc(r.handler)}</code>${r.framework ? ` \xB7 ${esc(r.framework)}` : ""}` : esc(r.framework || "");
+  function checksHTML(checks) {
+    if (!checks || !checks.length) return "";
+    const rows = checks.map(
+      (c) => `<li><code ${nameAttrs}>${esc(c.name)}</code> at <span class="mono">${esc(c.at)}</span> means <span class="mono">${esc(c.means)}</span> <span class="badge ${c.verdict === "confirmed" ? "badge-scip" : c.verdict === "contradicted" ? "badge-destructive" : "badge-secondary"}">${esc(c.verdict)}</span></li>`
+    ).join("");
+    return `<div class="checks"><div class="site-t">What SCIP checked</div><ul>${rows}</ul></div>`;
+  }
+  function linkInspectorHTML(gid) {
+    const g = store.G, H = g.http, gr = H.groups[gid], first = H.links[gr.links[0]], a = first.call.repo, b = first.route.repo;
+    let h = `<button class="handle" data-handle aria-label="Resize panel"></button><div class="ins-head"><nav class="crumbs" aria-label="Repositories" ${nameAttrs}><button data-terr="r${a}">${esc(g.repoName[a])}</button><span class="slash" aria-hidden="true">\u2192</span><button data-terr="r${b}">${esc(g.repoName[b])}</button></nav>`;
+    h += `<h2 class="ins-title mono" id="insTitle" tabindex="-1" ${nameAttrs}>${esc(first.method)} ${esc(first.path)}</h2><div class="kindrow">${proofBadge(gr.proof)}<span class="badge badge-outline">${gr.within ? "Inside one repository" : "HTTP link"}</span></div>`;
+    h += `<button class="btn btn-ghost btn-icon close" data-close aria-label="Close panel">${ICON_X}</button></div><div class="ins-body scroll">`;
+    h += `<div class="about"><p class="about-text">${esc(PROOF[gr.proof].note)}</p><div class="prov">Why it matched: ${esc(first.reason || "the method and path fit one route")}${gr.within ? ". No answer key covers links inside one repository yet." : ""}</div></div>`;
+    for (const li of gr.links) {
+      const l = H.links[li];
+      h += `<div class="sec proof">${siteHTML(g, l.call, "Sends the request", callDetail(l.call))}`;
+      h += `<div class="hop" aria-hidden="true"><span>\u2193</span><span class="mono">${esc(l.method)} ${esc(l.path)}</span></div>`;
+      if (li === gr.links[0]) h += siteHTML(g, l.route, "Serves it", routeDetail(l.route));
+      h += checksHTML(l.checks) + "</div>";
+    }
+    h += `<div class="sec"><div class="sec-h"><h3>Ends</h3></div>${nodeRow(g, gr.from)}${nodeRow(g, gr.to)}</div>`;
+    h += impactBlockHTML(g, { t: "n", id: gr.to }, "this endpoint");
+    return h + "</div>";
+  }
+  function nodeRow(g, i) {
+    const repo = g.repoName[g.domRepo[g.svcDom[g.own(i)]]];
+    return `<button class="row" data-id="${i}">${dotHTML(i)}<span class="rn${i >= g.S ? " mono" : ""}" ${nameAttrs}>${esc(g.name(i))}<span class="rs">${esc(repo)} \xB7 ${esc(g.svcName[g.own(i)])}</span></span><span class="rm"></span></button>`;
+  }
+  function groupRow(g, gid, side) {
+    const H = g.http, gr = H.groups[gid], l = H.links[gr.links[0]], far = side === "caller" ? gr.from : gr.to, farRepo = g.repoName[side === "caller" ? l.call.repo : l.route.repo], title = side === "caller" ? l.call.function || g.name(far) : `${l.method} ${l.path}`, sub = side === "caller" ? `${farRepo} \xB7 ${l.call.file}:${l.call.line}` : `${farRepo} \xB7 ${l.route.handler || g.name(far)}`, n = gr.links.length > 1 ? `<span class="badge badge-secondary" title="Call sites">${gr.links.length}</span>` : "";
+    return `<button class="row" data-link="${gid}"><span class="g ev" style="--c:var(--route)" aria-hidden="true"></span><span class="rn mono" ${nameAttrs}>${esc(title)}<span class="rs">${esc(sub)}</span></span><span class="rm">${n}${proofBadge(gr.proof)}</span></button>`;
+  }
+  function impactBlockHTML(g, target, what) {
+    const H = g.http, im = httpImpact(g, H, target);
+    if (!im.groups.length) return "";
+    const key = target.t + target.id, on = store.httpImpact === key, reach = /* @__PURE__ */ new Set();
+    for (const s of im.callers) for (const t of impactOf(g, s).services) if (!im.callers.includes(t)) reach.add(t);
+    const cross = im.links.length - im.within, parts = [];
+    if (cross)
+      parts.push(
+        `<b>${plural(cross, "call site", "call sites")}</b> in <b>${plural(im.repos.length, "other repository", "other repositories")}</b>`
+      );
+    if (im.within) parts.push(`<b>${plural(im.within, "call site", "call sites")}</b> in its own frontend`);
+    let h = `<div class="sec"><div class="sec-h"><h3>If ${esc(what)} changes</h3></div><div class="impact-body"><p class="impact-text">`;
+    h += `${parts.join(" and ")} send ${target.t === "n" && target.id >= g.S ? "it" : "them"} requests, from <b>${plural(im.callers.length, "file", "files")}</b>`;
+    h += target.t === "n" && target.id < g.S ? ` to ${plural(im.endpoints.length, "endpoint", "endpoints")}.` : ".";
+    if (reach.size)
+      h += ` Another <b>${plural(reach.size, "file", "files")}</b> reach those calls through Graphify\u2019s call graph (inferred, not proven).`;
+    return h + `</p><button class="btn btn-outline btn-sm" data-http-impact="${key}" aria-pressed="${on}">${on ? "Hide on map" : "Show on map"}</button></div></div>`;
+  }
+  function httpSectionHTML(id) {
+    const g = store.G, H = g.http;
+    if (!H) return "";
+    let h = "";
+    const into = groupsInto(g, H, { t: "n", id }), from = groupsFrom(g, H, id);
+    if (id >= g.S && H.byTo.has(id)) {
+      const l = H.links[H.groups[into[0]].links[0]];
+      h += `<div class="sec proof"><div class="sec-h"><h3>HTTP endpoint</h3></div>${siteHTML(g, l.route, "Served at", routeDetail(l.route))}</div>`;
+    }
+    if (into.length)
+      h += `<div class="sec"><div class="sec-h"><h3>Called over HTTP from</h3><span>${fmt(into.length)}</span></div>${into.map((i) => groupRow(g, i, "caller")).join("")}</div>`;
+    if (from.length)
+      h += `<div class="sec"><div class="sec-h"><h3>Sends requests to</h3><span>${fmt(from.length)}</span></div>${from.map((i) => groupRow(g, i, "endpoint")).join("")}</div>`;
+    if (into.length) h += impactBlockHTML(g, { t: "n", id }, id < g.S ? "this file\u2019s endpoints" : "this endpoint");
+    return h;
+  }
+  function accuracyHTML(acc, within = 0) {
+    if (!acc)
+      return `<div class="acc"><div class="acc-h">Accuracy not measured</div><p class="acc-note">No answer key exists for these repositories, so these links are unchecked.</p></div>`;
+    const stat = (v, label) => `<div class="acc-s"><b>${esc(v)}</b><span>${esc(label)}</span></div>`;
+    let h = `<div class="acc"><div class="acc-h">Measured on an answer key built without the tool</div><div class="acc-stats">`;
+    h += stat(`${acc.found}/${acc.of}`, "production links found");
+    h += stat(acc.falseLinks, acc.falseLinks === 1 ? "false link" : "false links");
+    if (acc.scip !== void 0) h += stat(`${acc.scip}/${acc.found}`, "of them confirmed by SCIP");
+    h += "</div>";
+    if (acc.how) h += `<p class="acc-note">${esc(acc.how)}</p>`;
+    if (acc.missed) h += `<p class="acc-note">Missed: ${esc(acc.missed)}</p>`;
+    if (within)
+      h += `<p class="acc-note">Not counted: ${fmt(within)} links inside one repository (a frontend calling its own API), which no answer key covers yet.</p>`;
+    if (acc.key)
+      h += `<a class="linkbtn acc-link" href="${esc(acc.key)}" target="_blank" rel="noopener noreferrer">The answer key and how it was built \u2197</a>`;
+    return h + "</div>";
+  }
+
   // src/ui/inspector.js
   function openInspector(id) {
     const g = store.G, svc = id < g.S, s = g.own(id), d = g.svcDom[s], r = g.domRepo[d];
@@ -4849,7 +5315,7 @@ FLOW: ${flowLine}`;
       ai: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5 9.3 6.7 13.5 8 9.3 9.3 8 13.5 6.7 9.3 2.5 8l4.2-1.3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>'
     };
     h += `<div class="actions"><button class="act primary" data-route="from" title="Directions from ${esc(g.svcName[s])}. Use the swap button to route here instead."><span class="ic">${IC.dir}</span>Directions</button><button class="act" data-fitconn><span class="ic">${IC.conn}</span>Connections</button><button class="act" data-source${hasSource(id) ? "" : ' disabled title="No source code for this item"'}><span class="ic">${IC.source}</span>Source</button><button class="act" data-copy-ai title="Copy a description of this item for an AI agent"><span class="ic">${IC.ai}</span>Copy for AI</button></div>`;
-    h += `<button class="btn btn-ghost btn-icon close" data-close aria-label="Close panel">${ICON_X}</button></div><div class="ins-body scroll">` + aboutHTML(id);
+    h += `<button class="btn btn-ghost btn-icon close" data-close aria-label="Close panel">${ICON_X}</button></div><div class="ins-body scroll">` + aboutHTML(id) + httpSectionHTML(id);
     const c = [0, 0, 0, 0], cap = (key) => expanded.has(key) ? 240 : 40;
     if (svc) {
       const outM = /* @__PURE__ */ new Map(), inM = /* @__PURE__ */ new Map(), roots = [id];
@@ -4915,6 +5381,10 @@ FLOW: ${flowLine}`;
     INSP.innerHTML = h + `</div>`;
     app.classList.add("has-insp");
   }
+  function openLinkInspector(gid) {
+    INSP.innerHTML = linkInspectorHTML(gid);
+    app.classList.add("has-insp");
+  }
   function init7() {
     INSP.addEventListener("click", (e) => {
       if (e.target.closest("[data-close]")) return deselect(true);
@@ -4925,7 +5395,7 @@ FLOW: ${flowLine}`;
       if (mb) {
         expanded.add(mb.dataset.more);
         const sc = INSP.querySelector(".ins-body").scrollTop;
-        openInspector(store.selectedId);
+        if (store.selectedId >= 0) openInspector(store.selectedId);
         INSP.querySelector(".ins-body").scrollTop = sc;
         return;
       }
@@ -4936,6 +5406,10 @@ FLOW: ${flowLine}`;
       const src = e.target.closest("[data-source]");
       if (src && !src.disabled) return openSource(store.selectedId, src);
       if (e.target.closest("[data-impact]")) return toggleImpact(store.selectedId);
+      const hi = e.target.closest("[data-http-impact]");
+      if (hi) return toggleHttpImpact(hi.dataset.httpImpact);
+      const lk = e.target.closest("[data-link]");
+      if (lk) return openLink(+lk.dataset.link, "list");
       const tb = e.target.closest("[data-terr]");
       if (tb) {
         const v = tb.dataset.terr;
@@ -4988,7 +5462,36 @@ FLOW: ${flowLine}`;
     });
   }
 
+  // src/model/maps.js
+  var INDEX = null;
+  var parsed = /* @__PURE__ */ new Map();
+  function mapList() {
+    if (!INDEX) {
+      const el = document.getElementById("mapIndex");
+      INDEX = el ? JSON.parse(el.textContent) : [];
+    }
+    return INDEX;
+  }
+  var isMap = (key) => mapList().some((m) => m.key === key);
+  function mapSpec(key) {
+    if (!parsed.has(key)) parsed.set(key, JSON.parse(document.getElementById("map-" + key).textContent));
+    return parsed.get(key);
+  }
+  var mapLabel = (key) => (mapList().find((m) => m.key === key) || { label: key }).label;
+
   // src/ui/controls.js
+  var datasetOf = (v) => /^\d+$/.test(v) ? +v : v;
+  function mapButtons() {
+    const maps = mapList();
+    if (!maps.length) return;
+    const group = $("#scale"), sel = $("#scaleSel");
+    group.setAttribute("aria-label", "Map");
+    sel.setAttribute("aria-label", "Map");
+    group.innerHTML = '<span class="thumb" aria-hidden="true"></span>' + maps.map(
+      (m, i) => `<button role="radio" data-v="${esc(m.key)}" aria-checked="${i === 0}" tabindex="${i === 0 ? 0 : -1}">${esc(m.label)}</button>`
+    ).join("");
+    sel.innerHTML = maps.map((m) => `<option value="${esc(m.key)}">${esc(m.label)}</option>`).join("");
+  }
   function syncThumb(el) {
     const b = el.querySelector('[aria-checked="true"]'), t = el.querySelector(".thumb");
     if (!b || !t || !b.offsetWidth) return;
@@ -5070,7 +5573,8 @@ FLOW: ${flowLine}`;
       store.userColor = true;
       setMode(v);
     });
-    radioGroup($("#scale"), (v) => loadDataset(v === "self" ? "self" : +v));
+    mapButtons();
+    radioGroup($("#scale"), (v) => loadDataset(datasetOf(v)));
     $("#issues").addEventListener("click", () => toggleIssues());
     $("#fit").addEventListener("click", () => fitAll());
     $("#dirBtn").addEventListener("click", () => startDirections());
@@ -5078,7 +5582,7 @@ FLOW: ${flowLine}`;
     DOCK.addEventListener("pointerleave", () => showTip(null));
     DOCK.addEventListener("focusin", (e) => showTip(e.target.closest("button")));
     DOCK.addEventListener("focusout", () => showTip(null));
-    $("#scaleSel").addEventListener("change", (e) => loadDataset(e.target.value === "self" ? "self" : +e.target.value));
+    $("#scaleSel").addEventListener("change", (e) => loadDataset(datasetOf(e.target.value)));
   }
 
   // src/app/url.js
@@ -5168,6 +5672,8 @@ FLOW: ${flowLine}`;
         }
       if (best >= 0) return { t: "n", id: best };
     }
+    const link = pickLink(px, py);
+    if (link) return link;
     for (let r = 0; r < g.R; r++)
       if (Math.hypot(wx - g.rx[r], wy - g.ry[r]) < g.rR[r]) {
         if (V.dAct > 0.5) {
@@ -5184,6 +5690,10 @@ FLOW: ${flowLine}`;
     if (!h) return "";
     if (h.t === "r") return `Repository ${g.repoName[h.id]}`;
     if (h.t === "d") return `Domain ${g.domName[h.id]} in ${g.repoName[g.domRepo[h.id]]}`;
+    if (h.t === "h") {
+      const l = g.http.links[g.http.groups[h.id].links[0]];
+      return `HTTP link ${l.method} ${l.path} from ${g.repoName[l.call.repo]} to ${g.repoName[l.route.repo]}`;
+    }
     const s = g.own(h.id);
     return h.id < g.S ? `Service ${g.svcName[h.id]} in ${g.repoName[g.domRepo[g.svcDom[h.id]]]}, ${g.domName[g.svcDom[h.id]]}` : `${KIND[g.KND[h.id]]} ${g.name(h.id)} on ${g.svcName[s]}`;
   };
@@ -5197,8 +5707,10 @@ FLOW: ${flowLine}`;
     if (!inspOpen() && document.activeElement && !INSP.contains(document.activeElement)) opener2 = document.activeElement;
     if (id !== store.selectedId) {
       store.impactId = -1;
+      if (store.httpImpact[0] !== "r") store.httpImpact = "";
       closeSource(false);
     }
+    store.linkId = -1;
     store.selectedId = id;
     expanded.clear();
     pushRecent(id);
@@ -5220,9 +5732,11 @@ FLOW: ${flowLine}`;
     writeHash();
   }
   function deselect(restore) {
-    if (store.selectedId < 0) return;
+    if (store.selectedId < 0 && store.linkId < 0) return;
     store.selectedId = -1;
+    store.linkId = -1;
     store.impactId = -1;
+    if (store.httpImpact[0] === "n") store.httpImpact = "";
     closeSource(false);
     store.placeDirty = true;
     app.classList.remove("has-insp");
@@ -5388,15 +5902,19 @@ FLOW: ${flowLine}`;
     };
   }
   var svcBox = (q2, side) => side === "right" ? [q2.x + q2.rr + 6, q2.y - 8, q2.x + q2.rr + 10 + q2.w, q2.y + 8] : [q2.x - q2.rr - 10 - q2.w, q2.y - 8, q2.x - q2.rr - 6, q2.y + 8];
+  var linkEnds = (g, gid) => g.http ? [g.http.groups[gid].from, g.http.groups[gid].to] : [];
   function reservePinned(fx, pins) {
     const { g } = fx;
     const geo = (key) => labelGeometry(fx, key);
     const pinned = [];
     if (store.selectedId >= 0) pinned.push((store.selectedId < g.S ? "s" : "l") + store.selectedId);
+    const leafKey = (i) => (i < g.S ? "s" : "l") + i;
     if (store.hover) {
-      if (store.hover.t === "n") pinned.push((store.hover.id < g.S ? "s" : "l") + store.hover.id);
+      if (store.hover.t === "n") pinned.push(leafKey(store.hover.id));
+      else if (store.hover.t === "h") linkEnds(g, store.hover.id).forEach((i) => pinned.push(leafKey(i)));
       else pinned.push(store.hover.t + store.hover.id);
     }
+    if (store.linkId >= 0) linkEnds(g, store.linkId).forEach((i) => pinned.push(leafKey(i)));
     for (const [end] of pins) pinned.push(end.t + end.id);
     const pinnedSet = new Set(pinned);
     for (const key of pinned) {
@@ -5574,6 +6092,115 @@ FLOW: ${flowLine}`;
     paintLabels(fx, pinned, pinnedSet);
   }
 
+  // src/render/http.js
+  function arcStyle(proof) {
+    if (proof === "scip" || proof === "syntax") return [theme.proof, null];
+    if (proof === "inferred") return [theme.st[3], [5, 4]];
+    if (proof === "ambiguous") return [theme.st[1], [5, 4]];
+    if (proof === "contradicted") return [theme.st[2], [2, 3]];
+    return [theme.text, null];
+  }
+  function hotGroups(g) {
+    const H = g.http, hot = /* @__PURE__ */ new Set();
+    if (store.linkId >= 0) hot.add(store.linkId);
+    if (store.hover && store.hover.t === "h") hot.add(store.hover.id);
+    if (store.selectedId >= 0) {
+      const n = { t: "n", id: store.selectedId };
+      for (const i of [...groupsFrom(g, H, store.selectedId), ...groupsInto(g, H, n)]) hot.add(i);
+    }
+    if (store.httpImpact) {
+      const t = { t: store.httpImpact[0], id: +store.httpImpact.slice(1) };
+      for (const i of httpImpact(g, H, t).groups) hot.add(i);
+    }
+    return hot;
+  }
+  function drawHttp(fx) {
+    const { g, I, now, SX, SY, on } = fx, H = g.http;
+    if (!H || !H.groups.length) return;
+    const hot = hotGroups(g), focused = store.dimT > 0.02 && (hot.size > 0 || store.focusId >= 0), order2 = H.groups.map((_, i) => i).sort((a, b) => hot.has(a) - hot.has(b));
+    for (const i of order2) {
+      const gr = H.groups[i], isHot = hot.has(i), x0 = SX(g.PX[gr.from]), y0 = SY(g.PY[gr.from]), x1 = SX(g.PX[gr.to]), y1 = SY(g.PY[gr.to]);
+      if (!on(x0, y0, 4e3) && !on(x1, y1, 4e3)) continue;
+      const [cx, cy] = arcCtrl(x0, y0, x1, y1), [col, dash] = arcStyle(gr.proof), rest = gr.within ? HTTP_ARC.withinAlpha : HTTP_ARC.restAlpha, a = isHot ? 1 : focused ? HTTP_ARC.dimAlpha + (rest - HTTP_ARC.dimAlpha) * (1 - store.dimT) : rest;
+      oc.globalAlpha = a * I;
+      oc.strokeStyle = css(col);
+      oc.lineWidth = isHot ? HTTP_ARC.hotWidth : HTTP_ARC.width;
+      oc.setLineDash(dash || []);
+      oc.beginPath();
+      oc.moveTo(x0, y0);
+      oc.quadraticCurveTo(cx, cy, x1, y1);
+      oc.stroke();
+      oc.setLineDash([]);
+      arrowHead(x1, y1, cx, cy, col);
+      endpointMark(x1, y1, col);
+      if (isHot && !reduceMotion) flowDots(x0, y0, cx, cy, x1, y1, now, col, on);
+    }
+    oc.globalAlpha = 1;
+  }
+  function arrowHead(x1, y1, cx, cy, col) {
+    const ang = Math.atan2(y1 - cy, x1 - cx), L = HTTP_ARC.arrowPx, back = HTTP_ARC.endpointPx + 1.5;
+    oc.save();
+    oc.translate(x1 - Math.cos(ang) * back, y1 - Math.sin(ang) * back);
+    oc.rotate(ang);
+    oc.beginPath();
+    oc.moveTo(0, 0);
+    oc.lineTo(-L, -L * 0.55);
+    oc.lineTo(-L, L * 0.55);
+    oc.closePath();
+    oc.fillStyle = css(col);
+    oc.fill();
+    oc.restore();
+  }
+  function endpointMark(x, y, col) {
+    const r = HTTP_ARC.endpointPx;
+    oc.beginPath();
+    oc.moveTo(x, y - r * 1.25);
+    oc.lineTo(x + r * 1.25, y);
+    oc.lineTo(x, y + r * 1.25);
+    oc.lineTo(x - r * 1.25, y);
+    oc.closePath();
+    oc.fillStyle = css(theme.halo);
+    oc.fill();
+    oc.lineWidth = 1.4;
+    oc.strokeStyle = css(col);
+    oc.stroke();
+  }
+  function flowDots(x0, y0, cx, cy, x1, y1, now, col, on) {
+    const L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.min(6, Math.round(L / 110)));
+    oc.fillStyle = css(col);
+    for (let q2 = 0; q2 < n; q2++) {
+      const t = (now * HTTP_ARC.flowSpeed / Math.max(L, 1) + q2 / n) % 1, u = 1 - t, x = u * u * x0 + 2 * u * t * cx + t * t * x1, y = u * u * y0 + 2 * u * t * cy + t * t * y1;
+      if (!on(x, y, 6)) continue;
+      const ga = oc.globalAlpha;
+      oc.globalAlpha = ga * Math.min(1, Math.sin(Math.PI * t) * 2.2);
+      oc.beginPath();
+      oc.arc(x, y, 2.4, 0, Math.PI * 2);
+      oc.fill();
+      oc.globalAlpha = ga;
+    }
+  }
+  function drawHttpTip(fx) {
+    const { g, SX, SY } = fx, H = g.http;
+    if (!H || !store.hover || store.hover.t !== "h") return;
+    const gr = H.groups[store.hover.id], l = H.links[gr.links[0]], x0 = SX(g.PX[gr.from]), y0 = SY(g.PY[gr.from]), x1 = SX(g.PX[gr.to]), y1 = SY(g.PY[gr.to]), [cx, cy] = arcCtrl(x0, y0, x1, y1), mx = 0.25 * x0 + 0.5 * cx + 0.25 * x1, my = 0.25 * y0 + 0.5 * cy + 0.25 * y1;
+    const top = `${l.method} ${l.path}`, more = gr.links.length > 1 ? ` \xB7 ${gr.links.length} call sites` : "", sub = `${g.repoName[l.call.repo]} \u2192 ${g.repoName[l.route.repo]} \xB7 ${PROOF[gr.proof].label}${more}`, fTop = "500 12px " + MONO, fSub = "400 11.5px " + SANS, w = Math.max(tw(fTop, top), tw(fSub, sub)) + 20, h = 42, x = Math.min(Math.max(8, mx - w / 2), store.W - w - 8), y = Math.max(8, my - h - 12);
+    oc.globalAlpha = 1;
+    rrect(x, y, w, h, 8);
+    oc.fillStyle = css(theme.halo);
+    oc.fill();
+    oc.lineWidth = 1;
+    oc.strokeStyle = css(theme.text, 0.22);
+    oc.stroke();
+    oc.textAlign = "left";
+    oc.fillStyle = css(theme.text);
+    oc.font = fTop;
+    oc.fillText(top, x + 10, y + 14);
+    oc.fillStyle = css(theme.muted);
+    oc.font = fSub;
+    oc.fillText(sub, x + 10, y + 30);
+    LC.fits(x, y, x + w, y + h, true);
+  }
+
   // src/render/overlay.js
   function drawOverlay(now, V, I) {
     const g = store.G, k = cam.k, sel = store.selectedId >= 0, hasF = store.focusId >= 0 && store.focusT > 1e-3, dimF = 1 - 0.86 * store.dimT;
@@ -5586,6 +6213,7 @@ FLOW: ${flowLine}`;
     store.offHits = [];
     const fx = { g, k, I, now, V, SX, SY, on, sel, hasF, dimF };
     drawTerritoryHover(fx);
+    drawHttp(fx);
     drawSelectionFlow(fx);
     drawRouteFlow(fx);
     drawRings(fx);
@@ -5593,6 +6221,7 @@ FLOW: ${flowLine}`;
     drawOffscreenChips(fx);
     drawReticle(fx);
     drawLabels(fx, pins);
+    drawHttpTip(fx);
     oc.globalAlpha = 1;
   }
   function drawTerritoryHover(fx) {
@@ -5812,6 +6441,7 @@ FLOW: ${flowLine}`;
   }
   function flowing() {
     if (store.dimT <= 0.02 || reduceMotion) return false;
+    if (store.linkId >= 0 || store.httpImpact) return true;
     if (store.selectedId >= 0) return store.focusEdges.length > 0 && store.focusEdges.length <= 900;
     if (store.focusId === ROUTE_FOCUS) return routeActive();
     return store.focusId === ASK_FOCUS && store.askSet.length > 0 && store.askHops.length > 0;
@@ -5951,7 +6581,7 @@ FLOW: ${flowLine}`;
 
   // src/app/camera.js
   var inspOpen = () => app.classList.contains("has-insp");
-  var leftOpen = () => RT.classList.contains("on") || ATTN.classList.contains("on") || ASK.classList.contains("on");
+  var leftOpen = () => RT.classList.contains("on") || ATTN.classList.contains("on") || ASK.classList.contains("on") || LINKS.classList.contains("on");
   function viewCenter() {
     const R = safeRect();
     return { x: (R.l + R.r) / 2, y: (R.t + R.b) / 2 };
@@ -6538,6 +7168,7 @@ FLOW: ${flowLine}`;
         errs.push(`edges[${i}] refers to a node outside 0..${N - 1}`);
       if (![0, 1, 2, 3].includes(st)) errs.push(`edges[${i}] has status ${st}; use 0, 1, 2 or 3`);
     });
+    errs.push(...validateLinks(spec, N));
     return errs.slice(0, 20);
   }
   function flattenHierarchy(spec) {
@@ -6628,6 +7259,7 @@ FLOW: ${flowLine}`;
     g.doc = (i) => info(i)[0];
     g.sig = (i) => info(i)[1];
     g.end = (i) => info(i)[2];
+    if (spec.links) g.http = httpIndex(spec, g);
     return g;
   }
 
@@ -6953,12 +7585,103 @@ FLOW: ${flowLine}`;
     onFrameEnd(perfTick);
   }
 
+  // src/ui/links.js
+  var closedByUser = false;
+  function autoOpenLinks() {
+    if (store.G && store.G.http && !closedByUser) openLinksPanel();
+    else renderLinks();
+  }
+  function openLinksPanel() {
+    closeAsk();
+    if (store.attnOpen) {
+      store.attnOpen = false;
+      renderAttn();
+    }
+    store.linksOpen = true;
+    closedByUser = false;
+    renderLinks();
+  }
+  function closeLinksPanel() {
+    store.linksOpen = false;
+    closedByUser = true;
+    renderLinks();
+  }
+  var toggleLinksPanel = () => store.linksOpen ? closeLinksPanel() : openLinksPanel();
+  function headerHTML2(g, H) {
+    const cross = H.links.filter((l) => !isWithin(l)), repos = new Set(cross.flatMap((l) => [l.call.repo, l.route.repo])), within = H.links.length - cross.length, more = within ? `, plus ${fmt(within)} inside one repository` : "";
+    return `<div class="ph"><div><h2 id="linksTitle">HTTP links</h2><p>${fmt(cross.length)} requests between ${fmt(repos.size)} repositories${more}, each proven down to the line</p></div><button class="btn btn-ghost btn-icon" data-lclose aria-label="Close HTTP links">${ICON_X}</button></div>`;
+  }
+  function proofLegendHTML(H) {
+    const c = proofCounts(H);
+    return `<div class="proof-legend">${PROOF_ORDER.filter((p) => c[p]).map((p) => `<span>${proofBadge(p)}<b>${fmt(c[p])}</b></span>`).join("")}</div>`;
+  }
+  function pairsHTML(g, H) {
+    let h = "";
+    for (const p of repoPairs(g, H)) {
+      const sites = p.groups.reduce((n, i) => n + H.groups[i].links.length, 0), rows = p.groups.map((i) => groupRow(g, i, "endpoint")).join("");
+      if (p.a === p.b)
+        h += `<details class="sec unmatched within"><summary class="sec-h"><h3 ${nameAttrs}>Inside ${esc(g.repoName[p.a])}: frontend \u2192 API</h3><span>${fmt(sites)}</span></summary><p class="impact-text pad">Browser code calling its own repository\u2019s routes. No answer key covers these yet, so they are not in the accuracy above.</p>${rows}</details>`;
+      else
+        h += `<div class="sec"><div class="sec-h"><h3 ${nameAttrs}>${esc(g.repoName[p.a])} \u2192 ${esc(g.repoName[p.b])}</h3><span>${fmt(sites)}</span></div>${rows}</div>`;
+    }
+    return h;
+  }
+  function repoImpactHTML(g, H) {
+    let rows = "";
+    for (let r = 0; r < g.R; r++) {
+      const im = httpImpact(g, H, { t: "r", id: r });
+      if (!im.groups.length) continue;
+      const key = "r" + r, on = store.httpImpact === key, callers2 = im.repos.map((x) => g.repoName[x]).join(", ");
+      rows += `<div class="imp-row"><span class="rn" ${nameAttrs}><b>${esc(g.repoName[r])}</b><span class="rs">${fmt(im.endpoints.length)} endpoints, ${fmt(im.links.length)} call sites in ${esc(callers2)}</span></span><button class="btn btn-outline btn-sm" data-http-impact="${key}" data-label="Show" aria-pressed="${on}">${on ? "Hide on map" : "Show"}</button></div>`;
+    }
+    return rows ? `<div class="sec"><div class="sec-h"><h3>What breaks if a service changes</h3></div>${rows}</div>` : "";
+  }
+  function unmatchedHTML(g, H) {
+    if (!H.unmatched.length) return "";
+    const rows = H.unmatched.map(
+      (u) => `<button class="row" data-id="${u.from}"><span class="g ev" style="--c:var(--destructive)" aria-hidden="true"></span><span class="rn mono" ${nameAttrs}>${esc(u.method)} ${esc(u.path)}<span class="rs">${esc(g.repoName[u.call.repo])} \xB7 ${esc(u.call.file)}:${u.call.line} \xB7 ${esc(u.reason)}</span></span><span class="rm"></span></button>`
+    ).join("");
+    return `<details class="sec unmatched"><summary class="sec-h"><h3>Requests with no route found</h3><span>${fmt(H.unmatched.length)}</span></summary><p class="impact-text pad">Not drawn as links: the finder could not tell which route serves them.</p>${rows}</details>`;
+  }
+  function renderLinks() {
+    const g = store.G, H = g && g.http, btn = $("#linksBtn");
+    if (btn) {
+      btn.hidden = !H;
+      btn.setAttribute("aria-pressed", String(!!(H && store.linksOpen)));
+    }
+    const show = !!H && store.linksOpen;
+    LINKS.classList.toggle("on", show);
+    syncLegend();
+    if (!show) return;
+    LINKS.innerHTML = headerHTML2(g, H) + `<div class="scroll" style="padding:0 8px 10px">${accuracyHTML(H.accuracy, H.links.filter(isWithin).length)}${proofLegendHTML(H)}${pairsHTML(g, H)}${repoImpactHTML(g, H)}${unmatchedHTML(g, H)}</div>`;
+  }
+  function init12() {
+    LINKS.addEventListener("click", (e) => {
+      if (e.target.closest("[data-lclose]")) return closeLinksPanel();
+      const hi = e.target.closest("[data-http-impact]");
+      if (hi) return toggleHttpImpact(hi.dataset.httpImpact);
+      const lk = e.target.closest("[data-link]");
+      if (lk) return openLink(+lk.dataset.link, "list");
+      const t = e.target.closest("[data-id]");
+      if (t) select(+t.dataset.id, "list");
+    });
+    const btn = $("#linksBtn");
+    if (btn) btn.addEventListener("click", toggleLinksPanel);
+  }
+
   // src/app/dataset.js
+  function resolveDataset(n) {
+    const maps = mapList();
+    if (typeof n === "number" || isMap(n)) return n;
+    return maps.length ? maps[0].key : "self";
+  }
+  var datasetName = (n) => n === "self" ? "Atlas\u2019s own code" : typeof n === "string" ? mapLabel(n) : fmt(n) + " nodes";
   function loadDataset(n, state) {
+    n = resolveDataset(n);
     const hadState = store.G && (store.selectedId >= 0 || !!route.from || !!route.to);
     setGroup($("#scale"), n);
     $("#scaleSel").value = String(n);
-    $("#buildMsg").textContent = n === "self" ? "Loading Atlas\u2019s own code graph\u2026" : `Building ${fmt(n)} nodes\u2026`;
+    $("#buildMsg").textContent = n === "self" ? "Loading Atlas\u2019s own code graph\u2026" : typeof n === "string" ? `Laying out ${mapLabel(n)}\u2026` : `Building ${fmt(n)} nodes\u2026`;
     BLD.classList.add("on");
     setTimeout(() => {
       requestAnimationFrame(() => {
@@ -6982,7 +7705,9 @@ FLOW: ${flowLine}`;
         store.labelA = /* @__PURE__ */ new Map();
         store.labelSide.clear();
         store.placeDirty = true;
-        store.G = n === "self" ? buildSpec(selfSpec()) : build(n);
+        store.linkId = -1;
+        store.httpImpact = "";
+        store.G = n === "self" ? buildSpec(selfSpec()) : typeof n === "string" ? buildSpec(mapSpec(n)) : build(n);
         store.G.src = n;
         resetAsk();
         store.inF = new Uint8Array(store.G.N);
@@ -7004,6 +7729,7 @@ FLOW: ${flowLine}`;
         renderPerf();
         renderRoute();
         renderAttn();
+        autoOpenLinks();
         const B = store.G.bounds, t = fitBox(B.x0, B.y0, B.x1, B.y1, 1e-4, 2.2);
         store.KMIN = t.k * 0.5;
         store.KMAX = Math.max(14, t.k * 4);
@@ -7018,10 +7744,7 @@ FLOW: ${flowLine}`;
         BLD.classList.remove("on");
         if (state) applyHashState(state);
         else writeHash();
-        if (hadState && !state)
-          toast(
-            `Switched to ${n === "self" ? "Atlas\u2019s own code" : fmt(n) + " nodes"}. Selection and route were cleared.`
-          );
+        if (hadState && !state) toast(`Switched to ${datasetName(n)}. Selection and route were cleared.`);
         else announce(`Showing ${fmt(store.G.N)} nodes and ${fmt(store.G.L + store.G.C)} edges.`);
       });
     }, 30);
@@ -7053,7 +7776,8 @@ FLOW: ${flowLine}`;
       const f = store.focusId;
       store.focusId = -1;
       if (f === ROUTE_FOCUS) computeRouteFocus();
-      else computeFocus(f);
+      else if (f >= LINK_FOCUS) computeHttpFocus();
+      else if (f < ROUTE_FOCUS) computeFocus(f);
       store.focusId = f;
     }
     if (route.path.length) computeRoute();
@@ -7061,6 +7785,7 @@ FLOW: ${flowLine}`;
     renderAttn();
     renderRoute();
     if (store.selectedId >= 0) openInspector(store.selectedId);
+    else if (store.linkId >= 0) openLinkInspector(store.linkId);
   };
 
   // src/app/pointer.js
@@ -7077,6 +7802,7 @@ FLOW: ${flowLine}`;
         const h = pick(e.offsetX, e.offsetY, e.pointerType === "touch" ? 14 : 7);
         if (!h) deselect();
         else if (h.t === "n") select(h.id, "map");
+        else if (h.t === "h") openLink(h.id, "map");
         else if (route.picking) setRouteEnd(route.picking, { t: h.t, id: h.id });
         else {
           deselect();
@@ -7108,7 +7834,7 @@ FLOW: ${flowLine}`;
     requestRender();
     if (store.kbdMap) keyHover();
   }
-  function init12() {
+  function init13() {
     ov.addEventListener("pointerdown", (e) => {
       ov.setPointerCapture(e.pointerId);
       ptrs.set(e.pointerId, { x: e.offsetX, y: e.offsetY });
@@ -7185,6 +7911,7 @@ FLOW: ${flowLine}`;
           flyTo(camFor((c.x - cam.x) / cam.k, (c.y - cam.y) / cam.k, Math.min(store.KMAX, cam.k * 2)));
           keyHover();
         } else if (store.hover.t === "n") select(store.hover.id, "map");
+        else if (store.hover.t === "h") openLink(store.hover.id, "map");
         else {
           flyToTerr(store.hover.t, store.hover.id);
           requestAnimationFrame(keyHover);
@@ -7218,7 +7945,7 @@ FLOW: ${flowLine}`;
     store.whereKey = key;
     WHERE.innerHTML = `<span class="badge badge-secondary">${lvl}</span><span class="loc" ${nameAttrs}>${r < 0 ? "Between repositories" : esc(g.repoName[r]) + (d >= 0 ? `<span aria-hidden="true">/</span>${esc(g.domName[d])}` : "")}</span>`;
   }
-  function init13() {
+  function init14() {
     onFrameDrawn(updateWhere);
   }
 
@@ -7239,7 +7966,7 @@ FLOW: ${flowLine}`;
       ZS.setAttribute("aria-valuetext", `${lvl} level`);
     }
   }
-  function init14() {
+  function init15() {
     onFrameDrawn(syncZoom);
     ZS.addEventListener("input", () => {
       if (!store.G) return;
@@ -7270,6 +7997,7 @@ FLOW: ${flowLine}`;
       store.attnOpen = false;
       renderAttn();
     } else if (askOpen()) closeAsk();
+    else if (store.linksOpen && store.G && store.G.http) closeLinksPanel();
   }
   var SHORTCUTS = {
     escape,
@@ -7277,6 +8005,7 @@ FLOW: ${flowLine}`;
     i: () => toggleIssues(),
     d: () => startDirections(),
     a: () => openAsk(),
+    l: () => store.G && store.G.http && toggleLinksPanel(),
     c: () => {
       store.userColor = true;
       setMode(store.colorMode === "health" ? "repo" : "health");
@@ -7307,7 +8036,7 @@ FLOW: ${flowLine}`;
     e.preventDefault();
     action();
   }
-  function init15() {
+  function init16() {
     document.addEventListener(
       "keydown",
       () => {
@@ -7335,10 +8064,10 @@ FLOW: ${flowLine}`;
     if (!initGL()) return showFallback();
     if (!globalThis.d3 || !globalThis.d3.packSiblings)
       return showFallback("The layout library didn\u2019t load. Check your connection, then reload.");
-    init12();
-    init();
-    init14();
     init13();
+    init();
+    init15();
+    init14();
     init11();
     init2();
     init5();
@@ -7346,9 +8075,10 @@ FLOW: ${flowLine}`;
     init8();
     init7();
     init6();
+    init12();
     init4();
     init3();
-    init15();
+    init16();
     init10();
     new ResizeObserver(resize).observe(ov);
     mq.addEventListener ? mq.addEventListener("change", onTheme) : mq.addListener(onTheme);
