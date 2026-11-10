@@ -7,14 +7,15 @@ Requests: verb calls on requests/httpx/aiohttp/session/client-like receivers, `.
 `+`, `urljoin`, local variables and module constants, and through the parameters of wrapper functions up to the
 callers that supply them. Payloads: `reverse('route-name')` URLs handed to another service. Service URLs:
 module-level names bound to absolute URLs (settings). Channels (channels/): Kafka, RabbitMQ, Redis pub/sub, socket,
-asyncio and websockets sends and receives from one table of library entry points, gRPC servicers and stubs, and
-Strawberry GraphQL root fields. Tasks (tasks/): Celery task definitions and the calls that hand them to workers.
+asyncio and websockets sends and receives from one table of library entry points, gRPC servicers and stubs, Socket.IO
+events, and Strawberry GraphQL root fields. Tasks (tasks/): Celery task definitions and the calls that hand them to
+workers.
 """
 
 from ....core.http import Extraction
 from ..kit import LanguageExtractor
 from .calls import PayloadCalls, RequestCalls
-from .channels import ChannelEndpoints, GrpcServicers, GrpcStubs, StrawberryFields
+from .channels import ChannelEndpoints, GrpcServicers, GrpcStubs, SocketIoEvents, StrawberryFields
 from .config import SettingUrls
 from .files import SlashedFiles
 from .policy import PythonTestPolicy
@@ -30,7 +31,7 @@ class PythonExtractor(LanguageExtractor):
     POLICY = PythonTestPolicy
     PREFIXED = (DecoratorRoutes, UrlRuleRoutes)  # share one read of the blueprint and router registrations
     # links over other protocols
-    CHANNELS = (ChannelEndpoints, GrpcServicers, GrpcStubs, StrawberryFields, TaskEndpoints)
+    CHANNELS = (ChannelEndpoints, GrpcServicers, GrpcStubs, SocketIoEvents, StrawberryFields, TaskEndpoints)
     OTHERS = (DjangoRoutes, RequestCalls, PayloadCalls, SettingUrls, *CHANNELS)
 
     def workspace(self, repo, sources):
