@@ -8,11 +8,16 @@ BridgeError
 │   ├── GraphFormatError        a file that is not a Graphify graph.json
 │   ├── ScipFormatError         a file that is not a SCIP index
 │   └── LibraryIndexError       a library to follow calls into, with no SCIP indexes to follow them
-└── ExtractionError             reading source code failed
-    ├── ParserUnavailableError  a tree-sitter grammar is not installed
-    ├── SourceReadError         a source file cannot be read
-    ├── IndexerUnavailableError a SCIP indexer is not installed
-    └── IndexerFailedError      a SCIP indexer ran but did not produce an index
+├── ExtractionError             reading source code failed
+│   ├── ParserUnavailableError  a tree-sitter grammar is not installed
+│   ├── SourceReadError         a source file cannot be read
+│   ├── IndexerUnavailableError a SCIP indexer is not installed
+│   ├── IndexerFailedError      a SCIP indexer ran but did not produce an index
+│   ├── GraphifyUnavailableError the graphify command is not installed
+│   └── GraphifyFailedError     graphify ran but wrote no graph.json
+└── OutputError                 writing the result failed
+    ├── OutputWriteError        the output folder cannot be written
+    └── PageTemplateError       the prebuilt Atlas page is missing from the installation
 """
 
 
@@ -89,3 +94,32 @@ class IndexerUnavailableError(ExtractionError):
 class IndexerFailedError(ExtractionError):
     def __init__(self, tool: str, repo: str, problem: str):
         super().__init__(f'{tool} could not index {repo}: {problem}')
+
+
+class GraphifyUnavailableError(ExtractionError):
+    def __init__(self):
+        super().__init__(
+            'graphify is not installed', 'install it with pip install graphifyy, or reinstall atlas-bridge'
+        )
+
+
+class GraphifyFailedError(ExtractionError):
+    def __init__(self, repo: str, problem: str):
+        super().__init__(f'graphify could not map {repo}: {problem}')
+
+
+class OutputError(BridgeError):
+    pass
+
+
+class OutputWriteError(OutputError):
+    def __init__(self, path: str, problem: str):
+        super().__init__(f'cannot write {path}: {problem}', 'pass another folder with -o')
+
+
+class PageTemplateError(OutputError):
+    def __init__(self, path: str):
+        super().__init__(
+            f'the Atlas page template is missing at {path}',
+            'reinstall atlas-bridge, or from a checkout run npm run build:page',
+        )

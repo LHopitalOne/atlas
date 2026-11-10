@@ -4,7 +4,20 @@ A zoomable map of a codebase or a service graph: repositories, domains, services
 Google Maps-style navigation, labels and directions; WebGL2 rendering that stays smooth at 100,000 nodes.
 Builds to a single HTML file. By default it shows its own source code, indexed with tree-sitter and SCIP.
 
-## Quick start
+## Map your own repositories
+
+```bash
+pipx install "git+https://github.com/LHopitalOne/atlas.git#subdirectory=bridge"   # Python 3.10+, no Node.js needed
+atlas ./api ./web          # Graphify each repository, find the HTTP calls between them, open the map
+atlas ./api ./web --verify # also confirm each link with SCIP indexes (uses Node.js / rust-analyzer when present)
+```
+
+Everything lands in `atlas-out/`: `atlas.html` (the map, one file), `links.json` (each link and why), and `graph.json`
+(Graphify's graph with the links added, for `graphify path` / `query`). A `graphify-out/graph.json` already in a
+repository is reused; `--refresh` rebuilds it. One repository works too: its browser code is linked to its own
+server routes (`atlas ./sentry` finds 225; `--no-within` turns that off). `atlas --help` lists the rest.
+
+## Build the page from source
 
 ```bash
 npm install
@@ -18,7 +31,8 @@ or call `window.Atlas.loadGraph(spec)` in the page.
 ## Graphify graphs on the map
 
 [Graphify](https://github.com/Graphify-Labs/graphify) turns a repository into `graphify-out/graph.json`.
-`bridge/` (Python 3.10+, no dependencies) draws one or more of those on Atlas:
+`bridge/` (Python 3.10+; installs Graphify and the tree-sitter grammars) draws one or more of those on Atlas.
+`atlas` above runs all of this; the steps one at a time:
 
 ```bash
 graphify update path/to/repo                                   # writes path/to/repo/graphify-out/graph.json
@@ -37,7 +51,7 @@ Graphify maps each repository on its own; `graphify merge-graphs` puts several s
 requests one repository sends to routes another serves, and adds them as edges:
 
 ```bash
-pip install './bridge[links]'                       # tree-sitter and its Python, Rust, JavaScript grammars
+pip install ./bridge                                # Graphify, tree-sitter and its Python, Rust, JavaScript grammars
 graphify merge-graphs api/graphify-out/graph.json web/graphify-out/graph.json --out merged.json
 python3 -m atlas_bridge links api web --graph merged.json --graphify-out merged-links.json -o links.json
 graphify path "placeOrder()" "POST /orders" --graph merged-links.json   # Graphify now crosses repositories

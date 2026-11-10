@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs && node scripts/build.mjs --offline",
+    "build:page": "node scripts/build.mjs --offline --graph=scripts/page-slot.txt --out=bridge/atlas_bridge/adapters/page/atlas.html",
     "test": "node --test test/*.test.js",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include='src/**' --test-coverage-lines=75 --test-coverage-branches=75 --test-coverage-functions=75 test/*.test.js",
     "test:e2e": "playwright test",
