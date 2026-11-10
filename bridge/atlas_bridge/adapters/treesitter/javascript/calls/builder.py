@@ -46,12 +46,13 @@ class RequestBuilder:
             return (JsSyntax.string(method) or default).upper()
         return ANY
 
-    def from_config(self, node, obj, config):
-        """`axios({url, method})`, `api.request({url})`."""
+    def from_config(self, node, obj, config, default='GET', require_path=False):
+        """`axios({url, method})`, `api.request({url})`, and a verb given its options (`client.post({url})`, as
+        generated SDKs call their client): the `method` of the options, else `default`."""
         url = JsSyntax.prop(config, self.URL_KEY)
         if url is None:
             return []
-        return self.build(node, obj, url, self.method(config, 'GET'))
+        return self.build(node, obj, url, self.method(config, default), require_path)
 
     def from_settings(self, node, settings, default, keys, require_path=False):
         """A request given one settings object (`$.ajax(settings)`): an object literal, a const bound to one, or a
@@ -90,6 +91,7 @@ class RequestBuilder:
         hints = set()
         value = self._module.values.resolve(url_node, hints)
         unknown_path = value is not None and UrlText.unknown_path(value)  # 'https://host/{*path}'
+        unknown_path = unknown_path and not self._valued(url_node, value)
         if value is None or unknown_path or not UrlText.matchable(value):
             if value is not None and obj is None:
                 value = self.params.resolve(url_node, hints)  # a parameter's member stays '{param.key}'
@@ -109,6 +111,15 @@ class RequestBuilder:
         hints.update(JsSyntax.names_in(url_node))
         client = self._client(obj, receiver, hints, relative=not url.hints and '://' not in value)
         return [self._pending(node, method, url.path, hints, client)]
+
+    def _valued(self, url_node, value):
+        """A URL to a public host whose path is values the function holds itself, not ones its callers pass
+        (`${BINLIST_URL}/${bin}` with `const bin = ...`): a request to that host, though no route can be named."""
+        names = UrlText.value_segments(value)
+        if not names:
+            return False
+        idents = (n for n in JsSyntax.walk(url_node, {'identifier'}) if JsSyntax.text(n) in names)
+        return not any(self.params.is_parameter(n) for n in idents)
 
     def _open(self, node, value, method, given, hints):
         """Keep a URL made of the enclosing function's parameters; `{ method }` from a parameter is filled in too."""

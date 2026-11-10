@@ -5,6 +5,7 @@ destructuring and imports (`const { baseUrl } = config.api`)."""
 from ...kit import StringTemplate, ValueResolver
 from ..bindings.scopes import Scopes
 from ..syntax.nodes import JsSyntax
+from ..syntax.params import Params
 from .objects import ObjectPaths
 from .urls import UrlText
 
@@ -89,11 +90,13 @@ class UrlValues(ValueResolver):
             and JsSyntax.text(fn.child_by_field_name('property')) == (self.TO_STRING)
         ):
             return self.resolve(fn.child_by_field_name('object'), hints, depth)
-        returned = self._helper(fn, hints, depth) if fn is not None and fn.type == 'identifier' else None
+        returned = self._helper(node, fn, hints, depth) if fn is not None and fn.type == 'identifier' else None
         return returned if returned is not None else self._builder(node, hints, depth)
 
-    def _helper(self, fn, hints, depth):
-        """What a function declared in this file returns (its parameters stay placeholders), when that is a URL."""
+    def _helper(self, call, fn, hints, depth):
+        """What a function declared in this file returns, when that is a URL: its parameters are what the call passes
+        when that has a known part (`apiUrl('/orders')` of `apiUrl = (path) => `${base}/api${path}``), placeholders
+        otherwise."""
         bound = self._scopes.lookup(fn, JsSyntax.text(fn)) if depth < self.MAX_DEPTH else None
         if bound is None or bound.type not in self.FUNCTIONS:
             return None
@@ -106,6 +109,20 @@ class UrlValues(ValueResolver):
             return None
         hints.add(JsSyntax.text(fn))
         hints.update(found)
+        return self._filled(value, bound, JsSyntax.args(call), hints, depth)
+
+    def _filled(self, value, fn, args, hints, depth):
+        """The value a helper returns with each plain parameter replaced by the call's argument, where that argument
+        has a known part. A parameter glued to a literal reads as a tail ('/api/{*path}'), which the argument's own
+        leading slash takes the place of."""
+        for param in Params.of(fn):
+            if not param.name or param.index >= len(args):
+                continue
+            given = self.resolve(args[param.index], hints, depth + 1)
+            if not UrlText.literal(given):
+                continue
+            value = value.replace('/{*' + param.name + '}', '/' + given.lstrip('/'))
+            value = value.replace('{' + param.name + '}', given)
         return value
 
     @staticmethod
