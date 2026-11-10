@@ -1,10 +1,11 @@
 """The map command's steps: Graphify graphs, HTTP links, the Atlas spec and the page. Each step that can fail says
-so in one line and hands the next step what it has, so a map is always written."""
+so in one line and hands the next step what it has, so a map is always written. The page proves every link it
+draws: the line that sends the request and the route that serves it, read from the repository folders."""
 
 import os
 import time
 
-from ..adapters.atlas import AtlasSpecPresenter
+from ..adapters.atlas import AtlasSpecPresenter, CodeSource, HttpLayer, LinkFile
 from ..adapters.graphify import GraphifyLinkWriter, GraphifyMerger, GraphifyReader, GraphifyRunner
 from ..adapters.linkfile import LinkFilePresenter
 from ..adapters.page import AtlasPage
@@ -29,20 +30,23 @@ class MapPipeline:
         self._report = report
         self._runner = GraphifyRunner(self._still_mapping)
         self._current = ''
+        self._records = []  # the links as the page proves them (adapters.atlas.LinkRecord)
+        self._folders = {}
 
     def run(self, repos) -> str:
         """Every step for these repositories (cli.inputs.RepositoryInput); returns the page's path."""
         self._save('', None)  # the output folder, before the slow steps
-        graph = self._timed('graphify', lambda: GraphifyMerger().merge([(r.name, self._graph(r)) for r in repos]))
+        self._folders = {r.name: r.path for r in repos}
+        merged = self._timed('graphify', lambda: GraphifyMerger().merge([(r.name, self._graph(r)) for r in repos]))
         links = self._timed('links', lambda: self._links(repos))
-        graph = GraphifyLinkWriter(graph).present(links)
+        graph = GraphifyLinkWriter(merged).present(links)  # graph.json, for graphify path and query
         if self._o.graph_json or len(graph['nodes']) <= self.MAX_GRAPH_JSON_NODES:
             self._save('graph.json', graph)
         else:
             self._report(
                 f'  graph     graph.json not written: {len(graph["nodes"]):,} nodes (add --graph-json to write it)'
             )
-        spec = self._timed('map', lambda: self._spec(graph))
+        spec = self._timed('map', lambda: self._spec(merged))  # the links go on as provable HTTP links instead
         self._save('spec.json', spec)
         return self._save('atlas.html', spec, AtlasPage().write)
 
@@ -86,8 +90,9 @@ class MapPipeline:
             links = ScipCheck(self._o.out_dir, self._report, self._o.sandbox).verify(repos, links)
         else:
             self._report('  links     not checked with SCIP (add --verify; needs Node.js and/or rust-analyzer)')
-        report = LinkReport(names, extraction, links)
-        self._save('links.json', LinkFilePresenter().present(report))
+        data = LinkFilePresenter().present(LinkReport(names, extraction, links))
+        self._save('links.json', data)
+        self._records = LinkFile(self._out('links.json')).parse(data)
         found = [link for link in links if link.route is not None]
         inside = sum(link.source == link.target for link in found)
         self._report(
@@ -99,12 +104,16 @@ class MapPipeline:
     def _spec(self, graph):
         code = CodeGraph()
         GraphifyReader(code).read(graph, 'repo', source=self._out('graph.json'))
-        if MapBudget().fit(code):
+        http = HttpLayer(self._records, CodeSource(self._folders)) if self._records else None
+        if http is not None:
+            http.add_files(code)
+        ends = {(s.repo, s.file) for r in self._records for s in (r.call, r.route) if s is not None}
+        if MapBudget().fit(code, frozenset(ends)):
             self._report(
                 f'  map       over {MapBudget.MAX_NODES:,} files and symbols: functions and classes are folded into '
                 'their files, except at the ends of HTTP links'
             )
-        spec = AtlasSpecPresenter(self._o.title).present(MapDrawer(GROUPINGS[self._o.group]).draw(code))
+        spec = AtlasSpecPresenter(self._o.title, http).present(MapDrawer(GROUPINGS[self._o.group]).draw(code))
         files = sum(len(d['services']) for r in spec['repos'] for d in r['domains'])
         self._report(f'  map       {len(spec["repos"])} repositories, {files:,} files, {len(spec["edges"]):,} links')
         return spec

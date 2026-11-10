@@ -11,12 +11,13 @@ class MapBudget:
     def __init__(self, max_nodes: int = MAX_NODES):
         self._max = max_nodes
 
-    def fit(self, graph: CodeGraph) -> bool:
-        """Fold symbols into files when the graph is over budget; True when it did."""
+    def fit(self, graph: CodeGraph, keep: frozenset = frozenset()) -> bool:
+        """Fold symbols into files when the graph is over budget; True when it did. `keep`: more (repo, path) files
+        whose symbols stay, such as both ends of the links the map proves."""
         symbols = sum(len(f.symbols) for f in graph.files.values())
         if len(graph.files) + symbols <= self._max:
             return False
-        keep = self._link_ends(graph)
+        keep = self._link_ends(graph) | set(keep)
         for key, f in graph.files.items():
             if key not in keep:
                 f.symbols = []

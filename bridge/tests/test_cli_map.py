@@ -88,6 +88,9 @@ class AtlasCommandTest(unittest.TestCase):
         self.assertIn('"title":"api, web"', html)
         self.assertEqual(sum(lk['status'] == 'matched' for lk in links['links']), 2)
         self.assertIn('not checked with SCIP', log)
+        # every link is on the page with its proof: the sending line and the route line, with their code
+        self.assertEqual(len(spec['links']), 2)
+        self.assertTrue(all(lk['call'].get('code') and lk['route'].get('code') for lk in spec['links']))
 
     def test_very_large_graphs_skip_graph_json(self):
         from atlas_bridge.cli.pipeline import MapPipeline
