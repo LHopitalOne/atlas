@@ -6,7 +6,7 @@ from .....core.http import ANY
 from ...kit import UrlTemplate
 from ..names import ItemPath
 from ..syntax import RustSyntax
-from ..values import UrlPiece
+from ..values import UrlPiece, Value
 from .base import RustCallCollector
 from .context import RequestContext
 
@@ -20,10 +20,12 @@ class ClientCalls(RustCallCollector):
     CLIENT = re.compile(r'client|http|reqwest|request|upstream', re.I)  # a name that suggests an HTTP client
     METHOD = re.compile(r'(?:^|::)Method::([A-Z]+)$')  # a whole argument naming a method: `reqwest::Method::POST`
     MAX_HINT = 300  # longer hints are whole expressions, not names
+    SCHEME = re.compile(r'^[a-z][a-z0-9+.-]*://[^/{}]+', re.I)  # an absolute URL whose host is known
 
-    def __init__(self, workspace, values):
+    def __init__(self, workspace, values, configured=None):
         super().__init__(workspace, values)
         self._context = RequestContext(workspace)
+        self._configured = configured  # ChannelValues: what a base URL holds once fields and settings are followed
 
     def calls(self, file, c) -> list:
         request = self._request(c)
@@ -32,8 +34,12 @@ class ClientCalls(RustCallCollector):
         method, url, recv = request
         vals = self._values.values(file, url)
         if not vals:
+            vals = [Value(v, url, []) for v in self._absolute(file, url)][:1]
+        if not vals:
             return []
         value, _, base = vals[0]
+        if value.startswith('{}'):
+            value = self._based(file, url, value)
         if not self._addressed(value, recv):
             return []
         split = UrlTemplate.split(value)
@@ -45,6 +51,20 @@ class ClientCalls(RustCallCollector):
         hints = {h for h in hints if h and len(h) < self.MAX_HINT}
         function = self._context.function_name(c)
         return [self.call(file, file.line(c), split.path, method, function, hints, self.workspace.is_test(file, c))]
+
+    def _absolute(self, file, url):
+        """The absolute URLs a URL expression holds once struct fields, crate fns (`self.endpoint(path)`) and
+        environment defaults are followed; unknown parts are '{}'."""
+        if self._configured is None:
+            return []
+        return [v.text for v in self._configured.values(file, url) if self.SCHEME.match(v.text)]
+
+    def _based(self, file, url, value):
+        """A URL on an unknown base (`format!("{}/item/{}.json", self.base, id)`) with the base it is configured
+        with, when every absolute URL the expression holds agrees on it; the value as it was otherwise."""
+        tail = UrlPiece.PLACEHOLDER.sub('{}', value[2:])
+        bases = {v[: len(v) - len(tail)] for v in self._absolute(file, url) if v.endswith(tail)}
+        return bases.pop() + value[2:] if len(bases) == 1 else value
 
     def _addressed(self, value, recv):
         """A path or URL, or any string handed to something named like a client."""

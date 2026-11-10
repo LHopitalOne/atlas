@@ -1,7 +1,6 @@
 """Python call collectors: HTTP requests (with forwarding through wrapper functions) and reverse() payloads."""
 
 from .absolute import AbsoluteUrl
-from .bases import ClientBases
 from .book import CallBook
 from .condition import Condition
 from .forwarding import CallSite, Forwarder
@@ -20,7 +19,6 @@ __all__ = [
     'AbsoluteUrl',
     'CallBook',
     'CallSite',
-    'ClientBases',
     'Condition',
     'Evidence',
     'Forwarder',

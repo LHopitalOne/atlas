@@ -54,12 +54,23 @@ class Origins:
         return out
 
     def function(self, fn, scope):
-        """(source, function node) a callee names in this repository: `name`, `module.name` or `self.method`."""
+        """(source, function node) a callee names in this repository: `name`, `module.name`, `self.method` or
+        `Class.method` (a classmethod or staticmethod: `Settings.from_env()`)."""
         if fn.type == 'attribute' and PythonSyntax.is_self(fn.child_by_field_name('object')):
             method = self.method(scope.cls, PythonSyntax.text(fn.child_by_field_name('attribute')))
             return (scope.source, method) if method is not None else None
         found = self._workspace.names.expression(scope.source, fn) if fn.type in ('identifier', 'attribute') else None
+        if found is None and fn.type == 'attribute':
+            return self._class_method(fn, scope)
         return (found.source, found.node) if found is not None and found.is_function else None
+
+    def _class_method(self, fn, scope):
+        """(source, method node) of `Class.method` for a class of this repository, or None."""
+        owner = self._workspace.names.expression(scope.source, fn.child_by_field_name('object'))
+        if owner is None or not owner.is_class:
+            return None
+        method = self.method(owner.node, PythonSyntax.text(fn.child_by_field_name('attribute')))
+        return (owner.source, method) if method is not None else None
 
     @staticmethod
     def method(cls, name):

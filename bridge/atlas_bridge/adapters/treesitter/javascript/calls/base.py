@@ -34,6 +34,7 @@ class RequestCollector(CallCollector, FileCollector):
             except RecursionError:  # pragma: no cover - pathological nesting
                 continue
         self._opens += builder.opens
+        builder.release()
         self._clients.read(module)
 
     def finish(self) -> Extraction:

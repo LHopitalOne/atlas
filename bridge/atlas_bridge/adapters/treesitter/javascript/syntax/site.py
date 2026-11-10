@@ -14,7 +14,7 @@ class CallSite:
     STREAMS = ('EventSource',)  # `new EventSource(url)`: a GET of the URL whose response streams Server-Sent Events
     GLOBALS = ('window', 'globalThis', 'self', 'global')  # `window.fetch(...)` is `fetch(...)`
     AJAX = ('ajax', 'getJSON')  # jQuery's request functions other than get / post
-    NAMES = (*ROUTE_VERBS, *REQUEST_METHODS, *DIRECT, *AJAX, 'route', 'use')
+    NAMES = (*ROUTE_VERBS, *REQUEST_METHODS, *DIRECT, *AJAX, 'route', 'use', 'register')
     # typescript reads `await http.get<T>(url)` as a call of `(await http.get)`: the callee may sit in an await
     MEMBER = '(member_expression property: (property_identifier) @name)'
     QUERY = (

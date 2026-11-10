@@ -2,7 +2,7 @@
 
 from .collectors import ChannelCalls, ChannelRoutes
 from .followups import Followups
-from .ports import SiteChannels, SocketAddress, TopicNames
+from .ports import RedisKeys, SiteChannels, SocketAddress, TopicNames
 from .sites import ChannelSite, ChannelSites
 from .table import EntryPoint, EntryPoints
 
@@ -14,6 +14,7 @@ __all__ = [
     'EntryPoint',
     'EntryPoints',
     'Followups',
+    'RedisKeys',
     'SiteChannels',
     'SocketAddress',
     'TopicNames',

@@ -66,6 +66,17 @@ class AddressBookTest(unittest.TestCase):
         self.assertEqual(book.repos_for('credentials.example.com'), {'credentials'})
         self.assertEqual(book.repos_for('url'), set())
 
+    def test_a_url_a_service_names_after_itself_gives_its_host_only_when_the_host_names_it_too(self):
+        book = self.book(
+            url('WEB_FEED_URL', 'https://feeds.example.org/v0', repo='web'),  # another service's API, in web
+            url('WEB_PUBLIC_URL', 'https://web.example.net:8443', repo='web'),
+            url('WEB_URL', 'https://web-cdn.example.net', repo='lms'),  # what lms says of web
+        )
+        self.assertEqual(book.repos_for('feeds.example.org'), set())
+        self.assertEqual(book.repos_for('web.example.net'), {'web'})
+        self.assertEqual(book.repos_for('web-cdn.example.net'), {'web'})
+        self.assertEqual(book.repos_for('feeds.example.org:443'), set())
+
     def test_an_address_two_services_claim_is_dropped(self):
         book = self.book(url('LMS_URL', 'http://localhost:8000'), url('DISCOVERY_URL', 'http://localhost:8000'))
         self.assertEqual(book.repos_for('localhost:8000'), set())

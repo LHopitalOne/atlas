@@ -15,8 +15,10 @@ class ChannelValues(UrlValues):
     """UrlValues (literals, templates, `+`, `process.env.X ?? 'default'`, local consts and helpers) of one file, also
     following a name to where the channel is kept: a constant or config object another file of the repository
     exports, a TypeScript enum's member, `this.field` (a class field, an assignment, a constructor parameter property),
-    a parameter (its default, or what its callers pass), `Number(...)` around a port. A value that depends on which
-    caller it came from is only taken when every caller agrees; `candidates` gives one per caller instead."""
+    a parameter (its default, or what its callers pass), `Number(...)` around a port, the object a function of the
+    repository returns (`loadConfig().stream`, `this.cfg.stream` with `cfg` a constructor parameter). A value that
+    depends on which caller it came from is only taken when every caller agrees; `candidates` gives one per caller
+    instead."""
 
     HANDLERS = {**UrlValues.HANDLERS, 'shorthand_property_identifier': '_identifier'}
     CONVERSIONS = frozenset({'Number', 'parseInt', 'parseFloat', 'String'})
@@ -56,11 +58,30 @@ class ChannelValues(UrlValues):
             target = self._file.graph.file_for(self._file.path, JsSyntax.require(node))
             exported = target.exported('default') if target is not None else None
             return target.values.objects(exported, depth + 1) if exported is not None else []
+        if node.type == 'call_expression':
+            return self._returned_objects(node, depth)
         if node.type == 'member_expression':
             key = JsSyntax.text(node.child_by_field_name('property'))
-            inner = self.objects(node.child_by_field_name('object'), depth + 1)
+            obj = JsSyntax.unwrap(node.child_by_field_name('object'))
+            if obj is not None and obj.type == 'this':
+                found = [(self._file, v) for v in Members.of_this(node, key)] + self._parameter_property(node, key)
+                return [(f, o) for f, n in found for f, o in f.values.objects(n, depth + 1)]
+            inner = self.objects(obj, depth + 1)
             return [(f, o) for f, p in self._props(inner, key) for f, o in f.values.objects(p, depth + 1)]
         return []
+
+    def _returned_objects(self, call, depth):
+        """The object literal a function of the repository returns (`loadConfig()`), declared here or imported."""
+        fn = JsSyntax.unwrap(call.child_by_field_name('function'))
+        if fn is None or fn.type != 'identifier':
+            return []
+        bound = self._scopes.lookup(fn, JsSyntax.text(fn))
+        found = [(self._file, bound)] if bound is not None else self._imported(fn)
+        out = []
+        for file, function in found:
+            body = self._returned(function) if function is not None and function.type in self.FUNCTIONS else None
+            out += file.values.objects(body, depth + 1) if body is not None else []
+        return out
 
     def _identifier(self, node, hints, depth):
         value = super()._identifier(node, hints, depth)

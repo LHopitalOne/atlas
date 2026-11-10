@@ -16,6 +16,7 @@ class UrlText:
     AUTHORITY = re.compile(r'^[a-z][a-z0-9+.-]*://[^/]*', re.I)  # 'https://host:port' up to the path
     WORD = re.compile(r'\w')
     REST = re.compile(r'\{\*([^{}]*)\}')  # '{*path}': a tail made of a path variable
+    PUBLIC_HOST = re.compile(r'^[a-z][a-z0-9+.-]*://[a-z0-9-]+(?:\.[a-z0-9-]+)+(?::\d+)?$', re.I)  # a dotted name
 
     @classmethod
     def literal(cls, value):
@@ -39,6 +40,19 @@ class UrlText:
         m = cls.AUTHORITY.match(value)
         rest = value[m.end() :] if m else ''
         return bool(cls.PLACEHOLDER.search(rest)) and not cls.WORD.search(cls.PLACEHOLDER.sub('', rest))
+
+    @classmethod
+    def value_segments(cls, value):
+        """The names of the placeholders that make up the path of a URL with a public host when each stands for one
+        value, not a path: 'https://lookup.binlist.net/{bin}' -> ['bin']. None for any other URL: a tail
+        ('{*path}'), a name that holds a path ('{endpoint}'), a host of no public name ('http://{host}/{id}')."""
+        m = cls.AUTHORITY.match(value)
+        if m is None or not cls.PUBLIC_HOST.match(m.group(0)):
+            return None
+        names = cls.PLACEHOLDER.findall(value[m.end() :])
+        if not names or any('*' in n or cls.PATH_NAME.search(n) for n in names):
+            return None
+        return [n[1:-1] for n in names]
 
     @classmethod
     def path_like(cls, value):

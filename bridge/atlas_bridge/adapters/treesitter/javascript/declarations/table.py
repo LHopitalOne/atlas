@@ -1,18 +1,18 @@
 """RouteSyntaxes: which syntax reads a member call, by the name of the method called."""
 
 from ..syntax.site import CallSite
-from .mounts import MountSyntax
+from .mounts import MountSyntax, RegisterSyntax
 from .records import Declaration
 from .routes import FastifyRouteSyntax, VerbRoutes
 
 
 class RouteSyntaxes:
-    """The declaration syntaxes of one file: `x.use(...)` mounts, `x.route({...})` is Fastify's, a verb call is a
-    chained or direct route. Plain calls (`get(...)`) declare nothing."""
+    """The declaration syntaxes of one file: `x.use(...)` and `x.register(...)` mount, `x.route({...})` is Fastify's,
+    a verb call is a chained or direct route. Plain calls (`get(...)`) declare nothing."""
 
     def __init__(self, receivers):
         verbs = VerbRoutes(receivers)
-        self._by_name = {'use': MountSyntax(), 'route': FastifyRouteSyntax()}
+        self._by_name = {'use': MountSyntax(), 'register': RegisterSyntax(), 'route': FastifyRouteSyntax()}
         self._by_name.update((verb, verbs) for verb in CallSite.ROUTE_VERBS)
 
     def declaration(self, site: CallSite) -> Declaration | None:

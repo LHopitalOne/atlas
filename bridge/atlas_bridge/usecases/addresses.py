@@ -8,7 +8,9 @@ class AddressBook:
     names (ServiceNames.owner). A URL whose name or host names exactly one repository teaches three things:
 
     - its address (`localhost:18381`, `edx.devstack.discovery:18381`, `10.0.0.5:8000`) belongs to that repository;
-    - its host, when it is not generic (`edx.devstack.discovery`, not `localhost` or an IP), does too;
+    - its host, when it is not generic (`edx.devstack.discovery`, not `localhost` or an IP), does too; but a URL a
+      repository configures under its own name only gives its host when the host names it too: in a repository
+      called `api`, `HN_API_BASE = 'https://hacker-news.firebaseio.com/v0'` is the API of another service;
     - its name, when the name itself names the repository (`COURSE_CATALOG_API_URL`, not `url`), points there;
     - its path ('/api/v1') is a prefix requests to it carry.
 
@@ -23,7 +25,7 @@ class AddressBook:
             if repo is None:
                 continue
             self._claim(self._addresses, url.address, repo, conflicts)
-            if not url.generic_host:
+            if not url.generic_host and (repo != url.repo or owner({url.host}) == repo):
                 self._claim(self._hosts, url.host, repo, conflicts)
             if owner({url.name}) == repo:  # 'CATALOG_API_URL' names it; 'url' pointing at sentry.io does not
                 self._claim(self._names, url.name, repo, conflicts)

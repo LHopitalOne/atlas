@@ -6,11 +6,14 @@ from ...kit import StringTemplate
 
 
 class UrlPiece:
-    # Calls that convert a value without changing it: `id.to_string()`, `url.clone()`, `x.unwrap()`.
+    # Calls that convert a value without changing it: `id.to_string()`, `url.clone()`, `x.unwrap()`; or that only
+    # trim it (`base.trim_end_matches('/')`), which leaves a URL the same once its parts are joined with slashes.
     CONVERSIONS = frozenset(
         {'clone', 'to_string', 'to_owned', 'into', 'as_str', 'as_ref', 'unwrap', 'expect', 'into_owned'}
+        | {'trim', 'trim_end', 'trim_start', 'trim_end_matches', 'trim_start_matches'}
     )
     LEADING_BASE = re.compile(r'^\{[^{}]*\}/')  # a placeholder base followed by a path: '{base}/x'
+    PLACEHOLDER = re.compile(r'\{[^{}]*\}')  # a part of a template the code does not show: '{id}', '{}'
 
     @staticmethod
     def path_like(v):
