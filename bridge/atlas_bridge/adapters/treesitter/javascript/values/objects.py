@@ -53,6 +53,24 @@ class ObjectPaths:
             return self._exported(required, self._module.imports.DEFAULT, depth)
         return Location(self._module, node)
 
+    def origin(self, node, depth=0) -> Location | None:
+        """Where the value a name holds is written, following names only (bindings, then imports of the repository)
+        and stopping at the first expression that is not a name: `export const router = t.router` -> `t.router`,
+        which locate() would try to read as a property of an object literal. None for a parameter."""
+        node = self._unwrap(node)
+        if node is None or depth > self.MAX_DEPTH:
+            return None
+        if node.type not in self.NAMES:
+            return Location(self._module, node)
+        name = JsSyntax.text(node)
+        binding = self._module.scopes.binding(node, name)
+        if binding is not None:
+            return self.origin(binding.initializer, depth + 1) if binding.initializer is not None else None
+        imported = self._module.imports.get(name)
+        target = self._linker.module(self._module.path, imported[0]) if imported and self._linker else None
+        value = target.exports.value(imported[1]) if target is not None else None
+        return target.objects.origin(value, depth + 1) if value is not None else None
+
     def property(self, location: Location, key, depth=0) -> Location | None:
         """Where property `key` of the object literal at `location` is written."""
         obj = self._unwrap(location.node)

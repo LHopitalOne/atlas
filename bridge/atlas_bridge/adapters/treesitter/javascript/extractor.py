@@ -13,13 +13,15 @@ from .routes.express import ExpressRoutes
 from .routes.nest import NestRoutes
 from .routes.nextjs import NextRoutes
 from .routes.resolvers import GraphqlResolvers
+from .trpc.calls import TrpcCalls
+from .trpc.routes import TrpcRoutes
 from .workspace import JavaScriptWorkspace
 
 
 class JavaScriptExtractor(LanguageExtractor):
     """Routes: Express, Koa-router, Fastify and Hono, with the prefixes of `app.use('/prefix', router)` across files;
     Next.js API routes named by their files (`pages/api/`, `app/**/route.ts`); the root fields of a GraphQL resolver
-    map (graphql-yoga, graphql-tools, Apollo Server).
+    map (graphql-yoga, graphql-tools, Apollo Server); the procedures of a tRPC router served by an HTTP adapter.
 
     Requests: `fetch(url, {method})`, `axios(config)`, `axios.get(url)`, `<client>.get/post/...(url)`,
     `<client>.request(config)`, and the keys of data fetching hooks (`useSWR('/api/notes')`). URLs are resolved from
@@ -29,7 +31,7 @@ class JavaScriptExtractor(LanguageExtractor):
     `new Client({baseUrl})`), or the default of a client class of the repository (`this.baseUrl = options.baseUrl ??
     '/api/0'`), reached through `new Client()`, a parameter typed `Client`, a function that returns `new Client()`, or
     a module-level client. GraphQL operations, posted as `{ query }` or given to a GraphQL client, are one GRAPHQL call
-    per root field.
+    per root field. A vanilla tRPC client's `.query()` / `.mutate()` is a request to its procedure.
     """
 
     GRAMMARS = frozenset({'javascript', 'typescript', 'tsx'})
@@ -50,6 +52,7 @@ class JavaScriptExtractor(LanguageExtractor):
         shared = (ExpressRoutes(workspace), RequestCalls(workspace), KeyedRequests(workspace), GraphqlCalls(workspace))
         shared += (GeneratedClientRequests(workspace),)
         # one parse per file for the shared pass; Next.js routes and other protocols read the files they pick
-        files = [NextRoutes(workspace), NestRoutes(workspace), GraphqlResolvers(workspace), ChannelCollector(workspace)]
+        files = [NextRoutes(workspace), NestRoutes(workspace), GraphqlResolvers(workspace), TrpcRoutes(workspace)]
+        files += [TrpcCalls(workspace), ChannelCollector(workspace)]
         # functions imported from other packages of the monorepo, followed into their source
         return [SharedPass(workspace, shared), *files, WorkspacePackageCalls(workspace)]
