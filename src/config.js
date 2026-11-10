@@ -24,8 +24,19 @@ export const FLIGHT = { defaultMs: 450, introMs: 600, zoomButtonMs: 220 };
 /**
  * Ask Atlas engine. 'demo': simulated, animated answers (scripted rendering walkthrough, offline answers otherwise).
  * 'claude': ask Claude through the artifact sample capability (publish with capabilities {sample: {}}).
+ * 'openrouter': ask ASK_MODEL on OpenRouter, through `atlas serve`'s local proxy (it holds OPENROUTER_API_KEY) or,
+ * on any other page, with a key the viewer gives once (kept in that browser tab only).
  */
-export const ASK_ENGINE = 'demo';
+export const ASK_ENGINE = 'openrouter';
+export const ASK_MODEL = 'meta/muse-ember';
+export const ASK_LLM = {
+  maxSteps: 8, // tool rounds before the model must answer
+  maxToolChars: 12000, // a tool result is cut to this many characters before it goes back to the model
+  maxTokens: 2500, // per request, reasoning and answer together
+  proxy: './api/llm', // `atlas serve` forwards <proxy>/chat/completions to OpenRouter with its key
+  direct: 'https://openrouter.ai/api/v1',
+  keyStore: 'atlas.openrouterKey', // sessionStorage key for a key the viewer pasted
+};
 
 /** Ask Atlas playback timing (ms). */
 export const ASK_PLAYBACK = { think: 520, tick: 28, tokensPerTick: 2 };

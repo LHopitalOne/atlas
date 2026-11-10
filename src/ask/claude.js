@@ -4,7 +4,7 @@
  * Each call is memoryless, so the standing rules and the conversation so far are sent every time.
  */
 
-const RULES = `You are Atlas, answering questions about a software codebase shown as a map: repositories contain domains, domains contain services (definitions), services expose endpoints, and services call each other.
+export const RULES = `You are Atlas, answering questions about a software codebase shown as a map: repositories contain domains, domains contain services (definitions), services expose endpoints, and services call each other.
 
 Rules:
 - Look things up with the tools. Never guess names, numbers or connections.
@@ -33,7 +33,7 @@ export function disableClaude() {
   sampleFn = null;
 }
 
-const STEP = {
+export const STEP = {
   search: i => `Searched the index for “${i.query}”`,
   describe: (i, name) => `Described ${name(i.ref)}`,
   impact: (i, name) => `Checked the impact of ${name(i.ref)}`,

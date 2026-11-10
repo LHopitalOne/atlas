@@ -7,11 +7,12 @@ from ..core.errors import BridgeError
 from .index import IndexCommand
 from .links import LinksCommand
 from .map import MapCommand
+from .serve import ServeCommand
 from .spec import SpecCommand
 
 
 class App:
-    COMMANDS = (MapCommand, SpecCommand, LinksCommand, IndexCommand)
+    COMMANDS = (MapCommand, SpecCommand, LinksCommand, IndexCommand, ServeCommand)
 
     def __init__(self):
         self._commands = [c() for c in self.COMMANDS]

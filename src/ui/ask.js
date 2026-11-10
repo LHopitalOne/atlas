@@ -11,6 +11,7 @@ import { renderAnswer } from '../ask/format.js';
 import { refName, resolve, search, toolSet } from '../ask/tools.js';
 import { answerLocally } from '../ask/local.js';
 import { askClaude, claudeAvailable, disableClaude } from '../ask/claude.js';
+import { askOpenRouter, llmTransport, useKey } from '../ask/openrouter.js';
 import { sourceLines } from './code-view.js';
 import { select } from '../app/selection.js';
 import { setHover, updateFocus } from '../app/focus.js';
@@ -21,7 +22,7 @@ import { closeDirections } from './directions.js';
 import { renderAttn, syncLegend } from './attention.js';
 import { dotHTML, ICON_X } from './fragments.js';
 import { DEMO_QUESTION, scriptFor } from '../ask/demo.js';
-import { ASK_ENGINE, ASK_PLAYBACK } from '../config.js';
+import { ASK_ENGINE, ASK_MODEL, ASK_PLAYBACK } from '../config.js';
 import { reduceMotion } from '../util/dom.js';
 import { ensureReverse } from '../graph/route-search.js';
 import { safeRect } from '../app/camera.js';
@@ -30,10 +31,10 @@ import { toMermaid } from '../ask/diagram.js';
 import { answerTrail } from '../graph/insights.js';
 import { visualHTML } from './answer-visual.js';
 
-/** Conversation: { q, text, steps, status: 'thinking'|'streaming'|'done'|'error', mode: 'claude'|'local', note } */
+/** Conversation: { q, text, steps, status: 'thinking'|'streaming'|'done'|'error', mode: 'claude'|'llm'|'local', note } */
 let thread = [];
 let busy = null; // AbortController of the running question
-let mode = ASK_ENGINE === 'demo' ? 'demo' : 'local';
+let mode = ASK_ENGINE === 'demo' || ASK_ENGINE === 'openrouter' ? 'demo' : 'local'; // a model takes over once reachable
 let showing = -1; // index of the answer whose items are on the map
 let mention = null; // { start, items, act }
 
@@ -86,6 +87,7 @@ export function openAsk(question) {
   ASK.classList.add('on');
   syncLegend();
   if (first) render();
+  if (ASK_ENGINE === 'openrouter') llmTransport().then(setLLM);
   if (ASK_ENGINE === 'claude')
     claudeAvailable().then(fn => {
       const m = fn ? 'claude' : 'local';
@@ -243,7 +245,7 @@ async function play(turn, i, script, signal) {
 }
 
 /** Ask Claude with the map's tools, streaming into the turn. */
-async function answerWithClaude(turn, q, refs, sel, ctl) {
+async function answerWithModel(turn, q, refs, sel, ctl) {
   const g = store.G;
   const onStep = label => {
     turn.steps.push(label);
@@ -267,7 +269,8 @@ async function answerWithClaude(turn, q, refs, sel, ctl) {
       { role: 'user', content: t.q },
       { role: 'assistant', content: t.text },
     ]);
-  turn.text = await askClaude({
+  const engine = mode === 'llm' ? askOpenRouter : askClaude;
+  turn.text = await engine({
     question: q,
     history,
     context: ctx,
@@ -287,7 +290,14 @@ async function answerWithClaude(turn, q, refs, sel, ctl) {
 function onFailure(turn, e, q, refs, sel) {
   const g = store.G;
   turn.text = (e && e.text) || turn.text;
-  if (e && e.code === 'cancelled') {
+  if (e && e.code === 'no_key') {
+    setLLM(null);
+    turn.mode = 'local';
+    turn.steps = [];
+    turn.note = `${e.message || 'No key for the model.'} This answer comes from the index only.`;
+    turn.text = answerLocally(g, q, { context: refs[0] || sel, onStep: l => turn.steps.push(l) });
+    turn.status = 'done';
+  } else if (e && e.code === 'cancelled') {
     setHover(null);
     turn.status = 'done';
     turn.doneAt = performance.now();
@@ -345,8 +355,8 @@ async function ask(raw) {
   renderComposer(); // Send becomes Stop while answering
   const sel = contextRef();
   try {
-    if (ASK_ENGINE === 'claude' && mode === 'claude') {
-      await answerWithClaude(turn, q, refs, sel, ctl);
+    if ((ASK_ENGINE === 'claude' && mode === 'claude') || (ASK_ENGINE === 'openrouter' && mode === 'llm')) {
+      await answerWithModel(turn, q, refs, sel, ctl);
     } else {
       const script = scriptFor(g, q, { context: refs[0] || sel });
       if (script.note) turn.note = script.note;
@@ -371,13 +381,15 @@ async function ask(raw) {
 function renderHead() {
   const h = ASK.querySelector('.ask-mode');
   if (!h) return;
-  h.textContent = mode === 'claude' ? 'Claude' : mode === 'demo' ? 'Demo' : 'Offline';
+  h.textContent = mode === 'claude' ? 'Claude' : mode === 'llm' ? ASK_MODEL : mode === 'demo' ? 'Demo' : 'Offline';
   h.title =
     mode === 'demo'
       ? 'Simulated answers for this prototype: a scripted walkthrough for rendering questions, answers from the index otherwise. The product answers with Claude.'
       : mode === 'claude'
         ? 'Answers by Claude, using Atlas’s index. Uses your Claude account.'
-        : 'Answers come from the index, without AI. Works for common questions.';
+        : mode === 'llm'
+          ? `Answers by ${ASK_MODEL} on OpenRouter, using Atlas’s index.`
+          : 'Answers come from the index, without AI. Works for common questions.';
 }
 
 function render() {
@@ -385,13 +397,31 @@ function render() {
     <div class="ph-actions"><button class="btn btn-ghost btn-icon" data-new aria-label="New conversation" title="New conversation">${ICON_NEW}</button>
     <button class="btn btn-ghost btn-icon" data-close-ask aria-label="Close Ask Atlas">${ICON_X}</button></div></div>
     <div class="lp-body scroll ask-thread" aria-live="polite"></div>
+    <form class="keybar" hidden><p>These are sample answers. To ask <b>${esc(ASK_MODEL)}</b>, give an OpenRouter key: it stays in this tab and goes only to openrouter.ai. (Or open the map with <code>atlas serve</code>.)</p>
+      <div class="cbox"><input type="password" autocomplete="off" placeholder="sk-or-…" aria-label="OpenRouter key"><button class="btn btn-sm" data-use-key>Use</button></div></form>
     <div class="composer"><div class="ctx"></div><div class="mentions" role="listbox" hidden></div>
       <div class="cbox"><textarea rows="1" placeholder="Ask about the code… (@ to mention)" aria-label="Ask Atlas a question"></textarea>
       <button class="send" data-send aria-label="Send">${ICON_SEND}</button></div>
       <div class="chint">Enter to send · Shift+Enter for a new line</div></div>`;
   renderHead();
+  renderKeybar();
   renderThread();
   renderComposer();
+}
+
+/** The model is reachable (a transport) or not (null): switch modes and show the key box when it is not. */
+function setLLM(t) {
+  const m = t ? 'llm' : 'demo';
+  if (m !== mode) {
+    mode = m;
+    renderHead();
+  }
+  renderKeybar();
+}
+
+function renderKeybar() {
+  const bar = ASK.querySelector('.keybar');
+  if (bar) bar.hidden = !(ASK_ENGINE === 'openrouter' && mode !== 'llm');
 }
 
 function renderThread(scroll) {
@@ -499,12 +529,20 @@ function renderTurn(i) {
       : '';
   el.innerHTML = `<div class="uq" data-at="${t.born}">${esc(t.q)}</div><div>${stepsHTML(t)}${t.note ? `<div class="ans-note">${esc(t.note)}</div>` : ''}
     <div class="ans-text">${t.status === 'streaming' ? withCaret(r.html) : r.html}</div>${pic.html}${sources}${actions}${follow}
-    ${done && !t.note ? (t.mode === 'demo' ? '<div class="ans-meta">Simulated answer for this prototype.</div>' : t.mode === 'local' ? '<div class="ans-meta">Answered from the index, without AI.</div>' : '') : ''}</div>`;
+    ${done && !t.note ? metaHTML(t.mode) : ''}</div>`;
   resumeAnimations(el, t);
   if (t.status !== 'done') {
     const box = ASK.querySelector('.ask-thread');
     box.scrollTop = box.scrollHeight;
   }
+}
+
+/** Under a finished answer: what answered it. */
+function metaHTML(m) {
+  if (m === 'demo') return '<div class="ans-meta">Simulated answer for this prototype.</div>';
+  if (m === 'local') return '<div class="ans-meta">Answered from the index, without AI.</div>';
+  if (m === 'llm') return `<div class="ans-meta">Answered by ${esc(ASK_MODEL)} from Atlas’s index.</div>`;
+  return '';
 }
 
 function renderComposer() {
@@ -658,6 +696,15 @@ function onOut(e) {
 
 function onClick(e) {
   if (e.target.closest('[data-close-ask]')) return closeAsk();
+  if (e.target.closest('[data-use-key]')) {
+    e.preventDefault();
+    const input = ASK.querySelector('.keybar input'),
+      key = input.value.trim();
+    if (!key) return input.focus();
+    input.value = '';
+    useKey(key);
+    return llmTransport().then(setLLM);
+  }
   if (e.target.closest('[data-new]')) {
     if (busy) busy.abort();
     thread = [];

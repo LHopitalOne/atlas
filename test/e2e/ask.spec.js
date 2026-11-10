@@ -19,6 +19,9 @@ test('a question in the search bar opens Ask Atlas with a cited answer', async (
   expect(await atlas.locator('#ask .src').count()).toBe(await atlas.locator('#ask .sources .src').count());
   await expect(atlas.locator('#ask .ask-mode')).toHaveText('Demo');
   await expect(atlas.locator('#ask .ans-meta')).toContainText('Simulated');
+  // with no `atlas serve` proxy and no key, the panel offers to use the viewer's OpenRouter key
+  await expect(atlas.locator('#ask .keybar')).toBeVisible();
+  await expect(atlas.locator('#ask .keybar')).toContainText('meta/muse-ember');
   expect(await atlas.locator('#legend').evaluate(d => d.open)).toBe(false);
 });
 

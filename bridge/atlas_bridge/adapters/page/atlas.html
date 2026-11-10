@@ -225,6 +225,9 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 .sw-line{width:20px;height:0;border-top:2px solid var(--c)}
 .sw-line.dash{border-top-style:dashed}
 .sw-line.dot{border-top-style:dotted}
+.keybar{padding:8px 12px;border-top:1px solid var(--border);font-size:12px;color:var(--muted-foreground);display:grid;gap:6px}
+.keybar[hidden]{display:none}
+.keybar input{flex:1;min-width:0;background:transparent;border:0;color:var(--foreground);font:inherit;outline:none}
 .about .tags{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 2px}
 .lg-row.lg-static{cursor:default}
 .lg-row.lg-static:hover{background:none}
@@ -1843,7 +1846,21 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
     caps: { repo: 120, domain: 200, service: 260, leaf: 320 }
     // most labels placed per tier per pass
   };
-  var ASK_ENGINE = "demo";
+  var ASK_ENGINE = "openrouter";
+  var ASK_MODEL = "meta/muse-ember";
+  var ASK_LLM = {
+    maxSteps: 8,
+    // tool rounds before the model must answer
+    maxToolChars: 12e3,
+    // a tool result is cut to this many characters before it goes back to the model
+    maxTokens: 2500,
+    // per request, reasoning and answer together
+    proxy: "./api/llm",
+    // `atlas serve` forwards <proxy>/chat/completions to OpenRouter with its key
+    direct: "https://openrouter.ai/api/v1",
+    keyStore: "atlas.openrouterKey"
+    // sessionStorage key for a key the viewer pasted
+  };
   var ASK_PLAYBACK = { think: 520, tick: 28, tokensPerTick: 2 };
   var HTTP_PICK_PX = 6;
   var HTTP_FIT_KMAX = 2.4;
@@ -3318,6 +3335,125 @@ ${context}` },
     return result.text;
   }
 
+  // src/ask/openrouter.js
+  var transport;
+  function storedKey() {
+    try {
+      return sessionStorage.getItem(ASK_LLM.keyStore) || "";
+    } catch (_) {
+      return "";
+    }
+  }
+  async function llmTransport() {
+    if (transport) return transport;
+    try {
+      const r = await fetch(`${ASK_LLM.proxy}/ping`, { cache: "no-store" });
+      if (r.ok) return transport = { url: `${ASK_LLM.proxy}/chat/completions`, headers: {}, via: "proxy" };
+    } catch (_) {
+    }
+    const key = storedKey();
+    if (key) return transport = keyTransport(key);
+    return null;
+  }
+  function keyTransport(key) {
+    return {
+      url: `${ASK_LLM.direct}/chat/completions`,
+      headers: { Authorization: `Bearer ${key}`, "X-Title": "Atlas" },
+      via: "key"
+    };
+  }
+  function useKey(key) {
+    try {
+      sessionStorage.setItem(ASK_LLM.keyStore, key);
+    } catch (_) {
+    }
+    transport = keyTransport(key);
+  }
+  function forgetKey() {
+    try {
+      sessionStorage.removeItem(ASK_LLM.keyStore);
+    } catch (_) {
+    }
+    transport = null;
+  }
+  var asFunction = (t) => ({
+    type: "function",
+    function: {
+      name: t.name,
+      description: t.description,
+      parameters: t.inputSchema || { type: "object", properties: {} }
+    }
+  });
+  async function complete(messages, tools, signal) {
+    const t = await llmTransport();
+    if (!t) throw { code: "no_key", message: "Give an OpenRouter key to ask the model." };
+    const body = {
+      model: ASK_MODEL,
+      messages,
+      max_tokens: ASK_LLM.maxTokens,
+      reasoning: { effort: "low" },
+      ...tools.length ? { tools: tools.map(asFunction) } : {}
+    };
+    const r = await fetch(t.url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...t.headers },
+      body: JSON.stringify(body),
+      signal
+    });
+    if (r.status === 401 || r.status === 403) {
+      if (t.via === "key") forgetKey();
+      throw { code: "no_key", message: "OpenRouter refused the key." };
+    }
+    if (r.status === 429) throw { code: "rate_limited" };
+    if (!r.ok) throw { code: "failed", message: `OpenRouter answered ${r.status}` };
+    const data = await r.json();
+    return data.choices && data.choices[0] && data.choices[0].message || {};
+  }
+  function runTool(byName, call, onStep, steps, nameOf2) {
+    const fn = call.function || {};
+    const tool = byName.get(fn.name);
+    let args = {};
+    try {
+      args = fn.arguments ? JSON.parse(fn.arguments) : {};
+    } catch (_) {
+      return { error: "arguments were not valid JSON" };
+    }
+    if (!tool) return { error: `no tool named ${fn.name}` };
+    onStep((steps[tool.name] || (() => tool.name))(args, nameOf2), tool.name);
+    try {
+      return tool.run(args);
+    } catch (e) {
+      return { error: String(e && e.message || e) };
+    }
+  }
+  async function askOpenRouter({ question, history: history2, context, tools, nameOf: nameOf2, onText, onStep, signal }) {
+    const byName = new Map(tools.map((t) => [t.name, t]));
+    const messages = [
+      { role: "system", content: `${RULES}
+
+What the user is looking at:
+${context}` },
+      ...history2,
+      { role: "user", content: question }
+    ];
+    for (let round = 0; round < ASK_LLM.maxSteps; round++) {
+      const msg = await complete(messages, round < ASK_LLM.maxSteps - 1 ? tools : [], signal);
+      const calls = msg.tool_calls || [];
+      if (!calls.length) {
+        const text2 = (msg.content || "").trim();
+        onText(text2);
+        return text2;
+      }
+      messages.push({ role: "assistant", content: msg.content || "", tool_calls: calls });
+      for (const call of calls) {
+        const result = runTool(byName, call, onStep, STEP, nameOf2);
+        const content = JSON.stringify(result).slice(0, ASK_LLM.maxToolChars);
+        messages.push({ role: "tool", tool_call_id: call.id, content });
+      }
+    }
+    throw { code: "failed", message: "The model kept looking things up without answering." };
+  }
+
   // src/ui/code-view.js
   var CONTEXT = 3;
   var MAX_LINES = 160;
@@ -4507,7 +4643,7 @@ FLOW: ${flowLine}`;
   // src/ui/ask.js
   var thread = [];
   var busy = null;
-  var mode = ASK_ENGINE === "demo" ? "demo" : "local";
+  var mode = ASK_ENGINE === "demo" || ASK_ENGINE === "openrouter" ? "demo" : "local";
   var showing = -1;
   var mention = null;
   var ICON_SEND = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 12V2M2.5 6.5 7 2l4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -4546,6 +4682,7 @@ FLOW: ${flowLine}`;
     ASK.classList.add("on");
     syncLegend();
     if (first) render();
+    if (ASK_ENGINE === "openrouter") llmTransport().then(setLLM);
     if (ASK_ENGINE === "claude")
       claudeAvailable().then((fn) => {
         const m = fn ? "claude" : "local";
@@ -4672,7 +4809,7 @@ FLOW: ${flowLine}`;
     }
     turn.text = script.text;
   }
-  async function answerWithClaude(turn, q2, refs, sel, ctl) {
+  async function answerWithModel(turn, q2, refs, sel, ctl) {
     const g = store.G;
     const onStep = (label) => {
       turn.steps.push(label);
@@ -4688,7 +4825,8 @@ FLOW: ${flowLine}`;
       { role: "user", content: t.q },
       { role: "assistant", content: t.text }
     ]);
-    turn.text = await askClaude({
+    const engine = mode === "llm" ? askOpenRouter : askClaude;
+    turn.text = await engine({
       question: q2,
       history: history2,
       context: ctx,
@@ -4706,7 +4844,14 @@ FLOW: ${flowLine}`;
   function onFailure(turn, e, q2, refs, sel) {
     const g = store.G;
     turn.text = e && e.text || turn.text;
-    if (e && e.code === "cancelled") {
+    if (e && e.code === "no_key") {
+      setLLM(null);
+      turn.mode = "local";
+      turn.steps = [];
+      turn.note = `${e.message || "No key for the model."} This answer comes from the index only.`;
+      turn.text = answerLocally(g, q2, { context: refs[0] || sel, onStep: (l) => turn.steps.push(l) });
+      turn.status = "done";
+    } else if (e && e.code === "cancelled") {
       setHover(null);
       turn.status = "done";
       turn.doneAt = performance.now();
@@ -4755,8 +4900,8 @@ FLOW: ${flowLine}`;
     renderComposer();
     const sel = contextRef();
     try {
-      if (ASK_ENGINE === "claude" && mode === "claude") {
-        await answerWithClaude(turn, q2, refs, sel, ctl);
+      if (ASK_ENGINE === "claude" && mode === "claude" || ASK_ENGINE === "openrouter" && mode === "llm") {
+        await answerWithModel(turn, q2, refs, sel, ctl);
       } else {
         const script = scriptFor(g, q2, { context: refs[0] || sel });
         if (script.note) turn.note = script.note;
@@ -4778,21 +4923,36 @@ FLOW: ${flowLine}`;
   function renderHead() {
     const h = ASK.querySelector(".ask-mode");
     if (!h) return;
-    h.textContent = mode === "claude" ? "Claude" : mode === "demo" ? "Demo" : "Offline";
-    h.title = mode === "demo" ? "Simulated answers for this prototype: a scripted walkthrough for rendering questions, answers from the index otherwise. The product answers with Claude." : mode === "claude" ? "Answers by Claude, using Atlas\u2019s index. Uses your Claude account." : "Answers come from the index, without AI. Works for common questions.";
+    h.textContent = mode === "claude" ? "Claude" : mode === "llm" ? ASK_MODEL : mode === "demo" ? "Demo" : "Offline";
+    h.title = mode === "demo" ? "Simulated answers for this prototype: a scripted walkthrough for rendering questions, answers from the index otherwise. The product answers with Claude." : mode === "claude" ? "Answers by Claude, using Atlas\u2019s index. Uses your Claude account." : mode === "llm" ? `Answers by ${ASK_MODEL} on OpenRouter, using Atlas\u2019s index.` : "Answers come from the index, without AI. Works for common questions.";
   }
   function render() {
     ASK.innerHTML = `<div class="ph"><div><h2>Ask Atlas <span class="badge badge-outline ask-mode"></span></h2></div>
     <div class="ph-actions"><button class="btn btn-ghost btn-icon" data-new aria-label="New conversation" title="New conversation">${ICON_NEW}</button>
     <button class="btn btn-ghost btn-icon" data-close-ask aria-label="Close Ask Atlas">${ICON_X}</button></div></div>
     <div class="lp-body scroll ask-thread" aria-live="polite"></div>
+    <form class="keybar" hidden><p>These are sample answers. To ask <b>${esc(ASK_MODEL)}</b>, give an OpenRouter key: it stays in this tab and goes only to openrouter.ai. (Or open the map with <code>atlas serve</code>.)</p>
+      <div class="cbox"><input type="password" autocomplete="off" placeholder="sk-or-\u2026" aria-label="OpenRouter key"><button class="btn btn-sm" data-use-key>Use</button></div></form>
     <div class="composer"><div class="ctx"></div><div class="mentions" role="listbox" hidden></div>
       <div class="cbox"><textarea rows="1" placeholder="Ask about the code\u2026 (@ to mention)" aria-label="Ask Atlas a question"></textarea>
       <button class="send" data-send aria-label="Send">${ICON_SEND}</button></div>
       <div class="chint">Enter to send \xB7 Shift+Enter for a new line</div></div>`;
     renderHead();
+    renderKeybar();
     renderThread();
     renderComposer();
+  }
+  function setLLM(t) {
+    const m = t ? "llm" : "demo";
+    if (m !== mode) {
+      mode = m;
+      renderHead();
+    }
+    renderKeybar();
+  }
+  function renderKeybar() {
+    const bar = ASK.querySelector(".keybar");
+    if (bar) bar.hidden = !(ASK_ENGINE === "openrouter" && mode !== "llm");
   }
   function renderThread(scroll) {
     const box = ASK.querySelector(".ask-thread");
@@ -4865,12 +5025,18 @@ FLOW: ${flowLine}`;
     const follow = done && r.followups.length && i === thread.length - 1 ? `<div class="sugg follow" data-at="${afterFlow + 60}">${r.followups.map((s) => `<button class="chip-q" data-q="${esc(s)}">${esc(s)}</button>`).join("")}</div>` : "";
     el.innerHTML = `<div class="uq" data-at="${t.born}">${esc(t.q)}</div><div>${stepsHTML2(t)}${t.note ? `<div class="ans-note">${esc(t.note)}</div>` : ""}
     <div class="ans-text">${t.status === "streaming" ? withCaret(r.html) : r.html}</div>${pic.html}${sources2}${actions}${follow}
-    ${done && !t.note ? t.mode === "demo" ? '<div class="ans-meta">Simulated answer for this prototype.</div>' : t.mode === "local" ? '<div class="ans-meta">Answered from the index, without AI.</div>' : "" : ""}</div>`;
+    ${done && !t.note ? metaHTML(t.mode) : ""}</div>`;
     resumeAnimations(el, t);
     if (t.status !== "done") {
       const box = ASK.querySelector(".ask-thread");
       box.scrollTop = box.scrollHeight;
     }
+  }
+  function metaHTML(m) {
+    if (m === "demo") return '<div class="ans-meta">Simulated answer for this prototype.</div>';
+    if (m === "local") return '<div class="ans-meta">Answered from the index, without AI.</div>';
+    if (m === "llm") return `<div class="ans-meta">Answered by ${esc(ASK_MODEL)} from Atlas\u2019s index.</div>`;
+    return "";
   }
   function renderComposer() {
     const btn = ASK.querySelector("[data-send]"), ta = ASK.querySelector("textarea"), ctx = ASK.querySelector(".ctx");
@@ -4998,6 +5164,14 @@ FLOW: ${flowLine}`;
   }
   function onClick2(e) {
     if (e.target.closest("[data-close-ask]")) return closeAsk();
+    if (e.target.closest("[data-use-key]")) {
+      e.preventDefault();
+      const input = ASK.querySelector(".keybar input"), key = input.value.trim();
+      if (!key) return input.focus();
+      input.value = "";
+      useKey(key);
+      return llmTransport().then(setLLM);
+    }
     if (e.target.closest("[data-new]")) {
       if (busy) busy.abort();
       thread = [];

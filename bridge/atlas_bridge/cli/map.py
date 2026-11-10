@@ -8,6 +8,7 @@ from ..usecases.draw import GROUPINGS
 from .command import Command
 from .inputs import Aliases, RepositoryInput
 from .pipeline import MapPipeline
+from .serve import MapServer
 
 
 class MapCommand(Command):
@@ -45,6 +46,11 @@ class MapCommand(Command):
         )
         parser.add_argument('--no-open', action='store_true', help='write the page without opening a browser')
         parser.add_argument(
+            '--serve',
+            action='store_true',
+            help='show the map from a local server (Ask then reaches OpenRouter with OPENROUTER_API_KEY) until Ctrl+C',
+        )
+        parser.add_argument(
             '--jev',
             action='store_true',
             help='let Jev (a decision model on OpenRouter; needs OPENROUTER_API_KEY) choose among the routes the code '
@@ -65,6 +71,11 @@ class MapCommand(Command):
         self.report(f'atlas: mapping {args.title}')
         page = MapPipeline(args, self.report).run(repos)
         self.report(f'atlas: wrote {page} in {time.monotonic() - start:.0f}s')
+        if args.serve:
+            MapServer(os.path.dirname(os.path.abspath(page)), 0).run(
+                os.path.basename(page), not args.no_open, self.report
+            )
+            return
         if args.no_open or not self.open(page):
             self.report(f'atlas: open {page} in a browser')
 
