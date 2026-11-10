@@ -4,7 +4,7 @@
  * on an answer key, and the HTTP sections of a node's inspector (served here, called from, sends, impact).
  */
 import { store } from '../state.js';
-import { groupsFrom, groupsInto, httpImpact, PROOF, siteUrl } from '../model/http.js';
+import { groupsFrom, groupsInto, httpImpact, PROOF, siteUrl, withinKind } from '../model/http.js';
 import { impactOf } from '../graph/insights.js';
 import { dotHTML, ICON_X, nameAttrs } from './fragments.js';
 import { esc, fmt } from '../util/format.js';
@@ -118,7 +118,7 @@ export function impactBlockHTML(g, target, what) {
     parts.push(
       `<b>${plural(cross, 'call site', 'call sites')}</b> in <b>${plural(im.repos.length, 'other repository', 'other repositories')}</b>`,
     );
-  if (im.within) parts.push(`<b>${plural(im.within, 'call site', 'call sites')}</b> in its own frontend`);
+  if (im.within) parts.push(`<b>${plural(im.within, 'call site', 'call sites')}</b> in its own repository`);
   let h = `<div class="sec"><div class="sec-h"><h3>If ${esc(what)} changes</h3></div><div class="impact-body"><p class="impact-text">`;
   h += `${parts.join(' and ')} send ${target.t === 'n' && target.id >= g.S ? 'it' : 'them'} requests, from <b>${plural(im.callers.length, 'file', 'files')}</b>`;
   h += target.t === 'n' && target.id < g.S ? ` to ${plural(im.endpoints.length, 'endpoint', 'endpoints')}.` : '.';
@@ -152,7 +152,7 @@ export function httpSectionHTML(id) {
 }
 
 /** How the links scored on an answer key built without the tool; says so plainly when nothing was measured. */
-export function accuracyHTML(acc, within = 0) {
+export function accuracyHTML(acc, within = []) {
   if (!acc)
     return `<div class="acc"><div class="acc-h">Accuracy not measured</div><p class="acc-note">No answer key exists for these repositories, so these links are unchecked.</p></div>`;
   const stat = (v, label) => `<div class="acc-s"><b>${esc(v)}</b><span>${esc(label)}</span></div>`;
@@ -163,8 +163,8 @@ export function accuracyHTML(acc, within = 0) {
   h += '</div>';
   if (acc.how) h += `<p class="acc-note">${esc(acc.how)}</p>`;
   if (acc.missed) h += `<p class="acc-note">Missed: ${esc(acc.missed)}</p>`;
-  if (within)
-    h += `<p class="acc-note">Not counted: ${fmt(within)} links inside one repository (a frontend calling its own API), which no answer key covers yet.</p>`;
+  if (within.length)
+    h += `<p class="acc-note">Not counted: ${fmt(within.length)} links inside one repository (${esc(withinKind(within).paren)}), which no answer key covers yet.</p>`;
   if (acc.key)
     h += `<a class="linkbtn acc-link" href="${esc(acc.key)}" target="_blank" rel="noopener noreferrer">The answer key and how it was built ↗</a>`;
   return h + '</div>';

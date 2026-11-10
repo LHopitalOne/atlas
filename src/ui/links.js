@@ -8,7 +8,7 @@ import { store } from '../state.js';
 import { openLink, toggleHttpImpact } from '../app/http.js';
 import { select } from '../app/selection.js';
 import { LINKS } from '../dom.js';
-import { httpImpact, isWithin, PROOF_ORDER, proofCounts, repoPairs } from '../model/http.js';
+import { httpImpact, isWithin, PROOF_ORDER, proofCounts, repoPairs, withinKind } from '../model/http.js';
 import { renderAttn, syncLegend } from './attention.js';
 import { closeAsk } from './ask.js';
 import { ICON_X, nameAttrs } from './fragments.js';
@@ -64,10 +64,11 @@ function pairsHTML(g, H) {
   for (const p of repoPairs(g, H)) {
     const sites = p.groups.reduce((n, i) => n + H.groups[i].links.length, 0),
       rows = p.groups.map(i => groupRow(g, i, 'endpoint')).join('');
-    if (p.a === p.b)
-      // inside one repository (a frontend calling its own API): many, and no answer key covers them, so folded
-      h += `<details class="sec unmatched within"><summary class="sec-h"><h3 ${nameAttrs}>Inside ${esc(g.repoName[p.a])}: frontend → API</h3><span>${fmt(sites)}</span></summary><p class="impact-text pad">Browser code calling its own repository’s routes. No answer key covers these yet, so they are not in the accuracy above.</p>${rows}</details>`;
-    else
+    if (p.a === p.b) {
+      // inside one repository (a frontend calling its own API, tasks for its workers): many, no answer key, so folded
+      const kind = withinKind(p.groups.flatMap(i => H.groups[i].links.map(j => H.links[j])));
+      h += `<details class="sec unmatched within"><summary class="sec-h"><h3 ${nameAttrs}>Inside ${esc(g.repoName[p.a])}: ${esc(kind.short)}</h3><span>${fmt(sites)}</span></summary><p class="impact-text pad">${esc(kind.long)} No answer key covers these yet, so they are not in the accuracy above.</p>${rows}</details>`;
+    } else
       h += `<div class="sec"><div class="sec-h"><h3 ${nameAttrs}>${esc(g.repoName[p.a])} → ${esc(g.repoName[p.b])}</h3><span>${fmt(sites)}</span></div>${rows}</div>`;
   }
   return h;
@@ -112,7 +113,7 @@ export function renderLinks() {
   if (!show) return;
   LINKS.innerHTML =
     headerHTML(g, H) +
-    `<div class="scroll" style="padding:0 8px 10px">${accuracyHTML(H.accuracy, H.links.filter(isWithin).length)}${proofLegendHTML(H)}${pairsHTML(g, H)}${repoImpactHTML(g, H)}${unmatchedHTML(g, H)}</div>`;
+    `<div class="scroll" style="padding:0 8px 10px">${accuracyHTML(H.accuracy, H.links.filter(isWithin))}${proofLegendHTML(H)}${pairsHTML(g, H)}${repoImpactHTML(g, H)}${unmatchedHTML(g, H)}</div>`;
 }
 
 /** Wire this module to the DOM. Called once from main.js. */

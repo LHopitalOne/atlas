@@ -1434,6 +1434,27 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
     );
   }
   var isWithin = (l) => l.call.repo === l.route.repo;
+  var WITHIN = {
+    request: {
+      short: "frontend \u2192 API",
+      long: "Browser code calling its own repository\u2019s routes.",
+      paren: "a frontend calling its own API"
+    },
+    task: {
+      short: "tasks \u2192 its workers",
+      long: "Background tasks and queue messages handed to the same repository\u2019s workers.",
+      paren: "tasks sent to its own workers"
+    },
+    mixed: {
+      short: "calls to itself",
+      long: "Browser code calling its own routes, and tasks handed to its own workers.",
+      paren: "a frontend calling its own API, or tasks sent to its own workers"
+    }
+  };
+  function withinKind(links) {
+    const tasks = links.filter((l) => l.protocol === "task" || l.protocol === "amqp").length;
+    return WITHIN[tasks === 0 ? "request" : tasks === links.length ? "task" : "mixed"];
+  }
   function proofCounts(H) {
     const c = {};
     for (const l of H.links) if (!isWithin(l)) c[l.proof] = (c[l.proof] || 0) + 1;
@@ -5281,7 +5302,7 @@ FLOW: ${flowLine}`;
       parts.push(
         `<b>${plural(cross, "call site", "call sites")}</b> in <b>${plural(im.repos.length, "other repository", "other repositories")}</b>`
       );
-    if (im.within) parts.push(`<b>${plural(im.within, "call site", "call sites")}</b> in its own frontend`);
+    if (im.within) parts.push(`<b>${plural(im.within, "call site", "call sites")}</b> in its own repository`);
     let h = `<div class="sec"><div class="sec-h"><h3>If ${esc(what)} changes</h3></div><div class="impact-body"><p class="impact-text">`;
     h += `${parts.join(" and ")} send ${target.t === "n" && target.id >= g.S ? "it" : "them"} requests, from <b>${plural(im.callers.length, "file", "files")}</b>`;
     h += target.t === "n" && target.id < g.S ? ` to ${plural(im.endpoints.length, "endpoint", "endpoints")}.` : ".";
@@ -5305,7 +5326,7 @@ FLOW: ${flowLine}`;
     if (into.length) h += impactBlockHTML(g, { t: "n", id }, id < g.S ? "this file\u2019s endpoints" : "this endpoint");
     return h;
   }
-  function accuracyHTML(acc, within = 0) {
+  function accuracyHTML(acc, within = []) {
     if (!acc)
       return `<div class="acc"><div class="acc-h">Accuracy not measured</div><p class="acc-note">No answer key exists for these repositories, so these links are unchecked.</p></div>`;
     const stat = (v, label) => `<div class="acc-s"><b>${esc(v)}</b><span>${esc(label)}</span></div>`;
@@ -5316,8 +5337,8 @@ FLOW: ${flowLine}`;
     h += "</div>";
     if (acc.how) h += `<p class="acc-note">${esc(acc.how)}</p>`;
     if (acc.missed) h += `<p class="acc-note">Missed: ${esc(acc.missed)}</p>`;
-    if (within)
-      h += `<p class="acc-note">Not counted: ${fmt(within)} links inside one repository (a frontend calling its own API), which no answer key covers yet.</p>`;
+    if (within.length)
+      h += `<p class="acc-note">Not counted: ${fmt(within.length)} links inside one repository (${esc(withinKind(within).paren)}), which no answer key covers yet.</p>`;
     if (acc.key)
       h += `<a class="linkbtn acc-link" href="${esc(acc.key)}" target="_blank" rel="noopener noreferrer">The answer key and how it was built \u2197</a>`;
     return h + "</div>";
@@ -7657,9 +7678,10 @@ FLOW: ${flowLine}`;
     let h = "";
     for (const p of repoPairs(g, H)) {
       const sites = p.groups.reduce((n, i) => n + H.groups[i].links.length, 0), rows = p.groups.map((i) => groupRow(g, i, "endpoint")).join("");
-      if (p.a === p.b)
-        h += `<details class="sec unmatched within"><summary class="sec-h"><h3 ${nameAttrs}>Inside ${esc(g.repoName[p.a])}: frontend \u2192 API</h3><span>${fmt(sites)}</span></summary><p class="impact-text pad">Browser code calling its own repository\u2019s routes. No answer key covers these yet, so they are not in the accuracy above.</p>${rows}</details>`;
-      else
+      if (p.a === p.b) {
+        const kind = withinKind(p.groups.flatMap((i) => H.groups[i].links.map((j) => H.links[j])));
+        h += `<details class="sec unmatched within"><summary class="sec-h"><h3 ${nameAttrs}>Inside ${esc(g.repoName[p.a])}: ${esc(kind.short)}</h3><span>${fmt(sites)}</span></summary><p class="impact-text pad">${esc(kind.long)} No answer key covers these yet, so they are not in the accuracy above.</p>${rows}</details>`;
+      } else
         h += `<div class="sec"><div class="sec-h"><h3 ${nameAttrs}>${esc(g.repoName[p.a])} \u2192 ${esc(g.repoName[p.b])}</h3><span>${fmt(sites)}</span></div>${rows}</div>`;
     }
     return h;
@@ -7691,7 +7713,7 @@ FLOW: ${flowLine}`;
     LINKS.classList.toggle("on", show);
     syncLegend();
     if (!show) return;
-    LINKS.innerHTML = headerHTML2(g, H) + `<div class="scroll" style="padding:0 8px 10px">${accuracyHTML(H.accuracy, H.links.filter(isWithin).length)}${proofLegendHTML(H)}${pairsHTML(g, H)}${repoImpactHTML(g, H)}${unmatchedHTML(g, H)}</div>`;
+    LINKS.innerHTML = headerHTML2(g, H) + `<div class="scroll" style="padding:0 8px 10px">${accuracyHTML(H.accuracy, H.links.filter(isWithin))}${proofLegendHTML(H)}${pairsHTML(g, H)}${repoImpactHTML(g, H)}${unmatchedHTML(g, H)}</div>`;
   }
   function init12() {
     LINKS.addEventListener("click", (e) => {

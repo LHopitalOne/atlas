@@ -188,8 +188,32 @@ export function repoPairs(g, H) {
   );
 }
 
-/** A link inside one repository (say, its frontend calling its own API) rather than between two. */
+/** A link inside one repository (its frontend calling its own API, a task for its own workers) rather than between two. */
 export const isWithin = l => l.call.repo === l.route.repo;
+
+const WITHIN = {
+  request: {
+    short: 'frontend → API',
+    long: 'Browser code calling its own repository’s routes.',
+    paren: 'a frontend calling its own API',
+  },
+  task: {
+    short: 'tasks → its workers',
+    long: 'Background tasks and queue messages handed to the same repository’s workers.',
+    paren: 'tasks sent to its own workers',
+  },
+  mixed: {
+    short: 'calls to itself',
+    long: 'Browser code calling its own routes, and tasks handed to its own workers.',
+    paren: 'a frontend calling its own API, or tasks sent to its own workers',
+  },
+};
+
+/** What links inside one repository are, in words: a frontend calling its API, tasks for its workers, or both. */
+export function withinKind(links) {
+  const tasks = links.filter(l => l.protocol === 'task' || l.protocol === 'amqp').length;
+  return WITHIN[tasks === 0 ? 'request' : tasks === links.length ? 'task' : 'mixed'];
+}
 
 /** How many links between repositories have each proof: {scip: 30, syntax: 4, ...}. */
 export function proofCounts(H) {

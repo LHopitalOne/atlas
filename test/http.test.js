@@ -12,6 +12,7 @@ import {
   protocolName,
   repoPairs,
   siteUrl,
+  withinKind,
 } from '../src/model/http.js';
 
 // test/fixtures/http-shop.json: web calls api twice (one confirmed by SCIP, one inferred) and once with no route
@@ -90,4 +91,10 @@ test('links are counted by protocol, most first, and named as the page shows the
   ]);
   assert.equal(protocolName('kafka'), 'Kafka');
   assert.equal(protocolName('sqs'), 'SQS');
+});
+
+test('links inside one repository are named by what they are', () => {
+  assert.equal(withinKind([{}, { protocol: 'http' }]).short, 'frontend → API');
+  assert.equal(withinKind([{ protocol: 'task' }]).short, 'tasks → its workers');
+  assert.equal(withinKind([{ protocol: 'task' }, {}]).short, 'calls to itself');
 });

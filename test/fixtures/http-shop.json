@@ -1,339 +1,277 @@
 {
- "meta": {
-  "label": "Graphify",
-  "title": "Shop, with HTTP links",
-  "source": "Graphify 0.9.102",
-  "status": [
-   "Extracted",
-   "Ambiguous",
-   "Unmatched",
-   "Inferred"
-  ],
-  "kind": [
-   "File",
-   "Function or class",
-   "HTTP endpoint",
-   "Symbol"
-  ],
-  "accuracy": {
-   "found": 2,
-   "of": 2,
-   "falseLinks": 0,
-   "scip": 1,
-   "how": "A hand-made key for the test shop."
-  }
- },
- "repos": [
-  {
-   "name": "api",
-   "url": "https://github.com/example/shop-api",
-   "commit": "1111111111111111111111111111111111111111",
-   "domains": [
-    {
-     "name": "__init__.py",
-     "services": [
-      {
-       "name": "__init__.py",
-       "loc": "app/__init__.py:1",
-       "leaves": []
-      }
-     ]
-    },
-    {
-     "name": "orders.py",
-     "services": [
-      {
-       "name": "orders.py",
-       "loc": "app/orders.py:1",
-       "leaves": [
-        {
-         "name": "OrderStore",
-         "kind": 1,
-         "loc": "app/orders.py:5"
-        },
-        {
-         "name": ".__init__()",
-         "kind": 1,
-         "loc": "app/orders.py:6"
-        },
-        {
-         "name": ".create()",
-         "kind": 1,
-         "loc": "app/orders.py:9"
-        },
-        {
-         "name": ".get()",
-         "kind": 1,
-         "loc": "app/orders.py:14"
-        },
-        {
-         "name": "new_id()",
-         "kind": 1,
-         "loc": "app/orders.py:18"
-        }
-       ]
-      }
-     ]
-    },
-    {
-     "name": "post_order",
-     "services": [
-      {
-       "name": "main.py",
-       "loc": "app/main.py:1",
-       "leaves": [
-        {
-         "name": "post_order()",
-         "kind": 1,
-         "loc": "app/main.py:11"
-        },
-        {
-         "name": "read_order()",
-         "kind": 1,
-         "loc": "app/main.py:16"
-        },
-        {
-         "name": "POST /orders",
-         "kind": 2,
-         "loc": "app/main.py:10",
-         "doc": "HTTP route served by post_order (fastapi).",
-         "sig": "POST /orders -> post_order"
-        },
-        {
-         "name": "GET /orders/{order_id}",
-         "kind": 2,
-         "loc": "app/main.py:15",
-         "doc": "HTTP route served by read_order (fastapi).",
-         "sig": "GET /orders/{order_id} -> read_order"
-        }
-       ]
-      }
-     ]
+  "meta": {
+    "label": "Graphify",
+    "title": "Shop, with HTTP links",
+    "source": "Graphify 0.9.102",
+    "status": ["Extracted", "Ambiguous", "Unmatched", "Inferred"],
+    "kind": ["File", "Function or class", "HTTP endpoint", "Symbol"],
+    "accuracy": {
+      "found": 2,
+      "of": 2,
+      "falseLinks": 0,
+      "scip": 1,
+      "how": "A hand-made key for the test shop."
     }
-   ]
   },
-  {
-   "name": "web",
-   "url": "https://github.com/example/shop-web",
-   "commit": "2222222222222222222222222222222222222222",
-   "domains": [
+  "repos": [
     {
-     "name": "checkout.js",
-     "services": [
-      {
-       "name": "api.js",
-       "loc": "src/api.js:1",
-       "leaves": [
+      "name": "api",
+      "url": "https://github.com/example/shop-api",
+      "commit": "1111111111111111111111111111111111111111",
+      "domains": [
         {
-         "name": "placeOrder()",
-         "kind": 1,
-         "loc": "src/api.js:4"
+          "name": "__init__.py",
+          "services": [
+            {
+              "name": "__init__.py",
+              "loc": "app/__init__.py:1",
+              "leaves": []
+            }
+          ]
         },
         {
-         "name": "loadOrder()",
-         "kind": 1,
-         "loc": "src/api.js:9"
+          "name": "orders.py",
+          "services": [
+            {
+              "name": "orders.py",
+              "loc": "app/orders.py:1",
+              "leaves": [
+                {
+                  "name": "OrderStore",
+                  "kind": 1,
+                  "loc": "app/orders.py:5"
+                },
+                {
+                  "name": ".__init__()",
+                  "kind": 1,
+                  "loc": "app/orders.py:6"
+                },
+                {
+                  "name": ".create()",
+                  "kind": 1,
+                  "loc": "app/orders.py:9"
+                },
+                {
+                  "name": ".get()",
+                  "kind": 1,
+                  "loc": "app/orders.py:14"
+                },
+                {
+                  "name": "new_id()",
+                  "kind": 1,
+                  "loc": "app/orders.py:18"
+                }
+              ]
+            }
+          ]
         },
         {
-         "name": "loadUser()",
-         "kind": 1,
-         "loc": "src/api.js:13"
+          "name": "post_order",
+          "services": [
+            {
+              "name": "main.py",
+              "loc": "app/main.py:1",
+              "leaves": [
+                {
+                  "name": "post_order()",
+                  "kind": 1,
+                  "loc": "app/main.py:11"
+                },
+                {
+                  "name": "read_order()",
+                  "kind": 1,
+                  "loc": "app/main.py:16"
+                },
+                {
+                  "name": "POST /orders",
+                  "kind": 2,
+                  "loc": "app/main.py:10",
+                  "doc": "HTTP route served by post_order (fastapi).",
+                  "sig": "POST /orders -> post_order"
+                },
+                {
+                  "name": "GET /orders/{order_id}",
+                  "kind": 2,
+                  "loc": "app/main.py:15",
+                  "doc": "HTTP route served by read_order (fastapi).",
+                  "sig": "GET /orders/{order_id} -> read_order"
+                }
+              ]
+            }
+          ]
         }
-       ]
+      ]
+    },
+    {
+      "name": "web",
+      "url": "https://github.com/example/shop-web",
+      "commit": "2222222222222222222222222222222222222222",
+      "domains": [
+        {
+          "name": "checkout.js",
+          "services": [
+            {
+              "name": "api.js",
+              "loc": "src/api.js:1",
+              "leaves": [
+                {
+                  "name": "placeOrder()",
+                  "kind": 1,
+                  "loc": "src/api.js:4"
+                },
+                {
+                  "name": "loadOrder()",
+                  "kind": 1,
+                  "loc": "src/api.js:9"
+                },
+                {
+                  "name": "loadUser()",
+                  "kind": 1,
+                  "loc": "src/api.js:13"
+                }
+              ]
+            },
+            {
+              "name": "checkout.js",
+              "loc": "src/checkout.js:1",
+              "leaves": [
+                {
+                  "name": "checkout()",
+                  "kind": 1,
+                  "loc": "src/checkout.js:4"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "edges": [
+    [2, 1, 0],
+    [2, 5, 0],
+    [4, 3, 0],
+    [4, 14, 0],
+    [4, 15, 0],
+    [7, 9, 0],
+    [10, 7, 3],
+    [11, 8, 3],
+    [14, 12, 0],
+    [15, 13, 3],
+    [17, 14, 0],
+    [17, 15, 0]
+  ],
+  "links": [
+    {
+      "from": 14,
+      "to": 12,
+      "method": "POST",
+      "path": "/orders",
+      "proof": "scip",
+      "reason": "named target, one route fits",
+      "call": {
+        "repo": 1,
+        "file": "src/api.js",
+        "line": 5,
+        "function": "placeOrder",
+        "start": 3,
+        "code": [
+          "",
+          "export async function placeOrder(items) {",
+          "  const res = await fetch(`${BASE}/orders`, { method: 'POST', body: JSON.stringify({ items }) });",
+          "  return res.json();",
+          "}",
+          "",
+          "export async function loadOrder(id) {"
+        ]
       },
-      {
-       "name": "checkout.js",
-       "loc": "src/checkout.js:1",
-       "leaves": [
+      "route": {
+        "repo": 0,
+        "file": "app/main.py",
+        "line": 10,
+        "handler": "post_order",
+        "framework": "fastapi",
+        "methods": ["POST"],
+        "start": 8,
+        "code": [
+          "",
+          "",
+          "@app.post('/orders')",
+          "def post_order(body: dict):",
+          "    return store.create(body['items'])"
+        ]
+      },
+      "checks": [
         {
-         "name": "checkout()",
-         "kind": 1,
-         "loc": "src/checkout.js:4"
+          "at": "src/api.js:5",
+          "name": "BASE",
+          "means": "src/api.js:2-2",
+          "verdict": "confirmed"
         }
-       ]
-      }
-     ]
-    }
-   ]
-  }
- ],
- "edges": [
-  [
-   2,
-   1,
-   0
-  ],
-  [
-   2,
-   5,
-   0
-  ],
-  [
-   4,
-   3,
-   0
-  ],
-  [
-   4,
-   14,
-   0
-  ],
-  [
-   4,
-   15,
-   0
-  ],
-  [
-   7,
-   9,
-   0
-  ],
-  [
-   10,
-   7,
-   3
-  ],
-  [
-   11,
-   8,
-   3
-  ],
-  [
-   14,
-   12,
-   0
-  ],
-  [
-   15,
-   13,
-   3
-  ],
-  [
-   17,
-   14,
-   0
-  ],
-  [
-   17,
-   15,
-   0
-  ]
- ],
- "links": [
-  {
-   "from": 14,
-   "to": 12,
-   "method": "POST",
-   "path": "/orders",
-   "proof": "scip",
-   "reason": "named target, one route fits",
-   "call": {
-    "repo": 1,
-    "file": "src/api.js",
-    "line": 5,
-    "function": "placeOrder",
-    "start": 3,
-    "code": [
-     "",
-     "export async function placeOrder(items) {",
-     "  const res = await fetch(`${BASE}/orders`, { method: 'POST', body: JSON.stringify({ items }) });",
-     "  return res.json();",
-     "}",
-     "",
-     "export async function loadOrder(id) {"
-    ]
-   },
-   "route": {
-    "repo": 0,
-    "file": "app/main.py",
-    "line": 10,
-    "handler": "post_order",
-    "framework": "fastapi",
-    "methods": [
-     "POST"
-    ],
-    "start": 8,
-    "code": [
-     "",
-     "",
-     "@app.post('/orders')",
-     "def post_order(body: dict):",
-     "    return store.create(body['items'])"
-    ]
-   },
-   "checks": [
+      ]
+    },
     {
-     "at": "src/api.js:5",
-     "name": "BASE",
-     "means": "src/api.js:2-2",
-     "verdict": "confirmed"
+      "from": 15,
+      "to": 13,
+      "method": "GET",
+      "path": "/orders/{order_id}",
+      "proof": "inferred",
+      "reason": "fits if the base URL is the api service",
+      "call": {
+        "repo": 1,
+        "file": "src/api.js",
+        "line": 10,
+        "function": "loadOrder",
+        "start": 8,
+        "code": [
+          "",
+          "export async function loadOrder(id) {",
+          "  return (await fetch(`${BASE}/orders/${id}`)).json();",
+          "}",
+          "",
+          "export async function loadUser(id) {",
+          "  return (await fetch(`${BASE}/users/${id}`)).json();"
+        ]
+      },
+      "route": {
+        "repo": 0,
+        "file": "app/main.py",
+        "line": 15,
+        "handler": "read_order",
+        "framework": "fastapi",
+        "methods": ["GET"],
+        "start": 13,
+        "code": [
+          "",
+          "",
+          "@app.get('/orders/{order_id}')",
+          "def read_order(order_id: str):",
+          "    return store.get(order_id)"
+        ]
+      },
+      "checks": []
     }
-   ]
-  },
-  {
-   "from": 15,
-   "to": 13,
-   "method": "GET",
-   "path": "/orders/{order_id}",
-   "proof": "inferred",
-   "reason": "fits if the base URL is the api service",
-   "call": {
-    "repo": 1,
-    "file": "src/api.js",
-    "line": 10,
-    "function": "loadOrder",
-    "start": 8,
-    "code": [
-     "",
-     "export async function loadOrder(id) {",
-     "  return (await fetch(`${BASE}/orders/${id}`)).json();",
-     "}",
-     "",
-     "export async function loadUser(id) {",
-     "  return (await fetch(`${BASE}/users/${id}`)).json();"
-    ]
-   },
-   "route": {
-    "repo": 0,
-    "file": "app/main.py",
-    "line": 15,
-    "handler": "read_order",
-    "framework": "fastapi",
-    "methods": [
-     "GET"
-    ],
-    "start": 13,
-    "code": [
-     "",
-     "",
-     "@app.get('/orders/{order_id}')",
-     "def read_order(order_id: str):",
-     "    return store.get(order_id)"
-    ]
-   },
-   "checks": []
-  }
- ],
- "unmatched": [
-  {
-   "from": 16,
-   "method": "GET",
-   "path": "/users/{id}",
-   "target": 0,
-   "reason": "api: no route fits (GET /users/{id})",
-   "call": {
-    "repo": 1,
-    "file": "src/api.js",
-    "line": 14,
-    "function": "loadUser",
-    "start": 12,
-    "code": [
-     "",
-     "export async function loadUser(id) {",
-     "  return (await fetch(`${BASE}/users/${id}`)).json();",
-     "}"
-    ]
-   }
-  }
- ]
+  ],
+  "unmatched": [
+    {
+      "from": 16,
+      "method": "GET",
+      "path": "/users/{id}",
+      "target": 0,
+      "reason": "api: no route fits (GET /users/{id})",
+      "call": {
+        "repo": 1,
+        "file": "src/api.js",
+        "line": 14,
+        "function": "loadUser",
+        "start": 12,
+        "code": [
+          "",
+          "export async function loadUser(id) {",
+          "  return (await fetch(`${BASE}/users/${id}`)).json();",
+          "}"
+        ]
+      }
+    }
+  ]
 }
