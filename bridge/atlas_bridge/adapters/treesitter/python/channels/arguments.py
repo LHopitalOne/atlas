@@ -29,6 +29,7 @@ class ChannelArguments:
         self._shapes = {
             Shape.NAME: self._names,
             Shape.NAMES: self._sequence,
+            Shape.KEYS: self._keys,
             Shape.PATTERNS: self._patterns,
             Shape.ADDRESS: self._address,
             Shape.PORT: self._port,
@@ -69,6 +70,14 @@ class ChannelArguments:
     def _sequence(self, node, scope):
         items = node.named_children if node.type in self.SEQUENCES else [node]
         return [p for item in items for p in self._names(item, scope)]
+
+    def _keys(self, node, scope):
+        """The names a dict's keys hold: written in the call or bound to a name."""
+        node, scope = self._bound(node, scope)
+        if node.type != 'dictionary':
+            return []
+        pairs = (p.child_by_field_name('key') for p in node.named_children if p.type == 'pair')
+        return [p for key in pairs if key is not None for p in self._names(key, scope)]
 
     def _patterns(self, node, scope):
         return [self.GLOB.sub('{pattern}', p) for p in self._sequence(node, scope)]

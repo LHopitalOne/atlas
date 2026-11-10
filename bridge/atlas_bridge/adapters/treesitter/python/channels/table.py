@@ -16,6 +16,7 @@ class Shape:
 
     NAME = 'name'  # a topic, queue or channel name: 'orders.created'
     NAMES = 'names'  # a list or tuple of names, or (for ALL) every positional argument
+    KEYS = 'keys'  # the keys of a dict of names: Redis xread({stream: last_id})
     PATTERNS = 'patterns'  # glob patterns of names (Redis psubscribe): '*' stands for any text
     ADDRESS = 'address'  # a (host, port) tuple: the port is the channel
     PORT = 'port'  # a port number
@@ -94,6 +95,8 @@ REMOTE_ADDR = Argument(2, 'remote_addr', Shape.ADDRESS)
 TOPIC_OBJECT = Argument(1, 'topic', Shape.OBJECT)  # arroyo: (producer or consumer, topic, ...)
 DESTINATION = Argument(0, 'destination', Shape.OBJECT)  # arroyo: produce(destination, payload)
 TOPIC_OBJECTS = Argument(0, 'topics', Shape.OBJECTS)
+LIST = Argument(0, 'name')  # redis-py: the key of a list or stream
+KEYS = Argument(0, 'keys', Shape.NAMES)  # redis-py blpop / brpop: one key or a list of them
 DEFAULT_EXCHANGE = ((Argument(0, 'exchange'), ''),)  # pika's default exchange routes by queue name
 
 
@@ -155,6 +158,18 @@ class ChannelTable:
         Endpoint('redis', 'Redis', 'publish', SEND, REDIS, Argument(0, 'channel')),
         Endpoint('redis', 'PubSub', 'subscribe', RECEIVE, REDIS, EVERY_NAME),
         Endpoint('redis', 'PubSub', 'psubscribe', RECEIVE, REDIS, Argument(Argument.ALL, None, Shape.PATTERNS)),
+        # redis-py lists as work queues: lpush / rpush (and their -x forms) append to the list a name names; blpop /
+        # brpop(keys) and lpop / rpop(name) take from it, as do (b)lmove(first_list, ...) and (b)rpoplpush(src, ...)
+        *(Endpoint('redis', 'Redis', push, SEND, REDIS, LIST) for push in ('lpush', 'rpush', 'lpushx', 'rpushx')),
+        *(Endpoint('redis', 'Redis', pop, RECEIVE, REDIS, KEYS) for pop in ('blpop', 'brpop')),
+        *(Endpoint('redis', 'Redis', pop, RECEIVE, REDIS, LIST) for pop in ('lpop', 'rpop')),
+        *(Endpoint('redis', 'Redis', move, RECEIVE, REDIS, Argument(0, 'first_list')) for move in ('lmove', 'blmove')),
+        *(Endpoint('redis', 'Redis', move, RECEIVE, REDIS, Argument(0, 'src')) for move in ('rpoplpush', 'brpoplpush')),
+        # redis-py streams: xadd(name, fields) appends; xread(streams) and xreadgroup(groupname, consumername,
+        # streams) read the streams the dict's keys name ({name: last id})
+        Endpoint('redis', 'Redis', 'xadd', SEND, REDIS, LIST),
+        Endpoint('redis', 'Redis', 'xread', RECEIVE, REDIS, Argument(0, 'streams', Shape.KEYS)),
+        Endpoint('redis', 'Redis', 'xreadgroup', RECEIVE, REDIS, Argument(2, 'streams', Shape.KEYS)),
         # socket: sendto(data, address) sends a datagram; connect(address) a stream, unless the socket is SOCK_DGRAM;
         # bind(address) receives; create_connection(address) connects a stream
         Endpoint('socket', 'socket', 'sendto', SEND, UDP, Argument(Argument.LAST, None, Shape.ADDRESS)),

@@ -11,7 +11,7 @@ defaults.
 from ....core.http import Extraction
 from ..kit import LanguageExtractor
 from .calls import CallOrder, ClientCalls, TraitPathCalls
-from .channels import ChannelCalls, ChannelRoutes, ChannelSites, Followups
+from .channels import ChannelCalls, ChannelRoutes, ChannelSites, EntryPoints, Followups
 from .policy import RustTestPolicy
 from .routes import ActixAttributeRoutes, ActixAttributes, RouterGraph, RouterRoutes, UniqueRoutes
 from .values import ChannelValues, CrateFunctions, CrateStructs, RustValues, ValueTypes
@@ -30,7 +30,7 @@ class RustExtractor(LanguageExtractor):
         graph = RouterGraph(workspace, attributes)  # shared: attribute routes are roots only when no router mounts them
         values = RustValues(workspace)
         functions, structs = CrateFunctions(workspace), CrateStructs(workspace)
-        types = ValueTypes(workspace, functions, structs)
+        types = ValueTypes(workspace, functions, structs, EntryPoints.RETURNS)
         channels, sites = ChannelValues(workspace, functions, structs, types), ChannelSites(types)
         followups = Followups(workspace)
         return [

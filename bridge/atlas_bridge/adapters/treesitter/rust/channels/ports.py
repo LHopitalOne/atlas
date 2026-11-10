@@ -36,6 +36,16 @@ class TopicNames:
         return list(dict.fromkeys('/' + v for v in values if cls.NAME.match(v)))
 
 
+class RedisKeys:
+    """'jobs:pending' -> '/jobs:pending': a whole Redis key or channel, any text without blanks or unknown parts."""
+
+    KEY = re.compile(r'^[^\s{}]+$')
+
+    @classmethod
+    def channels(cls, values) -> list[str]:
+        return list(dict.fromkeys('/' + v for v in values if cls.KEY.match(v)))
+
+
 class SiteChannels:
     """The channels of one entry-point call (ChannelSite), read as its entry point's shape says."""
 
@@ -49,7 +59,8 @@ class SiteChannels:
         if shape == EntryPoints.ADDRESS:
             return SocketAddress.channels([v.text for v in self._values.values(file, site.address)])
         nodes = [site.address]
-        if shape == EntryPoints.NAMES:
+        if shape in (EntryPoints.NAMES, EntryPoints.KEYS):
             items = RustSyntax.unwrap(site.address)
             nodes = items.named_children if items is not None and items.type in self.ARRAYS else []
-        return TopicNames.channels(v.text for n in nodes for v in self._values.values(file, n))
+        names = RedisKeys if shape in (EntryPoints.KEY, EntryPoints.KEYS) else TopicNames
+        return names.channels(v.text for n in nodes for v in self._values.values(file, n))

@@ -9,8 +9,9 @@ class ValueTypes:
     """of(file, expr) -> the full path of the type an expression holds ('std::net::UdpSocket', 'Config'), or None.
 
     Read from what is written, never guessed from names: a `let` annotation or value, a parameter's type, `self`
-    in an impl, a struct field's declared type, a struct expression, a crate fn's declared return type, and a
-    library constructor called on a type (`UdpSocket::bind(..)`)."""
+    in an impl, a struct field's declared type, a struct expression, a crate fn's declared return type, a library
+    constructor called on a type (`UdpSocket::bind(..)`), and what a library call returns by the table it is given
+    (`client.get_multiplexed_async_connection()` is a `redis::aio::MultiplexedConnection`)."""
 
     # Types that hand out the value they hold: `Arc<UdpSocket>` calls UdpSocket's methods; `io::Result<Self>`.
     HOLDERS = frozenset({'Arc', 'Rc', 'Box', 'Result', 'Option'})
@@ -20,10 +21,11 @@ class ValueTypes:
     CONSTRUCTORS = frozenset({'new', 'bind', 'connect', 'connect_timeout', 'from_std'})
     MAX_HOPS = 8
 
-    def __init__(self, workspace, functions, structs):
+    def __init__(self, workspace, functions, structs, returns=None):
         self._workspace = workspace
         self._functions = functions
         self._structs = structs
+        self._returns = returns or {}  # (type path, fn or method) -> the type path a library call returns
 
     def of(self, file, node, hops=0):
         node = RustSyntax.unwrap(node)
@@ -68,12 +70,16 @@ class ValueTypes:
         fn = RustSyntax.method(node)
         if fn is not None:
             name = RustSyntax.text(fn.child_by_field_name('field'))
-            return self.of(file, fn.child_by_field_name('value'), hops + 1) if name in self.PASSING else None
+            owner = self.of(file, fn.child_by_field_name('value'), hops + 1)
+            return owner if name in self.PASSING else self._returns.get((owner, name))
         target = self._functions.target(file, node)
         if target is not None:
             returns = target[1].child_by_field_name('return_type')
             return self._declared(target[0], returns, target[1]) if returns is not None else None
         segs = ItemPath.imported(file, node.child_by_field_name('function'))
+        returned = self._returns.get(('::'.join(segs[:-1]), segs[-1])) if len(segs) > 1 else None
+        if returned is not None:
+            return returned
         if len(segs) > 1 and segs[-1] in self.CONSTRUCTORS and segs[-2][:1].isupper():
             return '::'.join(segs[:-1])
         return None

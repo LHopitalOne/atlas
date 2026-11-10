@@ -74,6 +74,8 @@ class ChannelReadings:
     def _raw(self, match, hints):
         """The literal values the entry's argument holds (one per caller when it is a parameter)."""
         arg, args = match.entry.arg, JsSyntax.args(match.node)
+        if arg.after:
+            return [v for n in self._after(arg.after, args) for v in self._values.candidates(n, hints)]
         index = self._index(arg, args)
         if index >= len(args):
             return [arg.default] if arg.default else []
@@ -85,6 +87,13 @@ class ChannelReadings:
             return []
         nodes = args[index:] if arg.every else args[index : index + 1]
         return [v for n in nodes for v in self._values.candidates(n, hints)]
+
+    @staticmethod
+    def _after(token, args):
+        """The first half of the arguments after the literal `token` (any case): the keys before their ids."""
+        at = next((i for i, a in enumerate(args) if (JsSyntax.string(JsSyntax.unwrap(a)) or '').upper() == token), -1)
+        rest = args[at + 1 :] if at >= 0 else []
+        return rest[: len(rest) // 2]
 
     @staticmethod
     def _index(arg, args):

@@ -59,6 +59,9 @@ class Arg:
     long_index: int = -1
     unless: str = ''  # an option that means the channel is not given here (`noServer`)
     positional: bool = True  # the argument itself names the channel when it is not an options object
+    # the channels are the arguments after this literal one, their first half: ioredis xread(..., 'STREAMS', key1,
+    # key2, id1, id2)
+    after: str = ''
 
 
 @dataclass(frozen=True)
@@ -102,6 +105,14 @@ TOPICS = Arg(0, key='topic', many='topics', positional=False)
 SERVER_PATH = Arg(0, key='path', default='/', unless='noServer', positional=False)
 CONNECT_SEND = ('CONNECT', 'SEND')
 QUEUE = 'bullmq.queue'  # the object `new Queue(name)` makes, or a queue NestJS injects
+STREAMS = Arg(0, after='STREAMS')
+# (method names in ioredis and node-redis 4, role, fewest arguments): a Redis list or stream key first
+REDIS_KEYED = (
+    (('lpush', 'rpush', 'lPush', 'rPush'), Role.SEND, 2),
+    (('xadd', 'xAdd'), Role.SEND, 3),
+    (('blpop', 'brpop', 'blPop', 'brPop'), Role.RECEIVE, 2),
+    (('lpop', 'rpop', 'lPop', 'rPop'), Role.RECEIVE, 1),
+)
 
 ENTRIES = (
     # WebSocket (browser global, `ws`): the client opens a URL, then sends on it; a `ws` server listens on a path
@@ -123,6 +134,20 @@ ENTRIES = (
     # ioredis / node-redis: publish(channel, message), subscribe(channel, ...)
     Entry(REDIS, Form.METHOD, 'publish', Role.SEND, Protocol.REDIS, Reading.NAME, Arg(0), min_args=2, max_args=2),
     Entry(REDIS, Form.METHOD, 'subscribe', Role.RECEIVE, Protocol.REDIS, Reading.NAME, Arg(0, every=True)),
+    # lists and streams: lpush / rpush(key, ...) and xadd(key, id, ...) append; blpop / brpop(key, ..., timeout),
+    # lpop / rpop(key) take; xread / xreadgroup(..., 'STREAMS', keys..., ids...) read. node-redis 4 spells them
+    # lPush, xAdd, blPop..., and takes xRead({ key, id }) and xReadGroup(group, consumer, { key, id })
+    *(
+        Entry(REDIS, Form.METHOD, name, role, Protocol.REDIS, Reading.NAME, Arg(0), min_args=least)
+        for names, role, least in REDIS_KEYED
+        for name in names
+    ),
+    *(
+        Entry(REDIS, Form.METHOD, name, Role.RECEIVE, Protocol.REDIS, Reading.NAME, STREAMS)
+        for name in ('xread', 'xreadgroup')
+    ),
+    Entry(REDIS, Form.METHOD, 'xRead', Role.RECEIVE, Protocol.REDIS, Reading.NAME, Arg(0, key='key')),
+    Entry(REDIS, Form.METHOD, 'xReadGroup', Role.RECEIVE, Protocol.REDIS, Reading.NAME, Arg(2, key='key')),
     # @grpc/grpc-js + @grpc/proto-loader: new <pkg>.<Service>(address, credentials) from loadPackageDefinition,
     # client.<Method>(...); server.addService(<pkg>.<Service>.service, { <Method>: impl })
     Entry(GRPC, Form.CALL, 'loadPackageDefinition', Role.MAKE, makes='grpc.package', nested=True),

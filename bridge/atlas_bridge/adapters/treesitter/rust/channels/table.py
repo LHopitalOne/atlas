@@ -33,12 +33,38 @@ class EntryPoint(NamedTuple):
         return any(path == f'{m}::{self.type}' for m in self.modules)
 
 
+SEND, RECEIVE = 'send', 'receive'
+KEY, KEYS = 'key', 'keys'  # EntryPoint.shape: a Redis key or channel (any text but blanks: 'jobs:pending'), or several
+# redis: the connection types the command traits are used on, and the commands that name a key or channel first
+REDIS_CONNECTIONS = (
+    (('redis',), 'Client'),
+    (('redis',), 'Connection'),
+    (('redis::aio',), 'Connection'),
+    (('redis::aio',), 'MultiplexedConnection'),
+    (('redis::aio',), 'ConnectionManager'),
+    (('redis::cluster',), 'ClusterConnection'),
+    (('redis::cluster_async',), 'ClusterConnection'),
+)
+REDIS_COMMANDS = (
+    ('publish', SEND),
+    *((push, SEND) for push in ('lpush', 'rpush', 'lpush_exists', 'rpush_exists', 'xadd', 'xadd_maxlen')),
+    *((pop, RECEIVE) for pop in ('blpop', 'brpop', 'lpop', 'rpop', 'blmove', 'lmove', 'brpoplpush', 'rpoplpush')),
+)
+REDIS_MULTIPLEXED = (
+    'get_multiplexed_async_connection',
+    'get_multiplexed_tokio_connection',
+    'get_multiplexed_async_std_connection',
+    'get_multiplexed_async_connection_with_config',
+)
+
+
 class EntryPoints:
     """Lookup of ENTRIES by the name called and whether it is called on a value."""
 
-    SEND = 'send'
-    RECEIVE = 'receive'
+    SEND = SEND
+    RECEIVE = RECEIVE
     ADDRESS, NAME, NAMES = 'address', 'name', 'names'  # EntryPoint.shape
+    KEY, KEYS = KEY, KEYS
     SOCKETS = ('std::net', 'tokio::net', 'async_std::net')  # the same socket API in std, tokio and async-std
     # UdpSocket reads in std, tokio and async-std: blocking/async, try_ (non-blocking) and poll_ (manual futures).
     UDP_READS = frozenset({
@@ -66,7 +92,36 @@ class EntryPoints:
         EntryPoint(RECORDS, 'FutureRecord', 'to', SEND, Protocol.KAFKA, 0, shape=NAME),
         EntryPoint(CONSUMERS, 'StreamConsumer', 'subscribe', RECEIVE, Protocol.KAFKA, 0, instance=True, shape=NAMES),
         EntryPoint(CONSUMERS, 'BaseConsumer', 'subscribe', RECEIVE, Protocol.KAFKA, 0, instance=True, shape=NAMES),
+        # redis: the commands of the Commands / AsyncCommands traits on every connection type, the key or channel
+        # first: publish(channel, msg); lpush / rpush(key, value) and xadd(key, id, items) append to a list or
+        # stream; blpop / brpop(key, timeout), lpop / rpop(key, count) and xread(keys, ids) take from them;
+        # PubSub::subscribe(channel) receives
+        *(
+            EntryPoint(modules, kind, command, role, Protocol.REDIS, 0, instance=True, shape=KEY)
+            for modules, kind in REDIS_CONNECTIONS
+            for command, role in REDIS_COMMANDS
+        ),
+        *(
+            EntryPoint(modules, kind, 'xread', RECEIVE, Protocol.REDIS, 0, instance=True, shape=KEYS)
+            for modules, kind in REDIS_CONNECTIONS
+        ),
+        *(
+            EntryPoint((module,), 'PubSub', 'subscribe', RECEIVE, Protocol.REDIS, 0, instance=True, shape=KEY)
+            for module in ('redis', 'redis::aio')
+        ),
     )
+    # What a library call returns, for the types of values made by calls the crate does not define:
+    # (type, associated fn or method) -> the full path of the type it returns.
+    RETURNS = {
+        ('redis::Client', 'open'): 'redis::Client',
+        ('redis::Client', 'get_connection'): 'redis::Connection',
+        ('redis::Client', 'get_async_connection'): 'redis::aio::Connection',
+        **{('redis::Client', m): 'redis::aio::MultiplexedConnection' for m in REDIS_MULTIPLEXED},
+        ('redis::Client', 'get_connection_manager'): 'redis::aio::ConnectionManager',
+        ('redis::Client', 'get_async_pubsub'): 'redis::aio::PubSub',
+        ('redis::Connection', 'as_pubsub'): 'redis::PubSub',
+        ('redis::aio::ConnectionManager', 'new'): 'redis::aio::ConnectionManager',
+    }
 
     def __init__(self, entries=ENTRIES):
         self._by_call = {}
