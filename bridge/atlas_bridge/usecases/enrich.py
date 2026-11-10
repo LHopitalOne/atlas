@@ -36,6 +36,7 @@ class Enricher:
         out = {}
         for case, d in zip(cases, found, strict=True):
             if d is not None and d.summary and d.role in Description.ROLES:
-                out[(case.repo, case.path)] = Description(d.summary, d.role, tuple(d.tags[: self.MAX_TAGS]))
+                tags = tuple(t for t in dict.fromkeys(d.tags) if t != d.role)[: self.MAX_TAGS]  # the role is shown
+                out[(case.repo, case.path)] = Description(d.summary, d.role, tags)
         self.report = EnrichReport(len(cases), len(out))
         return out

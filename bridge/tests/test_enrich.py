@@ -44,6 +44,14 @@ class EnricherTest(unittest.TestCase):
         self.assertEqual([(c.repo, c.path) for c in echo.asked], [('web', 'src/app.ts'), ('api', 'api/orders.py')])
         self.assertEqual(found[('api', 'api/orders.py')].tags, ('a', 'b', 'c', 'd'))
 
+    def test_tags_are_not_repeated_nor_the_role_again(self):
+        class Twice(Echo):
+            def describe(self, cases):
+                return [Description('x', 'auth', ('auth', 'mfa', 'mfa', 'recovery')) for _ in cases]
+
+        found = Enricher(Twice()).describe(graph())
+        self.assertEqual(found[('api', 'api/orders.py')].tags, ('mfa', 'recovery'))
+
     def test_a_budget_and_a_role_outside_the_list(self):
         echo = Echo()
         Enricher(echo, max_files=1).describe(graph())
