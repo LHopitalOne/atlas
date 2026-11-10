@@ -5,6 +5,7 @@
 import { stOn, store } from '../state.js';
 import { flyToTerr } from '../app/camera.js';
 import { deselect } from '../app/selection.js';
+import { HTTP_ARC } from '../config.js';
 import { LEGB } from '../dom.js';
 import { isWithin, PROOF, PROOF_ORDER, proofCounts, protocolCounts, protocolName } from '../model/http.js';
 import { KIND, STATUS } from '../model/vocab.js';
@@ -29,7 +30,10 @@ function linksGroup(H) {
     const [col, dash] = arcStyle(p);
     h += keyRow(`<span class="sw-line${dash ? ' dash' : ''}" style="--c:${css(col)}"></span>`, PROOF[p].label, c[p]);
   }
-  if (within) h += keyRow('<span class="sw-line sw-none"></span>', 'Inside one repository', within);
+  if (within) {
+    const col = css(theme.text, Math.max(HTTP_ARC.withinAlpha, 0.45)); // drawn fainter on the map, by its proof
+    h += keyRow(`<span class="sw-line" style="--c:${col}"></span>`, 'Inside one repository', within);
+  }
   const protocols = protocolCounts(H)
     .map(([p, n]) => `${esc(protocolName(p))} ${fmt(n)}`)
     .join(' · ');

@@ -224,7 +224,6 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 .lg-row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sw-line{width:20px;height:0;border-top:2px solid var(--c)}
 .sw-line.dash{border-top-style:dashed}
-.sw-line.sw-none{border-top-color:transparent}
 .lg-row.lg-static{cursor:default}
 .lg-row.lg-static:hover{background:none}
 .lg-note{padding:2px 6px 0;font-size:12px;color:var(--muted-foreground)}
@@ -5563,7 +5562,10 @@ FLOW: ${flowLine}`;
       const [col, dash] = arcStyle(p);
       h += keyRow(`<span class="sw-line${dash ? " dash" : ""}" style="--c:${css(col)}"></span>`, PROOF[p].label, c[p]);
     }
-    if (within) h += keyRow('<span class="sw-line sw-none"></span>', "Inside one repository", within);
+    if (within) {
+      const col = css(theme.text, Math.max(HTTP_ARC.withinAlpha, 0.45));
+      h += keyRow(`<span class="sw-line" style="--c:${col}"></span>`, "Inside one repository", within);
+    }
     const protocols = protocolCounts(H).map(([p, n]) => `${esc(protocolName(p))} ${fmt(n)}`).join(" \xB7 ");
     return h + `<div class="lg-note">${protocols}</div></div>`;
   }
