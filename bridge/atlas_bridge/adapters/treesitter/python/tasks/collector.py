@@ -5,8 +5,8 @@ import dataclasses
 from .....core.http import Extraction, Protocol
 from ...kit import CallCollector, RouteCollector
 from ..channels.arguments import ChannelArguments
-from ..channels.qualified import QualifiedNames
 from ..channels.values import ChannelValues
+from ..qualified import QualifiedNames
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from .definitions import TaskDefinitions

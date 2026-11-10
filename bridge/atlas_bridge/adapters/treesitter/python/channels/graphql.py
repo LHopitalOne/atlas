@@ -5,8 +5,8 @@ import re
 
 from .....core.http import ANY, Extraction, Protocol
 from ...kit import RouteCollector
+from ..qualified import QualifiedNames
 from ..syntax import PythonSyntax
-from .qualified import QualifiedNames
 
 
 class StrawberryFields(RouteCollector):

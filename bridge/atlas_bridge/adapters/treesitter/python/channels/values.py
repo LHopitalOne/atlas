@@ -1,6 +1,7 @@
 """ChannelValues: the Python value resolver, reading further for channel names and ports: environment defaults,
 number conversions, fields of this repository's objects and `self` attributes set from constructor arguments."""
 
+from ..qualified import QualifiedNames
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from ..values import Marker, PythonValueResolver, Value
@@ -10,7 +11,6 @@ from .flask import FlaskConfig
 from .mappings import MappingEntries
 from .objects import Field, ObjectFields
 from .origins import Origins
-from .qualified import QualifiedNames
 from .sites import FunctionSites
 
 

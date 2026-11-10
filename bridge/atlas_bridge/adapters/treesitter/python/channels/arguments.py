@@ -2,10 +2,10 @@
 
 import re
 
+from ..qualified import QualifiedNames
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from ..values import Marker, UrlShape
-from .qualified import QualifiedNames
 from .table import Argument, ChannelTable, Shape
 
 

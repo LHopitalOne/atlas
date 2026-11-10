@@ -1,8 +1,8 @@
 """Dotted names read through a file's imports: `Producer` after `from confluent_kafka import Producer` is
 `confluent_kafka.Producer`, `redis.Redis.from_url` after `import redis` stays itself."""
 
-from ..syntax import PythonSyntax
-from ..workspace import AbsoluteModule
+from .syntax import PythonSyntax
+from .workspace import AbsoluteModule
 
 
 class QualifiedNames:

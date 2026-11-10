@@ -2,9 +2,9 @@
 
 from typing import NamedTuple
 
+from ..qualified import QualifiedNames
 from ..scope import Scope
 from ..syntax import PythonSyntax
-from .qualified import QualifiedNames
 from .table import ChannelTable, LibraryType
 
 

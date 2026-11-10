@@ -1,11 +1,11 @@
 """Members of this repository's Enum classes, read as the values they are assigned: `Topic.EVENTS.value` is 'events'
 after `class Topic(Enum): EVENTS = 'events'`."""
 
+from ..qualified import QualifiedNames
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from ..values import Marker
 from .objects import Field
-from .qualified import QualifiedNames
 
 
 class EnumMembers:

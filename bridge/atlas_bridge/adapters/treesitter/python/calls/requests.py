@@ -5,6 +5,7 @@ from ...kit import CallCollector
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from ..values import PythonValueResolver
+from .bases import ClientBases
 from .book import CallBook
 from .idioms import RequestMethodIdiom, RequestTarget, UrlopenIdiom, VerbIdiom
 from .methods import MethodOptions
@@ -31,6 +32,7 @@ class RequestCalls(CallCollector):
         self._settler = Settler(workspace, self._book, self._values, self._methods, self._sites)
         self._idioms = {name: idiom(self._methods) for idiom in self.IDIOMS for name in idiom.NAMES}
         self._senders = Senders(workspace)
+        self._bases = ClientBases(workspace, self._values, self._sites)
 
     def collect(self) -> Extraction:
         for source, call, name in self.workspace.calls(self._idioms):
@@ -60,7 +62,13 @@ class RequestCalls(CallCollector):
         origin = self._sites.origin_assumption(scope, receiver)
         assumptions = (origin,) if origin is not None else ()
         run = RequestRun(target.client)
-        for v in self._values.resolve(target.url, scope)[: self.MAX_ALTS]:
+        for v in self._urls(target.url, scope, receiver):
             for m in methods:
                 pending = PendingRequest(v.text, m, hints | v.hints, assumptions=assumptions)
                 self._settler.settle(scope, call, pending, run)
+
+    def _urls(self, url, scope, receiver):
+        """The values of a request's URL, each joined onto the base URL of its client when the client has one."""
+        values = self._values.resolve(url, scope)[: self.MAX_ALTS]
+        bases = self._bases.of(scope, receiver)
+        return [ClientBases.join(b, v) for v in values for b in bases] if bases else values

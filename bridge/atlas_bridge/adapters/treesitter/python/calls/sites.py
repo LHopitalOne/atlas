@@ -27,7 +27,13 @@ class SiteHints:
         return frozenset(h for h in hints if h)
 
     def origin(self, scope, receiver):
-        """The expression a client receiver was created from: `_pool = connection_from_url(settings.SNUBA)`."""
+        """The text of the expression a client receiver was created from: `_pool = connection_from_url(settings.X)`."""
+        found = self.origin_node(scope, receiver)
+        return PythonSyntax.text(found[1]) if found is not None else ''
+
+    def origin_node(self, scope, receiver):
+        """(source, expression) a client receiver was created from, or None: a local assigned before the call, a
+        module-level name (followed through imports), or an attribute of the enclosing class."""
         node = receiver
         if node.type == 'attribute':
             obj = node.child_by_field_name('object')
@@ -35,27 +41,27 @@ class SiteHints:
                 return self._self_origin(scope, node)
             found = self._workspace.names.value(scope.source, node)
             if found is not None:
-                return PythonSyntax.text(found.node)
+                return found.source, found.node
             while node.type == 'attribute':
                 node = node.child_by_field_name('object')
         if node.type != 'identifier':
-            return ''
+            return None
         return self._name_origin(scope, PythonSyntax.text(node), receiver.start_byte)
 
     def _self_origin(self, scope, node):
         if not scope.cls:
-            return ''
+            return None
         attr = PythonSyntax.text(node.child_by_field_name('attribute'))
         value = self._workspace.attributes.attribute(scope.source, scope.cls, attr)
-        return PythonSyntax.text(value) if value is not None else ''
+        return (scope.source, value) if value is not None else None
 
     def _name_origin(self, scope, name, byte):
         if scope.func is not None:
             prior = self._workspace.locals.before(scope.source, scope.func, name, byte)
             if prior:
-                return PythonSyntax.text(prior[-1].value)
+                return scope.source, prior[-1].value
         found = self._workspace.names.lookup(scope.source, name)
-        return PythonSyntax.text(found.node) if found and found.is_value else ''
+        return (found.source, found.node) if found and found.is_value else None
 
     def origin_assumption(self, scope, receiver):
         """The Assumption behind the receiver's origin when the finder looked it up by name: a module-level name

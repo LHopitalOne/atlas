@@ -3,8 +3,8 @@
 from typing import NamedTuple
 
 from ..channels.arguments import ChannelArguments
-from ..channels.qualified import QualifiedNames
 from ..channels.types import LibraryTypes
+from ..qualified import QualifiedNames
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from .modules import ModuleNames

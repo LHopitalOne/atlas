@@ -6,10 +6,10 @@ import re
 
 from .....core.http import Extraction, Protocol
 from ...kit import CallCollector, RouteCollector
+from ..qualified import QualifiedNames
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from .origins import Origins
-from .qualified import QualifiedNames
 from .sites import FunctionSites
 
 

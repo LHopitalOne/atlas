@@ -4,10 +4,10 @@ import dataclasses
 
 from .....core.http import Extraction
 from ...kit import CallCollector, RouteCollector
+from ..qualified import QualifiedNames
 from ..scope import Scope
 from ..syntax import PythonSyntax
 from .arguments import ChannelArguments
-from .qualified import QualifiedNames
 from .table import ChannelTable, Endpoint, Role
 from .types import LibraryTypes
 from .values import ChannelValues
