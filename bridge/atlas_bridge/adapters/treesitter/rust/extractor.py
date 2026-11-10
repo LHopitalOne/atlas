@@ -2,8 +2,9 @@
 UDP channels both ways (std, tokio and async-std sockets).
 
 Routes come from evaluating router expressions (`.route` chains, `.nest`, `.merge`, let-bound routers and crate fns
-returning routers) and from actix-web attribute routes. Requests come from types implementing a request trait whose
-`fn path` yields a literal, and from `client.get(url)` / `.request(Method::X, url)` calls. Channels come from calls to
+returning routers), from actix-web attribute routes and from `match`es on a request's (method, path). Requests come
+from types implementing a request trait whose `fn path` yields a literal, and from `client.get(url)` /
+`.request(Method::X, url)` calls. Channels come from calls to
 the library entry points of channels.EntryPoints, their address followed through fns, struct fields and environment
 defaults.
 """
@@ -13,7 +14,7 @@ from ..kit import LanguageExtractor
 from .calls import CallOrder, ClientCalls, TraitPathCalls
 from .channels import ChannelCalls, ChannelRoutes, ChannelSites, EntryPoints, Followups
 from .policy import RustTestPolicy
-from .routes import ActixAttributeRoutes, ActixAttributes, RouterGraph, RouterRoutes, UniqueRoutes
+from .routes import ActixAttributeRoutes, ActixAttributes, MatchRoutes, RouterGraph, RouterRoutes, UniqueRoutes
 from .values import ChannelValues, CrateFunctions, CrateStructs, RustValues, ValueTypes
 from .workspace import RustWorkspace
 
@@ -36,6 +37,7 @@ class RustExtractor(LanguageExtractor):
         return [
             RouterRoutes(workspace, graph),
             ActixAttributeRoutes(workspace, graph, attributes),
+            MatchRoutes(workspace, types),
             ChannelRoutes(workspace, channels, sites, followups),
             TraitPathCalls(workspace, values),
             ClientCalls(workspace, values, channels),
