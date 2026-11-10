@@ -224,6 +224,10 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 .lg-row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sw-line{width:20px;height:0;border-top:2px solid var(--c)}
 .sw-line.dash{border-top-style:dashed}
+.sw-line.sw-none{border-top-color:transparent}
+.lg-row.lg-static{cursor:default}
+.lg-row.lg-static:hover{background:none}
+.lg-note{padding:2px 6px 0;font-size:12px;color:var(--muted-foreground)}
 .sw-dot{width:10px;height:10px;border-radius:50%;background:var(--c);justify-self:center}
 .shapes{display:flex;flex-wrap:wrap;gap:6px 14px;padding:4px 6px 0;color:var(--muted-foreground);font-size:12px}
 .shapes span{display:flex;align-items:center;gap:6px;white-space:nowrap}
@@ -1435,6 +1439,24 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
     const c = {};
     for (const l of H.links) if (!isWithin(l)) c[l.proof] = (c[l.proof] || 0) + 1;
     return c;
+  }
+  var PROTOCOL_NAMES = {
+    http: "HTTP",
+    websocket: "WebSocket",
+    grpc: "gRPC",
+    graphql: "GraphQL",
+    kafka: "Kafka",
+    amqp: "AMQP",
+    redis: "Redis",
+    tcp: "TCP",
+    udp: "UDP",
+    task: "Task queue"
+  };
+  var protocolName = (p) => PROTOCOL_NAMES[p] || String(p).toUpperCase();
+  function protocolCounts(H) {
+    const c = /* @__PURE__ */ new Map();
+    for (const l of H.links) c.set(l.protocol || "http", (c.get(l.protocol || "http") || 0) + 1);
+    return [...c].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
   }
   function arcCtrl(x0, y0, x1, y1) {
     const dx = x1 - x0, dy = y1 - y0;
@@ -5421,10 +5443,133 @@ FLOW: ${flowLine}`;
     });
   }
 
+  // src/render/http.js
+  function arcStyle(proof) {
+    if (proof === "scip" || proof === "syntax") return [theme.proof, null];
+    if (proof === "inferred") return [theme.st[3], [5, 4]];
+    if (proof === "ambiguous") return [theme.st[1], [5, 4]];
+    if (proof === "contradicted") return [theme.st[2], [2, 3]];
+    return [theme.text, null];
+  }
+  function hotGroups(g) {
+    const H = g.http, hot = /* @__PURE__ */ new Set();
+    if (store.linkId >= 0) hot.add(store.linkId);
+    if (store.hover && store.hover.t === "h") hot.add(store.hover.id);
+    if (store.selectedId >= 0) {
+      const n = { t: "n", id: store.selectedId };
+      for (const i of [...groupsFrom(g, H, store.selectedId), ...groupsInto(g, H, n)]) hot.add(i);
+    }
+    if (store.httpImpact) {
+      const t = { t: store.httpImpact[0], id: +store.httpImpact.slice(1) };
+      for (const i of httpImpact(g, H, t).groups) hot.add(i);
+    }
+    return hot;
+  }
+  function drawHttp(fx) {
+    const { g, I, now, SX, SY, on } = fx, H = g.http;
+    if (!H || !H.groups.length) return;
+    const hot = hotGroups(g), focused = store.dimT > 0.02 && (hot.size > 0 || store.focusId >= 0), order2 = H.groups.map((_, i) => i).sort((a, b) => hot.has(a) - hot.has(b));
+    for (const i of order2) {
+      const gr = H.groups[i], isHot = hot.has(i), x0 = SX(g.PX[gr.from]), y0 = SY(g.PY[gr.from]), x1 = SX(g.PX[gr.to]), y1 = SY(g.PY[gr.to]);
+      if (!on(x0, y0, 4e3) && !on(x1, y1, 4e3)) continue;
+      const [cx, cy] = arcCtrl(x0, y0, x1, y1), [col, dash] = arcStyle(gr.proof), rest = gr.within ? HTTP_ARC.withinAlpha : HTTP_ARC.restAlpha, a = isHot ? 1 : focused ? HTTP_ARC.dimAlpha + (rest - HTTP_ARC.dimAlpha) * (1 - store.dimT) : rest;
+      oc.globalAlpha = a * I;
+      oc.strokeStyle = css(col);
+      oc.lineWidth = isHot ? HTTP_ARC.hotWidth : HTTP_ARC.width;
+      oc.setLineDash(dash || []);
+      oc.beginPath();
+      oc.moveTo(x0, y0);
+      oc.quadraticCurveTo(cx, cy, x1, y1);
+      oc.stroke();
+      oc.setLineDash([]);
+      arrowHead(x1, y1, cx, cy, col);
+      endpointMark(x1, y1, col);
+      if (isHot && !reduceMotion) flowDots(x0, y0, cx, cy, x1, y1, now, col, on);
+    }
+    oc.globalAlpha = 1;
+  }
+  function arrowHead(x1, y1, cx, cy, col) {
+    const ang = Math.atan2(y1 - cy, x1 - cx), L = HTTP_ARC.arrowPx, back = HTTP_ARC.endpointPx + 1.5;
+    oc.save();
+    oc.translate(x1 - Math.cos(ang) * back, y1 - Math.sin(ang) * back);
+    oc.rotate(ang);
+    oc.beginPath();
+    oc.moveTo(0, 0);
+    oc.lineTo(-L, -L * 0.55);
+    oc.lineTo(-L, L * 0.55);
+    oc.closePath();
+    oc.fillStyle = css(col);
+    oc.fill();
+    oc.restore();
+  }
+  function endpointMark(x, y, col) {
+    const r = HTTP_ARC.endpointPx;
+    oc.beginPath();
+    oc.moveTo(x, y - r * 1.25);
+    oc.lineTo(x + r * 1.25, y);
+    oc.lineTo(x, y + r * 1.25);
+    oc.lineTo(x - r * 1.25, y);
+    oc.closePath();
+    oc.fillStyle = css(theme.halo);
+    oc.fill();
+    oc.lineWidth = 1.4;
+    oc.strokeStyle = css(col);
+    oc.stroke();
+  }
+  function flowDots(x0, y0, cx, cy, x1, y1, now, col, on) {
+    const L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.min(6, Math.round(L / 110)));
+    oc.fillStyle = css(col);
+    for (let q2 = 0; q2 < n; q2++) {
+      const t = (now * HTTP_ARC.flowSpeed / Math.max(L, 1) + q2 / n) % 1, u = 1 - t, x = u * u * x0 + 2 * u * t * cx + t * t * x1, y = u * u * y0 + 2 * u * t * cy + t * t * y1;
+      if (!on(x, y, 6)) continue;
+      const ga = oc.globalAlpha;
+      oc.globalAlpha = ga * Math.min(1, Math.sin(Math.PI * t) * 2.2);
+      oc.beginPath();
+      oc.arc(x, y, 2.4, 0, Math.PI * 2);
+      oc.fill();
+      oc.globalAlpha = ga;
+    }
+  }
+  function drawHttpTip(fx) {
+    const { g, SX, SY } = fx, H = g.http;
+    if (!H || !store.hover || store.hover.t !== "h") return;
+    const gr = H.groups[store.hover.id], l = H.links[gr.links[0]], x0 = SX(g.PX[gr.from]), y0 = SY(g.PY[gr.from]), x1 = SX(g.PX[gr.to]), y1 = SY(g.PY[gr.to]), [cx, cy] = arcCtrl(x0, y0, x1, y1), mx = 0.25 * x0 + 0.5 * cx + 0.25 * x1, my = 0.25 * y0 + 0.5 * cy + 0.25 * y1;
+    const top = `${l.method} ${l.path}`, more = gr.links.length > 1 ? ` \xB7 ${gr.links.length} call sites` : "", sub = `${g.repoName[l.call.repo]} \u2192 ${g.repoName[l.route.repo]} \xB7 ${PROOF[gr.proof].label}${more}`, fTop = "500 12px " + MONO, fSub = "400 11.5px " + SANS, w = Math.max(tw(fTop, top), tw(fSub, sub)) + 20, h = 42, x = Math.min(Math.max(8, mx - w / 2), store.W - w - 8), y = Math.max(8, my - h - 12);
+    oc.globalAlpha = 1;
+    rrect(x, y, w, h, 8);
+    oc.fillStyle = css(theme.halo);
+    oc.fill();
+    oc.lineWidth = 1;
+    oc.strokeStyle = css(theme.text, 0.22);
+    oc.stroke();
+    oc.textAlign = "left";
+    oc.fillStyle = css(theme.text);
+    oc.font = fTop;
+    oc.fillText(top, x + 10, y + 14);
+    oc.fillStyle = css(theme.muted);
+    oc.font = fSub;
+    oc.fillText(sub, x + 10, y + 30);
+    LC.fits(x, y, x + w, y + h, true);
+  }
+
   // src/ui/legend.js
+  var keyRow = (swatch, label, n) => `<div class="lg-row lg-static">${swatch}<span>${esc(label)}</span><span class="n">${fmt(n)}</span></div>`;
+  function linksGroup(H) {
+    if (!H || !H.links.length) return "";
+    const c = proofCounts(H), within = H.links.filter(isWithin).length;
+    let h = `<div class="lg-group"><div class="lg-h">Links between services</div>`;
+    for (const p of PROOF_ORDER) {
+      if (!c[p]) continue;
+      const [col, dash] = arcStyle(p);
+      h += keyRow(`<span class="sw-line${dash ? " dash" : ""}" style="--c:${css(col)}"></span>`, PROOF[p].label, c[p]);
+    }
+    if (within) h += keyRow('<span class="sw-line sw-none"></span>', "Inside one repository", within);
+    const protocols = protocolCounts(H).map(([p, n]) => `${esc(protocolName(p))} ${fmt(n)}`).join(" \xB7 ");
+    return h + `<div class="lg-note">${protocols}</div></div>`;
+  }
   function renderLegend() {
-    const g = store.G;
-    let h = `<div class="lg-group"><div class="lg-h">Contracts</div>`;
+    const g = store.G, H = g.http, channels = !!H && H.links.some((l) => l.protocol && l.protocol !== "http");
+    let h = linksGroup(H) + `<div class="lg-group"><div class="lg-h">${H && H.links.length ? "Code graph" : "Contracts"}</div>`;
     STATUS.forEach((s, i) => {
       const col = i === 0 ? css(theme.text, 0.55) : css(theme.st[i]);
       h += `<button class="lg-row" data-st="${i}" aria-pressed="${!!stOn[i] && (!store.issuesOnly || i === 1 || i === 2)}"><span class="sw-line${i === 3 ? " dash" : ""}" style="--c:${col}"></span><span>${s}</span><span class="n">${fmt(g.BYST[i])}</span></button>`;
@@ -5440,7 +5585,7 @@ FLOW: ${flowLine}`;
       if (g.R > 5)
         h += `<div class="lg-row" style="cursor:default"><span class="sw-dot" style="--c:${css(theme.other)}"></span><span>${fmt(g.R - 5)} other ${g.R - 5 === 1 ? "repository" : "repositories"}</span><span></span></div>`;
     }
-    h += `</div><div class="lg-group"><div class="shapes"><span><i class="g ep"></i>${KIND[1]}</span><span><i class="g ev"></i>${KIND[2]}</span><span><i class="g md"></i>${KIND[3]}</span></div></div>`;
+    h += `</div><div class="lg-group"><div class="shapes"><span><i class="g ep"></i>${KIND[1]}</span><span><i class="g ev"></i>${channels ? "Endpoint or topic" : KIND[2]}</span><span><i class="g md"></i>${KIND[3]}</span></div></div>`;
     if (g.meta && g.meta.source)
       h += `<div class="lg-group"><div class="lg-h">Indexed with ${esc(g.meta.source)}</div></div>`;
     LEGB.innerHTML = h;
@@ -6090,115 +6235,6 @@ FLOW: ${flowLine}`;
     const { pinned, pinnedSet } = reservePinned(fx, pins);
     placeLabels(fx, pinnedSet);
     paintLabels(fx, pinned, pinnedSet);
-  }
-
-  // src/render/http.js
-  function arcStyle(proof) {
-    if (proof === "scip" || proof === "syntax") return [theme.proof, null];
-    if (proof === "inferred") return [theme.st[3], [5, 4]];
-    if (proof === "ambiguous") return [theme.st[1], [5, 4]];
-    if (proof === "contradicted") return [theme.st[2], [2, 3]];
-    return [theme.text, null];
-  }
-  function hotGroups(g) {
-    const H = g.http, hot = /* @__PURE__ */ new Set();
-    if (store.linkId >= 0) hot.add(store.linkId);
-    if (store.hover && store.hover.t === "h") hot.add(store.hover.id);
-    if (store.selectedId >= 0) {
-      const n = { t: "n", id: store.selectedId };
-      for (const i of [...groupsFrom(g, H, store.selectedId), ...groupsInto(g, H, n)]) hot.add(i);
-    }
-    if (store.httpImpact) {
-      const t = { t: store.httpImpact[0], id: +store.httpImpact.slice(1) };
-      for (const i of httpImpact(g, H, t).groups) hot.add(i);
-    }
-    return hot;
-  }
-  function drawHttp(fx) {
-    const { g, I, now, SX, SY, on } = fx, H = g.http;
-    if (!H || !H.groups.length) return;
-    const hot = hotGroups(g), focused = store.dimT > 0.02 && (hot.size > 0 || store.focusId >= 0), order2 = H.groups.map((_, i) => i).sort((a, b) => hot.has(a) - hot.has(b));
-    for (const i of order2) {
-      const gr = H.groups[i], isHot = hot.has(i), x0 = SX(g.PX[gr.from]), y0 = SY(g.PY[gr.from]), x1 = SX(g.PX[gr.to]), y1 = SY(g.PY[gr.to]);
-      if (!on(x0, y0, 4e3) && !on(x1, y1, 4e3)) continue;
-      const [cx, cy] = arcCtrl(x0, y0, x1, y1), [col, dash] = arcStyle(gr.proof), rest = gr.within ? HTTP_ARC.withinAlpha : HTTP_ARC.restAlpha, a = isHot ? 1 : focused ? HTTP_ARC.dimAlpha + (rest - HTTP_ARC.dimAlpha) * (1 - store.dimT) : rest;
-      oc.globalAlpha = a * I;
-      oc.strokeStyle = css(col);
-      oc.lineWidth = isHot ? HTTP_ARC.hotWidth : HTTP_ARC.width;
-      oc.setLineDash(dash || []);
-      oc.beginPath();
-      oc.moveTo(x0, y0);
-      oc.quadraticCurveTo(cx, cy, x1, y1);
-      oc.stroke();
-      oc.setLineDash([]);
-      arrowHead(x1, y1, cx, cy, col);
-      endpointMark(x1, y1, col);
-      if (isHot && !reduceMotion) flowDots(x0, y0, cx, cy, x1, y1, now, col, on);
-    }
-    oc.globalAlpha = 1;
-  }
-  function arrowHead(x1, y1, cx, cy, col) {
-    const ang = Math.atan2(y1 - cy, x1 - cx), L = HTTP_ARC.arrowPx, back = HTTP_ARC.endpointPx + 1.5;
-    oc.save();
-    oc.translate(x1 - Math.cos(ang) * back, y1 - Math.sin(ang) * back);
-    oc.rotate(ang);
-    oc.beginPath();
-    oc.moveTo(0, 0);
-    oc.lineTo(-L, -L * 0.55);
-    oc.lineTo(-L, L * 0.55);
-    oc.closePath();
-    oc.fillStyle = css(col);
-    oc.fill();
-    oc.restore();
-  }
-  function endpointMark(x, y, col) {
-    const r = HTTP_ARC.endpointPx;
-    oc.beginPath();
-    oc.moveTo(x, y - r * 1.25);
-    oc.lineTo(x + r * 1.25, y);
-    oc.lineTo(x, y + r * 1.25);
-    oc.lineTo(x - r * 1.25, y);
-    oc.closePath();
-    oc.fillStyle = css(theme.halo);
-    oc.fill();
-    oc.lineWidth = 1.4;
-    oc.strokeStyle = css(col);
-    oc.stroke();
-  }
-  function flowDots(x0, y0, cx, cy, x1, y1, now, col, on) {
-    const L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.min(6, Math.round(L / 110)));
-    oc.fillStyle = css(col);
-    for (let q2 = 0; q2 < n; q2++) {
-      const t = (now * HTTP_ARC.flowSpeed / Math.max(L, 1) + q2 / n) % 1, u = 1 - t, x = u * u * x0 + 2 * u * t * cx + t * t * x1, y = u * u * y0 + 2 * u * t * cy + t * t * y1;
-      if (!on(x, y, 6)) continue;
-      const ga = oc.globalAlpha;
-      oc.globalAlpha = ga * Math.min(1, Math.sin(Math.PI * t) * 2.2);
-      oc.beginPath();
-      oc.arc(x, y, 2.4, 0, Math.PI * 2);
-      oc.fill();
-      oc.globalAlpha = ga;
-    }
-  }
-  function drawHttpTip(fx) {
-    const { g, SX, SY } = fx, H = g.http;
-    if (!H || !store.hover || store.hover.t !== "h") return;
-    const gr = H.groups[store.hover.id], l = H.links[gr.links[0]], x0 = SX(g.PX[gr.from]), y0 = SY(g.PY[gr.from]), x1 = SX(g.PX[gr.to]), y1 = SY(g.PY[gr.to]), [cx, cy] = arcCtrl(x0, y0, x1, y1), mx = 0.25 * x0 + 0.5 * cx + 0.25 * x1, my = 0.25 * y0 + 0.5 * cy + 0.25 * y1;
-    const top = `${l.method} ${l.path}`, more = gr.links.length > 1 ? ` \xB7 ${gr.links.length} call sites` : "", sub = `${g.repoName[l.call.repo]} \u2192 ${g.repoName[l.route.repo]} \xB7 ${PROOF[gr.proof].label}${more}`, fTop = "500 12px " + MONO, fSub = "400 11.5px " + SANS, w = Math.max(tw(fTop, top), tw(fSub, sub)) + 20, h = 42, x = Math.min(Math.max(8, mx - w / 2), store.W - w - 8), y = Math.max(8, my - h - 12);
-    oc.globalAlpha = 1;
-    rrect(x, y, w, h, 8);
-    oc.fillStyle = css(theme.halo);
-    oc.fill();
-    oc.lineWidth = 1;
-    oc.strokeStyle = css(theme.text, 0.22);
-    oc.stroke();
-    oc.textAlign = "left";
-    oc.fillStyle = css(theme.text);
-    oc.font = fTop;
-    oc.fillText(top, x + 10, y + 14);
-    oc.fillStyle = css(theme.muted);
-    oc.font = fSub;
-    oc.fillText(sub, x + 10, y + 30);
-    LC.fits(x, y, x + w, y + h, true);
   }
 
   // src/render/overlay.js

@@ -28,6 +28,12 @@ test('the links panel shows the accuracy, every link by direction, and requests 
   await expect(panel.locator('.unmatched')).toContainText('GET /users/{id}');
   await expect(atlas.locator('#linksBtn')).toBeVisible();
   await atlas.keyboard.press('Escape');
+  // the Key lists the links in the line styles the map draws them, and their protocols
+  const key = atlas.locator('#legendBody');
+  await expect(key).toContainText('Links between services');
+  await expect(key).toContainText('Confirmed by SCIP');
+  await expect(key.locator('.lg-note')).toHaveText(/^HTTP \d+$/);
+  await expect(key).toContainText('HTTP endpoint');
   await expect(panel).toBeHidden();
   await atlas.locator('#ov').focus();
   await atlas.keyboard.press('l');

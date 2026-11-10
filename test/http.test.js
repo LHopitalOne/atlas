@@ -3,7 +3,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import './setup.js';
 import { buildSpec, validateSpec } from '../src/model/spec.js';
-import { arcDistance, groupsFrom, httpImpact, proofCounts, repoPairs, siteUrl } from '../src/model/http.js';
+import {
+  arcDistance,
+  groupsFrom,
+  httpImpact,
+  proofCounts,
+  protocolCounts,
+  protocolName,
+  repoPairs,
+  siteUrl,
+} from '../src/model/http.js';
 
 // test/fixtures/http-shop.json: web calls api twice (one confirmed by SCIP, one inferred) and once with no route
 const SPEC = JSON.parse(readFileSync('test/fixtures/http-shop.json', 'utf8'));
@@ -68,4 +77,17 @@ test('links inside one repository are kept apart from those between repositories
   assert.equal(httpImpact(g2, H2, { t: 'n', id: ep }).repos.length, 0);
   const pairs = repoPairs(g2, H2);
   assert.ok(pairs.at(-1).a === pairs.at(-1).b);
+});
+
+test('links are counted by protocol, most first, and named as the page shows them', () => {
+  const mixed = {
+    links: [{ protocol: 'kafka' }, {}, { protocol: 'kafka' }, { protocol: 'kafka' }, {}, { protocol: 'sqs' }],
+  };
+  assert.deepEqual(protocolCounts(mixed), [
+    ['kafka', 3],
+    ['http', 2],
+    ['sqs', 1],
+  ]);
+  assert.equal(protocolName('kafka'), 'Kafka');
+  assert.equal(protocolName('sqs'), 'SQS');
 });

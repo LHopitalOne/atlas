@@ -106,6 +106,7 @@ class HttpLayer:
                 methods=list(route.methods),
             ),
             'checks': [{'at': c.at, 'name': c.name, 'means': c.means, 'verdict': c.verdict} for c in r.checks],
+            **({'protocol': route.protocol} if route.protocol != 'http' else {}),
         }
 
     def _unmatched(self, r, source, index):

@@ -198,6 +198,28 @@ export function proofCounts(H) {
   return c;
 }
 
+/** How a protocol is named on the page; one not listed is shown in capitals. */
+export const PROTOCOL_NAMES = {
+  http: 'HTTP',
+  websocket: 'WebSocket',
+  grpc: 'gRPC',
+  graphql: 'GraphQL',
+  kafka: 'Kafka',
+  amqp: 'AMQP',
+  redis: 'Redis',
+  tcp: 'TCP',
+  udp: 'UDP',
+  task: 'Task queue',
+};
+export const protocolName = p => PROTOCOL_NAMES[p] || String(p).toUpperCase();
+
+/** How many links (between repositories and inside one) go over each protocol, most first: [['http', 34], ...]. */
+export function protocolCounts(H) {
+  const c = new Map();
+  for (const l of H.links) c.set(l.protocol || 'http', (c.get(l.protocol || 'http') || 0) + 1);
+  return [...c].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
+}
+
 /** Control point of the arc drawn for an HTTP link (shared by the overlay and picking, so hits match the drawing). */
 export function arcCtrl(x0, y0, x1, y1) {
   const dx = x1 - x0,

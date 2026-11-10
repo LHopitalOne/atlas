@@ -12,8 +12,8 @@ import { LC, rrect, tw } from './canvas.js';
 import { reduceMotion } from '../util/dom.js';
 import { MONO, SANS } from '../util/format.js';
 
-/** Colour and dash of an arc for a proof. */
-function arcStyle(proof) {
+/** Colour and dash of an arc for a proof (the Key draws its swatches with it too). */
+export function arcStyle(proof) {
   if (proof === 'scip' || proof === 'syntax') return [theme.proof, null];
   if (proof === 'inferred') return [theme.st[3], [5, 4]];
   if (proof === 'ambiguous') return [theme.st[1], [5, 4]];
