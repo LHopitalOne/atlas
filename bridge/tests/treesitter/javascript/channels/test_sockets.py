@@ -65,6 +65,32 @@ class DgramTest(unittest.TestCase):
         self.assertEqual([path for _, _, path, _, _ in found.calls], ['/8130', '/8131'])
         self.assertEqual(found.routes, [])
 
+    def test_port_from_an_env_helper_through_a_class_and_a_config_object(self):
+        found = Channels(
+            {
+                'src/config.ts': 'function envInt(name: string, fallback: number): number {\n'
+                '  const raw = process.env[name];\n'
+                '  return raw ? Number.parseInt(raw, 10) : fallback;\n'
+                '}\n'
+                'const envStr = (name: string, def: string) => process.env[name] ?? def;\n'
+                'export const config = {\n'
+                "  metrics: { host: envStr('STATSD_HOST', 'statsd'), port: envInt('STATSD_PORT', 8125) },\n"
+                "  other: envInt('OTHER', Number(process.env.X)),\n"
+                '} as const;\n',
+                'src/reporter.ts': "import dgram from 'node:dgram';\n"
+                'export class Reporter {\n'
+                "  private readonly socket = dgram.createSocket('udp4');\n"
+                '  constructor(private readonly host: string, private readonly port: number) {}\n'
+                "  hit(): void { this.socket.send('hits:1|c', this.port, this.host); }\n"
+                '}\n',
+                'src/main.ts': "import { config } from './config.js';\nimport { Reporter } from './reporter.js';\n"
+                'new Reporter(config.metrics.host, config.metrics.port).hit();\n',
+                'src/other.ts': "import dgram from 'node:dgram';\nimport { config } from './config.js';\n"
+                "dgram.createSocket('udp4').send('x', config.other, 'h');\n",
+            }
+        )
+        self.assertEqual([(path, f) for _, _, path, f, _ in found.calls], [('/8125', 'src/reporter.ts')])
+
 
 if __name__ == '__main__':
     unittest.main()
