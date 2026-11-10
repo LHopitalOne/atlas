@@ -25,6 +25,8 @@ export function validateSpec(spec) {
       (d.services || []).forEach(s => {
         services++;
         for (const k of texts(s)) errs.push(`service "${s.name}": ${k} must be a string`);
+        if (s.tags !== undefined && !(Array.isArray(s.tags) && s.tags.every(t => typeof t === 'string')))
+          errs.push(`service "${s.name}": tags must be a list of strings`);
         for (const l of s.leaves || []) {
           leaves++;
           if (![1, 2, 3].includes(l.kind)) errs.push(`leaf "${l.name}" has kind ${l.kind}; use 1, 2 or 3`);
@@ -73,7 +75,7 @@ function flattenHierarchy(spec) {
         svcName.push(sv.name);
         svcDom.push(domName.length - 1);
         svcLoc.push(sv.loc || 0);
-        svcInfo.push([sv.doc || '', sv.sig || '', sv.end || 0]);
+        svcInfo.push([sv.doc || '', sv.sig || '', sv.end || 0, sv.tags || []]);
       }
       dSe.push(svcName.length);
     }
@@ -169,6 +171,7 @@ export function buildSpec(spec) {
   g.doc = i => info(i)[0];
   g.sig = i => info(i)[1];
   g.end = i => info(i)[2];
+  g.tags = i => info(i)[3] || [];
   if (spec.links) g.http = httpIndex(spec, g);
   return g;
 }

@@ -75,6 +75,7 @@ On services and leaves:
 | `sig` | the signature under the summary (name and parameters, or an endpoint's request and response) |
 | `loc` | location, such as `"path/file.ts:42"`; enables "View source" when the page has the file |
 | `end` | last line of the definition, so the source view can mark the whole definition |
+| `tags` | services only: a few words shown as badges under `doc` (the bridge's `--enrich` writes the file's role first, then its domain) |
 
 On `meta`:
 
@@ -82,6 +83,7 @@ On `meta`:
 | --- | --- |
 | `commit` | the commit the graph was built from; shown with summaries and source |
 | `docSource` | where `doc` came from: `"comment"` (doc comments), `"ai"` (generated), `"simulated"` (demo). Shown under every summary |
+| `docModel` | with `"ai"`: the model that wrote the summaries (e.g. `meta/muse-ember`), named under every summary |
 | `sourceBundle` | id of a `<script type="application/json">` holding `{ commit, files: { path: text } }`. Prototype only: stands in for fetching lines live from GitHub |
 | `label`, `title`, `source` | scale-button name, title, and the "Indexed with ..." line in the Key |
 

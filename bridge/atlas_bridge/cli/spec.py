@@ -9,6 +9,7 @@ from ..core.errors import LinkFormatError
 from ..core.model import CodeGraph
 from ..usecases.draw import GROUPINGS, MapDrawer
 from .command import Command
+from .enrich import EnrichPass
 from .inputs import GraphInput, JsonFile, RepositoryInput
 
 
@@ -40,6 +41,11 @@ class SpecCommand(Command):
             help='where a repository is checked out, to embed the lines each link cites and link them on GitHub',
         )
         parser.add_argument('--accuracy', help='a JSON object shown with the links: how they scored on an answer key')
+        parser.add_argument(
+            '--enrich',
+            action='store_true',
+            help='with --repo folders: a small model (meta/muse-ember on OpenRouter) says what each file does',
+        )
 
     def run(self, args):
         graph = CodeGraph()
@@ -50,7 +56,9 @@ class SpecCommand(Command):
         http = self._http(args)
         if http is not None:
             http.add_files(graph)
-        spec = AtlasSpecPresenter(args.title, http).present(MapDrawer(GROUPINGS[args.group]).draw(graph))
+        described, model = self._described(args, graph, http)
+        view = MapDrawer(GROUPINGS[args.group]).draw(graph)
+        spec = AtlasSpecPresenter(args.title, http, described, model).present(view)
         if args.out == '-':
             sys.stdout.write(json.dumps(spec, separators=(',', ':')))
             return
@@ -62,6 +70,13 @@ class SpecCommand(Command):
             f'{args.out}: {len(spec["repos"])} repos, {len(services)} files, {leaves} symbols, '
             f'{len(spec["edges"])} links{http_note}'
         )
+
+    def _described(self, args, graph, http):
+        if not args.enrich:
+            return {}, ''
+        folders = {r.name: r.path for r in (RepositoryInput.parse(item).checked() for item in args.repo)}
+        linked = http.files() if http is not None else frozenset()
+        return EnrichPass(self.report).run(graph, folders, linked)
 
     @staticmethod
     def _http(args):

@@ -69,6 +69,7 @@ modules = [
     "atlas_bridge.adapters.treesitter",
     "atlas_bridge.adapters.page",
     "atlas_bridge.adapters.jev",
+    "atlas_bridge.adapters.muse",
 ]
 
 [[tool.importlinter.contracts]]

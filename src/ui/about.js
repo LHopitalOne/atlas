@@ -13,6 +13,7 @@ function provenance(g) {
   const m = g.meta || {};
   if (m.docSource === 'comment') return `From a doc comment in the code · commit ${esc(m.commit || '')}`;
   if (m.docSource === 'simulated') return 'AI summary · simulated for this demo data';
+  if (m.docSource === 'ai') return `AI summary · written by ${esc(m.docModel || 'a model')} from the code`;
   return 'From the graph spec';
 }
 
@@ -25,8 +26,13 @@ export function aboutHTML(id) {
     sig = g.sig ? g.sig(id) : '',
     loc = g.loc ? g.loc(id) : '';
   let h = '<div class="about">';
+  const tags = g.tags ? g.tags(id) : [];
   h += doc
-    ? `<p class="about-text">${esc(doc)}</p><div class="prov">${provenance(g)}</div>`
+    ? `<p class="about-text">${esc(doc)}</p>` +
+      (tags.length
+        ? `<div class="tags">${tags.map(t => `<span class="badge badge-outline">${esc(t)}</span>`).join('')}</div>`
+        : '') +
+      `<div class="prov">${provenance(g)}</div>`
     : `<p class="about-text empty">No description in the code yet.</p><div class="prov">In the product, an AI summary would appear here, marked as AI-written.</div>`;
   if (id < g.S) {
     const roles = rolesOf(g, id);

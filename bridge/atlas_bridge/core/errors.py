@@ -16,9 +16,10 @@ BridgeError
 │   ├── IndexerFailedError      a SCIP indexer ran but did not produce an index
 │   ├── GraphifyUnavailableError the graphify command is not installed
 │   └── GraphifyFailedError     graphify ran but wrote no graph.json
-├── JudgeError                  asking a decision model about a link failed
+├── JudgeError                  asking a model (about a link, or to describe a file) failed
 │   ├── JudgeUnavailableError   no API key for the model
-│   └── JudgeFailedError        the model's service refused or failed every request
+│   ├── JudgeFailedError        the model's service refused or failed every request
+│   └── DescriberFailedError    the model asked to describe files failed every request
 └── OutputError                 writing the result failed
     ├── OutputWriteError        the output folder cannot be written
     └── PageTemplateError       the prebuilt Atlas page is missing from the installation
@@ -129,6 +130,11 @@ class JudgeUnavailableError(JudgeError):
 class JudgeFailedError(JudgeError):
     def __init__(self, problem: str):
         super().__init__(f'the decision model could not be reached: {problem}', 'try again, or leave out --jev')
+
+
+class DescriberFailedError(JudgeError):
+    def __init__(self, problem: str):
+        super().__init__(f'no file could be described: {problem}', 'try again, or leave out --enrich')
 
 
 class OutputError(BridgeError):

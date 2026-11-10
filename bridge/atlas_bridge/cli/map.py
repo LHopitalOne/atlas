@@ -50,6 +50,12 @@ class MapCommand(Command):
             help='let Jev (a decision model on OpenRouter; needs OPENROUTER_API_KEY) choose among the routes the code '
             'leaves open for a request; its picks are marked "Chosen by Jev"',
         )
+        parser.add_argument(
+            '--enrich',
+            action='store_true',
+            help='let a small model (meta/muse-ember on OpenRouter; needs OPENROUTER_API_KEY) say in one sentence what '
+            'each file does, with its role and tags; shown as AI summaries',
+        )
 
     def run(self, args):
         start = time.monotonic()

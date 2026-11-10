@@ -74,6 +74,11 @@ class HttpLayer:
             if r.route is not None:
                 graph.file(r.route.repo, r.route.file)
 
+    def files(self) -> frozenset:
+        """(repo, path) of every file at an end of a link."""
+        ends = {(r.call.repo, r.call.file) for r in self._records}
+        return frozenset(ends | {(r.route.repo, r.route.file) for r in self._records if r.route is not None})
+
     def endpoints(self, file: Ref) -> list[Endpoint]:
         return sorted(self._endpoints.get(file, []), key=lambda e: (e.route.line, e.route.label))
 

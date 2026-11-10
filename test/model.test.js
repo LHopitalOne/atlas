@@ -71,3 +71,15 @@ test('the embedded self graph is a valid spec', () => {
   assert.deepEqual(validateSpec(spec), []);
   assert.ok(buildSpec(spec).N > 500);
 });
+
+test('a service may carry tags, shown with its summary', () => {
+  const spec = tinySpec();
+  const first = spec.repos[0].domains[0].services[0];
+  first.doc = 'Creates orders.';
+  first.tags = ['api', 'orders'];
+  const g = buildSpec(spec);
+  assert.deepEqual(g.tags(0), ['api', 'orders']);
+  assert.deepEqual(g.tags(1), []);
+  first.tags = 'api';
+  assert.match(validateSpec(spec).join('\n'), /tags must be a list of strings/);
+});

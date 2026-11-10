@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from ..core.callgraph import Function, Site, Target
+from ..core.descriptions import Description
 from ..core.evidence import Assumption, Verdict
 from ..core.http import Call, Extraction, Route
 
@@ -81,3 +82,19 @@ class RouteJudge(ABC):
     @abstractmethod
     def choose(self, cases: list[JudgeCase]) -> list[Choice]:
         """One Choice per case, in order."""
+
+
+@dataclass(frozen=True)
+class FileCase:
+    """A file of a repository to describe."""
+
+    repo: str
+    path: str
+
+
+class FileDescriber(ABC):
+    """Says what files do: a one-sentence summary, a role and a few tags, read from each file's code."""
+
+    @abstractmethod
+    def describe(self, cases: list[FileCase]) -> list[Description | None]:
+        """One Description per case, in order; None for a file it could not describe."""

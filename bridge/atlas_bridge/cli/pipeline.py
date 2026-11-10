@@ -15,6 +15,7 @@ from ..core.model import CodeGraph, Status
 from ..usecases.draw import GROUPINGS, MapDrawer
 from ..usecases.link import LinkFinder, LinkReport
 from .budget import MapBudget
+from .enrich import EnrichPass
 from .inputs import GraphInput, JsonFile
 from .judge import JudgePass
 from .links import LinksCommand
@@ -26,7 +27,7 @@ class MapPipeline:
 
     def __init__(self, options, report):
         """options: parsed map arguments (out_dir, refresh, aliases, include_tests, verify, sandbox, group, title,
-        graph_json, within, jev)."""
+        graph_json, within, jev, enrich)."""
         self._o = options
         self._report = report
         self._runner = GraphifyRunner(self._still_mapping)
@@ -127,7 +128,11 @@ class MapPipeline:
                 f'  map       over {MapBudget.MAX_NODES:,} files and symbols: functions and classes are folded into '
                 'their files, except at the ends of HTTP links'
             )
-        spec = AtlasSpecPresenter(self._o.title, http).present(MapDrawer(GROUPINGS[self._o.group]).draw(code))
+        described, model = ({}, '')
+        if getattr(self._o, 'enrich', False):
+            described, model = EnrichPass(self._report).run(code, self._folders, frozenset(ends))
+        view = MapDrawer(GROUPINGS[self._o.group]).draw(code)
+        spec = AtlasSpecPresenter(self._o.title, http, described, model).present(view)
         files = sum(len(d['services']) for r in spec['repos'] for d in r['domains'])
         self._report(f'  map       {len(spec["repos"])} repositories, {files:,} files, {len(spec["edges"]):,} links')
         return spec

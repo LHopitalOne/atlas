@@ -225,6 +225,7 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 .sw-line{width:20px;height:0;border-top:2px solid var(--c)}
 .sw-line.dash{border-top-style:dashed}
 .sw-line.dot{border-top-style:dotted}
+.about .tags{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 2px}
 .lg-row.lg-static{cursor:default}
 .lg-row.lg-static:hover{background:none}
 .lg-note{padding:2px 6px 0;font-size:12px;color:var(--muted-foreground)}
@@ -5107,13 +5108,15 @@ FLOW: ${flowLine}`;
     const m = g.meta || {};
     if (m.docSource === "comment") return `From a doc comment in the code \xB7 commit ${esc(m.commit || "")}`;
     if (m.docSource === "simulated") return "AI summary \xB7 simulated for this demo data";
+    if (m.docSource === "ai") return `AI summary \xB7 written by ${esc(m.docModel || "a model")} from the code`;
     return "From the graph spec";
   }
   var ROLE_ICON = { entry: "\u2192", hub: "\u2733", bridge: "\u21C4", deadEnd: "\u25A0", isolated: "\u25CB" };
   function aboutHTML(id) {
     const g = store.G, doc = g.doc ? g.doc(id) : "", sig = g.sig ? g.sig(id) : "", loc = g.loc ? g.loc(id) : "";
     let h = '<div class="about">';
-    h += doc ? `<p class="about-text">${esc(doc)}</p><div class="prov">${provenance(g)}</div>` : `<p class="about-text empty">No description in the code yet.</p><div class="prov">In the product, an AI summary would appear here, marked as AI-written.</div>`;
+    const tags = g.tags ? g.tags(id) : [];
+    h += doc ? `<p class="about-text">${esc(doc)}</p>` + (tags.length ? `<div class="tags">${tags.map((t) => `<span class="badge badge-outline">${esc(t)}</span>`).join("")}</div>` : "") + `<div class="prov">${provenance(g)}</div>` : `<p class="about-text empty">No description in the code yet.</p><div class="prov">In the product, an AI summary would appear here, marked as AI-written.</div>`;
     if (id < g.S) {
       const roles = rolesOf(g, id);
       if (roles.length)
@@ -7227,6 +7230,8 @@ FLOW: ${flowLine}`;
         (d.services || []).forEach((s) => {
           services++;
           for (const k of texts(s)) errs.push(`service "${s.name}": ${k} must be a string`);
+          if (s.tags !== void 0 && !(Array.isArray(s.tags) && s.tags.every((t) => typeof t === "string")))
+            errs.push(`service "${s.name}": tags must be a list of strings`);
           for (const l of s.leaves || []) {
             leaves++;
             if (![1, 2, 3].includes(l.kind)) errs.push(`leaf "${l.name}" has kind ${l.kind}; use 1, 2 or 3`);
@@ -7260,7 +7265,7 @@ FLOW: ${flowLine}`;
           svcName.push(sv.name);
           svcDom.push(domName.length - 1);
           svcLoc.push(sv.loc || 0);
-          svcInfo.push([sv.doc || "", sv.sig || "", sv.end || 0]);
+          svcInfo.push([sv.doc || "", sv.sig || "", sv.end || 0, sv.tags || []]);
         }
         dSe.push(svcName.length);
       }
@@ -7336,6 +7341,7 @@ FLOW: ${flowLine}`;
     g.doc = (i) => info(i)[0];
     g.sig = (i) => info(i)[1];
     g.end = (i) => info(i)[2];
+    g.tags = (i) => info(i)[3] || [];
     if (spec.links) g.http = httpIndex(spec, g);
     return g;
   }

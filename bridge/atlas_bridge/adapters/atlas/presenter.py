@@ -22,9 +22,13 @@ class AtlasSpecPresenter(Presenter):
     HTTP_KIND_NAMES = ['File', 'Function or class', 'HTTP endpoint', 'Symbol']
     HTTP_KIND = {Kind.FUNCTION: 1, Kind.CLASS: 1, Kind.OTHER: 3}
 
-    def __init__(self, title='Graphify graph', http: HttpLayer | None = None):
+    def __init__(self, title='Graphify graph', http: HttpLayer | None = None, descriptions=None, doc_model=''):
+        """descriptions: {(repo, path): core.descriptions.Description} written by `doc_model`, shown on the files'
+        services as `doc` (the summary) and `tags` (the role, then the domain words)."""
         self._title = title
         self._http = http
+        self._descriptions = descriptions or {}
+        self._doc_model = doc_model
 
     def present(self, result: MapView):
         files = [f for r in result.repos for d in r.domains for f in d.files]
@@ -53,6 +57,9 @@ class AtlasSpecPresenter(Presenter):
         }
         if self._http is not None and self._http.accuracy:
             meta['accuracy'] = self._http.accuracy
+        if self._descriptions:
+            meta['docSource'] = 'ai'
+            meta['docModel'] = self._doc_model
         return meta
 
     def _repo(self, r):
@@ -84,7 +91,11 @@ class AtlasSpecPresenter(Presenter):
                 for s, leaf_name in zip(f.symbols, self.unique(s.name for s in f.symbols), strict=True)
             ]
             leaves += [e.leaf() for e in self._endpoints(f.ref)]
-            out.append({'name': name, 'loc': f'{f.path}:1', 'leaves': leaves})
+            service = {'name': name, 'loc': f'{f.path}:1', 'leaves': leaves}
+            described = self._descriptions.get((f.repo, f.path))
+            if described is not None:
+                service.update(doc=described.summary, tags=[described.role, *described.tags])
+            out.append(service)
         return out
 
     @staticmethod
