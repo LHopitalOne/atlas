@@ -79,7 +79,18 @@ class ScipEdgesTest(unittest.TestCase):
         b = ScipBuilder()
         b.occurrence('shop/cart.py', 1, IMPORTED)
         uses = ScipReferences({'shop': [ScipIndex(b.build(), 'x')]}).uses('shop', 'shop/cart.py')
-        self.assertEqual([u.key for u in uses], ['`shop.store`/'])  # a module: named, kept; the graph has no node
+        self.assertEqual([u.key for u in uses], [IMPORTED])  # a module: named, kept; the graph has no node
+
+    def test_a_name_defined_in_several_crates_reaches_none_of_them_unless_exact(self):
+        result = 'rust-analyzer cargo {} 0.1 errors/Result#'
+        b = ScipBuilder()
+        b.occurrence('a/lib.rs', 1, result.format('crate-a'), definition=True)
+        b.occurrence('b/lib.rs', 1, result.format('crate-b'), definition=True)
+        refs = ScipReferences({'r': [ScipIndex(b.build(), 'x')]})
+        self.assertEqual(refs.definition(result.format('crate-b')).file, 'b/lib.rs')  # the exact symbol
+        self.assertIsNone(refs.definition(result.format('crate-c')))  # another crate's Result: none
+        self.assertEqual(refs.definition(result.format('crate-a').replace('0.1', '0.2')).file, 'a/lib.rs')  # same crate
+        self.assertEqual(ScipReferences({'r': [index()]}).definition(SAVE.replace(' 0 ', ' 9 ')).file, 'shop/store.py')
 
 
 class ScipEdgesOnTheMapTest(unittest.TestCase):

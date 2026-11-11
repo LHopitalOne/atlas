@@ -17,8 +17,9 @@ class Definition:
 
 @dataclass(frozen=True)
 class Use:
-    """A line that uses a definition (a call, a reference, a type in a signature). `within` is the definition the line
-    sits in (the enclosing function or class), None at module level."""
+    """A line that uses a definition (a call, a reference, a type in a signature). `key` is what the index calls the
+    definition used; `within` is the definition the line sits in (the enclosing function or class), None at module
+    level."""
 
     line: int
     key: str
