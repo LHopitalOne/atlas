@@ -1,0 +1,14 @@
+{
+ "sentry": {
+  "graphify_extracted": 152148,
+  "graphify_guess_seen_by_scip": 20947,
+  "graphify_guess_not_seen": 19511,
+  "scip_added": 70404
+ },
+ "openedx": {
+  "graphify_extracted": 35290,
+  "graphify_guess_seen_by_scip": 3250,
+  "graphify_guess_not_seen": 2722,
+  "scip_added": 16388
+ }
+}

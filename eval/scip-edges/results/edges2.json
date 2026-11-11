@@ -1,0 +1,202 @@
+[
+ {
+  "id": "5ae9a2056a",
+  "verdict": "yes",
+  "evidence": "course_discovery/apps/api/v1/views/sources.py:13 permission_classes includes IsCourseRunEditorOrDjangoOrReadOnly (imported line 6)"
+ },
+ {
+  "id": "5f4b08fd76",
+  "verdict": "yes",
+  "evidence": "xmodule/vertical_block.py:113 self.block_has_access_error(child)"
+ },
+ {
+  "id": "61dd11634d",
+  "verdict": "yes",
+  "evidence": "relay-server/src/endpoints/project_configs.rs:103 Vec<ErrorBoundary<ProjectKey>> (use relay_base_schema::project::ProjectKey line 9)"
+ },
+ {
+  "id": "620c88a471",
+  "verdict": "yes",
+  "evidence": "lms/djangoapps/courseware/date_summary.py:581 VerificationDeadline.deadline_for_course(...)"
+ },
+ {
+  "id": "6713393ada",
+  "verdict": "yes",
+  "evidence": "relay-server/src/envelope/item.rs:494 self.is_attachment_ref() (also 592), within impl Item"
+ },
+ {
+  "id": "6797388a51",
+  "verdict": "yes",
+  "evidence": "xmodule/modulestore/mongo/base.py:1471 self._make_mongo_asset_key(asset_key.asset_type)"
+ },
+ {
+  "id": "6ab8ff22b5",
+  "verdict": "yes",
+  "evidence": "relay-server/src/services/processor/envelope.rs:26 import, :350 RequestTrust::Trusted match"
+ },
+ {
+  "id": "6b485f143d",
+  "verdict": "yes",
+  "evidence": "lms/djangoapps/instructor/views/api.py:2337 return JsonResponse(response_payload)"
+ },
+ {
+  "id": "6baad97ea5",
+  "verdict": "yes",
+  "evidence": "lms/djangoapps/grades/score_render.py:44 DjangoKeyValueStore(field_data_cache) (import line 16)"
+ },
+ {
+  "id": "6d60435203",
+  "verdict": "yes",
+  "evidence": "common/djangoapps/student/signals/receivers.py:49 raise AccountValidationError(...)"
+ },
+ {
+  "id": "6e48918e2e",
+  "verdict": "yes",
+  "evidence": "src/sentry/preprod/snapshots/tasks.py:286 snapshot_manifest: SnapshotManifest field annotation"
+ },
+ {
+  "id": "6e9b0e9bca",
+  "verdict": "yes",
+  "evidence": "src/sentry/search/eap/ourlogs/filter_aliases.py:2 import, :11 used in OURLOG_FILTER_ALIAS_DEFINITIONS"
+ },
+ {
+  "id": "6f66fdc6a8",
+  "verdict": "yes",
+  "evidence": "src/sentry/buffer/base.py:148 BoundedPositiveIntegerField.MAX_VALUE (also 166)"
+ },
+ {
+  "id": "6f78ff10c7",
+  "verdict": "yes",
+  "evidence": "src/sentry/runner/commands/performance.py:38 import, :46 issubclass(cls, PerformanceDetector)"
+ },
+ {
+  "id": "74482d59b1",
+  "verdict": "yes",
+  "evidence": "latest_adopted_release_handler.py:79 event.organization (event narrowed to GroupEvent -> BaseEvent.organization property)"
+ },
+ {
+  "id": "74df3d00df",
+  "verdict": "yes",
+  "evidence": "course_discovery/apps/learner_pathway/api/filters.py:18 Meta.model = LearnerPathway"
+ },
+ {
+  "id": "75c2b915f1",
+  "verdict": "yes",
+  "evidence": "common/djangoapps/edxmako/template.py:39 engines[Engines.MAKO]"
+ },
+ {
+  "id": "780672a055",
+  "verdict": "yes",
+  "evidence": "snuba/consumers/consumer.py:479 get_mapped_option(...) (import line 35)"
+ },
+ {
+  "id": "79b4f1c636",
+  "verdict": "no",
+  "evidence": "video_storage_handlers.py:365-370 only getattr(video/unit/subsection, 'display_name') on xblocks, not Bookmark.display_name"
+ },
+ {
+  "id": "79d35f77b6",
+  "verdict": "yes",
+  "evidence": "lms/djangoapps/course_home_api/progress/views.py:24 from lms.djangoapps.course_home_api.utils import get_course_or_403"
+ },
+ {
+  "id": "7a13bac15c",
+  "verdict": "yes",
+  "evidence": "xmodule/seq_block.py:292 get_completion.will_recheck_access = True in SequenceBlock body"
+ },
+ {
+  "id": "7a59cefe12",
+  "verdict": "yes",
+  "evidence": "src/sentry/search/events/fields.py:1097 normalize(params: ParamsType, ...)"
+ },
+ {
+  "id": "7b9effa3f9",
+  "verdict": "yes",
+  "evidence": "query_expression.py:468 self._unit.apply_on_query_expression(int_number), _unit: Unit"
+ },
+ {
+  "id": "7c8c41c656",
+  "verdict": "yes",
+  "evidence": "lms/djangoapps/course_api/api.py:206 CourseOverview.get_all_course_keys()"
+ },
+ {
+  "id": "7cc6242195",
+  "verdict": "yes",
+  "evidence": "openedx/core/djangoapps/course_date_signals/tests.py:12 import, :242 extract_dates_from_course(course)"
+ },
+ {
+  "id": "7d315efdbf",
+  "verdict": "yes",
+  "evidence": "src/sentry/ai_monitoring/transcript/builder.py:58 span: TranscriptSpan annotation"
+ },
+ {
+  "id": "7e96073cc7",
+  "verdict": "yes",
+  "evidence": "src/sentry/receivers/users.py:4 import, :32 sender=SiloMode.MONOLITH"
+ },
+ {
+  "id": "7eb8318715",
+  "verdict": "yes",
+  "evidence": "snuba/replacers/errors_replacer.py:667-668 -> ReplacementType / ReplacementType.END_MERGE"
+ },
+ {
+  "id": "7fed4a36ca",
+  "verdict": "yes",
+  "evidence": "src/sentry/sentry_apps/services/cell/impl.py:147 Organization.objects.get(...)"
+ },
+ {
+  "id": "809dc2721c",
+  "verdict": "yes",
+  "evidence": "src/sentry/search/eap/columns.py:555 snuba_params: SnubaParams"
+ },
+ {
+  "id": "84eb796d7d",
+  "verdict": "yes",
+  "evidence": "common/djangoapps/student/views/dashboard.py:727 IDVerificationService.user_status(user)"
+ },
+ {
+  "id": "863ce626b9",
+  "verdict": "yes",
+  "evidence": "cms/djangoapps/modulestore_migrator/rest_api/v1/views.py:578 authentication_classes includes BearerAuthenticationAllowInactiveUser"
+ },
+ {
+  "id": "8682641cdd",
+  "verdict": "yes",
+  "evidence": "lms/djangoapps/instructor/views/api_v2.py:2502 serializer_class = CourseEnrollmentSerializerV2"
+ },
+ {
+  "id": "86b82e8445",
+  "verdict": "yes",
+  "evidence": "openedx/features/lti_course_tab/tab.py:219 tab_dict['link_func'] = link_func"
+ },
+ {
+  "id": "8930db3bfe",
+  "verdict": "yes",
+  "evidence": "lms/djangoapps/discussion/urls.py:20 views.forum_form_discussion"
+ },
+ {
+  "id": "89315de832",
+  "verdict": "yes",
+  "evidence": "xmodule/html_block.py:31 import, :253 name_to_pathname(...) (also 319)"
+ },
+ {
+  "id": "8a89b1b7a7",
+  "verdict": "yes",
+  "evidence": "src/sentry/seer/autofix/autofix_agent.py:663 state.get_artifacts() with state: SeerRunState"
+ },
+ {
+  "id": "8ad30dffa4",
+  "verdict": "yes",
+  "evidence": "lms/djangoapps/instructor/views/api_v2.py:2453 subclasses DeveloperErrorViewMixin (import line 126)"
+ },
+ {
+  "id": "8b8f665fa5",
+  "verdict": "yes",
+  "evidence": "lms/djangoapps/discussion/rest_api/permissions.py:180 GlobalStaff().has_user(...)"
+ },
+ {
+  "id": "8cd5d2423e",
+  "verdict": "yes",
+  "evidence": "internal_registered_templates.py:66 rendered_template.subject_blocks (NotificationRenderedTemplate)"
+ }
+]

@@ -1,0 +1,202 @@
+[
+ {
+  "id": "d39d7af9fb",
+  "verdict": "yes",
+  "evidence": "repository_project_path_config.py:27 field annotation `provider: IntegrationProviderInfo | None` (imported from integration.py:9)"
+ },
+ {
+  "id": "d53fa8f0f2",
+  "verdict": "yes",
+  "evidence": "symbolicate_js.rs:12 `use crate::utils::sentry::ConfigureScope` (crate::utils re-exports symbolicator_service::utils, main.rs:22)"
+ },
+ {
+  "id": "d63cacc50b",
+  "verdict": "yes",
+  "evidence": "api_impl.py:56 `BookmarkSerializer(bookmark, ...)` inside get_bookmark"
+ },
+ {
+  "id": "d6795d3a42",
+  "verdict": "yes",
+  "evidence": "rate_limits.rs:898 `DataCategory::SpanIndexed` (DataCategory via relay_quotas re-export of relay_base_schema)"
+ },
+ {
+  "id": "d6e8dceddc",
+  "verdict": "no",
+  "evidence": "retries.py:145,155 `Exception` is the builtin; sentry.interfaces.exception is not imported"
+ },
+ {
+  "id": "d8d84a71a4",
+  "verdict": "yes",
+  "evidence": "organization_preprod_artifact_assemble.py:127 `owner = ApiOwner.EMERGE_TOOLS`"
+ },
+ {
+  "id": "dcbf0fb202",
+  "verdict": "yes",
+  "evidence": "row_processors.py:4 import, :31 `GroupAssigneeRow.from_bulk(row)`"
+ },
+ {
+  "id": "dccf2a3ea1",
+  "verdict": "yes",
+  "evidence": "services.py:39 `from xmodule.exceptions import NotFoundError`, used :145"
+ },
+ {
+  "id": "dd3fc229df",
+  "verdict": "yes",
+  "evidence": "level_types.py:17 `LevelType.objects.all()` in class body"
+ },
+ {
+  "id": "df1e982d61",
+  "verdict": "yes",
+  "evidence": "attachment_event.py:128 `isinstance(exc, Retriable)` (imported from .processors :20)"
+ },
+ {
+  "id": "df612ed479",
+  "verdict": "yes",
+  "evidence": "organization_shortid.py:53 `IssueParams.GROUP_INDEX_COLLAPSE` in extend_schema on class method"
+ },
+ {
+  "id": "e0b33b1d6a",
+  "verdict": "yes",
+  "evidence": "debug_organization_integration_request.py:19 `Organization(id=1, ...)`"
+ },
+ {
+  "id": "e1eebc8781",
+  "verdict": "yes",
+  "evidence": "model.py:261 `kind: RpcExportErrorKind = RpcExportErrorKind.Unknown`"
+ },
+ {
+  "id": "e1f13a0761",
+  "verdict": "yes",
+  "evidence": "sentry_app_installation.py:137 `super().save(...)` resolves via ReplicatedControlModel to ControlOutboxProducingModel.save (base.py:248)"
+ },
+ {
+  "id": "e2631f6b49",
+  "verdict": "yes",
+  "evidence": "backend.py:45 `Template(template_code)` (from .template import Template :18)"
+ },
+ {
+  "id": "e46bfff3bb",
+  "verdict": "yes",
+  "evidence": "auth_organization_config.py:10 `from sentry.api.api_owners import ApiOwner`"
+ },
+ {
+  "id": "e5a2890325",
+  "verdict": "yes",
+  "evidence": "views.py:135 `atexit.register(close_cogs_recorder)` (imported :40)"
+ },
+ {
+  "id": "e5cb0283fc",
+  "verdict": "yes",
+  "evidence": "assets.py:38 `@course_author_access_required` decorates retrieve (re-exported via contentstore/api/__init__.py:2)"
+ },
+ {
+  "id": "e63fdfc6b4",
+  "verdict": "yes",
+  "evidence": "discussions_notifications.py:119 `Subscription.is_user_subscribed_to_thread(`"
+ },
+ {
+  "id": "e6402dde03",
+  "verdict": "yes",
+  "evidence": "tasks.py:666-667 `PreprodArtifactSizeComparison.objects.get_or_create(` inside function (583-723)"
+ },
+ {
+  "id": "e7e6bc8248",
+  "verdict": "yes",
+  "evidence": "mobile.rs:328 `normalize_mobile_attributes(&mut attributes)`"
+ },
+ {
+  "id": "e90f92101c",
+  "verdict": "yes",
+  "evidence": "client.py:495 `extract_hook_definition(` (imported :58)"
+ },
+ {
+  "id": "ea1fb43d36",
+  "verdict": "yes",
+  "evidence": "preprod_artifact_admin_info.py:91 `PreprodSnapshotMetrics.objects.filter(`"
+ },
+ {
+  "id": "eca340cc1b",
+  "verdict": "yes",
+  "evidence": "serializers/course.py:191 `document = CourseDocument` (documents/__init__.py re-exports from .course)"
+ },
+ {
+  "id": "ed30991165",
+  "verdict": "yes",
+  "evidence": "message_builder.py:197 `isinstance(reference, Group)` inside build"
+ },
+ {
+  "id": "efeae0d0f5",
+  "verdict": "yes",
+  "evidence": "accounts/views.py:747 `UserRetirementStatus.get_retirement_for_retirement_action(` within class (658-806)"
+ },
+ {
+  "id": "f0644e098f",
+  "verdict": "yes",
+  "evidence": "enrollments/views.py:387 `except CourseNotFoundError:` within class (303-393)"
+ },
+ {
+  "id": "f09225920e",
+  "verdict": "yes",
+  "evidence": "projectownership.py:23 `matcher: OwnershipRuleMatcher` (imported :8)"
+ },
+ {
+  "id": "f1cd1c904b",
+  "verdict": "yes",
+  "evidence": "dashboard.py:60 `from openedx.features.content_type_gating.models import ContentTypeGatingConfig`"
+ },
+ {
+  "id": "f22be195c5",
+  "verdict": "yes",
+  "evidence": "managed.rs:901 `self.assert_quantities(original, new)` (resolves to cfg(debug_assertions) version at :916; release build uses :985)"
+ },
+ {
+  "id": "f2ad5ff035",
+  "verdict": "yes",
+  "evidence": "organiation_uptime_alert_index.py:63 param annotation `organization: Organization`"
+ },
+ {
+  "id": "f4728666b6",
+  "verdict": "yes",
+  "evidence": "agreements/serializers.py:20 `model = IntegritySignature`"
+ },
+ {
+  "id": "f502057ee5",
+  "verdict": "yes",
+  "evidence": "api/serializers.py:2226 `class Meta(MinimalProgramSerializer.Meta)` and :2228"
+ },
+ {
+  "id": "f682069c2d",
+  "verdict": "no",
+  "evidence": "secrets.py:98 `serialize(...)` is sentry.api.serializers.serialize (imported :19), not the method; only instantiates the serializer class"
+ },
+ {
+  "id": "f6f6b81bc7",
+  "verdict": "yes",
+  "evidence": "export_git.py:33 `modulestore().get_course(course_key)`"
+ },
+ {
+  "id": "f77725aa0a",
+  "verdict": "yes",
+  "evidence": "login.py:726 `except AuthFailedError as error:` in login_refresh"
+ },
+ {
+  "id": "f7facd1293",
+  "verdict": "no",
+  "evidence": "repository/base.py:6 subclasses builtin Exception; sentry.interfaces.exception not imported"
+ },
+ {
+  "id": "f8686a7ae9",
+  "verdict": "yes",
+  "evidence": "contracts.py:197 `self.project_ids_are_required(attrs)` in same class ProjectScopedSerializer"
+ },
+ {
+  "id": "f87e6c3681",
+  "verdict": "yes",
+  "evidence": "issues_tools.py:482 `ApiClient().get(` (ApiClient from sentry.api.client :5)"
+ },
+ {
+  "id": "f8d7ec61e3",
+  "verdict": "yes",
+  "evidence": "aws_lambda/integration.py:19 import, :424 return annotation `-> IntegrationData`"
+ }
+]

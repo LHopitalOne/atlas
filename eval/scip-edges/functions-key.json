@@ -1,0 +1,846 @@
+{
+ "e124c92a4a": {
+  "set": "sentry",
+  "graphify": [],
+  "with_scip": []
+ },
+ "773973e808": {
+  "set": "sentry",
+  "graphify": [
+   [
+    "snuba/admin/clickhouse/nodes.py",
+    "Node"
+   ],
+   [
+    "snuba/query/composite.py",
+    "CompositeQuery"
+   ],
+   [
+    "snuba/query/data_source/simple.py",
+    "LogicalDataSource"
+   ],
+   [
+    "snuba/query/logical.py",
+    "Query"
+   ]
+  ],
+  "with_scip": [
+   [
+    "snuba/admin/clickhouse/nodes.py",
+    "Node"
+   ],
+   [
+    "snuba/query/composite.py",
+    "CompositeQuery"
+   ],
+   [
+    "snuba/query/data_source/join.py",
+    "JoinClause"
+   ],
+   [
+    "snuba/query/data_source/simple.py",
+    "Entity"
+   ],
+   [
+    "snuba/query/data_source/simple.py",
+    "LogicalDataSource"
+   ],
+   [
+    "snuba/query/data_source/simple.py",
+    "Storage"
+   ],
+   [
+    "snuba/query/logical.py",
+    "Query"
+   ]
+  ]
+ },
+ "80e2066588": {
+  "set": "sentry",
+  "graphify": [
+   [
+    "src/sentry/constants.py",
+    "ObjectStatus"
+   ],
+   [
+    "src/sentry/integrations/slack/requests/action.py",
+    "SlackActionRequest"
+   ],
+   [
+    "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "_get_investigation_source"
+   ],
+   [
+    "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "_respond_ephemeral"
+   ],
+   [
+    "src/sentry/investigations/services/breached_metrics.py",
+    "resolve_investigation_source"
+   ],
+   [
+    "src/sentry/models/organization.py",
+    "Organization"
+   ],
+   [
+    "src/sentry/models/organizationmember.py",
+    "InviteStatus"
+   ],
+   [
+    "src/sentry/models/organizationmember.py",
+    "OrganizationMember"
+   ],
+   [
+    "src/sentry/notebooks/endpoints/base.py",
+    "organization_project_ids"
+   ],
+   [
+    "src/sentry/seer/entrypoints/operator.py",
+    "SeerInvestigationOperator"
+   ],
+   [
+    "src/sentry/seer/entrypoints/operator.py",
+    "has_access"
+   ],
+   [
+    "src/sentry/seer/entrypoints/slack/entrypoint.py",
+    "SlackInvestigationEntrypoint"
+   ],
+   [
+    "src/sentry/seer/entrypoints/types.py",
+    "SeerEntrypointKey"
+   ],
+   [
+    "src/sentry/users/services/user/model.py",
+    "RpcUser"
+   ]
+  ],
+  "with_scip": [
+   [
+    "src/sentry/constants.py",
+    "ObjectStatus"
+   ],
+   [
+    "src/sentry/integrations/services/integration/service.py",
+    "get_organization_integrations"
+   ],
+   [
+    "src/sentry/integrations/slack/requests/action.py",
+    "SlackActionRequest"
+   ],
+   [
+    "src/sentry/integrations/slack/requests/base.py",
+    "data"
+   ],
+   [
+    "src/sentry/integrations/slack/requests/base.py",
+    "integration"
+   ],
+   [
+    "src/sentry/integrations/slack/requests/base.py",
+    "user_id"
+   ],
+   [
+    "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "InvestigationActionError"
+   ],
+   [
+    "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "InvestigationUnavailableReason"
+   ],
+   [
+    "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "_get_investigation_source"
+   ],
+   [
+    "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "_respond_ephemeral"
+   ],
+   [
+    "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "log_unavailable"
+   ],
+   [
+    "src/sentry/investigations/services/breached_metrics.py",
+    "resolve_investigation_source"
+   ],
+   [
+    "src/sentry/models/organization.py",
+    "Organization"
+   ],
+   [
+    "src/sentry/models/organizationmember.py",
+    "InviteStatus"
+   ],
+   [
+    "src/sentry/models/organizationmember.py",
+    "OrganizationMember"
+   ],
+   [
+    "src/sentry/notebooks/endpoints/base.py",
+    "organization_project_ids"
+   ],
+   [
+    "src/sentry/notebooks/models/notebook.py",
+    "get_absolute_url"
+   ],
+   [
+    "src/sentry/notebooks/services/notebooks.py",
+    "InvestigationSourceNotFound"
+   ],
+   [
+    "src/sentry/notebooks/services/notebooks.py",
+    "InvestigationValidationError"
+   ],
+   [
+    "src/sentry/seer/entrypoints/operator.py",
+    "SeerInvestigationOperator"
+   ],
+   [
+    "src/sentry/seer/entrypoints/operator.py",
+    "has_access"
+   ],
+   [
+    "src/sentry/seer/entrypoints/operator.py",
+    "trigger_investigation"
+   ],
+   [
+    "src/sentry/seer/entrypoints/slack/entrypoint.py",
+    "SlackInvestigationEntrypoint"
+   ],
+   [
+    "src/sentry/seer/entrypoints/types.py",
+    "SeerEntrypointKey"
+   ],
+   [
+    "src/sentry/users/services/user/model.py",
+    "RpcUser"
+   ]
+  ]
+ },
+ "a5ba1ba6f5": {
+  "set": "sentry",
+  "graphify": [
+   [
+    "snuba/clusters/cluster.py",
+    "get_cluster"
+   ],
+   [
+    "snuba/datasets/cdc/row_processors.py",
+    "CdcRowProcessor"
+   ],
+   [
+    "snuba/snapshots/__init__.py",
+    "BulkLoadSource"
+   ],
+   [
+    "snuba/snapshots/loaders/__init__.py",
+    "BulkLoader"
+   ],
+   [
+    "snuba/snapshots/loaders/single_table.py",
+    "SingleTableBulkLoader"
+   ]
+  ],
+  "with_scip": [
+   [
+    "snuba/clusters/cluster.py",
+    "ClickhouseClientSettings"
+   ],
+   [
+    "snuba/clusters/cluster.py",
+    "get_cluster"
+   ],
+   [
+    "snuba/clusters/cluster.py",
+    "get_query_connection"
+   ],
+   [
+    "snuba/datasets/cdc/row_processors.py",
+    "CdcRowProcessor"
+   ],
+   [
+    "snuba/datasets/schemas/tables.py",
+    "get_table_name"
+   ],
+   [
+    "snuba/snapshots/__init__.py",
+    "BulkLoadSource"
+   ],
+   [
+    "snuba/snapshots/loaders/__init__.py",
+    "BulkLoader"
+   ],
+   [
+    "snuba/snapshots/loaders/single_table.py",
+    "SingleTableBulkLoader"
+   ]
+  ]
+ },
+ "5a81bf18d9": {
+  "set": "sentry",
+  "graphify": [],
+  "with_scip": []
+ },
+ "8ad38499f0": {
+  "set": "sentry",
+  "graphify": [
+   [
+    "src/sentry/audit_log/manager.py",
+    "__init__"
+   ]
+  ],
+  "with_scip": [
+   [
+    "src/sentry/audit_log/manager.py",
+    "__init__"
+   ]
+  ]
+ },
+ "9c228d3c23": {
+  "set": "sentry",
+  "graphify": [
+   [
+    "src/sentry/replays/usecases/ingest/event_logger.py",
+    "_should_report_rage_click_issue"
+   ],
+   [
+    "src/sentry/replays/usecases/ingest/event_logger.py",
+    "gen_rage_clicks"
+   ],
+   [
+    "src/sentry/replays/usecases/ingest/event_parser.py",
+    "ParsedEventMeta"
+   ],
+   [
+    "src/sentry/replays/usecases/ingest/issue_creation.py",
+    "report_rage_click_issue_with_replay_event"
+   ],
+   [
+    "src/sentry/replays/usecases/ingest/types.py",
+    "ProcessorContext"
+   ],
+   [
+    "src/sentry/utils/metrics.py",
+    "incr"
+   ]
+  ],
+  "with_scip": [
+   [
+    "src/sentry/replays/usecases/ingest/event_logger.py",
+    "_should_report_rage_click_issue"
+   ],
+   [
+    "src/sentry/replays/usecases/ingest/event_logger.py",
+    "gen_rage_clicks"
+   ],
+   [
+    "src/sentry/replays/usecases/ingest/event_parser.py",
+    "ParsedEventMeta"
+   ],
+   [
+    "src/sentry/replays/usecases/ingest/issue_creation.py",
+    "report_rage_click_issue_with_replay_event"
+   ],
+   [
+    "src/sentry/replays/usecases/ingest/types.py",
+    "ProcessorContext"
+   ],
+   [
+    "src/sentry/utils/metrics.py",
+    "incr"
+   ]
+  ]
+ },
+ "e7c14e60c3": {
+  "set": "sentry",
+  "graphify": [],
+  "with_scip": []
+ },
+ "db081ab48b": {
+  "set": "sentry",
+  "graphify": [
+   [
+    "src/sentry/options/manager.py",
+    "UnknownOption"
+   ],
+   [
+    "src/sentry/runner/decorators.py",
+    "configuration"
+   ]
+  ],
+  "with_scip": [
+   [
+    "src/sentry/options/manager.py",
+    "UnknownOption"
+   ],
+   [
+    "src/sentry/runner/commands/config.py",
+    "config"
+   ],
+   [
+    "src/sentry/runner/decorators.py",
+    "configuration"
+   ]
+  ]
+ },
+ "7fa97fe203": {
+  "set": "sentry",
+  "graphify": [
+   [
+    "src/sentry/db/models/manager/option.py",
+    "_make_key"
+   ],
+   [
+    "src/sentry/db/models/manager/option.py",
+    "_option_cache"
+   ]
+  ],
+  "with_scip": [
+   [
+    "src/sentry/db/models/manager/option.py",
+    "_make_key"
+   ],
+   [
+    "src/sentry/db/models/manager/option.py",
+    "_option_cache"
+   ]
+  ]
+ },
+ "a6255ed730": {
+  "set": "sentry",
+  "graphify": [
+   [
+    "src/sentry/models/options/project_option.py",
+    "ProjectOption"
+   ],
+   [
+    "src/sentry/models/organization.py",
+    "Organization"
+   ],
+   [
+    "src/sentry/models/project.py",
+    "Project"
+   ],
+   [
+    "src/sentry/seer/autofix/utils.py",
+    "_get_repo_definitions_by_project"
+   ],
+   [
+    "src/sentry/seer/autofix/utils.py",
+    "get_automation_handoff"
+   ],
+   [
+    "src/sentry/seer/models/seer_api_models.py",
+    "SeerProjectPreference"
+   ]
+  ],
+  "with_scip": [
+   [
+    "src/sentry/db/models/manager/base.py",
+    "get_from_cache"
+   ],
+   [
+    "src/sentry/models/options/project_option.py",
+    "ProjectOption"
+   ],
+   [
+    "src/sentry/models/options/project_option.py",
+    "get_value_bulk_id"
+   ],
+   [
+    "src/sentry/models/organization.py",
+    "Organization"
+   ],
+   [
+    "src/sentry/models/project.py",
+    "Project"
+   ],
+   [
+    "src/sentry/seer/autofix/utils.py",
+    "_get_project_option"
+   ],
+   [
+    "src/sentry/seer/autofix/utils.py",
+    "_get_repo_definitions_by_project"
+   ],
+   [
+    "src/sentry/seer/autofix/utils.py",
+    "get_automation_handoff"
+   ],
+   [
+    "src/sentry/seer/models/seer_api_models.py",
+    "SeerProjectPreference"
+   ]
+  ]
+ },
+ "12292890b3": {
+  "set": "sentry",
+  "graphify": [],
+  "with_scip": []
+ },
+ "b65474f1ac": {
+  "set": "sentry",
+  "graphify": [
+   [
+    "snuba/datasets/entities/entity_key.py",
+    "EntityKey"
+   ],
+   [
+    "snuba/query/parser/exceptions.py",
+    "ParsingException"
+   ],
+   [
+    "snuba/query/snql/joins.py",
+    "Node"
+   ],
+   [
+    "snuba/query/snql/joins.py",
+    "RelationshipTuple"
+   ],
+   [
+    "snuba/query/snql/joins.py",
+    "entity"
+   ],
+   [
+    "snuba/query/snql/joins.py",
+    "push_child"
+   ]
+  ],
+  "with_scip": [
+   [
+    "snuba/datasets/entities/entity_key.py",
+    "EntityKey"
+   ],
+   [
+    "snuba/query/parser/exceptions.py",
+    "ParsingException"
+   ],
+   [
+    "snuba/query/snql/joins.py",
+    "Node"
+   ],
+   [
+    "snuba/query/snql/joins.py",
+    "RelationshipTuple"
+   ],
+   [
+    "snuba/query/snql/joins.py",
+    "entity"
+   ],
+   [
+    "snuba/query/snql/joins.py",
+    "has_child"
+   ],
+   [
+    "snuba/query/snql/joins.py",
+    "push_child"
+   ],
+   [
+    "snuba/query/snql/joins.py",
+    "update_children"
+   ]
+  ]
+ },
+ "b1ac65d6f3": {
+  "set": "sentry",
+  "graphify": [
+   [
+    "src/sentry/release_health/base.py",
+    "SessionsQueryResult"
+   ],
+   [
+    "src/sentry/release_health/metrics_sessions_v2.py",
+    "run_sessions_query"
+   ],
+   [
+    "src/sentry/snuba/sessions_v2.py",
+    "QueryDefinition"
+   ]
+  ],
+  "with_scip": [
+   [
+    "src/sentry/release_health/base.py",
+    "SessionsQueryResult"
+   ],
+   [
+    "src/sentry/release_health/metrics_sessions_v2.py",
+    "run_sessions_query"
+   ],
+   [
+    "src/sentry/snuba/sessions_v2.py",
+    "QueryDefinition"
+   ]
+  ]
+ },
+ "eb928a3c56": {
+  "set": "sentry",
+  "graphify": [
+   [
+    "snuba/utils/metrics/gauge.py",
+    "increment"
+   ]
+  ],
+  "with_scip": [
+   [
+    "snuba/utils/metrics/gauge.py",
+    "increment"
+   ]
+  ]
+ },
+ "4e60f07a41": {
+  "set": "openedx",
+  "graphify": [],
+  "with_scip": []
+ },
+ "d8d53ce2c4": {
+  "set": "openedx",
+  "graphify": [],
+  "with_scip": []
+ },
+ "b952db4b32": {
+  "set": "openedx",
+  "graphify": [],
+  "with_scip": []
+ },
+ "98afbba2b3": {
+  "set": "openedx",
+  "graphify": [],
+  "with_scip": []
+ },
+ "94a0a312a2": {
+  "set": "openedx",
+  "graphify": [
+   [
+    "credentials/apps/records/api.py",
+    "single_learner_cert_status"
+   ]
+  ],
+  "with_scip": [
+   [
+    "credentials/apps/records/api.py",
+    "single_learner_cert_status"
+   ]
+  ]
+ },
+ "3dd455a88d": {
+  "set": "openedx",
+  "graphify": [
+   [
+    "openedx/core/djangoapps/external_user_ids/admin.py",
+    "_generate_results_msg"
+   ]
+  ],
+  "with_scip": [
+   [
+    "openedx/core/djangoapps/external_user_ids/admin.py",
+    "_generate_results_msg"
+   ],
+   [
+    "openedx/core/djangoapps/external_user_ids/models.py",
+    "ExternalId"
+   ]
+  ]
+ },
+ "0fb5b17b2b": {
+  "set": "openedx",
+  "graphify": [],
+  "with_scip": []
+ },
+ "2c56637bb5": {
+  "set": "openedx",
+  "graphify": [
+   [
+    "openedx/features/survey_report/queries.py",
+    "get_course_enrollments"
+   ],
+   [
+    "openedx/features/survey_report/queries.py",
+    "get_generated_certificates"
+   ],
+   [
+    "openedx/features/survey_report/queries.py",
+    "get_recently_active_users"
+   ],
+   [
+    "openedx/features/survey_report/queries.py",
+    "get_registered_learners"
+   ],
+   [
+    "openedx/features/survey_report/queries.py",
+    "get_unique_courses_offered"
+   ]
+  ],
+  "with_scip": [
+   [
+    "openedx/features/survey_report/queries.py",
+    "get_course_enrollments"
+   ],
+   [
+    "openedx/features/survey_report/queries.py",
+    "get_generated_certificates"
+   ],
+   [
+    "openedx/features/survey_report/queries.py",
+    "get_recently_active_users"
+   ],
+   [
+    "openedx/features/survey_report/queries.py",
+    "get_registered_learners"
+   ],
+   [
+    "openedx/features/survey_report/queries.py",
+    "get_unique_courses_offered"
+   ]
+  ]
+ },
+ "b378d9db88": {
+  "set": "openedx",
+  "graphify": [
+   [
+    "course_discovery/apps/course_metadata/models.py",
+    "has_model_changed"
+   ]
+  ],
+  "with_scip": [
+   [
+    "course_discovery/apps/course_metadata/models.py",
+    "has_model_changed"
+   ]
+  ]
+ },
+ "b391f1af19": {
+  "set": "openedx",
+  "graphify": [],
+  "with_scip": []
+ },
+ "1e31c04621": {
+  "set": "openedx",
+  "graphify": [
+   [
+    "openedx/core/djangoapps/discussions/models.py",
+    "get"
+   ]
+  ],
+  "with_scip": [
+   [
+    "openedx/core/djangoapps/discussions/models.py",
+    "get"
+   ],
+   [
+    "openedx/core/djangoapps/discussions/models.py",
+    "supports_lti"
+   ]
+  ]
+ },
+ "40393f12a1": {
+  "set": "openedx",
+  "graphify": [
+   [
+    "openedx/core/djangoapps/monkey_patch/__init__.py",
+    "patch"
+   ]
+  ],
+  "with_scip": [
+   [
+    "lms/djangoapps/mobile_api/testutils.py",
+    "api_response"
+   ],
+   [
+    "lms/djangoapps/mobile_api/testutils.py",
+    "enroll"
+   ],
+   [
+    "lms/djangoapps/mobile_api/testutils.py",
+    "login"
+   ],
+   [
+    "openedx/core/djangoapps/monkey_patch/__init__.py",
+    "patch"
+   ]
+  ]
+ },
+ "c41ecfe474": {
+  "set": "openedx",
+  "graphify": [
+   [
+    "common/djangoapps/student/auth.py",
+    "has_course_author_access"
+   ],
+   [
+    "lms/djangoapps/grades/models.py",
+    "read_grade"
+   ],
+   [
+    "lms/djangoapps/grades/rest_api/serializers.py",
+    "SubsectionGradeResponseSerializer"
+   ],
+   [
+    "lms/djangoapps/grades/rest_api/v1/gradebook_views.py",
+    "_get_grade_data_for_not_attempted_assignment"
+   ],
+   [
+    "openedx/core/lib/api/view_utils.py",
+    "api_error"
+   ]
+  ],
+  "with_scip": [
+   [
+    "common/djangoapps/student/auth.py",
+    "has_course_author_access"
+   ],
+   [
+    "lms/djangoapps/grades/models.py",
+    "PersistentSubsectionGrade"
+   ],
+   [
+    "lms/djangoapps/grades/models.py",
+    "PersistentSubsectionGradeOverride"
+   ],
+   [
+    "lms/djangoapps/grades/models.py",
+    "read_grade"
+   ],
+   [
+    "lms/djangoapps/grades/rest_api/serializers.py",
+    "SubsectionGradeResponseSerializer"
+   ],
+   [
+    "lms/djangoapps/grades/rest_api/v1/gradebook_views.py",
+    "SubsectionUnavailableToUserException"
+   ],
+   [
+    "lms/djangoapps/grades/rest_api/v1/gradebook_views.py",
+    "_get_grade_data_for_not_attempted_assignment"
+   ],
+   [
+    "openedx/core/lib/api/view_utils.py",
+    "DeveloperErrorViewMixin"
+   ],
+   [
+    "openedx/core/lib/api/view_utils.py",
+    "api_error"
+   ]
+  ]
+ },
+ "04ce89a78b": {
+  "set": "openedx",
+  "graphify": [],
+  "with_scip": []
+ },
+ "ca77af6c63": {
+  "set": "openedx",
+  "graphify": [
+   [
+    "lms/djangoapps/teams/models.py",
+    "handle_activity"
+   ]
+  ],
+  "with_scip": [
+   [
+    "lms/djangoapps/teams/models.py",
+    "handle_activity"
+   ]
+  ]
+ }
+}

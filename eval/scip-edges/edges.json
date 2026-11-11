@@ -1,0 +1,3802 @@
+[
+ {
+  "id": "007d8ba576",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/hybridcloud/services/replica/service.py",
+   "name": "CellReplicaService",
+   "line": 49,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/auth/services/orgauthtoken/model.py",
+   "name": "RpcOrgAuthToken",
+   "line": 8,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "02b7119638",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/ccx/api/v0/views.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/ccx/api/v0/serializers.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "02db2ce695",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "source": {
+   "repo": "snuba",
+   "file": "snuba/query/data_source/simple.py",
+   "name": "Entity",
+   "line": 49,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "snuba",
+   "file": "snuba/datasets/entities/entity_key.py",
+   "name": "EntityKey",
+   "line": 20,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "034e2b3870",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/social_auth/backends/__init__.py",
+   "name": "SocialAuthBackend",
+   "line": 79,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/social_auth/models.py",
+   "name": "UserSocialAuth",
+   "line": 27,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "03c21a6df9",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "source": {
+   "repo": "snuba",
+   "file": "snuba/web/rpc/proto_visitor.py",
+   "name": "accept",
+   "line": 108,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "snuba",
+   "file": "snuba/web/rpc/proto_visitor.py",
+   "name": "TimeSeriesExpressionWrapper",
+   "line": 85,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "0824b3f23c",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/workflow_engine/endpoints/serializers/action_serializer.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/workflow_engine/models/action.py",
+   "name": "Action",
+   "line": 46,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "097a80655d",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/algolia_models.py",
+   "name": "AlgoliaProxyProgram",
+   "line": 493,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/models.py",
+   "name": "CourseRun",
+   "line": 2272,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "0b21ba829c",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "source": {
+   "repo": "snuba",
+   "file": "snuba/admin/clickhouse/tracing.py",
+   "name": "format_trace_output_from_summary",
+   "line": 291,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "snuba",
+   "file": "snuba/admin/clickhouse/trace_log_parsing.py",
+   "name": "TracingSummary",
+   "line": 200,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "0b60ff0ae5",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/lookups.py",
+   "name": "ExpectedLearningItemAutocomplete",
+   "line": 78,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/models.py",
+   "name": "ExpectedLearningItem",
+   "line": 1035,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "0dd7950f02",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/user_api/accounts/views.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/user_api/errors.py",
+   "name": "UserNotFound",
+   "line": 16,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "0ea2afef84",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/discussion/rest_api/api.py",
+   "name": "create_thread",
+   "line": 1462,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/django_comment_common/models.py",
+   "name": "CourseDiscussionSettings",
+   "line": 256,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "0ee58e4ec7",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor/views/api_v2.py",
+   "name": "list",
+   "line": 1362,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/certificates/models.py",
+   "name": "CertificateAllowlist",
+   "line": 58,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "0ffc8d9e53",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/issues/auto_source_code_config/frame_info.py",
+   "name": "PathBasedFrameInfo",
+   "line": 98,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/issues/auto_source_code_config/errors.py",
+   "name": "NeedsExtension",
+   "line": 9,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "126fcc350a",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/bitbucket/client.py",
+   "name": "get_last_commits",
+   "line": 210,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/bitbucket/client.py",
+   "name": "zip_commit_data",
+   "line": 202,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "15cbf0afa9",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/models/group.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/search/eap/occurrences/query_utils.py",
+   "name": "build_event_id_in_filter",
+   "line": 148,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "15db1ce161",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/api/endpoints/organization_profiling_profiles.py",
+   "name": "OrganizationProfilingBaseEndpoint",
+   "line": 45,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/api/api_publish_status.py",
+   "name": "ApiPublishStatus",
+   "line": 4,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "180c451669",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/certificates/management/commands/regenerate_noidv_cert.py",
+   "name": "_handle_all_courses",
+   "line": 118,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/certificates/models.py",
+   "name": "GeneratedCertificate",
+   "line": 169,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "1a0d1e100a",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/api/endpoints/organization_code_mapping_details.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/apidocs/constants.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "1b059e63ad",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/courses.py",
+   "name": "_check_nonstaff_access",
+   "line": 184,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/support/admin.py",
+   "name": "user",
+   "line": 69,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "1e44103042",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/features/lti_course_tab/tests.py",
+   "name": "DiscussionLtiCourseTabTestCase",
+   "line": 17,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/discussions/models.py",
+   "name": "DiscussionsConfiguration",
+   "line": 408,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "1ec943d743",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/api/v2/views/search.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/edx_elasticsearch_dsl_extensions/viewsets.py",
+   "name": "SearchAfterPagination",
+   "line": 105,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "1f1ff58d42",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/models.py",
+   "name": "AdditionalMetadata",
+   "line": 926,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/choices.py",
+   "name": "ExternalProductStatus",
+   "line": 96,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "1f68a2764f",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/auth.py",
+   "name": "get_user_permissions",
+   "line": 83,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/roles.py",
+   "name": "CourseStaffRole",
+   "line": 740,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "1fa8075773",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/replays/usecases/summarize.py",
+   "name": "fetch_trace_connected_errors",
+   "line": 86,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/snuba/referrer.py",
+   "name": "Referrer",
+   "line": 12,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "209e6dcb2c",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/experiments/utils.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/schedules/models.py",
+   "name": "Schedule",
+   "line": 12,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "23f6472b82",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/preprod/api/endpoints/snapshots/preprod_artifact_snapshot.py",
+   "name": "ProjectPreprodSnapshotEndpoint",
+   "line": 700,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/types/ratelimit.py",
+   "name": "RateLimit",
+   "line": 17,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "2439474b1e",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/content/course_overviews/serializers.py",
+   "name": "CourseOverviewBaseSerializer",
+   "line": 9,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/content/course_overviews/models.py",
+   "name": "CourseOverview",
+   "line": 44,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "243a89aa6c",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/bitbucket/descriptor.py",
+   "name": "BitbucketDescriptorEndpoint",
+   "line": 13,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/api/api_owners.py",
+   "name": "ApiOwner",
+   "line": 4,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "25e5f4427d",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/management/commands/recover_account.py",
+   "name": "send_password_reset_email",
+   "line": 109,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/site_configuration/helpers.py",
+   "name": "get_value",
+   "line": 120,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "25ea2d8a68",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/api/endpoints/organization_explore_formulas.py",
+   "name": "get",
+   "line": 763,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/api/endpoints/organization_explore_formulas.py",
+   "name": "ExploreSavedFormulaSerializer",
+   "line": 226,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "2686eeac0f",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor/views/serializers_v2.py",
+   "name": "validate_username",
+   "line": 852,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/models/user.py",
+   "name": "get_user_by_username_or_email",
+   "line": 1190,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "27060865d6",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/site_configuration/management/commands/create_or_update_site_configuration.py",
+   "name": "Command",
+   "line": 22,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/site_configuration/models.py",
+   "name": "SiteConfiguration",
+   "line": 19,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "27f6fe81ee",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "static/app/actionCreators/organization.tsx",
+   "name": "fetchOrganizationDetails",
+   "line": 108,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "static/app/actionCreators/organization.tsx",
+   "name": "fetchOrg",
+   "line": 23,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "282291abc3",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/track/shim.py",
+   "name": "__call__",
+   "line": 112,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/track/transformers.py",
+   "name": "create_transformer",
+   "line": 115,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "294122d572",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/monitors/endpoints/project_monitor_checkin_index.py",
+   "name": "ProjectMonitorCheckInIndexEndpoint",
+   "line": 23,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/api/api_publish_status.py",
+   "name": "ApiPublishStatus",
+   "line": 4,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "2c9c6c6f62",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/preprod/authentication.py",
+   "name": "has_permission",
+   "line": 25,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/preprod/authentication.py",
+   "name": "LaunchpadRpcSignatureAuthentication",
+   "line": 13,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "2f691d6740",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/experiments/views_custom.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/lib/api/authentication.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "33482413bf",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/verify_student/management/commands/trigger_softwaresecurephotoverifications_post_save_signal.py",
+   "name": "Command",
+   "line": 17,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/verify_student/models.py",
+   "name": "SoftwareSecurePhotoVerification",
+   "line": 613,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "3351bde4bb",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/views/views.py",
+   "name": "courseware_mfe_search_enabled",
+   "line": 2347,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/roles.py",
+   "name": "CourseStaffRole",
+   "line": 740,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "335e7c2551",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "cms/djangoapps/contentstore/xblock_storage_handlers/view_handlers.py",
+   "name": "_create_block_core",
+   "line": 826,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "cms/lib/xblock/upstream_sync.py",
+   "name": "BadUpstream",
+   "line": 58,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "3391bbd1d0",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/features/course_duration_limits/access.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/masquerade.py",
+   "name": "get_course_masquerade",
+   "line": 249,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "3448acc9d8",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/certificates/generation_handler.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/certificates/data.py",
+   "name": "CertificateStatuses",
+   "line": 15,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "37aa9b346c",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/gitlab/client.py",
+   "name": "GitLabApiClient",
+   "line": 122,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/identity/services/identity/model.py",
+   "name": "RpcIdentity",
+   "line": 21,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "390be91b94",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/django_comment_common/models.py",
+   "name": "Role",
+   "line": 72,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "xmodule/modulestore/exceptions.py",
+   "name": "ItemNotFoundError",
+   "line": 6,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "3924976d8b",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/support/tasks.py",
+   "name": "send_reset_course_completion_email",
+   "line": 48,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/support/message_types.py",
+   "name": "WholeCourseReset",
+   "line": 8,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "39dcce4343",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "source": {
+   "repo": "relay",
+   "file": "relay-server/src/managed/managed/test.rs",
+   "name": "ManagedTestHandle",
+   "line": 83,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "relay",
+   "file": "relay-server/src/services/outcome/service.rs",
+   "name": "TrackOutcome",
+   "line": 30,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "3a594cd5f2",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/jira/integration.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/mixins/issues.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "3a8bb1c41b",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/verify_student/models.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/signals/signals.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "3a8ee0a603",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/api/endpoints/external_user_index.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/models/external_actor.py",
+   "name": "ExternalActor",
+   "line": 23,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "3b4dd150e6",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/notifications/notifications/digest.py",
+   "name": "DigestNotification",
+   "line": 50,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/services/eventstore/models.py",
+   "name": "Event",
+   "line": 597,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "3ce293b729",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/api/endpoints/organization_trace_item_attributes.py",
+   "name": "data_fn",
+   "line": 825,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/utils/snuba_rpc.py",
+   "name": "meta",
+   "line": 120,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "3d87147c05",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/monitors/processing_errors/errors.py",
+   "name": "CheckinProcessingError",
+   "line": 241,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/monitors/types.py",
+   "name": "CheckinItem",
+   "line": 53,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "3decd2a400",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/frontend-app-learning",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/frontend-app-learning",
+  "source": {
+   "repo": "frontend-app-learning",
+   "file": "src/courseware/course/sequence/sequence-navigation/messages.ts",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "frontend-app-learning",
+   "file": "src/courseware/course/sequence/sequence-navigation/messages.ts",
+   "name": "messages",
+   "line": 3,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "3f6ae0c755",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/user_api/preferences/views.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/user_api/preferences/api.py",
+   "name": "update_user_preferences",
+   "line": 110,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "3ff456a20b",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/discord/views/linkage.py",
+   "name": "DiscordIdentityLinkageView",
+   "line": 10,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/discord/spec.py",
+   "name": "DiscordMessagingSpec",
+   "line": 12,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "3ffccefb33",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/courseware_api/serializers.py",
+   "name": "CourseInfoSerializer",
+   "line": 84,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/course_home_api/outline/serializers.py",
+   "name": "CourseGoalsSerializer",
+   "line": 97,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "405b9e699a",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/discussion/rest_api/api.py",
+   "name": "get_thread_list",
+   "line": 898,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/django_comment_common/models.py",
+   "name": "user_has_role_for_course",
+   "line": 124,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "40cb6fa670",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/mobile_api/decorators.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/exceptions.py",
+   "name": "CourseAccessRedirect",
+   "line": 15,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "42d8a99fea",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/signals.py",
+   "name": "connect_product_data_modified_timestamp_related_models",
+   "line": 568,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/models.py",
+   "name": "ProgramLocationRestriction",
+   "line": 4783,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "43043cf6df",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/credentials",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/credentials",
+  "source": {
+   "repo": "credentials",
+   "file": "credentials/urls.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "credentials",
+   "file": "credentials/apps/badges/toggles.py",
+   "name": "is_badges_enabled",
+   "line": 18,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "4313dde320",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/frontend-app-learning",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/frontend-app-learning",
+  "source": {
+   "repo": "frontend-app-learning",
+   "file": "src/course-home/progress-tab/grades/grade-summary/GradeSummaryHeader.jsx",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "frontend-app-learning",
+   "file": "src/course-home/progress-tab/grades/grade-summary/GradeSummaryHeader.jsx",
+   "name": "GradeSummaryHeader",
+   "line": 15,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "45cbe8bc75",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/models/organizationslugreservation.py",
+   "name": "OrganizationSlugReservation",
+   "line": 30,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/db/models/base.py",
+   "name": "sane_repr",
+   "line": 40,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "45dec11da8",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/sentry_apps/models/sentry_app_installation_token.py",
+   "name": "SentryAppInstallationTokenManager",
+   "line": 19,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/models/project.py",
+   "name": "Project",
+   "line": 244,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "46a5a05d03",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/releases/endpoints/release_deploys.py",
+   "name": "ReleaseDeploysEndpoint",
+   "line": 144,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/apidocs/response_types.py",
+   "name": "ValidationErrorResponse",
+   "line": 40,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "48549a5422",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/course_modes/models.py",
+   "name": "clean",
+   "line": 242,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor_analytics/distributions.py",
+   "name": "ValidationError",
+   "line": 53,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "48c2278a8b",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/access.py",
+   "name": "_has_staff_access_to_block",
+   "line": 859,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/access.py",
+   "name": "_has_staff_access_to_location",
+   "line": 784,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "498b887829",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/data_export/processors/explore.py",
+   "name": "TraceItemFullExportProcessor",
+   "line": 220,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/models/organization.py",
+   "name": "Organization",
+   "line": 151,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "4bacae1a48",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/models/user.py",
+   "name": "create_comments_service_user",
+   "line": 1291,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/django_comment_common/comment_client/user.py",
+   "name": "from_django_user",
+   "line": 30,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "4c7bf6c5a2",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "source": {
+   "repo": "snuba",
+   "file": "snuba/datasets/factory.py",
+   "name": "get_enabled_dataset_names",
+   "line": 86,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "snuba",
+   "file": "snuba/datasets/factory.py",
+   "name": "all_names",
+   "line": 38,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "4cdc4167f5",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/models.py",
+   "name": "is_marketable_external",
+   "line": 3111,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/choices.py",
+   "name": "CourseRunStatus",
+   "line": 5,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "4ce6c0d181",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/discussion/django_comment_client/utils.py",
+   "name": "convert_img_to_markdown",
+   "line": 1076,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/discussion/django_comment_client/utils.py",
+   "name": "replace_image",
+   "line": 1080,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "4d0187b394",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/ingest/consumer/processors.py",
+   "name": "wrapper",
+   "line": 53,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/ingest/consumer/processors.py",
+   "name": "inner",
+   "line": 55,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "4e778c25e8",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/tasks/seer/pr_iteration.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/seer/autofix/pr_iteration/sweep.py",
+   "name": "sweep_stale_pr_iterations",
+   "line": 43,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "4f094a0d9c",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor/views/api.py",
+   "name": "GetStudentEnrollmentStatus",
+   "line": 1960,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor/permissions.py",
+   "name": "InstructorPermission",
+   "line": 85,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "4f3ed8eb55",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/issues/endpoints/group_integration_details.py",
+   "name": "IntegrationIssueConfigSerializer",
+   "line": 107,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/api/serializers/models/integration.py",
+   "name": "IntegrationSerializer",
+   "line": 102,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "52abd54200",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/tagstore/snuba/backend.py",
+   "name": "_get_semver_versions_for_package",
+   "line": 1827,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/models/releases/release_project.py",
+   "name": "ReleaseProject",
+   "line": 47,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "53d0e82301",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/xblock/runtime/runtime.py",
+   "name": "XBlockRuntime",
+   "line": 78,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "xmodule/modulestore/django.py",
+   "name": "XBlockI18nService",
+   "line": 379,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "56a12b6e62",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/api/endpoints/organization_code_mappings.py",
+   "name": "RepositoryProjectPathConfigSerializer",
+   "line": 70,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/api/serializers/rest_framework/base.py",
+   "name": "CamelSnakeModelSerializer",
+   "line": 128,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "56b1372a9f",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/access.py",
+   "name": "_has_access_string",
+   "line": 717,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/access.py",
+   "name": "check_support",
+   "line": 739,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "589b689aee",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/content_libraries/rest_api/blocks.py",
+   "name": "get",
+   "line": 162,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/content_libraries/api/blocks.py",
+   "name": "create_library_block",
+   "line": 560,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "5ae9a2056a",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/api/v1/views/sources.py",
+   "name": "SourceViewSet",
+   "line": 10,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/api/permissions.py",
+   "name": "IsCourseRunEditorOrDjangoOrReadOnly",
+   "line": 55,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "5f4b08fd76",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "xmodule/vertical_block.py",
+   "name": "_student_or_public_view",
+   "line": 77,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "xmodule/vertical_block.py",
+   "name": "block_has_access_error",
+   "line": 183,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "61dd11634d",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "source": {
+   "repo": "relay",
+   "file": "relay-server/src/endpoints/project_configs.rs",
+   "name": "GetProjectStatesRequest",
+   "line": 101,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "relay",
+   "file": "relay-base-schema/src/project.rs",
+   "name": "ProjectKey",
+   "line": 89,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "620c88a471",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/date_summary.py",
+   "name": "VerificationDeadlineDate",
+   "line": 521,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/verify_student/models.py",
+   "name": "VerificationDeadline",
+   "line": 1082,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "6713393ada",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "source": {
+   "repo": "relay",
+   "file": "relay-server/src/envelope/item.rs",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "relay",
+   "file": "relay-server/src/envelope/item.rs",
+   "name": "is_attachment_ref",
+   "line": 554,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "6797388a51",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "xmodule/modulestore/mongo/base.py",
+   "name": "delete_asset_metadata",
+   "line": 1451,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "xmodule/modulestore/mongo/base.py",
+   "name": "_make_mongo_asset_key",
+   "line": 1345,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "6ab8ff22b5",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "source": {
+   "repo": "relay",
+   "file": "relay-server/src/services/processor/envelope.rs",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "relay",
+   "file": "relay-server/src/extractors/request_meta.rs",
+   "name": "RequestTrust",
+   "line": 531,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "6b485f143d",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor/views/api.py",
+   "name": "RescoreProblem",
+   "line": 2254,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/util/json_request.py",
+   "name": "JsonResponse",
+   "line": 81,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "6baad97ea5",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/grades/score_render.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/model_data.py",
+   "name": "DjangoKeyValueStore",
+   "line": 86,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "6d60435203",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/signals/receivers.py",
+   "name": "on_user_updated",
+   "line": 39,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/helpers.py",
+   "name": "AccountValidationError",
+   "line": 451,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "6e48918e2e",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/preprod/snapshots/tasks.py",
+   "name": "SiblingComparison",
+   "line": 282,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/preprod/snapshots/manifest.py",
+   "name": "SnapshotManifest",
+   "line": 69,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "6e9b0e9bca",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/search/eap/ourlogs/filter_aliases.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/search/eap/spans/filter_aliases.py",
+   "name": "release_filter_converter",
+   "line": 19,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "6f66fdc6a8",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/buffer/base.py",
+   "name": "Buffer",
+   "line": 21,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/db/models/fields/bounded.py",
+   "name": "BoundedPositiveIntegerField",
+   "line": 32,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "6f78ff10c7",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/runner/commands/performance.py",
+   "name": "detect",
+   "line": 31,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/issue_detection/base.py",
+   "name": "PerformanceDetector",
+   "line": 53,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "74482d59b1",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/workflow_engine/handlers/condition/latest_adopted_release_handler.py",
+   "name": "evaluate_value",
+   "line": 46,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/services/eventstore/models.py",
+   "name": "organization",
+   "line": 478,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "74df3d00df",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/learner_pathway/api/filters.py",
+   "name": "PathwayUUIDFilter",
+   "line": 10,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/learner_pathway/models.py",
+   "name": "LearnerPathway",
+   "line": 79,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "75c2b915f1",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/edxmako/template.py",
+   "name": "Template",
+   "line": 30,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/edxmako/__init__.py",
+   "name": "Engines",
+   "line": 24,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "780672a055",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "source": {
+   "repo": "snuba",
+   "file": "snuba/consumers/consumer.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "snuba",
+   "file": "snuba/state/sentry_options.py",
+   "name": "get_mapped_option",
+   "line": 61,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "79b4f1c636",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "cms/djangoapps/contentstore/video_storage_handlers.py",
+   "name": "get_video_usage_path",
+   "line": 345,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/bookmarks/models.py",
+   "name": "display_name",
+   "line": 110,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "79d35f77b6",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/course_home_api/progress/views.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/course_home_api/utils.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "7a13bac15c",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "xmodule/seq_block.py",
+   "name": "SequenceBlock",
+   "line": 239,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "xmodule/seq_block.py",
+   "name": "get_completion",
+   "line": 285,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "7a59cefe12",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/search/events/fields.py",
+   "name": "ColumnArg",
+   "line": 1070,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/search/events/types.py",
+   "name": "ParamsType",
+   "line": 31,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "7b9effa3f9",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/sentry_metrics/querying/visitors/query_expression.py",
+   "name": "_visit_int",
+   "line": 468,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/sentry_metrics/querying/units.py",
+   "name": "apply_on_query_expression",
+   "line": 75,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "7c8c41c656",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/course_api/api.py",
+   "name": "list_course_keys",
+   "line": 177,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/content/course_overviews/models.py",
+   "name": "CourseOverview",
+   "line": 44,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "7cc6242195",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/course_date_signals/tests.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/course_date_signals/handlers.py",
+   "name": "extract_dates_from_course",
+   "line": 121,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "7d315efdbf",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/ai_monitoring/transcript/builder.py",
+   "name": "has_error",
+   "line": 58,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/ai_monitoring/transcript/models.py",
+   "name": "TranscriptSpan",
+   "line": 41,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "7e96073cc7",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/receivers/users.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/silo/base.py",
+   "name": "SiloMode",
+   "line": 21,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "7eb8318715",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "source": {
+   "repo": "snuba",
+   "file": "snuba/replacers/errors_replacer.py",
+   "name": "MergeReplacement",
+   "line": 561,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "snuba",
+   "file": "snuba/processor.py",
+   "name": "ReplacementType",
+   "line": 73,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "7fed4a36ca",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/sentry_apps/services/cell/impl.py",
+   "name": "DatabaseBackedSentryAppCellService",
+   "line": 58,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/models/organization.py",
+   "name": "Organization",
+   "line": 151,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "809dc2721c",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/search/eap/columns.py",
+   "name": "AggregateDefinition",
+   "line": 542,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/search/events/types.py",
+   "name": "SnubaParams",
+   "line": 99,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "84eb796d7d",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/views/dashboard.py",
+   "name": "student_dashboard",
+   "line": 508,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/verify_student/services.py",
+   "name": "IDVerificationService",
+   "line": 55,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "863ce626b9",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "cms/djangoapps/modulestore_migrator/rest_api/v1/views.py",
+   "name": "BlockMigrationInfo",
+   "line": 549,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/lib/api/authentication.py",
+   "name": "BearerAuthenticationAllowInactiveUser",
+   "line": 130,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "8682641cdd",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor/views/api_v2.py",
+   "name": "CourseEnrollmentsView",
+   "line": 2453,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor/views/serializers_v2.py",
+   "name": "CourseEnrollmentSerializerV2",
+   "line": 910,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "86b82e8445",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/features/lti_course_tab/tab.py",
+   "name": "__init__",
+   "line": 206,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/features/lti_course_tab/tab.py",
+   "name": "link_func",
+   "line": 207,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "8930db3bfe",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/discussion/urls.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/discussion/views.py",
+   "name": "forum_form_discussion",
+   "line": 286,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "89315de832",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "xmodule/html_block.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "xmodule/xml_block.py",
+   "name": "name_to_pathname",
+   "line": 24,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "8a89b1b7a7",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/seer/autofix/autofix_agent.py",
+   "name": "_get_relevant_repo",
+   "line": 657,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/seer/agent/client_models.py",
+   "name": "get_artifacts",
+   "line": 442,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "8ad30dffa4",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor/views/api_v2.py",
+   "name": "CourseEnrollmentsView",
+   "line": 2453,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/lib/api/view_utils.py",
+   "name": "DeveloperErrorViewMixin",
+   "line": 42,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "8b8f665fa5",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/discussion/rest_api/permissions.py",
+   "name": "IsStaffOrAdmin",
+   "line": 165,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/roles.py",
+   "name": "GlobalStaff",
+   "line": 451,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "8cd5d2423e",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/notifications/platform/api/endpoints/internal_registered_templates.py",
+   "name": "serialize_rendered_example",
+   "line": 64,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/notifications/platform/types.py",
+   "name": "subject_blocks",
+   "line": 313,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "8e3858f640",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/credentials",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/credentials",
+  "source": {
+   "repo": "credentials",
+   "file": "credentials/apps/badges/signals/handlers.py",
+   "name": "handle_badge_completion",
+   "line": 65,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "credentials",
+   "file": "credentials/apps/badges/models.py",
+   "name": "CredlyBadgeTemplate",
+   "line": 143,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "8f861ddc5a",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/content_tagging/rules.py",
+   "name": "can_change_object_tag_objectid",
+   "line": 251,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/content_tagging/utils.py",
+   "name": "get_context_key_from_key_string",
+   "line": 45,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "8fff704ab5",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/notifications/notifications/rules.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/notifications/utils/participants.py",
+   "name": "get_owner_reason",
+   "line": 228,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "953cd9ee3b",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/experiments/views.py",
+   "name": "ExperimentKeyValueViewSet",
+   "line": 86,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/experiments/permissions.py",
+   "name": "IsStaffOrReadOnly",
+   "line": 29,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "95ea9639ca",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/content/learning_sequences/api/outlines.py",
+   "name": "get_course_outline",
+   "line": 105,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/content/learning_sequences/data.py",
+   "name": "VisibilityData",
+   "line": 66,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "973ad83a63",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/management/commands/populate_product_catalog.py",
+   "name": "Command",
+   "line": 15,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/models.py",
+   "name": "Course",
+   "line": 1449,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "999b01ef59",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/deletions/defaults/__init__.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/deletions/defaults/repository.py",
+   "name": "RepositoryDeletionTask",
+   "line": 10,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "9bf6c74ab2",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/features/content_type_gating/block_transformers.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/features/content_type_gating/models.py",
+   "name": "ContentTypeGatingConfig",
+   "line": 14,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "a0e06c9b92",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/learner_pathway/api/v1/views.py",
+   "name": "LearnerPathwayStepViewSet",
+   "line": 79,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/choices.py",
+   "name": "CourseRunStatus",
+   "line": 5,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "a585486aaa",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/credentials/helpers.py",
+   "name": "is_learner_records_enabled",
+   "line": 23,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/site_configuration/helpers.py",
+   "name": "get_value",
+   "line": 120,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "a6b500d98e",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/tasks/seer/pr_iteration.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/seer/autofix/pr_iteration/queue.py",
+   "name": "clear_queued_autofix_feedback",
+   "line": 91,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "a88e77e229",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/frontend-app-learning",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/frontend-app-learning",
+  "source": {
+   "repo": "frontend-app-learning",
+   "file": "src/generic/CourseAccessErrorPage.jsx",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "frontend-app-learning",
+   "file": "src/generic/CourseAccessErrorPage.jsx",
+   "name": "CourseAccessErrorPage",
+   "line": 12,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "aca1930541",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "source": {
+   "repo": "snuba",
+   "file": "snuba/admin/views.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "snuba",
+   "file": "snuba/admin/eap_query_analysis/analysis.py",
+   "name": "result_to_dict",
+   "line": 825,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "af488952df",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/frontend-app-learning",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/frontend-app-learning",
+  "source": {
+   "repo": "frontend-app-learning",
+   "file": "src/course-home/dates-tab/timeline/badgelist.jsx",
+   "name": "getBadgeListAndColor",
+   "line": 28,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "frontend-app-learning",
+   "file": "src/course-home/dates-tab/timeline/badgelist.jsx",
+   "name": "isPastDue",
+   "line": 18,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "af8523b4eb",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/symbolicator",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/symbolicator",
+  "source": {
+   "repo": "symbolicator",
+   "file": "crates/symbolicator-native/src/symbolication/apple.rs",
+   "name": "process_apple_crash_report",
+   "line": 132,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "symbolicator",
+   "file": "crates/symbolicator-native/src/symbolication/apple.rs",
+   "name": "parse_apple_crash_report",
+   "line": 25,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "afb82737f9",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/models/groupowner.py",
+   "name": "GroupOwner",
+   "line": 115,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/db/models/fields/jsonfield.py",
+   "name": "LegacyTextJSONField",
+   "line": 200,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "b079366a20",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "cms/djangoapps/contentstore/rest_api/v0/views/advanced_settings.py",
+   "name": "patch",
+   "line": 147,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "cms/djangoapps/contentstore/views/course.py",
+   "name": "update_course_advanced_settings",
+   "line": 1551,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "b139bec50a",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/issues/endpoints/group_integration_details.py",
+   "name": "GroupIntegrationDetailsEndpoint",
+   "line": 140,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/base.py",
+   "name": "IntegrationFeatures",
+   "line": 101,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "b19cbda53c",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "source": {
+   "repo": "relay",
+   "file": "relay-event-schema/src/protocol/nel.rs",
+   "name": "NetworkReportError",
+   "line": 126,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "relay",
+   "file": "relay-event-schema/src/protocol/nel.rs",
+   "name": "InvalidJson",
+   "line": 129,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "b3b785e693",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/core/endpoints/project_keys.py",
+   "name": "get",
+   "line": 74,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/apidocs/parameters.py",
+   "name": "ProjectParams",
+   "line": 1154,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "b413dc015e",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/discover/endpoints/discover_homepage_query.py",
+   "name": "put",
+   "line": 55,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/api/bases/organization.py",
+   "name": "NoProjects",
+   "line": 66,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "b4f2302ab3",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "cms/djangoapps/modulestore_migrator/rest_api/v1/urls.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "cms/djangoapps/modulestore_migrator/rest_api/v1/views.py",
+   "name": "BlockMigrationInfo",
+   "line": 549,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "b94d442df4",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/course_api/views.py",
+   "name": "get_object",
+   "line": 116,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor_analytics/distributions.py",
+   "name": "ValidationError",
+   "line": 53,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "ba973c3c9d",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/api/endpoints/organization_api_key_index.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/api/bases/organization.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "bb915ff067",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/datadog/integration.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/models/organization.py",
+   "name": "Organization",
+   "line": 151,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "bc6f32e797",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor/views/api_urls.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/instructor/views/api.py",
+   "name": "GetCourseSurveyResults",
+   "line": 1884,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "be9cd47078",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/algolia_models.py",
+   "name": "AlgoliaProxyCourse",
+   "line": 230,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/models.py",
+   "name": "AbstractLocationRestrictionModel",
+   "line": 1405,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "bf25fbdb68",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/seer/endpoints/organization_seer_onboarding_check.py",
+   "name": "is_code_review_enabled",
+   "line": 42,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/models/organization.py",
+   "name": "Organization",
+   "line": 151,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "c0f6eaf357",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/learner_dashboard/utils.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/roles.py",
+   "name": "GlobalStaff",
+   "line": 451,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "c21bac0554",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/snuba/utils.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/discover/models.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "c3d1b9bb22",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/edx_catalog_extensions/api/v1/views.py",
+   "name": "DistinctCountsAggregateSearchViewSet",
+   "line": 26,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/edx_catalog_extensions/api/serializers.py",
+   "name": "DistinctCountsAggregateFacetSearchSerializer",
+   "line": 12,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "c4044121e3",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/notifications/platform/msteams/renderers/issue.py",
+   "name": "IssueMSTeamsRenderer",
+   "line": 40,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/msteams/card_builder/block.py",
+   "name": "Action",
+   "line": 74,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "cadb355174",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/issue_detection/detectors/query_injection_detector.py",
+   "name": "QueryInjectionDetector",
+   "line": 22,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/issues/grouptype.py",
+   "name": "QueryInjectionVulnerabilityGroupType",
+   "line": 561,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "cde9f002b1",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/backup/exports.py",
+   "name": "_export",
+   "line": 111,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/models/organizationmember.py",
+   "name": "OrganizationMember",
+   "line": 204,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "cf501a9223",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/access.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/courseware/access_response.py",
+   "name": "NoAllowedPartitionGroupsError",
+   "line": 241,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "cfb83e7434",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/survey/utils.py",
+   "name": "is_survey_required_for_course",
+   "line": 24,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/survey/models.py",
+   "name": "SurveyForm",
+   "line": 22,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "d08d90f088",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/sentry_apps/api/endpoints/sentry_internal_app_token_details.py",
+   "name": "SentryInternalAppTokenDetailsEndpoint",
+   "line": 29,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/sentry_apps/api/bases/sentryapps.py",
+   "name": "SentryInternalAppTokenPermission",
+   "line": 541,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "d1e0f6d2ad",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/seer/endpoints/group_ai_summary.py",
+   "name": "GroupAiSummaryEndpoint",
+   "line": 32,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/api/api_publish_status.py",
+   "name": "ApiPublishStatus",
+   "line": 4,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "d2b1f78e10",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/issues/derived/store.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/issues/derived/framework.py",
+   "name": "Feature",
+   "line": 182,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "d3433f03de",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/models.py",
+   "name": "validate_unique",
+   "line": 716,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/models.py",
+   "name": "Subject",
+   "line": 696,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "d39d7af9fb",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/api/serializers/models/repository_project_path_config.py",
+   "name": "RepositoryProjectPathConfigSerializerResponse",
+   "line": 20,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/api/serializers/models/integration.py",
+   "name": "IntegrationProviderInfo",
+   "line": 63,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "d53fa8f0f2",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/symbolicator",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/symbolicator",
+  "source": {
+   "repo": "symbolicator",
+   "file": "crates/symbolicator/src/endpoints/symbolicate_js.rs",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "symbolicator",
+   "file": "crates/symbolicator-service/src/utils/sentry.rs",
+   "name": "ConfigureScope",
+   "line": 4,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "d63cacc50b",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/bookmarks/api_impl.py",
+   "name": "get_bookmark",
+   "line": 33,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/bookmarks/serializers.py",
+   "name": "BookmarkSerializer",
+   "line": 25,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "d6795d3a42",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "source": {
+   "repo": "relay",
+   "file": "relay-server/src/utils/rate_limits.rs",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "relay",
+   "file": "relay-base-schema/src/data_category.rs",
+   "name": "SpanIndexed",
+   "line": 110,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "d6e8dceddc",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/utils/retries.py",
+   "name": "__init__",
+   "line": 143,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/interfaces/exception.py",
+   "name": "Exception",
+   "line": 339,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "d8d84a71a4",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/preprod/api/endpoints/organization_preprod_artifact_assemble.py",
+   "name": "ProjectPreprodArtifactAssembleEndpoint",
+   "line": 126,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/api/api_owners.py",
+   "name": "ApiOwner",
+   "line": 4,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "dcbf0fb202",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "source": {
+   "repo": "snuba",
+   "file": "snuba/datasets/cdc/row_processors.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "snuba",
+   "file": "snuba/datasets/cdc/groupassignee_processor.py",
+   "name": "GroupAssigneeRow",
+   "line": 25,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "dccf2a3ea1",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/video_config/services.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "xmodule/exceptions.py",
+   "name": "NotFoundError",
+   "line": 6,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "dd3fc229df",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/api/v1/views/level_types.py",
+   "name": "LevelTypeViewSet",
+   "line": 10,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/models.py",
+   "name": "LevelType",
+   "line": 428,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "df1e982d61",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/ingest/consumer/attachment_event.py",
+   "name": "process_attachments_and_events",
+   "line": 80,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/ingest/consumer/processors.py",
+   "name": "Retriable",
+   "line": 48,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "df612ed479",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/issues/endpoints/organization_shortid.py",
+   "name": "ShortIdLookupEndpoint",
+   "line": 34,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/apidocs/parameters.py",
+   "name": "IssueParams",
+   "line": 378,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "e0b33b1d6a",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/web/frontend/debug/debug_organization_integration_request.py",
+   "name": "DebugOrganizationIntegrationRequestEmailView",
+   "line": 17,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/models/organization.py",
+   "name": "Organization",
+   "line": 151,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "e1eebc8781",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/backup/services/import_export/model.py",
+   "name": "RpcExportError",
+   "line": 255,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/backup/services/import_export/model.py",
+   "name": "RpcExportErrorKind",
+   "line": 246,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "e1f13a0761",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/sentry_apps/models/sentry_app_installation.py",
+   "name": "save",
+   "line": 129,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/hybridcloud/outbox/base.py",
+   "name": "save",
+   "line": 248,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "e2631f6b49",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/edxmako/backend.py",
+   "name": "Mako",
+   "line": 23,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/edxmako/template.py",
+   "name": "Template",
+   "line": 30,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "e46bfff3bb",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/api/endpoints/auth_organization_config.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/api/api_owners.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  }
+ },
+ {
+  "id": "e5a2890325",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/snuba",
+  "source": {
+   "repo": "snuba",
+   "file": "snuba/web/views.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "snuba",
+   "file": "snuba/cogs/accountant.py",
+   "name": "close_cogs_recorder",
+   "line": 46,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "e5cb0283fc",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "cms/djangoapps/contentstore/rest_api/v0/views/assets.py",
+   "name": "retrieve",
+   "line": 40,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "cms/djangoapps/contentstore/api/views/utils.py",
+   "name": "course_author_access_required",
+   "line": 144,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "e63fdfc6b4",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "lms/djangoapps/discussion/rest_api/discussions_notifications.py",
+   "name": "DiscussionNotificationSender",
+   "line": 27,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/django_comment_common/comment_client/subscriptions.py",
+   "name": "Subscription",
+   "line": 14,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "e6402dde03",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/preprod/size_analysis/tasks.py",
+   "name": "_maybe_emit_issues_from_diff_size_results",
+   "line": 583,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/preprod/models.py",
+   "name": "PreprodArtifactSizeComparison",
+   "line": 682,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "e7e6bc8248",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "source": {
+   "repo": "relay",
+   "file": "relay-event-normalization/src/eap/mobile.rs",
+   "name": "test_app_start_cold_normalized",
+   "line": 323,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "relay",
+   "file": "relay-event-normalization/src/eap/mobile.rs",
+   "name": "normalize_mobile_attributes",
+   "line": 18,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "e90f92101c",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/seer/agent/client.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/seer/agent/on_completion_hook.py",
+   "name": "extract_hook_definition",
+   "line": 63,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "ea1fb43d36",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/preprod/api/endpoints/preprod_artifact_admin_info.py",
+   "name": "get",
+   "line": 35,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/preprod/snapshots/models.py",
+   "name": "PreprodSnapshotMetrics",
+   "line": 16,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "eca340cc1b",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/search_indexes/serializers/course.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/course_metadata/search_indexes/documents/course.py",
+   "name": "CourseDocument",
+   "line": 27,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "ed30991165",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/utils/email/message_builder.py",
+   "name": "build",
+   "line": 167,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/models/group.py",
+   "name": "Group",
+   "line": 849,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "efeae0d0f5",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/user_api/accounts/views.py",
+   "name": "AccountRetirementPartnerReportView",
+   "line": 658,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/user_api/models.py",
+   "name": "UserRetirementStatus",
+   "line": 282,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "f0644e098f",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/enrollments/views.py",
+   "name": "EnrollmentCourseDetailView",
+   "line": 303,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/lib/exceptions.py",
+   "name": "CourseNotFoundError",
+   "line": 8,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "f09225920e",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/api/serializers/models/projectownership.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/issues/ownership/grammar.py",
+   "name": "OwnershipRuleMatcher",
+   "line": 39,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "f1cd1c904b",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "common/djangoapps/student/views/dashboard.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/features/content_type_gating/models.py",
+   "name": "py",
+   "line": 1,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "f22be195c5",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/relay",
+  "source": {
+   "repo": "relay",
+   "file": "relay-server/src/managed/managed.rs",
+   "name": "success",
+   "line": 899,
+   "kind": "other"
+  },
+  "target": {
+   "repo": "relay",
+   "file": "relay-server/src/managed/managed.rs",
+   "name": "assert_quantities",
+   "line": 916,
+   "kind": "other"
+  }
+ },
+ {
+  "id": "f2ad5ff035",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/uptime/endpoints/organiation_uptime_alert_index.py",
+   "name": "OrganizationUptimeAlertIndexEndpoint",
+   "line": 38,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/models/organization.py",
+   "name": "Organization",
+   "line": 151,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "f4728666b6",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/agreements/serializers.py",
+   "name": "IntegritySignatureSerializer",
+   "line": 11,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/agreements/models.py",
+   "name": "IntegritySignature",
+   "line": 14,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "f502057ee5",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/course-discovery",
+  "source": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/api/serializers.py",
+   "name": "Meta",
+   "line": 2226,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "course-discovery",
+   "file": "course_discovery/apps/api/serializers.py",
+   "name": "MinimalProgramSerializer",
+   "line": 2015,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "f682069c2d",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/flags/endpoints/secrets.py",
+   "name": "get",
+   "line": 92,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/flags/endpoints/secrets.py",
+   "name": "serialize",
+   "line": 41,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "f6f6b81bc7",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "cms/djangoapps/contentstore/views/export_git.py",
+   "name": "export_git",
+   "line": 25,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "xmodule/modulestore/django.py",
+   "name": "modulestore",
+   "line": 343,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "f77725aa0a",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/openedx/openedx-platform",
+  "source": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/user_authn/views/login.py",
+   "name": "login_refresh",
+   "line": 720,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "openedx-platform",
+   "file": "openedx/core/djangoapps/user_authn/exceptions.py",
+   "name": "AuthFailedError",
+   "line": 7,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "f7facd1293",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/repository/base.py",
+   "name": "NotificationMessageValidationError",
+   "line": 6,
+   "kind": "class"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/interfaces/exception.py",
+   "name": "Exception",
+   "line": 339,
+   "kind": "class"
+  }
+ },
+ {
+  "id": "f8686a7ae9",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/investigations/contracts.py",
+   "name": "validate",
+   "line": 194,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/investigations/contracts.py",
+   "name": "project_ids_are_required",
+   "line": 191,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "f87e6c3681",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/seer/assisted_query/issues_tools.py",
+   "name": "get_issue_filter_keys",
+   "line": 427,
+   "kind": "function"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/api/client.py",
+   "name": "get",
+   "line": 127,
+   "kind": "function"
+  }
+ },
+ {
+  "id": "f8d7ec61e3",
+  "root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "target_root": "/Users/alexaramyan/personal/dev/codegraph/demo-repos/sentry",
+  "source": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/aws_lambda/integration.py",
+   "name": "(module level of the file)",
+   "line": 0,
+   "kind": "file"
+  },
+  "target": {
+   "repo": "sentry",
+   "file": "src/sentry/integrations/base.py",
+   "name": "IntegrationData",
+   "line": 181,
+   "kind": "class"
+  }
+ }
+]

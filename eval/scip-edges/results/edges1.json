@@ -1,0 +1,202 @@
+[
+ {
+  "id": "3391bbd1d0",
+  "verdict": "yes",
+  "evidence": "openedx/features/course_duration_limits/access.py:16 imports, :101 calls get_course_masquerade"
+ },
+ {
+  "id": "3448acc9d8",
+  "verdict": "yes",
+  "evidence": "generation_handler.py:17 imports CertificateStatuses from certificates.data; used :268"
+ },
+ {
+  "id": "37aa9b346c",
+  "verdict": "yes",
+  "evidence": "gitlab/client.py:138 GitLabApiClient.identity -> RpcIdentity (imported :16 from identity.model)"
+ },
+ {
+  "id": "390be91b94",
+  "verdict": "yes",
+  "evidence": "django_comment_common/models.py:117 Role.has_permission raises ItemNotFoundError (imported :24 from xmodule.modulestore.exceptions)"
+ },
+ {
+  "id": "3924976d8b",
+  "verdict": "yes",
+  "evidence": "support/tasks.py:67 WholeCourseReset(context=...) (imported :18)"
+ },
+ {
+  "id": "39dcce4343",
+  "verdict": "yes",
+  "evidence": "managed/test.rs:84 field outcomes: UnboundedReceiver<TrackOutcome> (use crate::services::outcome::TrackOutcome :13, re-exported from service.rs)"
+ },
+ {
+  "id": "3a594cd5f2",
+  "verdict": "yes",
+  "evidence": "jira/integration.py:36 imports IssueSyncIntegration/ResolveSyncAction from integrations.mixins.issues; subclass :241"
+ },
+ {
+  "id": "3a8bb1c41b",
+  "verdict": "yes",
+  "evidence": "verify_student/models.py:45 imports LEARNER_SSO_VERIFIED, PHOTO_VERIFICATION_APPROVED from signals.signals"
+ },
+ {
+  "id": "3a8ee0a603",
+  "verdict": "yes",
+  "evidence": "external_user_index.py:26 imports ExternalActor; :69 annotation"
+ },
+ {
+  "id": "3b4dd150e6",
+  "verdict": "yes",
+  "evidence": "digest.py:187 DigestNotification.get_extra_context annotation Event | GroupEvent (imported :37 from eventstore.models)"
+ },
+ {
+  "id": "3ce293b729",
+  "verdict": "no",
+  "evidence": "organization_trace_item_attributes.py:837 'meta' is a local var from resolver.resolve_meta (:798), not snuba_rpc SnubaRPCRequest.meta"
+ },
+ {
+  "id": "3d87147c05",
+  "verdict": "yes",
+  "evidence": "monitors/processing_errors/errors.py:243 checkin: CheckinItem; :257 CheckinItem.from_dict"
+ },
+ {
+  "id": "3decd2a400",
+  "verdict": "yes",
+  "evidence": "messages.ts:21 export default messages"
+ },
+ {
+  "id": "3f6ae0c755",
+  "verdict": "yes",
+  "evidence": "preferences/views.py:27 imports, :128 calls update_user_preferences"
+ },
+ {
+  "id": "3ff456a20b",
+  "verdict": "yes",
+  "evidence": "discord/views/linkage.py:13 imports and :15 instantiates DiscordMessagingSpec()"
+ },
+ {
+  "id": "3ffccefb33",
+  "verdict": "yes",
+  "evidence": "courseware_api/serializers.py:94 course_goals = CourseGoalsSerializer() (imported :7 from course_home_api.outline.serializers)"
+ },
+ {
+  "id": "405b9e699a",
+  "verdict": "yes",
+  "evidence": "discussion/rest_api/api.py:998 Role.user_has_role_for_course(...) (Role imported :49-55 from django_comment_common.models)"
+ },
+ {
+  "id": "40cb6fa670",
+  "verdict": "yes",
+  "evidence": "mobile_api/decorators.py:16 imports CourseAccessRedirect; :51 except CourseAccessRedirect"
+ },
+ {
+  "id": "42d8a99fea",
+  "verdict": "yes",
+  "evidence": "course_metadata/signals.py:585 and :602 ProgramLocationRestriction in model lists (imported :29 from models)"
+ },
+ {
+  "id": "43043cf6df",
+  "verdict": "yes",
+  "evidence": "credentials/urls.py:30 imports, :78 calls is_badges_enabled()"
+ },
+ {
+  "id": "4313dde320",
+  "verdict": "yes",
+  "evidence": "GradeSummaryHeader.jsx:63 GradeSummaryHeader.propTypes, :67 export default GradeSummaryHeader"
+ },
+ {
+  "id": "45cbe8bc75",
+  "verdict": "yes",
+  "evidence": "organizationslugreservation.py:53 __repr__ = sane_repr(...) (imported :10 from db.models.base)"
+ },
+ {
+  "id": "45dec11da8",
+  "verdict": "yes",
+  "evidence": "sentry_app_installation_token.py:45 QuerySet[Project], :50/:52 Project.objects (local import :46 from sentry.models.project)"
+ },
+ {
+  "id": "46a5a05d03",
+  "verdict": "yes",
+  "evidence": "release_deploys.py:203 return annotation Response[ValidationErrorResponse] (imported :22 from apidocs.response_types)"
+ },
+ {
+  "id": "48549a5422",
+  "verdict": "no",
+  "evidence": "course_modes/models.py:248 raises django.core.exceptions.ValidationError (imported :12), not distributions.ValidationError"
+ },
+ {
+  "id": "48c2278a8b",
+  "verdict": "yes",
+  "evidence": "courseware/access.py:865 return _has_staff_access_to_location(user, block.location, course_key)"
+ },
+ {
+  "id": "498b887829",
+  "verdict": "yes",
+  "evidence": "data_export/processors/explore.py:225 organization: Organization annotation (imported :19 from sentry.models.organization)"
+ },
+ {
+  "id": "4bacae1a48",
+  "verdict": "yes",
+  "evidence": "student/models/user.py:1296 cc.User.from_django_user(user) (cc.User -> comment_client/user.py User)"
+ },
+ {
+  "id": "4c7bf6c5a2",
+  "verdict": "yes",
+  "evidence": "snuba/datasets/factory.py:87 _ds_factory().all_names() (returns _DatasetFactory)"
+ },
+ {
+  "id": "4cdc4167f5",
+  "verdict": "yes",
+  "evidence": "course_metadata/models.py:3126 CourseRunStatus.Reviewed (imported :46-48 from choices)"
+ },
+ {
+  "id": "4ce6c0d181",
+  "verdict": "yes",
+  "evidence": "django_comment_client/utils.py:1092 re.sub(regex_exp, replace_image, text) (nested def :1080)"
+ },
+ {
+  "id": "4d0187b394",
+  "verdict": "yes",
+  "evidence": "ingest/consumer/processors.py:80 wrapper returns inner (nested def :55)"
+ },
+ {
+  "id": "4e778c25e8",
+  "verdict": "yes",
+  "evidence": "tasks/seer/pr_iteration.py:117 imports, :2036 calls sweep_stale_pr_iterations()"
+ },
+ {
+  "id": "4f094a0d9c",
+  "verdict": "yes",
+  "evidence": "instructor/views/api.py:1964 permission_classes includes permissions.InstructorPermission (from .. import permissions :142)"
+ },
+ {
+  "id": "4f3ed8eb55",
+  "verdict": "yes",
+  "evidence": "group_integration_details.py:119 IntegrationSerializer().serialize(...) (imported :34-35)"
+ },
+ {
+  "id": "52abd54200",
+  "verdict": "yes",
+  "evidence": "tagstore/snuba/backend.py:1841 ReleaseProject.objects.filter(...) (imported :41)"
+ },
+ {
+  "id": "53d0e82301",
+  "verdict": "yes",
+  "evidence": "xblock/runtime/runtime.py:325 XBlockI18nService(block=block) in XBlockRuntime.service (imported :43)"
+ },
+ {
+  "id": "56a12b6e62",
+  "verdict": "yes",
+  "evidence": "organization_code_mappings.py:70 subclasses CamelSnakeModelSerializer (imported :21 from rest_framework.base)"
+ },
+ {
+  "id": "56b1372a9f",
+  "verdict": "yes",
+  "evidence": "courseware/access.py:750 'support': check_support (nested def :739)"
+ },
+ {
+  "id": "589b689aee",
+  "verdict": "no",
+  "evidence": "content_libraries/rest_api/blocks.py:162-169 LibraryComponentDraftHistoryView.get never calls create_library_block (call is at :97 in another view)"
+ }
+]

@@ -1,0 +1,956 @@
+[
+ {
+  "id": "e124c92a4a",
+  "uses": []
+ },
+ {
+  "id": "773973e808",
+  "uses": [
+   {
+    "file": "snuba/query/logical.py",
+    "name": "Query",
+    "line": 252,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/composite.py",
+    "name": "CompositeQuery",
+    "line": 252,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/data_source/simple.py",
+    "name": "LogicalDataSource",
+    "line": 252,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/composite.py",
+    "name": "CompositeQuery",
+    "line": 283,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/logical.py",
+    "name": "Query",
+    "line": 283,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/data_source/join.py",
+    "name": "JoinClause",
+    "line": 283,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/composite.py",
+    "name": "CompositeQuery",
+    "line": 285,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/data_source/simple.py",
+    "name": "Entity",
+    "line": 288,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/data_source/simple.py",
+    "name": "Entity",
+    "line": 292,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/data_source/simple.py",
+    "name": "Storage",
+    "line": 292,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/logical.py",
+    "name": "Query",
+    "line": 293,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "80e2066588",
+  "uses": [
+   {
+    "file": "src/sentry/integrations/slack/requests/action.py",
+    "name": "SlackActionRequest",
+    "line": 113,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/users/services/user/model.py",
+    "name": "RpcUser",
+    "line": 115,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 118,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "record_investigation_unavailable",
+    "line": 120,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/requests/base.py",
+    "name": "integration",
+    "line": 123,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 128,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 134,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 138,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 141,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 151,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 156,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 163,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 165,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 175,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 181,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 188,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 199,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationUnavailableReason",
+    "line": 202,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 129,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 135,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 139,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 142,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 152,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 157,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 167,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 176,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 182,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 191,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 200,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 203,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_respond_ephemeral",
+    "line": 222,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_UNAVAILABLE_MESSAGE",
+    "line": 129,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_UNAVAILABLE_MESSAGE",
+    "line": 135,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_UNAVAILABLE_MESSAGE",
+    "line": 139,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_UNAVAILABLE_MESSAGE",
+    "line": 142,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_UNAVAILABLE_MESSAGE",
+    "line": 152,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_UNAVAILABLE_MESSAGE",
+    "line": 157,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_UNAVAILABLE_MESSAGE",
+    "line": 167,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_UNAVAILABLE_MESSAGE",
+    "line": 182,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_UNAVAILABLE_MESSAGE",
+    "line": 191,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_UNAVAILABLE_MESSAGE",
+    "line": 200,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_UNAVAILABLE_MESSAGE",
+    "line": 203,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/requests/base.py",
+    "name": "data",
+    "line": 130,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/requests/base.py",
+    "name": "user_id",
+    "line": 136,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/services/integration/service.py",
+    "name": "integration_service",
+    "line": 144,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/services/integration/service.py",
+    "name": "get_organization_integrations",
+    "line": 144,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/requests/base.py",
+    "name": "integration",
+    "line": 145,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/constants.py",
+    "name": "ObjectStatus",
+    "line": 147,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/models/organization.py",
+    "name": "Organization",
+    "line": 154,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/seer/entrypoints/operator.py",
+    "name": "SeerInvestigationOperator",
+    "line": 158,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/seer/entrypoints/operator.py",
+    "name": "has_access",
+    "line": 158,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/seer/entrypoints/types.py",
+    "name": "SeerEntrypointKey",
+    "line": 159,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/models/organizationmember.py",
+    "name": "OrganizationMember",
+    "line": 169,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/models/organizationmember.py",
+    "name": "InviteStatus",
+    "line": 172,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_NOT_MEMBER_MESSAGE",
+    "line": 177,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/models/organizationmember.py",
+    "name": "get_scopes",
+    "line": 180,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/notebooks/access.py",
+    "name": "INVESTIGATION_SCOPES",
+    "line": 180,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "_get_investigation_source",
+    "line": 185,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "InvestigationActionError",
+    "line": 186,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/investigations/services/breached_metrics.py",
+    "name": "resolve_investigation_source",
+    "line": 193,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/notebooks/endpoints/base.py",
+    "name": "organization_project_ids",
+    "line": 196,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/notebooks/services/notebooks.py",
+    "name": "InvestigationSourceNotFound",
+    "line": 198,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/notebooks/services/notebooks.py",
+    "name": "InvestigationValidationError",
+    "line": 201,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/seer/entrypoints/slack/entrypoint.py",
+    "name": "SlackInvestigationEntrypoint",
+    "line": 205,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/seer/entrypoints/operator.py",
+    "name": "SeerInvestigationOperator",
+    "line": 212,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/seer/entrypoints/operator.py",
+    "name": "trigger_investigation",
+    "line": 212,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/integrations/slack/webhooks/actions/investigation.py",
+    "name": "INVESTIGATION_EXISTS_MESSAGE",
+    "line": 223,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/notebooks/models/notebook.py",
+    "name": "get_absolute_url",
+    "line": 223,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "a5ba1ba6f5",
+  "uses": [
+   {
+    "file": "snuba/snapshots/__init__.py",
+    "name": "BulkLoadSource",
+    "line": 332,
+    "confident": true
+   },
+   {
+    "file": "snuba/datasets/cdc/row_processors.py",
+    "name": "CdcRowProcessor",
+    "line": 334,
+    "confident": true
+   },
+   {
+    "file": "snuba/snapshots/loaders/__init__.py",
+    "name": "BulkLoader",
+    "line": 336,
+    "confident": true
+   },
+   {
+    "file": "snuba/datasets/schemas/tables.py",
+    "name": "get_table_name",
+    "line": 341,
+    "confident": true
+   },
+   {
+    "file": "snuba/snapshots/loaders/single_table.py",
+    "name": "SingleTableBulkLoader",
+    "line": 342,
+    "confident": true
+   },
+   {
+    "file": "snuba/clusters/cluster.py",
+    "name": "get_cluster",
+    "line": 347,
+    "confident": true
+   },
+   {
+    "file": "snuba/clusters/cluster.py",
+    "name": "get_query_connection",
+    "line": 347,
+    "confident": true
+   },
+   {
+    "file": "snuba/clusters/cluster.py",
+    "name": "ClickhouseClientSettings",
+    "line": 348,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "5a81bf18d9",
+  "uses": []
+ },
+ {
+  "id": "8ad38499f0",
+  "uses": [
+   {
+    "file": "src/sentry/audit_log/manager.py",
+    "name": "__init__",
+    "line": 54,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "9c228d3c23",
+  "uses": [
+   {
+    "file": "src/sentry/replays/usecases/ingest/event_parser.py",
+    "name": "ParsedEventMeta",
+    "line": 372,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/replays/usecases/ingest/types.py",
+    "name": "ProcessorContext",
+    "line": 376,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/replays/usecases/ingest/event_logger.py",
+    "name": "gen_rage_clicks",
+    "line": 378,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/replays/usecases/ingest/event_logger.py",
+    "name": "_should_report_rage_click_issue",
+    "line": 379,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/utils/metrics.py",
+    "name": "incr",
+    "line": 382,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/replays/usecases/ingest/issue_creation.py",
+    "name": "report_rage_click_issue_with_replay_event",
+    "line": 385,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "e7c14e60c3",
+  "uses": [
+   {
+    "file": "snuba/migrations/operations.py",
+    "name": "SqlOperation",
+    "line": 36,
+    "confident": true
+   },
+   {
+    "file": "snuba/migrations/operations.py",
+    "name": "DropColumn",
+    "line": 38,
+    "confident": true
+   },
+   {
+    "file": "snuba/migrations/operations.py",
+    "name": "OperationTarget",
+    "line": 45,
+    "confident": true
+   },
+   {
+    "file": "snuba/migrations/operations.py",
+    "name": "OperationTarget",
+    "line": 46,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "db081ab48b",
+  "uses": [
+   {
+    "file": "src/sentry/runner/commands/config.py",
+    "name": "config",
+    "line": 82,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/runner/decorators.py",
+    "name": "configuration",
+    "line": 85,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/options/manager.py",
+    "name": "UnknownOption",
+    "line": 89,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/options/__init__.py",
+    "name": "delete",
+    "line": 94,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/options/manager.py",
+    "name": "delete",
+    "line": 94,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/options/manager.py",
+    "name": "UnknownOption",
+    "line": 95,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "7fa97fe203",
+  "uses": [
+   {
+    "file": "src/sentry/db/models/manager/option.py",
+    "name": "_make_key",
+    "line": 34,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/db/models/manager/option.py",
+    "name": "_option_cache",
+    "line": 39,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/db/models/manager/option.py",
+    "name": "_option_cache",
+    "line": 41,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "a6255ed730",
+  "uses": [
+   {
+    "file": "src/sentry/seer/models/seer_api_models.py",
+    "name": "SeerProjectPreference",
+    "line": 618,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/models/project.py",
+    "name": "Project",
+    "line": 623,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/models/organization.py",
+    "name": "Organization",
+    "line": 627,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/db/models/manager/base.py",
+    "name": "get_from_cache",
+    "line": 627,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/seer/autofix/utils.py",
+    "name": "_get_repo_definitions_by_project",
+    "line": 629,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/models/options/project_option.py",
+    "name": "ProjectOption",
+    "line": 636,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/models/options/project_option.py",
+    "name": "get_value_bulk_id",
+    "line": 636,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/projectoptions/defaults.py",
+    "name": "SEER_PROJECT_PREFERENCE_OPTION_KEYS",
+    "line": 637,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/seer/models/seer_api_models.py",
+    "name": "SeerProjectPreference",
+    "line": 640,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/projectoptions/__init__.py",
+    "name": "get_well_known_default",
+    "line": 646,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/seer/models/seer_api_models.py",
+    "name": "SeerProjectPreference",
+    "line": 649,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/seer/autofix/utils.py",
+    "name": "get_automation_handoff",
+    "line": 656,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "12292890b3",
+  "uses": []
+ },
+ {
+  "id": "b65474f1ac",
+  "uses": [
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "RelationshipTuple",
+    "line": 97,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "Node",
+    "line": 97,
+    "confident": true
+   },
+   {
+    "file": "snuba/datasets/entities/entity_key.py",
+    "name": "EntityKey",
+    "line": 121,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "Node",
+    "line": 121,
+    "confident": true
+   },
+   {
+    "file": "snuba/datasets/entities/entity_key.py",
+    "name": "EntityKey",
+    "line": 122,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "Node",
+    "line": 122,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "Node",
+    "line": 124,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "entity",
+    "line": 126,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "Node",
+    "line": 130,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "Node",
+    "line": 131,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "entity",
+    "line": 132,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "has_child",
+    "line": 133,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "entity",
+    "line": 133,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "push_child",
+    "line": 136,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "entity",
+    "line": 137,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "entity",
+    "line": 139,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "push_child",
+    "line": 140,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "entity",
+    "line": 143,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "entity",
+    "line": 144,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "push_child",
+    "line": 144,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "push_child",
+    "line": 147,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/snql/joins.py",
+    "name": "entity",
+    "line": 148,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/parser/exceptions.py",
+    "name": "ParsingException",
+    "line": 152,
+    "confident": true
+   },
+   {
+    "file": "snuba/query/parser/exceptions.py",
+    "name": "ParsingException",
+    "line": 154,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "b1ac65d6f3",
+  "uses": [
+   {
+    "file": "src/sentry/snuba/sessions_v2.py",
+    "name": "QueryDefinition",
+    "line": 406,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/release_health/base.py",
+    "name": "SessionsQueryResult",
+    "line": 408,
+    "confident": true
+   },
+   {
+    "file": "src/sentry/release_health/metrics_sessions_v2.py",
+    "name": "run_sessions_query",
+    "line": 409,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "eb928a3c56",
+  "uses": [
+   {
+    "file": "snuba/utils/metrics/gauge.py",
+    "name": "increment",
+    "line": 24,
+    "confident": true
+   }
+  ]
+ }
+]

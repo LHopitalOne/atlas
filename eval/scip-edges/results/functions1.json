@@ -1,0 +1,306 @@
+[
+ {
+  "id": "4e60f07a41",
+  "uses": [
+   {
+    "file": "course_discovery/apps/course_metadata/models.py",
+    "name": "course_ends",
+    "line": 94,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "d8d53ce2c4",
+  "uses": [
+   {
+    "file": "course_discovery/apps/course_metadata/models.py",
+    "name": "course_runs",
+    "line": 541,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "b952db4b32",
+  "uses": []
+ },
+ {
+  "id": "98afbba2b3",
+  "uses": []
+ },
+ {
+  "id": "94a0a312a2",
+  "uses": [
+   {
+    "file": "credentials/apps/credentials/rest_api/v1/views.py",
+    "name": "learner_cert_status_request_schema",
+    "line": 105,
+    "confident": true
+   },
+   {
+    "file": "credentials/apps/records/api.py",
+    "name": "single_learner_cert_status",
+    "line": 129,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "3dd455a88d",
+  "uses": [
+   {
+    "file": "openedx/core/djangoapps/external_user_ids/admin.py",
+    "name": "User",
+    "line": 54,
+    "confident": true
+   },
+   {
+    "file": "openedx/core/djangoapps/external_user_ids/models.py",
+    "name": "ExternalId",
+    "line": 58,
+    "confident": true
+   },
+   {
+    "file": "openedx/core/djangoapps/external_user_ids/admin.py",
+    "name": "_generate_results_msg",
+    "line": 68,
+    "confident": true
+   },
+   {
+    "file": "openedx/core/djangoapps/external_user_ids/admin.py",
+    "name": "logger",
+    "line": 69,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "0fb5b17b2b",
+  "uses": []
+ },
+ {
+  "id": "2c56637bb5",
+  "uses": [
+   {
+    "file": "openedx/features/survey_report/queries.py",
+    "name": "get_unique_courses_offered",
+    "line": 28,
+    "confident": true
+   },
+   {
+    "file": "openedx/features/survey_report/queries.py",
+    "name": "get_recently_active_users",
+    "line": 29,
+    "confident": true
+   },
+   {
+    "file": "openedx/features/survey_report/api.py",
+    "name": "MAX_WEEKS_SINCE_LAST_LOGIN",
+    "line": 29,
+    "confident": true
+   },
+   {
+    "file": "openedx/features/survey_report/queries.py",
+    "name": "get_registered_learners",
+    "line": 30,
+    "confident": true
+   },
+   {
+    "file": "openedx/features/survey_report/queries.py",
+    "name": "get_generated_certificates",
+    "line": 31,
+    "confident": true
+   },
+   {
+    "file": "openedx/features/survey_report/queries.py",
+    "name": "get_course_enrollments",
+    "line": 32,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "b378d9db88",
+  "uses": [
+   {
+    "file": "course_discovery/apps/course_metadata/models.py",
+    "name": "has_model_changed",
+    "line": 4524,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "b391f1af19",
+  "uses": []
+ },
+ {
+  "id": "1e31c04621",
+  "uses": [
+   {
+    "file": "openedx/core/djangoapps/discussions/models.py",
+    "name": "get",
+    "line": 550,
+    "confident": true
+   },
+   {
+    "file": "openedx/core/djangoapps/discussions/models.py",
+    "name": "supports_lti",
+    "line": 553,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "40393f12a1",
+  "uses": [
+   {
+    "file": "lms/djangoapps/mobile_api/testutils.py",
+    "name": "login",
+    "line": 999,
+    "confident": true
+   },
+   {
+    "file": "xmodule/modulestore/tests/factories.py",
+    "name": "CourseFactory",
+    "line": 1000,
+    "confident": true
+   },
+   {
+    "file": "lms/djangoapps/mobile_api/testutils.py",
+    "name": "enroll",
+    "line": 1002,
+    "confident": true
+   },
+   {
+    "file": "lms/djangoapps/mobile_api/testutils.py",
+    "name": "api_response",
+    "line": 1005,
+    "confident": true
+   },
+   {
+    "file": "lms/djangoapps/mobile_api/utils.py",
+    "name": "API_V4",
+    "line": 1005,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "c41ecfe474",
+  "uses": [
+   {
+    "file": "openedx/core/lib/api/view_utils.py",
+    "name": "api_error",
+    "line": 1111,
+    "confident": true
+   },
+   {
+    "file": "common/djangoapps/student/auth.py",
+    "name": "has_course_author_access",
+    "line": 1117,
+    "confident": true
+   },
+   {
+    "file": "openedx/core/lib/api/view_utils.py",
+    "name": "DeveloperErrorViewMixin",
+    "line": 1118,
+    "confident": true
+   },
+   {
+    "file": "openedx/core/lib/api/view_utils.py",
+    "name": "api_error",
+    "line": 1118,
+    "confident": true
+   },
+   {
+    "file": "openedx/core/lib/api/view_utils.py",
+    "name": "api_error",
+    "line": 1127,
+    "confident": true
+   },
+   {
+    "file": "lms/djangoapps/grades/models.py",
+    "name": "PersistentSubsectionGrade",
+    "line": 1144,
+    "confident": true
+   },
+   {
+    "file": "lms/djangoapps/grades/models.py",
+    "name": "read_grade",
+    "line": 1144,
+    "confident": true
+   },
+   {
+    "file": "lms/djangoapps/grades/models.py",
+    "name": "PersistentSubsectionGradeOverride",
+    "line": 1148,
+    "confident": true
+   },
+   {
+    "file": "lms/djangoapps/grades/models.py",
+    "name": "PersistentSubsectionGrade",
+    "line": 1157,
+    "confident": true
+   },
+   {
+    "file": "lms/djangoapps/grades/rest_api/v1/gradebook_views.py",
+    "name": "_get_grade_data_for_not_attempted_assignment",
+    "line": 1159,
+    "confident": true
+   },
+   {
+    "file": "lms/djangoapps/grades/rest_api/v1/gradebook_views.py",
+    "name": "SubsectionUnavailableToUserException",
+    "line": 1160,
+    "confident": true
+   },
+   {
+    "file": "lms/djangoapps/grades/rest_api/serializers.py",
+    "name": "SubsectionGradeResponseSerializer",
+    "line": 1181,
+    "confident": true
+   }
+  ]
+ },
+ {
+  "id": "04ce89a78b",
+  "uses": []
+ },
+ {
+  "id": "ca77af6c63",
+  "uses": [
+   {
+    "file": "openedx/core/djangoapps/django_comment_common/signals.py",
+    "name": "thread_edited",
+    "line": 67,
+    "confident": true
+   },
+   {
+    "file": "openedx/core/djangoapps/django_comment_common/signals.py",
+    "name": "thread_deleted",
+    "line": 68,
+    "confident": true
+   },
+   {
+    "file": "openedx/core/djangoapps/django_comment_common/signals.py",
+    "name": "comment_edited",
+    "line": 69,
+    "confident": true
+   },
+   {
+    "file": "openedx/core/djangoapps/django_comment_common/signals.py",
+    "name": "comment_deleted",
+    "line": 70,
+    "confident": true
+   },
+   {
+    "file": "lms/djangoapps/teams/models.py",
+    "name": "handle_activity",
+    "line": 77,
+    "confident": true
+   }
+  ]
+ }
+]

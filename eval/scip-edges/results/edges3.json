@@ -1,0 +1,202 @@
+[
+ {
+  "id": "8e3858f640",
+  "verdict": "yes",
+  "evidence": "credentials/apps/badges/signals/handlers.py:82 CredlyBadgeTemplate.ORIGIN (imported from badges.models at :13)"
+ },
+ {
+  "id": "8f861ddc5a",
+  "verdict": "yes",
+  "evidence": "content_tagging/rules.py:267 get_context_key_from_key_string(object_id) (imported from .utils at :32)"
+ },
+ {
+  "id": "8fff704ab5",
+  "verdict": "yes",
+  "evidence": "notifications/notifications/rules.py:49 import, :186 get_owner_reason(...) call"
+ },
+ {
+  "id": "953cd9ee3b",
+  "verdict": "yes",
+  "evidence": "experiments/views.py:90 permission_classes = (IsStaffOrReadOnly,) (imported from experiments.permissions at :20)"
+ },
+ {
+  "id": "95ea9639ca",
+  "verdict": "yes",
+  "evidence": "learning_sequences/api/outlines.py:159 VisibilityData(...) (imported from ..data at :33)"
+ },
+ {
+  "id": "973ad83a63",
+  "verdict": "yes",
+  "evidence": "populate_product_catalog.py:77 Course.objects.available(...) (imported from course_metadata.models at :10)"
+ },
+ {
+  "id": "999b01ef59",
+  "verdict": "yes",
+  "evidence": "deletions/defaults/__init__.py:28 from .repository import * (no __all__; re-exported, used as defaults.RepositoryDeletionTask in deletions/__init__.py:100)"
+ },
+ {
+  "id": "9bf6c74ab2",
+  "verdict": "yes",
+  "evidence": "content_type_gating/block_transformers.py:12 import, :75 ContentTypeGatingConfig.enabled_for_enrollment(...)"
+ },
+ {
+  "id": "a0e06c9b92",
+  "verdict": "yes",
+  "evidence": "learner_pathway/api/v1/views.py:94 CourseRunStatus.Published (imported from course_metadata.choices at :14)"
+ },
+ {
+  "id": "a585486aaa",
+  "verdict": "yes",
+  "evidence": "credentials/helpers.py:24 config_helpers.get_value(...) (config_helpers = site_configuration.helpers, :7)"
+ },
+ {
+  "id": "a6b500d98e",
+  "verdict": "yes",
+  "evidence": "tasks/seer/pr_iteration.py:112 import from pr_iteration.queue, :499 clear_queued_autofix_feedback(run_id)"
+ },
+ {
+  "id": "a88e77e229",
+  "verdict": "yes",
+  "evidence": "src/generic/CourseAccessErrorPage.jsx:50 export default CourseAccessErrorPage"
+ },
+ {
+  "id": "aca1930541",
+  "verdict": "yes",
+  "evidence": "snuba/admin/views.py:44 import from eap_query_analysis, :764 result_to_dict(result)"
+ },
+ {
+  "id": "af488952df",
+  "verdict": "yes",
+  "evidence": "badgelist.jsx:52 assignments.every(isPastDue), :53 isPastDue(x)"
+ },
+ {
+  "id": "af8523b4eb",
+  "verdict": "yes",
+  "evidence": "apple.rs:151 self.parse_apple_crash_report(...) (both in impl SymbolicationActor :23)"
+ },
+ {
+  "id": "afb82737f9",
+  "verdict": "yes",
+  "evidence": "models/groupowner.py:133 context = LegacyTextJSONField(null=True) (imported from db.models.fields.jsonfield at :19)"
+ },
+ {
+  "id": "b079366a20",
+  "verdict": "yes",
+  "evidence": "advanced_settings.py:194 update_course_advanced_settings(...) (imported from ....views.course at :18)"
+ },
+ {
+  "id": "b139bec50a",
+  "verdict": "yes",
+  "evidence": "group_integration_details.py:739 IntegrationFeatures.ISSUE_BASIC (imported from integrations.base at :38)"
+ },
+ {
+  "id": "b19cbda53c",
+  "verdict": "no",
+  "evidence": "nel.rs:129 InvalidJson is a variant defined inside NetworkReportError, not a use of it"
+ },
+ {
+  "id": "b3b785e693",
+  "verdict": "yes",
+  "evidence": "core/endpoints/project_keys.py:63 ProjectParams.STATUS in get's @extend_schema decorator (imported :21)"
+ },
+ {
+  "id": "b413dc015e",
+  "verdict": "yes",
+  "evidence": "discover_homepage_query.py:68 except NoProjects (from sentry.api.bases, star re-export of bases/organization.py, no __all__)"
+ },
+ {
+  "id": "b4f2302ab3",
+  "verdict": "yes",
+  "evidence": "modulestore_migrator/rest_api/v1/urls.py:8 import from .views, :28 BlockMigrationInfo.as_view()"
+ },
+ {
+  "id": "b94d442df4",
+  "verdict": "no",
+  "evidence": "course_api/views.py:125 raises django.core.exceptions.ValidationError (imported :6), not distributions' nested class"
+ },
+ {
+  "id": "ba973c3c9d",
+  "verdict": "yes",
+  "evidence": "organization_api_key_index.py:9 from sentry.api.bases.organization import (...)"
+ },
+ {
+  "id": "bb915ff067",
+  "verdict": "yes",
+  "evidence": "datadog/integration.py:28 import, :219 organization: Organization annotation"
+ },
+ {
+  "id": "bc6f32e797",
+  "verdict": "yes",
+  "evidence": "instructor/views/api_urls.py:271 api.GetCourseSurveyResults.as_view() (api imported :8)"
+ },
+ {
+  "id": "be9cd47078",
+  "verdict": "yes",
+  "evidence": "algolia_models.py:394 AbstractLocationRestrictionModel.ALLOWLIST (imported from course_metadata.models :15)"
+ },
+ {
+  "id": "bf25fbdb68",
+  "verdict": "yes",
+  "evidence": "organization_seer_onboarding_check.py:42 organization: Organization annotation (imported :14)"
+ },
+ {
+  "id": "c0f6eaf357",
+  "verdict": "yes",
+  "evidence": "learner_dashboard/utils.py:8 import, :41 GlobalStaff().has_user(...)"
+ },
+ {
+  "id": "c21bac0554",
+  "verdict": "yes",
+  "evidence": "snuba/utils.py:6 from sentry.discover.models import DiscoverSavedQueryTypes"
+ },
+ {
+  "id": "c3d1b9bb22",
+  "verdict": "yes",
+  "evidence": "edx_catalog_extensions/api/v1/views.py:30 facet_serializer_class = DistinctCountsAggregateFacetSearchSerializer (import :19)"
+ },
+ {
+  "id": "c4044121e3",
+  "verdict": "yes",
+  "evidence": "msteams/renderers/issue.py:228 -> Action return annotation (TYPE_CHECKING import from card_builder.block :30)"
+ },
+ {
+  "id": "cadb355174",
+  "verdict": "yes",
+  "evidence": "query_injection_detector.py:105 type=QueryInjectionVulnerabilityGroupType (imported from issues.grouptype :14)"
+ },
+ {
+  "id": "cde9f002b1",
+  "verdict": "yes",
+  "evidence": "backup/exports.py:131 local import, :160 OrganizationMember.objects.filter(...)"
+ },
+ {
+  "id": "cf501a9223",
+  "verdict": "yes",
+  "evidence": "courseware/access.py:54 import from access_response, :557 NoAllowedPartitionGroupsError(partition)"
+ },
+ {
+  "id": "cfb83e7434",
+  "verdict": "yes",
+  "evidence": "survey/utils.py:34 SurveyForm.get(...) (imported from survey.models :10)"
+ },
+ {
+  "id": "d08d90f088",
+  "verdict": "yes",
+  "evidence": "sentry_internal_app_token_details.py:35 permission_classes = (SentryInternalAppTokenPermission, ...) (import :20)"
+ },
+ {
+  "id": "d1e0f6d2ad",
+  "verdict": "yes",
+  "evidence": "group_ai_summary.py:34 ApiPublishStatus.PRIVATE (imported from api.api_publish_status :11)"
+ },
+ {
+  "id": "d2b1f78e10",
+  "verdict": "yes",
+  "evidence": "issues/derived/store.py:13 import, :19 COLUMN_MAP: dict[Feature[Any], str]"
+ },
+ {
+  "id": "d3433f03de",
+  "verdict": "yes",
+  "evidence": "course_metadata/models.py:718 Subject.objects.filter(...) inside Subject.validate_unique"
+ }
+]
