@@ -25,12 +25,25 @@ class WithinRepoRule(LinkRule):
         return self._each(call, call.repo, call.repo, routes, status, 'browser code calls its own repository')
 
     def _own(self, call):
-        if call.path is None or not call.path.literals or not call.file.endswith(self.FRONTEND):
+        if call.path is None or not call.path.literals or not self._sent_to_own(call):
             return []
         top, best = self._routes.best(call, call.repo)
         if top < self.LITERAL_POINTS * call.path.literals or (call.path.has_rest and len(best) > 1):
             return []  # a word met a parameter, or '/api/0/{*url}' (a generic helper) fits every route under it
         return best
+
+    def _sent_to_own(self, call):
+        """Whether a relative path goes to the repository's own server: from browser code, it does."""
+        return call.file.endswith(self.FRONTEND)
+
+
+class ReadWithinRule(WithinRepoRule):
+    """A request a reader found (usecases.read) to its own repository's routes, from any file: the reader gives the
+    path with its base ('{tornado_url}/api/v1/events/internal'), so a worker posting to its own web process counts as
+    browser code does. Every fixed word must still meet the same word in one route."""
+
+    def _sent_to_own(self, call):
+        return True
 
 
 class NoRouteRule(LinkRule):

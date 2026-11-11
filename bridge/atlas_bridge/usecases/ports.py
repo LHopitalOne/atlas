@@ -98,3 +98,97 @@ class FileDescriber(ABC):
     @abstractmethod
     def describe(self, cases: list[FileCase]) -> list[Description | None]:
         """One Description per case, in order; None for a file it could not describe."""
+
+
+class SourceFiles(ABC):
+    """The code files of each repository, and their text."""
+
+    @abstractmethod
+    def paths(self, repo: str) -> list[str]:
+        """Paths, inside the repository, of its code files that are not tests or tooling."""
+
+    @abstractmethod
+    def text(self, repo: str, path: str) -> str:
+        """The file's text, or '' when it cannot be read."""
+
+
+@dataclass(frozen=True)
+class ReadHelper:
+    """A function that sends a request whose URL is built from its own parameters: `function` sends `method` (or a
+    parameter's value, '{method}') to `url`, a template whose `{name}` parts are those parameters or a base URL. Or
+    (kind CLIENT) a client object made with a base URL (`axios.create({baseURL: config.api})`): `url` is that base."""
+
+    FUNCTION = 'function'
+    CLIENT = 'client'
+
+    function: str
+    method: str
+    url: str
+    kind: str = FUNCTION
+
+    @property
+    def name(self) -> str:
+        """The name other files use it by: the last part of 'Client.send'."""
+        return self.function.split('.')[-1]
+
+
+@dataclass(frozen=True)
+class ReadRequest:
+    """A request a reader says a file sends: on `line`, whose code is `code`; `url` as far as the file shows it
+    (`{name}` for a part it does not, a leading `{base}` for a base URL from elsewhere). `base`: the expression the
+    base URL comes from; `service`: words in the code naming where it goes; `through`: the helper it is sent with."""
+
+    line: int
+    code: str
+    method: str
+    url: str
+    protocol: str
+    function: str = ''
+    base: str = ''
+    service: str = ''
+    through: str = ''
+
+
+@dataclass(frozen=True)
+class ReadRoute:
+    """A route or channel a reader says a file serves or consumes: an HTTP route, a task or job handler, a queue or
+    topic consumer, declared on `line` (whose code is `code`) for `path` (a route path, or a channel's name as the
+    code writes it), handled by `function`."""
+
+    line: int
+    code: str
+    method: str
+    path: str
+    protocol: str
+    function: str = ''
+
+
+@dataclass(frozen=True)
+class FileReading:
+    """What a reader found in one file: the requests it sends, the helpers it defines, and what it serves."""
+
+    requests: tuple[ReadRequest, ...] = ()
+    helpers: tuple[ReadHelper, ...] = ()
+    routes: tuple[ReadRoute, ...] = ()
+
+
+@dataclass(frozen=True)
+class ReadCase:
+    """A file to read for requests, with its text (numbered by the reader) and the helpers of its repository that it
+    calls, defined in other files."""
+
+    repo: str
+    path: str
+    text: str
+    helpers: tuple[ReadHelper, ...] = ()
+
+
+class RequestReader(ABC):
+    """Reads files and says which requests each sends: a language model, so every claim is checked against the code
+    before it is used (usecases.reading.ReadCheck)."""
+
+    model: str = ''
+
+    @abstractmethod
+    def read(self, cases: list[ReadCase]) -> list[FileReading | None]:
+        """One FileReading per case, in order; None for a file it could not read."""

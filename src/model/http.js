@@ -31,6 +31,11 @@ export const PROOF = {
     cls: 'badge-inferred',
     note: 'The code leaves several routes possible. Jev, a small decision model, read the lines around the call and chose this route; the probability it gave is in the reason below.',
   },
+  read: {
+    label: 'Read by AI',
+    cls: 'badge-inferred',
+    note: 'The code reading Atlas does missed this request. A language model read the file and found it; the code then checked that the line, the path and the service it names are written there, and matched the path to this route with the same rules as any other request.',
+  },
   ambiguous: {
     label: 'Ambiguous',
     cls: 'badge-warning',
@@ -47,7 +52,17 @@ export const PROOF = {
     note: 'Sent to a host none of these repositories serves: a third-party API, a CDN, an analytics or ad script, or a site a visitor is linked to.',
   },
 };
-export const PROOF_ORDER = ['scip', 'syntax', 'matched', 'inferred', 'judged', 'ambiguous', 'contradicted', 'outside'];
+export const PROOF_ORDER = [
+  'scip',
+  'syntax',
+  'matched',
+  'inferred',
+  'judged',
+  'read',
+  'ambiguous',
+  'contradicted',
+  'outside',
+];
 
 /** A link to a host none of the repositories serves. */
 export const isOutside = l => l.proof === 'outside';

@@ -47,6 +47,7 @@ class Verification(Enum):
     CONTRADICTED = 'contradicted'  # at least one assumption is wrong
     UNVERIFIED = 'unverified'  # no index for the repository, some names unresolved, or not a matched link
     JUDGED = 'judged'  # the code left several routes open; a decision model read the lines around the call and chose
+    READ = 'read'  # the extractor missed the request; a language model read it in the file and the code checked it
 
     @classmethod
     def of(cls, verdicts) -> 'Verification':

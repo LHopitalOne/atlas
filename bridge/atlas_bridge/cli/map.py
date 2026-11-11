@@ -50,11 +50,23 @@ class MapCommand(Command):
             action='store_true',
             help='show the map from a local server (Ask then reaches OpenRouter with OPENROUTER_API_KEY) until Ctrl+C',
         )
+        self._models(parser)
+
+    @staticmethod
+    def _models(parser):
+        """The options that ask a model on OpenRouter (needs OPENROUTER_API_KEY)."""
         parser.add_argument(
             '--jev',
             action='store_true',
             help='let Jev (a decision model on OpenRouter; needs OPENROUTER_API_KEY) choose among the routes the code '
             'leaves open for a request; its picks are marked "Chosen by Jev"',
+        )
+        parser.add_argument(
+            '--read',
+            action='store_true',
+            help='let a small model (meta/muse-ember on OpenRouter; needs OPENROUTER_API_KEY) read the files the code '
+            'reading leaves unexplained for the requests and routes they hold; the code checks each claim, and links '
+            'found so are marked "Read by AI"',
         )
         parser.add_argument(
             '--enrich',

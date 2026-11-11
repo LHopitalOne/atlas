@@ -15,7 +15,10 @@ class TestPathPolicy:
     TEST_DIRS = frozenset(
         {'tests', 'test', 'testutils', 'testing', 'fixtures', '__tests__', '__mocks__', 'e2e', 'benches', 'examples'}
     )
-    TEST_FILE = re.compile(r'(^test_.*\.py$|_test\.py$|^conftest\.py$|\.(spec|test)\.[jt]sx?$|_test\.rs$)')
+    # test files of pytest, Jest/Vitest and Rust, and Locust load tests (a client hammering the service, not one of it)
+    TEST_FILE = re.compile(
+        r'(^test_.*\.py$|_test\.py$|^conftest\.py$|^locustfile\.py$|\.(spec|test)\.[jt]sx?$|_test\.rs$)'
+    )
 
     def is_test(self, path: str) -> bool:
         parts = path.replace('\\', '/').split('/')

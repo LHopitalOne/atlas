@@ -28,7 +28,8 @@ function linksGroup(H) {
   for (const p of PROOF_ORDER) {
     if (!c[p]) continue;
     const [col, dash] = arcStyle(p);
-    const style = !dash ? '' : dash[0] <= 2 ? ' dot' : ' dash'; // dotted (Jev, outside) or dashed, as on the map
+    // dotted (Jev, outside), dash-dot (read by AI) or dashed, as on the map
+    const style = !dash ? '' : dash.length > 2 ? ' dashdot' : dash[0] <= 2 ? ' dot' : ' dash';
     h += keyRow(`<span class="sw-line${style}" style="--c:${css(col)}"></span>`, PROOF[p].label, c[p]);
   }
   if (within) {

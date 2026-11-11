@@ -85,14 +85,18 @@ class LinkRecord:
         'ambiguous': 1,
         'inferred': 3,
         'judged': 3,
+        'read': 3,
     }
 
     @property
     def proof(self):
         """scip (confirmed by SCIP), syntax (read straight from the code), matched (read from the code, names not
-        confirmed), contradicted, inferred, judged (chosen by a decision model), ambiguous or outside."""
+        confirmed), contradicted, inferred, judged (chosen by a decision model), read (found by a language model, then
+        checked by the code), ambiguous or outside."""
         if self.verification == 'judged':
             return 'judged'  # chosen by a decision model among the routes the code left open
+        if self.verification == 'read' and self.status != 'outside':
+            return 'read'  # the extractors missed it; a language model read it and the code bore it out
         if self.status != 'matched':
             return self.status
         return self.PROOF.get(self.verification, 'matched')

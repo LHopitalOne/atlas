@@ -225,6 +225,7 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 .sw-line{width:20px;height:0;border-top:2px solid var(--c)}
 .sw-line.dash{border-top-style:dashed}
 .sw-line.dot{border-top-style:dotted}
+.sw-line.dashdot{border-top:0;height:2px;background:repeating-linear-gradient(90deg,var(--c) 0 6px,transparent 6px 8px,var(--c) 8px 9px,transparent 9px 11px)}
 .keybar{padding:8px 12px;border-top:1px solid var(--border);font-size:12px;color:var(--muted-foreground);display:grid;gap:6px}
 .keybar[hidden]{display:none}
 .keybar input{flex:1;min-width:0;background:transparent;border:0;color:var(--foreground);font:inherit;outline:none}
@@ -1326,6 +1327,11 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
       cls: "badge-inferred",
       note: "The code leaves several routes possible. Jev, a small decision model, read the lines around the call and chose this route; the probability it gave is in the reason below."
     },
+    read: {
+      label: "Read by AI",
+      cls: "badge-inferred",
+      note: "The code reading Atlas does missed this request. A language model read the file and found it; the code then checked that the line, the path and the service it names are written there, and matched the path to this route with the same rules as any other request."
+    },
     ambiguous: {
       label: "Ambiguous",
       cls: "badge-warning",
@@ -1342,7 +1348,17 @@ void main(){ o=vec4(v_col.rgb,v_col.a*u_alpha); }`
       note: "Sent to a host none of these repositories serves: a third-party API, a CDN, an analytics or ad script, or a site a visitor is linked to."
     }
   };
-  var PROOF_ORDER = ["scip", "syntax", "matched", "inferred", "judged", "ambiguous", "contradicted", "outside"];
+  var PROOF_ORDER = [
+    "scip",
+    "syntax",
+    "matched",
+    "inferred",
+    "judged",
+    "read",
+    "ambiguous",
+    "contradicted",
+    "outside"
+  ];
   var isOutside = (l) => l.proof === "outside";
   var rank = (p) => {
     const i = PROOF_ORDER.indexOf(p);
@@ -5658,6 +5674,7 @@ FLOW: ${flowLine}`;
     if (proof === "scip" || proof === "syntax") return [theme.proof, null];
     if (proof === "inferred") return [theme.st[3], [5, 4]];
     if (proof === "judged") return [theme.st[3], [1, 3]];
+    if (proof === "read") return [theme.st[3], [8, 3, 1, 3]];
     if (proof === "ambiguous") return [theme.st[1], [5, 4]];
     if (proof === "contradicted") return [theme.st[2], [2, 3]];
     if (proof === "outside") return [theme.muted, [2, 4]];
@@ -5773,7 +5790,7 @@ FLOW: ${flowLine}`;
     for (const p of PROOF_ORDER) {
       if (!c[p]) continue;
       const [col, dash] = arcStyle(p);
-      const style = !dash ? "" : dash[0] <= 2 ? " dot" : " dash";
+      const style = !dash ? "" : dash.length > 2 ? " dashdot" : dash[0] <= 2 ? " dot" : " dash";
       h += keyRow(`<span class="sw-line${style}" style="--c:${css(col)}"></span>`, PROOF[p].label, c[p]);
     }
     if (within) {

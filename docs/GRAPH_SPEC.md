@@ -120,7 +120,7 @@ also an edge, so routing, impact and search see it.
 | --- | --- |
 | `from`, `to` | node ids: the function (or file) that sends the request, and the endpoint leaf that serves it |
 | `method`, `path` | the request as the caller sends it, and the route's path |
-| `proof` | `scip` (every name it rests on resolves, in a SCIP index, to the assumed definition), `syntax` (the method and path are written at the call site: nothing to resolve), `matched` (read from code, names unchecked), `inferred` (fits only under an assumption, such as a base URL prefix), `ambiguous`, or `contradicted` |
+| `proof` | `scip` (every name it rests on resolves, in a SCIP index, to the assumed definition), `syntax` (the method and path are written at the call site: nothing to resolve), `matched` (read from code, names unchecked), `inferred` (fits only under an assumption, such as a base URL prefix), `judged` (Jev chose it among the routes the code left open), `read` (the extractors missed it; a language model found it in the file and the code checked the claim before matching it), `ambiguous`, `contradicted`, or `outside` |
 | `call`, `route` | the two cited sites: `repo` is an index into `repos`; `start` and `code` are the lines shown (optional) |
 | `checks` | what SCIP said of each name the link rests on |
 | `unmatched` | requests no route was found for: listed in the links panel, not drawn |

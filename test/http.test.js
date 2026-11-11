@@ -65,6 +65,9 @@ test('malformed links are reported', () => {
   assert.ok(errs.some(e => /proof vibes/.test(e)));
   assert.ok(errs.some(e => /links\[1\] needs from and to/.test(e)));
   assert.deepEqual(validateSpec({ ...SPEC, links: 'x' }).slice(-1), ['spec.links must be an array']);
+  const read = structuredClone(SPEC);
+  read.links[0].proof = 'read'; // found by a language model, checked by the code
+  assert.deepEqual(validateSpec(read), []);
 });
 
 test('links inside one repository are kept apart from those between repositories', () => {

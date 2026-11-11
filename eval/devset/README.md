@@ -26,6 +26,7 @@ as unjudged, not false.
 | --- | --- | --- | --- | --- | --- |
 | commit f9d3d98 | 0 / 46 | 32 / 41 | 0 / 47 | 32 / 134 | 0 |
 | + background tasks, route helpers, JavaScript request helpers, NestJS and generated clients | 24 / 46 | 39 / 41 | 31 / 47 | **94 / 134** | 0 |
+| + `--read` (Muse Ember reads the files the extractors leave unexplained; the code checks every claim) | 36 / 46 | 41 / 41 | 39 / 47 | **116 / 134** | 0 |
 
 The four mechanisms came from a diagnosis of every miss (by agents that saw the code, the key and what the finder
 extracted, not the finder's code), each needed by at least two of the three projects except generated clients, and
@@ -42,3 +43,9 @@ projects rather than a language, library or framework:
   monorepo's own packages.
 
 Links outside every key are not judged by the sampled keys; a fixed sample of them is audited separately.
+
+With `--read`, a model on OpenRouter reads each file that looks like it sends or serves more than the extractors found, and lists its requests, helpers and routes; the code keeps a claim only when the line,
+every fixed word of the path, any host and the channel's name are written in the file, then matches it with the same
+rules. Three of those checks came from this set's misses, as the set is meant for (a channel held in a variable, a
+relay that takes every event, a list of jobs sent at once); none names a project. It cost $0.15 (Immich), $0.50 (Plane) and $0.52 (Zulip) on a first run; answers are cached, so a rerun is free.
+Its answers vary a little between first runs (Immich: 34 to 43 of 46), so the row above is one run, not a best of.

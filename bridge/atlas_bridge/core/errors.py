@@ -19,7 +19,8 @@ BridgeError
 ├── JudgeError                  asking a model (about a link, or to describe a file) failed
 │   ├── JudgeUnavailableError   no API key for the model
 │   ├── JudgeFailedError        the model's service refused or failed every request
-│   └── DescriberFailedError    the model asked to describe files failed every request
+│   ├── DescriberFailedError    the model asked to describe files failed every request
+│   └── ReaderFailedError       the model asked to read requests in files failed every request
 └── OutputError                 writing the result failed
     ├── OutputWriteError        the output folder cannot be written
     └── PageTemplateError       the prebuilt Atlas page is missing from the installation
@@ -135,6 +136,11 @@ class JudgeFailedError(JudgeError):
 class DescriberFailedError(JudgeError):
     def __init__(self, problem: str):
         super().__init__(f'no file could be described: {problem}', 'try again, or leave out --enrich')
+
+
+class ReaderFailedError(JudgeError):
+    def __init__(self, problem: str):
+        super().__init__(f'no file could be read for requests: {problem}', 'try again, or leave out --read')
 
 
 class OutputError(BridgeError):

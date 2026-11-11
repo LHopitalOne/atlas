@@ -4,6 +4,7 @@ from dataclasses import replace
 
 from ..adapters.graphify import GraphifyLinkWriter
 from ..adapters.linkfile import LinkFilePresenter
+from ..adapters.muse import MuseReader
 from ..adapters.scip import ScipCallGraph, ScipIndex, ScipOracle
 from ..core.errors import LibraryIndexError
 from ..core.http import Extraction
@@ -18,6 +19,7 @@ from ..usecases.within import NoRouteRule, WithinRepoRule
 from .command import Command
 from .inputs import Aliases, GraphInput, JsonFile, RepositoryInput, ScipInput
 from .judge import JudgePass
+from .read import ReadOptions, ReadPass
 
 
 class LinksCommand(Command):
@@ -59,12 +61,7 @@ class LinksCommand(Command):
             action='store_true',
             help="also link browser code to its own repository's server routes (a monorepo's frontend and backend)",
         )
-        parser.add_argument(
-            '--jev',
-            action='store_true',
-            help='let Jev (a decision model on OpenRouter; needs OPENROUTER_API_KEY) choose among the routes the code '
-            'leaves open for a request; its picks are marked judged',
-        )
+        self._models(parser)
         parser.add_argument(
             '--library',
             action='append',
@@ -73,6 +70,23 @@ class LinksCommand(Command):
             help='a client library the services call (an SDK): its requests are reported at the service lines that '
             'call into it, found with the SCIP indexes (repeatable; needs --scip or --scip-dir)',
         )
+
+    @staticmethod
+    def _models(parser):
+        """The options that ask a model on OpenRouter (needs OPENROUTER_API_KEY)."""
+        parser.add_argument(
+            '--jev',
+            action='store_true',
+            help='let Jev (a decision model on OpenRouter; needs OPENROUTER_API_KEY) choose among the routes the code '
+            'leaves open for a request; its picks are marked judged',
+        )
+        parser.add_argument(
+            '--read',
+            action='store_true',
+            help='let a language model on OpenRouter (needs OPENROUTER_API_KEY) read the files the extractors leave '
+            'unexplained for the requests they send; the code checks each claim, and links found so are marked read',
+        )
+        parser.add_argument('--read-model', help=f'the model --read asks (default: {MuseReader.MODEL})')
 
     def run(self, args):
         from ..adapters.treesitter import FileMentions, TreeSitterExtractor  # needs the optional tree-sitter packages
@@ -93,6 +107,12 @@ class LinksCommand(Command):
         named = NamedChannels(FileMentions({r.name: r.path for r in repos}), names)
         extraction.routes += named.routes(extraction.calls, extraction.routes)
         links = finder.find(extraction)
+        if args.read:
+            folders = {r.name: r.path for r in repos}
+            options = ReadOptions(
+                Aliases.parse(args.alias), args.include_tests, args.within, extractor.is_test, args.read_model
+            )
+            links = ReadPass(self.report).run(links, extraction, folders, options)
         if args.jev:
             folders = {r.name: r.path for r in repos}
             links = JudgePass(self.report).run(links, extraction, folders, args.include_tests, args.within)

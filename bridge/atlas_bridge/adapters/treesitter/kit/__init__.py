@@ -9,6 +9,7 @@ from .mentions import FileMentions
 from .pages import PageTags
 from .resolver import ValueResolver
 from .source import SourceFile
+from .sources import RepositorySources
 from .strings import StringTemplate, UrlTemplate
 from .syntax import Syntax
 from .workspace import Workspace
@@ -24,6 +25,7 @@ __all__ = [
     'Grammar',
     'LanguageExtractor',
     'RepositoryFiles',
+    'RepositorySources',
     'RouteCollector',
     'SourceFile',
     'StringTemplate',

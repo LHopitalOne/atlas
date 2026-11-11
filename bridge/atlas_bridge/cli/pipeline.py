@@ -19,6 +19,7 @@ from .enrich import EnrichPass
 from .inputs import GraphInput, JsonFile
 from .judge import JudgePass
 from .links import LinksCommand
+from .read import ReadOptions, ReadPass
 from .scipcheck import ScipCheck
 
 
@@ -27,7 +28,7 @@ class MapPipeline:
 
     def __init__(self, options, report):
         """options: parsed map arguments (out_dir, refresh, aliases, include_tests, verify, sandbox, group, title,
-        graph_json, within, jev, enrich)."""
+        graph_json, within, jev, read, enrich)."""
         self._o = options
         self._report = report
         self._runner = GraphifyRunner(self._still_mapping)
@@ -89,6 +90,8 @@ class MapPipeline:
         except (BridgeError, ImportError) as e:
             self._report(f'  links     none found: {e}')
             return []
+        if getattr(self._o, 'read', False):
+            links = self._read(links, extraction, repos, extractor)
         if getattr(self._o, 'jev', False):
             links = self._judged(links, extraction, repos)
         if self._o.verify:
@@ -106,6 +109,16 @@ class MapPipeline:
             f'services, {len(links) - len(found) - outside} requests with no route found'
         )
         return links
+
+    def _read(self, links, extraction, repos, extractor):
+        """The links a model's reading adds; the rules' links unchanged when it cannot be asked."""
+        try:
+            folders = {r.name: r.path for r in repos}
+            options = ReadOptions(self._o.aliases, self._o.include_tests, self._o.within, extractor.is_test)
+            return ReadPass(self._report).run(links, extraction, folders, options)
+        except BridgeError as e:
+            self._report(f'  read      not asked: {e}')
+            return links
 
     def _judged(self, links, extraction, repos):
         """Jev's picks among the routes the code leaves open; the rules' links unchanged when it cannot be asked."""
