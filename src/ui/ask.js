@@ -11,13 +11,13 @@ import { renderAnswer } from '../ask/format.js';
 import { refName, resolve, search, toolSet } from '../ask/tools.js';
 import { answerLocally } from '../ask/local.js';
 import { askClaude, claudeAvailable, disableClaude } from '../ask/claude.js';
-import { askOpenRouter, llmTransport, useKey } from '../ask/openrouter.js';
+import { askOpenRouter, llmTransport, useKey, writtenMap } from '../ask/openrouter.js';
 import { sourceLines } from './code-view.js';
 import { select } from '../app/selection.js';
 import { setHover, updateFocus } from '../app/focus.js';
 import { fitNodes, flyTo, flyToTerr } from '../app/camera.js';
 import { requestRender } from '../render/frame.js';
-import { announce, copyText } from './feedback.js';
+import { announce, copyText, toast } from './feedback.js';
 import { closeDirections } from './directions.js';
 import { renderAttn, syncLegend } from './attention.js';
 import { dotHTML, ICON_X } from './fragments.js';
@@ -37,6 +37,13 @@ let busy = null; // AbortController of the running question
 let mode = ASK_ENGINE === 'demo' || ASK_ENGINE === 'openrouter' ? 'demo' : 'local'; // a model takes over once reachable
 let showing = -1; // index of the answer whose items are on the map
 let mention = null; // { start, items, act }
+let off = false; // a map `atlas map` wrote without a key, and no `atlas serve` proxy: Ask is turned off
+
+const OFF_NOTE =
+  'Ask Atlas is off: this map was written without an OpenRouter key. Set OPENROUTER_API_KEY and run atlas map again.';
+
+/** Whether Ask Atlas is turned off on this page (search and shortcuts leave it out). */
+export const askOff = () => off;
 
 const ICON_SEND =
   '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 12V2M2.5 6.5 7 2l4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -78,6 +85,7 @@ function suggestions() {
 
 /** Open the panel, optionally asking a question right away. */
 export function openAsk(question) {
+  if (off) return toast(OFF_NOTE);
   if (route.from || route.to || route.picking) closeDirections();
   if (store.attnOpen) {
     store.attnOpen = false;
@@ -421,7 +429,7 @@ function setLLM(t) {
 
 function renderKeybar() {
   const bar = ASK.querySelector('.keybar');
-  if (bar) bar.hidden = !(ASK_ENGINE === 'openrouter' && mode !== 'llm');
+  if (bar) bar.hidden = !(ASK_ENGINE === 'openrouter' && mode !== 'llm' && !writtenMap());
 }
 
 function renderThread(scroll) {
@@ -739,6 +747,14 @@ function onClick(e) {
 
 /** Wire the panel. Called once from main.js. */
 export function init() {
+  // a written map: its own key answers from the first question; without one, Ask is on only behind `atlas serve`
+  const page = ASK_ENGINE === 'openrouter' && writtenMap();
+  if (page && page.key) mode = 'llm';
+  else if (page)
+    llmTransport().then(t => {
+      off = !t;
+      if (t) setLLM(t);
+    });
   ASK.addEventListener('click', onClick);
   ASK.addEventListener('keydown', onKeydown);
   ASK.addEventListener('input', onInput);

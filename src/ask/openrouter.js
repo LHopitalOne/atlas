@@ -1,9 +1,11 @@
 /**
  * Asking a model on OpenRouter from the page (ASK_MODEL, Meta's Muse Ember by default), with the same tools and
- * rules as the Claude engine. Two ways to reach it, so no key is ever written into the page:
+ * rules as the Claude engine. Three ways to reach it, first that works:
+ * - a map `atlas map` wrote carries its key in the page (#askKey, OPENROUTER_API_KEY when it ran), so Ask works by
+ *   opening the file; such a map written without a key has Ask turned off unless `atlas serve` shows it;
  * - `atlas serve` serves the page with a local proxy that adds OPENROUTER_API_KEY on the way out;
- * - anywhere else, the viewer gives their own key once; it stays in this tab's sessionStorage and goes only to
- *   openrouter.ai.
+ * - on a built page (the demo, the Self map) the viewer may give their own key once; it stays in this tab's
+ *   sessionStorage and goes only to openrouter.ai.
  * The model calls the map's tools in a loop (OpenAI-style tool calls) until it answers, at most ASK_LLM.maxSteps.
  */
 import { ASK_LLM, ASK_MODEL } from '../config.js';
@@ -19,25 +21,42 @@ function storedKey() {
   }
 }
 
-/** How this page reaches OpenRouter: the local proxy when `atlas serve` is serving it, else a stored key; or null. */
+let written; // { key } for a map `atlas map` wrote (key null when it had none); null for a built page
+
+/** The key `atlas map` wrote into the page: { key } on a written map, null on a built page. */
+export function writtenMap() {
+  if (written !== undefined) return written;
+  const el = typeof document === 'undefined' ? null : document.getElementById('askKey');
+  try {
+    written = el && el.textContent.trim() ? JSON.parse(el.textContent) : null;
+  } catch (_) {
+    written = null;
+  }
+  return written;
+}
+
+/** How this page reaches OpenRouter: the key written into it, the local proxy when `atlas serve` is serving it, or
+ * (on a built page only) a key the viewer gave; null when there is none. */
 export async function llmTransport() {
   if (transport) return transport;
+  const page = writtenMap();
+  if (page && page.key) return (transport = keyTransport(page.key, 'page'));
   try {
     const r = await fetch(`${ASK_LLM.proxy}/ping`, { cache: 'no-store' });
     if (r.ok) return (transport = { url: `${ASK_LLM.proxy}/chat/completions`, headers: {}, via: 'proxy' });
   } catch (_) {
     // not served by `atlas serve`
   }
-  const key = storedKey();
-  if (key) return (transport = keyTransport(key));
+  const key = page ? '' : storedKey();
+  if (key) return (transport = keyTransport(key, 'key'));
   return null;
 }
 
-function keyTransport(key) {
+function keyTransport(key, via) {
   return {
     url: `${ASK_LLM.direct}/chat/completions`,
     headers: { Authorization: `Bearer ${key}`, 'X-Title': 'Atlas' },
-    via: 'key',
+    via,
   };
 }
 
@@ -48,7 +67,7 @@ export function useKey(key) {
   } catch (_) {
     // storage blocked: the key still works until the page closes
   }
-  transport = keyTransport(key);
+  transport = keyTransport(key, 'key');
 }
 
 /** Forget the viewer's key (after OpenRouter refuses it). */
@@ -88,7 +107,7 @@ async function complete(messages, tools, signal) {
   });
   if (r.status === 401 || r.status === 403) {
     if (t.via === 'key') forgetKey();
-    throw { code: 'no_key', message: 'OpenRouter refused the key.' };
+    throw { code: 'no_key', message: `OpenRouter refused the key${t.via === 'page' ? ' written into this map' : ''}.` };
   }
   if (r.status === 429) throw { code: 'rate_limited' };
   if (!r.ok) throw { code: 'failed', message: `OpenRouter answered ${r.status}` };

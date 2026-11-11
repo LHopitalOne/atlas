@@ -72,6 +72,11 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
 
 - **The search bar is the one way in.** Typing a question offers "Ask Atlas: …" first; typing a name offers it last.
   `A` or the "Ask Atlas" action opens it empty. Why: one box for finding, asking and acting; no competing chat bubble.
+- **A map `atlas map` writes asks the model on its own.** The page carries OPENROUTER_API_KEY (`#askKey`), so Ask
+  works by opening atlas.html, like Graphify's graph.html; `--no-ask-key` leaves it out. Written without a key, Ask is
+  off (no sample answers, no key box) unless `--serve` shows the map. Why: one file to open, nothing to run; the
+  cost is that anyone holding the file can use the key, so the map command says so when it writes one. Built pages
+  (the demo, Self) keep sample answers and the viewer's own key.
 - **The conversation lives in the left panel,** one left panel at a time: opening Ask closes Directions and Needs
   attention (and the other way round), and the Key folds while it is open.
 - **Every map item an answer mentions is a numbered chip,** listed again under Sources. Hovering a chip or source rings

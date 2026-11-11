@@ -13,7 +13,7 @@ import { announce } from './feedback.js';
 import { dotHTML, nameAttrs } from './fragments.js';
 import { $ } from '../util/dom.js';
 import { esc, fmt } from '../util/format.js';
-import { openAsk } from './ask.js';
+import { askOff, openAsk } from './ask.js';
 
 let hits = [];
 let act = 0;
@@ -67,7 +67,7 @@ const ACTIONS = () => [
     },
   },
   { label: 'Get directions', kbd: 'D', run: () => startDirections() },
-  { label: 'Ask Atlas a question', kbd: 'A', run: () => openAsk() },
+  ...(askOff() ? [] : [{ label: 'Ask Atlas a question', kbd: 'A', run: () => openAsk() }]),
   { label: 'Fit to screen', kbd: 'F', run: () => fitAll() },
 ];
 const GROUP = h =>
@@ -153,7 +153,7 @@ function runSearch() {
     .sort((a, b) => order.indexOf(GROUP(a)) - order.indexOf(GROUP(b)));
   // a question goes to Ask Atlas: first when it reads like one, last otherwise
   const askHit = ['q', 0, Q.value.trim()];
-  hits = looksLikeQuestion(q) ? [askHit, ...hits] : [...hits, askHit];
+  if (!askOff()) hits = looksLikeQuestion(q) ? [askHit, ...hits] : [...hits, askHit];
   act = 0;
   drawResults(q);
 }

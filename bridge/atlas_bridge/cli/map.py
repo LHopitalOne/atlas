@@ -52,6 +52,13 @@ class MapCommand(Command):
         )
         parser.add_argument('--no-open', action='store_true', help='write the page without opening a browser')
         parser.add_argument(
+            '--no-ask-key',
+            dest='ask_key',
+            action='store_false',
+            help='leave OPENROUTER_API_KEY out of atlas.html (by default it is written in so Ask Atlas works by '
+            'opening the file; without it Ask is off unless --serve shows the map)',
+        )
+        parser.add_argument(
             '--serve',
             action='store_true',
             help='show the map from a local server (Ask then reaches OpenRouter with OPENROUTER_API_KEY) until Ctrl+C',

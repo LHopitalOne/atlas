@@ -84,9 +84,7 @@ class MapServer:
 
     def run(self, page: str, open_browser: bool = True, report=print):
         has_key = bool(os.environ.get(LlmProxy.KEY_VARIABLE))
-        chat = (
-            'Ask uses OPENROUTER_API_KEY through this server' if has_key else 'no OPENROUTER_API_KEY: Ask asks for one'
-        )
+        chat = 'Ask uses OPENROUTER_API_KEY through this server' if has_key else 'no OPENROUTER_API_KEY: Ask is off'
         report(f'atlas: serving {self.url}/{page} ({chat}); Ctrl+C to stop')
         if open_browser:
             threading.Timer(0.3, webbrowser.open, (f'{self.url}/{page}',)).start()

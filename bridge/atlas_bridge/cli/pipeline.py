@@ -25,6 +25,7 @@ from .scipcheck import ScipCheck, ScipPass
 
 class MapPipeline:
     MAX_GRAPH_JSON_NODES = 200_000  # PostHog's 760,000-node merged graph is a 1.2 GB file nobody asked for
+    KEY_VARIABLE = 'OPENROUTER_API_KEY'  # its value goes into atlas.html for Ask Atlas
 
     def __init__(self, options, report):
         """options: parsed map arguments (out_dir, refresh, aliases, include_tests, verify, sandbox, group, title,
@@ -54,7 +55,7 @@ class MapPipeline:
                 f'  graph     graph.json not written: {len(graph["nodes"]):,} nodes (add --graph-json to write it)'
             )
         self._save('spec.json', spec)
-        return self._save('atlas.html', spec, AtlasPage().write)
+        return self._save('atlas.html', spec, self._page().write)
 
     def _graph(self, repo):
         """The repository's Graphify graph: the one already in graphify-out/ unless --refresh, else a new one; an
@@ -163,6 +164,15 @@ class MapPipeline:
         result = work()
         self._report(f'  {step:<9} done in {time.monotonic() - start:.1f}s')
         return result
+
+    def _page(self):
+        """The page, with OPENROUTER_API_KEY written in for Ask Atlas unless --no-ask-key; Ask is off without one."""
+        key = os.environ.get(self.KEY_VARIABLE, '') if getattr(self._o, 'ask_key', True) else ''
+        if key:
+            self._report(f'  page      Ask Atlas uses {self.KEY_VARIABLE}, written into atlas.html: share it with care')
+        else:
+            self._report('  page      Ask Atlas is off: no OpenRouter key written into atlas.html')
+        return AtlasPage(key=key)
 
     def _save(self, name, data, write=JsonFile.write):
         """Write one output file (or, with no name, make the output folder)."""

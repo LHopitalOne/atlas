@@ -92,6 +92,18 @@ class AtlasCommandTest(unittest.TestCase):
         self.assertEqual(len(spec['links']), 2)
         self.assertTrue(all(lk['call'].get('code') and lk['route'].get('code') for lk in spec['links']))
 
+    def test_the_openrouter_key_goes_into_the_page_unless_left_out(self):
+        with Shop() as shop, mock.patch.dict(os.environ, {'OPENROUTER_API_KEY': 'sk-or-test'}):
+            code, log, out = shop.atlas()
+            html = load_text(os.path.join(out, 'atlas.html'))
+            code2, log2, _ = shop.atlas(0, '--no-ask-key')
+            keyless = load_text(os.path.join(out, 'atlas.html'))
+        self.assertEqual((code, code2), (0, 0), log)
+        self.assertIn('id="askKey">{"key":"sk-or-test"}</script>', html)
+        self.assertIn('share it with care', log)
+        self.assertIn('id="askKey">{"key":null}</script>', keyless)
+        self.assertIn('Ask Atlas is off', log2)
+
     def test_very_large_graphs_skip_graph_json(self):
         from atlas_bridge.cli.pipeline import MapPipeline
 
@@ -181,14 +193,19 @@ class PartsTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             template = os.path.join(d, 't.html')
             with open(template, 'w', encoding='utf-8') as f:
-                f.write(f'<p>{AtlasPage.SLOT}</p>')
-            html = AtlasPage(template).render({'title': '</script><b>'})
+                f.write(f'<p>{AtlasPage.KEY_SLOT}{AtlasPage.SLOT}</p>')
+            html = AtlasPage(template, key='k</script>').render({'title': '</script><b>'})
+            keyless = AtlasPage(template).render({})
         self.assertEqual(
-            html, '<p><script type="application/json" id="selfGraph">{"title":"\\u003c/script>\\u003cb>"}</script></p>'
+            html,
+            '<p><script type="application/json" id="askKey">{"key":"k\\u003c/script>"}</script>'
+            '<script type="application/json" id="selfGraph">{"title":"\\u003c/script>\\u003cb>"}</script></p>',
         )
+        self.assertIn('id="askKey">{"key":null}</script>', keyless)  # a written map without a key: Ask is off
 
     def test_page_template_is_shipped_and_missing_is_an_output_error(self):
         self.assertIn(AtlasPage.SLOT, load_text(AtlasPage.TEMPLATE))
+        self.assertIn(AtlasPage.KEY_SLOT, load_text(AtlasPage.TEMPLATE))
         with self.assertRaises(PageTemplateError) as e:
             AtlasPage('/nowhere.html').render({})
         self.assertIsInstance(e.exception, OutputError)

@@ -709,6 +709,7 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 </div>
 
 <script type="application/json" id="selfGraph">__ATLAS_SPEC__</script>
+<script type="application/json" id="askKey"></script>
 <script type="application/json" id="selfSource">{}</script>
 <script type="application/json" id="mapIndex">[]</script>
 <script>
@@ -3360,22 +3361,35 @@ ${context}` },
       return "";
     }
   }
+  var written;
+  function writtenMap() {
+    if (written !== void 0) return written;
+    const el = typeof document === "undefined" ? null : document.getElementById("askKey");
+    try {
+      written = el && el.textContent.trim() ? JSON.parse(el.textContent) : null;
+    } catch (_) {
+      written = null;
+    }
+    return written;
+  }
   async function llmTransport() {
     if (transport) return transport;
+    const page = writtenMap();
+    if (page && page.key) return transport = keyTransport(page.key, "page");
     try {
       const r = await fetch(`${ASK_LLM.proxy}/ping`, { cache: "no-store" });
       if (r.ok) return transport = { url: `${ASK_LLM.proxy}/chat/completions`, headers: {}, via: "proxy" };
     } catch (_) {
     }
-    const key = storedKey();
-    if (key) return transport = keyTransport(key);
+    const key = page ? "" : storedKey();
+    if (key) return transport = keyTransport(key, "key");
     return null;
   }
-  function keyTransport(key) {
+  function keyTransport(key, via) {
     return {
       url: `${ASK_LLM.direct}/chat/completions`,
       headers: { Authorization: `Bearer ${key}`, "X-Title": "Atlas" },
-      via: "key"
+      via
     };
   }
   function useKey(key) {
@@ -3383,7 +3397,7 @@ ${context}` },
       sessionStorage.setItem(ASK_LLM.keyStore, key);
     } catch (_) {
     }
-    transport = keyTransport(key);
+    transport = keyTransport(key, "key");
   }
   function forgetKey() {
     try {
@@ -3418,7 +3432,7 @@ ${context}` },
     });
     if (r.status === 401 || r.status === 403) {
       if (t.via === "key") forgetKey();
-      throw { code: "no_key", message: "OpenRouter refused the key." };
+      throw { code: "no_key", message: `OpenRouter refused the key${t.via === "page" ? " written into this map" : ""}.` };
     }
     if (r.status === 429) throw { code: "rate_limited" };
     if (!r.ok) throw { code: "failed", message: `OpenRouter answered ${r.status}` };
@@ -3639,7 +3653,7 @@ ${context}` },
       }
     },
     { label: "Get directions", kbd: "D", run: () => startDirections() },
-    { label: "Ask Atlas a question", kbd: "A", run: () => openAsk() },
+    ...askOff() ? [] : [{ label: "Ask Atlas a question", kbd: "A", run: () => openAsk() }],
     { label: "Fit to screen", kbd: "F", run: () => fitAll() }
   ];
   var GROUP = (h) => h[0] === "q" ? "Ask Atlas" : h[0] === "a" ? "Actions" : h[0] === "m" ? "By what it does" : h[0] === "h" ? "Recent" : h[0] === "r" ? "Repositories" : h[0] === "d" ? "Domains" : h[1] < store.G.S ? "Services" : "Endpoints";
@@ -3691,7 +3705,7 @@ ${context}` },
     });
     hits = top.map((x) => x[1] < 0 ? x[2] : it[x[1]]).concat(meaning).sort((a, b) => order2.indexOf(GROUP(a)) - order2.indexOf(GROUP(b)));
     const askHit = ["q", 0, Q.value.trim()];
-    hits = looksLikeQuestion(q2) ? [askHit, ...hits] : [...hits, askHit];
+    if (!askOff()) hits = looksLikeQuestion(q2) ? [askHit, ...hits] : [...hits, askHit];
     act = 0;
     drawResults(q2);
   }
@@ -4662,6 +4676,9 @@ FLOW: ${flowLine}`;
   var mode = ASK_ENGINE === "demo" || ASK_ENGINE === "openrouter" ? "demo" : "local";
   var showing = -1;
   var mention = null;
+  var off = false;
+  var OFF_NOTE = "Ask Atlas is off: this map was written without an OpenRouter key. Set OPENROUTER_API_KEY and run atlas map again.";
+  var askOff = () => off;
   var ICON_SEND = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 12V2M2.5 6.5 7 2l4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var ICON_STOP = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="2" width="8" height="8" rx="1.5" fill="currentColor"/></svg>';
   var ICON_NEW = '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
@@ -4689,6 +4706,7 @@ FLOW: ${flowLine}`;
     ];
   }
   function openAsk(question) {
+    if (off) return toast(OFF_NOTE);
     if (route.from || route.to || route.picking) closeDirections();
     if (store.attnOpen) {
       store.attnOpen = false;
@@ -4968,7 +4986,7 @@ FLOW: ${flowLine}`;
   }
   function renderKeybar() {
     const bar = ASK.querySelector(".keybar");
-    if (bar) bar.hidden = !(ASK_ENGINE === "openrouter" && mode !== "llm");
+    if (bar) bar.hidden = !(ASK_ENGINE === "openrouter" && mode !== "llm" && !writtenMap());
   }
   function renderThread(scroll) {
     const box = ASK.querySelector(".ask-thread");
@@ -5220,6 +5238,13 @@ FLOW: ${flowLine}`;
     }
   }
   function init5() {
+    const page = ASK_ENGINE === "openrouter" && writtenMap();
+    if (page && page.key) mode = "llm";
+    else if (page)
+      llmTransport().then((t) => {
+        off = !t;
+        if (t) setLLM(t);
+      });
     ASK.addEventListener("click", onClick2);
     ASK.addEventListener("keydown", onKeydown3);
     ASK.addEventListener("input", onInput2);
@@ -7208,9 +7233,9 @@ FLOW: ${flowLine}`;
     for (let s = 0; s < S; s++) {
       const { ds, take } = plans[s], slots = [];
       take.forEach((tk, ri) => {
-        const off = ri % 2 ? Math.PI / Math.max(tk, 1) : 0;
+        const off2 = ri % 2 ? Math.PI / Math.max(tk, 1) : 0;
         for (let j = 0; j < tk; j++)
-          slots.push({ ring: ri, d: ds[ri], a: off + j * 2 * Math.PI / tk - Math.PI, used: false });
+          slots.push({ ring: ri, d: ds[ri], a: off2 + j * 2 * Math.PI / tk - Math.PI, used: false });
       });
       const pref = [], rest = [];
       for (let i = sLs[s]; i < sLe[s]; i++) {
