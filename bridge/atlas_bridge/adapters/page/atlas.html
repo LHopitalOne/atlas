@@ -5620,7 +5620,7 @@ FLOW: ${flowLine}`;
           o += `<div class="none">${side === "src" ? "No known callers." : "Calls nothing outside its service."}</div>`;
         for (const e of L.slice(0, C)) {
           const t = side === "src" ? g.CS[e] : g.CD[e], st = g.CST[e];
-          o += `<button class="row" data-id="${t}">${dotHTML(t)}<span class="rn${t >= g.S ? " mono" : ""}" ${nameAttrs}>${esc(g.name(t))}<span class="rs">${t >= g.S ? esc(g.svcName[g.own(t)]) : esc(g.repoName[g.domRepo[g.svcDom[t]]])}</span></span><span class="rm"><span class="badge ${BCLS[st]}">${st === 3 ? "Inferred" : STATUS[st]}</span></span></button>`;
+          o += `<button class="row" data-id="${t}">${dotHTML(t)}<span class="rn${t >= g.S ? " mono" : ""}" ${nameAttrs}>${esc(g.name(t))}<span class="rs">${t >= g.S ? esc(g.svcName[g.own(t)]) : esc(g.repoName[g.domRepo[g.svcDom[t]]])}</span></span><span class="rm">${g.CPR && g.CPR[e] ? '<span class="badge badge-scip" title="A SCIP index shows this use in the code">SCIP</span>' : `<span class="badge ${BCLS[st]}">${st === 3 ? "Inferred" : STATUS[st]}</span>`}</span></button>`;
         }
         return o + moreBtn(key, L.length, C) + `</div>`;
       };
@@ -5809,6 +5809,8 @@ FLOW: ${flowLine}`;
       const col = i === 0 ? css(theme.text, 0.55) : css(theme.st[i]);
       h += `<button class="lg-row" data-st="${i}" aria-pressed="${!!stOn[i] && (!store.issuesOnly || i === 1 || i === 2)}"><span class="sw-line${i === 3 ? " dash" : ""}" style="--c:${col}"></span><span>${s}</span><span class="n">${fmt(g.BYST[i])}</span></button>`;
     });
+    if (g.SCIPN)
+      h += keyRow(`<span class="sw-dot" style="--c:${css(theme.proof)}"></span>`, "Seen by SCIP", g.SCIPN);
     h += `</div><div class="lg-group">`;
     if (store.colorMode === "health")
       h += `<div class="lg-h">Service health</div><div class="hgrad"></div><div class="hgrad-l"><span>Clean</span><span>Mostly broken</span></div>`;
@@ -7432,11 +7434,12 @@ FLOW: ${flowLine}`;
     });
     const N = services + leaves;
     (spec.edges || []).forEach((e, i) => {
-      if (!Array.isArray(e) || e.length !== 3) {
-        errs.push(`edges[${i}] must be [source, target, status]`);
+      if (!Array.isArray(e) || e.length < 3 || e.length > 4) {
+        errs.push(`edges[${i}] must be [source, target, status] or [source, target, status, seenBySCIP]`);
         return;
       }
-      const [a, b, st] = e;
+      const [a, b, st, seen] = e;
+      if (e.length === 4 && ![0, 1].includes(seen)) errs.push(`edges[${i}] has ${seen} for seen by SCIP; use 0 or 1`);
       if (!(Number.isInteger(a) && a >= 0 && a < N) || !(Number.isInteger(b) && b >= 0 && b < N))
         errs.push(`edges[${i}] refers to a node outside 0..${N - 1}`);
       if (![0, 1, 2, 3].includes(st)) errs.push(`edges[${i}] has status ${st}; use 0, 1, 2 or 3`);
@@ -7506,13 +7509,14 @@ FLOW: ${flowLine}`;
     };
   }
   function contractsFrom(edges) {
-    const CS = new Uint32Array(edges.length), CD = new Uint32Array(edges.length), CST = new Uint8Array(edges.length);
-    edges.forEach(([a, b, st], e) => {
+    const CS = new Uint32Array(edges.length), CD = new Uint32Array(edges.length), CST = new Uint8Array(edges.length), CPR = new Uint8Array(edges.length);
+    edges.forEach(([a, b, st, seen], e) => {
       CS[e] = a;
       CD[e] = b;
       CST[e] = st;
+      CPR[e] = seen === 1 ? 1 : 0;
     });
-    return { CS, CD, CST };
+    return { CS, CD, CST, CPR };
   }
   function hubWeights({ S, sLs, sLe, leafSvc }, { CS, CD }) {
     const hub = new Float64Array(S);
@@ -7525,9 +7529,11 @@ FLOW: ${flowLine}`;
     if (problems.length) throw new Error("Invalid graph spec:\n- " + problems.join("\n- "));
     const T0 = performance.now();
     const { loc, info, ...hier } = flattenHierarchy(spec);
-    const contracts = contractsFrom(spec.edges);
+    const { CPR, ...contracts } = contractsFrom(spec.edges);
     const g = finish({ ...hier, ...contracts, hub: hubWeights(hier, contracts), T0 });
     g.meta = spec.meta;
+    g.CPR = CPR;
+    g.SCIPN = CPR.reduce((n, v) => n + v, 0);
     g.loc = loc;
     g.doc = (i) => info(i)[0];
     g.sig = (i) => info(i)[1];

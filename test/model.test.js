@@ -66,6 +66,16 @@ test('validateSpec explains problems', () => {
   assert.throws(() => buildSpec(bad), /Invalid graph spec/);
 });
 
+test('an edge a SCIP index shows carries a fourth item, counted apart', () => {
+  const spec = tinySpec();
+  spec.edges[0] = [...spec.edges[0], 1];
+  const g = buildSpec(spec);
+  assert.equal(g.SCIPN, 1);
+  assert.deepEqual([...g.CPR], [1, ...Array(spec.edges.length - 1).fill(0)]);
+  spec.edges[1] = [...spec.edges[1], 5];
+  assert.ok(validateSpec(spec).some(e => e.includes('seen by SCIP')));
+});
+
 test('the embedded self graph is a valid spec', () => {
   const spec = JSON.parse(readFileSync('generated/self-graph.json', 'utf8'));
   assert.deepEqual(validateSpec(spec), []);

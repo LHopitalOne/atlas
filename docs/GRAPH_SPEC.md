@@ -49,7 +49,9 @@ In the example: `cart_api=0, pay_api=1, ledger=2`, then the leaf `POST /cart=3`.
 
 ## Edges
 
-`[source, target, status]`: source depends on, calls or uses target. Either end may be a service or a leaf.
+`[source, target, status]`: source depends on, calls or uses target. Either end may be a service or a leaf. An
+optional fourth item, `1`, says a SCIP index (a compiler-grade view of the code) shows the use: the Key counts these
+as "Seen by SCIP" and the inspector badges them `SCIP`. The bridge writes it for every edge its SCIP step sees.
 
 | status | default label | meaning on the map |
 | --- | --- | --- |

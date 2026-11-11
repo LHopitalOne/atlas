@@ -54,6 +54,9 @@ export function renderLegend() {
     const col = i === 0 ? css(theme.text, 0.55) : css(theme.st[i]);
     h += `<button class="lg-row" data-st="${i}" aria-pressed="${!!stOn[i] && (!store.issuesOnly || i === 1 || i === 2)}"><span class="sw-line${i === 3 ? ' dash' : ''}" style="--c:${col}"></span><span>${s}</span><span class="n">${fmt(g.BYST[i])}</span></button>`;
   });
+  if (g.SCIPN)
+    // of the edges above, those a SCIP index (a compiler-grade view of the code) shows
+    h += keyRow(`<span class="sw-dot" style="--c:${css(theme.proof)}"></span>`, 'Seen by SCIP', g.SCIPN);
   h += `</div><div class="lg-group">`;
   if (store.colorMode === 'health')
     h += `<div class="lg-h">Service health</div><div class="hgrad"></div><div class="hgrad-l"><span>Clean</span><span>Mostly broken</span></div>`;

@@ -7,6 +7,7 @@ from .document import Occurrence, ScipDocument
 from .index import ScipIndex
 from .indexers import INDEXERS, PythonScipIndexer, RustScipIndexer, ScipIndexer, TypeScriptScipIndexer
 from .oracle import ScipOracle
+from .references import ScipReferences
 from .sandbox import DockerImage, SandboxedPythonIndexer
 from .symbol import ScipSymbol
 from .wire import WireReader
@@ -24,6 +25,7 @@ __all__ = [
     'ScipIndex',
     'ScipIndexer',
     'ScipOracle',
+    'ScipReferences',
     'ScipSymbol',
     'TypeScriptScipIndexer',
     'WireReader',

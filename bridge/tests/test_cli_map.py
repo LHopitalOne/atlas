@@ -123,9 +123,12 @@ class AtlasCommandTest(unittest.TestCase):
 
     def test_scip_without_tools_is_one_line_per_repo(self):
         with Shop() as shop, mock.patch('shutil.which', return_value=None):
-            code, log, _ = shop.atlas(0, '--verify')
+            code, log, _ = shop.atlas(0)  # SCIP is on by default
         self.assertEqual(code, 0, log)
-        self.assertIn('no index written; links are not checked with SCIP', log)
+        self.assertIn('no index written; links and edges are not checked with SCIP', log)
+        with Shop() as shop:
+            code, log, _ = shop.atlas(0, '--no-scip')
+        self.assertIn('not run (--no-scip)', log)
 
     def test_missing_folder_is_an_input_error(self):
         err = io.StringIO()

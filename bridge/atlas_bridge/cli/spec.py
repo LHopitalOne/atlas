@@ -5,12 +5,14 @@ import sys
 
 from ..adapters.atlas import AtlasSpecPresenter, CodeSource, HttpLayer, LinkFile
 from ..adapters.graphify import GraphifyReader
+from ..adapters.scip import ScipIndex
 from ..core.errors import LinkFormatError
 from ..core.model import CodeGraph
 from ..usecases.draw import GROUPINGS, MapDrawer
 from .command import Command
 from .enrich import EnrichPass
-from .inputs import GraphInput, JsonFile, RepositoryInput
+from .inputs import GraphInput, JsonFile, RepositoryInput, ScipInput
+from .scipcheck import ScipPass
 
 
 class SpecCommand(Command):
@@ -46,6 +48,9 @@ class SpecCommand(Command):
             action='store_true',
             help='with --repo folders: a small model (meta/muse-ember on OpenRouter) says what each file does',
         )
+        parser.add_argument(
+            '--scip-dir', help='a folder of <repo>[.<language>].scip files: adds the edges they show, marked as SCIP'
+        )
 
     def run(self, args):
         graph = CodeGraph()
@@ -56,6 +61,11 @@ class SpecCommand(Command):
         http = self._http(args)
         if http is not None:
             http.add_files(graph)
+        if args.scip_dir:
+            indexes = {}
+            for i in ScipInput.in_folder(args.scip_dir):
+                indexes.setdefault(i.name, []).append(ScipIndex.read(i.path))
+            ScipPass(self.report).run(graph, indexes)
         described, model = self._described(args, graph, http)
         view = MapDrawer(GROUPINGS[args.group]).draw(graph)
         spec = AtlasSpecPresenter(args.title, http, described, model).present(view)

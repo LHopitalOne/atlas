@@ -27,6 +27,20 @@ class GraphifyLinkWriter(Presenter):
     def __init__(self, base: dict | None = None):
         self._base = base
 
+    @staticmethod
+    def add_checked(graph: dict, pairs) -> dict:
+        """Mark the edges a SCIP index shows (pairs of node ids): an edge the graph has becomes extracted and `scip`,
+        a missing one is added as a `uses` edge. `graphify query/path` then walk what the compiler-grade index saw."""
+        edges = {(e.get('source'), e.get('target')): e for e in graph['links']}
+        for a, b in pairs:
+            e = edges.get((a, b))
+            if e is None:
+                e = {'source': a, 'target': b, 'relation': 'uses'}
+                graph['links'].append(e)
+                edges[(a, b)] = e
+            e.update({'confidence': 'EXTRACTED', 'confidence_score': 1.0, 'scip': True})
+        return graph
+
     def present(self, result):
         """result: the links (usecases.link.Link) to add."""
         self._out = self._copy(self._base)

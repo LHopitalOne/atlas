@@ -36,11 +36,12 @@ export function validateSpec(spec) {
   });
   const N = services + leaves;
   (spec.edges || []).forEach((e, i) => {
-    if (!Array.isArray(e) || e.length !== 3) {
-      errs.push(`edges[${i}] must be [source, target, status]`);
+    if (!Array.isArray(e) || e.length < 3 || e.length > 4) {
+      errs.push(`edges[${i}] must be [source, target, status] or [source, target, status, seenBySCIP]`);
       return;
     }
-    const [a, b, st] = e;
+    const [a, b, st, seen] = e;
+    if (e.length === 4 && ![0, 1].includes(seen)) errs.push(`edges[${i}] has ${seen} for seen by SCIP; use 0 or 1`);
     if (!(Number.isInteger(a) && a >= 0 && a < N) || !(Number.isInteger(b) && b >= 0 && b < N))
       errs.push(`edges[${i}] refers to a node outside 0..${N - 1}`);
     if (![0, 1, 2, 3].includes(st)) errs.push(`edges[${i}] has status ${st}; use 0, 1, 2 or 3`);
@@ -132,17 +133,19 @@ function flattenHierarchy(spec) {
   };
 }
 
-/** Edges [source, target, status] as typed arrays. */
+/** Edges [source, target, status, seenBySCIP?] as typed arrays; CPR[e] is 1 when a SCIP index shows edge e. */
 function contractsFrom(edges) {
   const CS = new Uint32Array(edges.length),
     CD = new Uint32Array(edges.length),
-    CST = new Uint8Array(edges.length);
-  edges.forEach(([a, b, st], e) => {
+    CST = new Uint8Array(edges.length),
+    CPR = new Uint8Array(edges.length);
+  edges.forEach(([a, b, st, seen], e) => {
     CS[e] = a;
     CD[e] = b;
     CST[e] = st;
+    CPR[e] = seen === 1 ? 1 : 0;
   });
-  return { CS, CD, CST };
+  return { CS, CD, CST, CPR };
 }
 
 /** Packing weight per service: its size plus half its incoming contracts, so busy services sit central. */
@@ -164,9 +167,11 @@ export function buildSpec(spec) {
   if (problems.length) throw new Error('Invalid graph spec:\n- ' + problems.join('\n- '));
   const T0 = performance.now();
   const { loc, info, ...hier } = flattenHierarchy(spec);
-  const contracts = contractsFrom(spec.edges);
+  const { CPR, ...contracts } = contractsFrom(spec.edges);
   const g = finish({ ...hier, ...contracts, hub: hubWeights(hier, contracts), T0 });
   g.meta = spec.meta;
+  g.CPR = CPR; // edges a SCIP index shows (by edge, in spec order: layout keeps it)
+  g.SCIPN = CPR.reduce((n, v) => n + v, 0);
   g.loc = loc;
   g.doc = i => info(i)[0];
   g.sig = i => info(i)[1];

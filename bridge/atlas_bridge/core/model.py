@@ -67,6 +67,7 @@ class Ref:
 class CodeGraph:
     files: dict[tuple[str, str], SourceFile] = field(default_factory=dict)
     links: dict[tuple[Ref, Ref], Status] = field(default_factory=dict)
+    checked: set[tuple[Ref, Ref]] = field(default_factory=set)  # links a precise index (SCIP) shows in the code
     tools: set[str] = field(default_factory=set)  # what produced it, e.g. "Graphify 0.9.101"
 
     def file(self, repo, path):
@@ -75,10 +76,14 @@ class CodeGraph:
             self.files[key] = SourceFile(repo, path)
         return self.files[key]
 
-    def link(self, source: Ref, target: Ref, status: Status):
-        """Record that source uses target. Self-links are dropped; a repeated link keeps its most certain status."""
+    def link(self, source: Ref, target: Ref, status: Status, checked: bool = False):
+        """Record that source uses target. Self-links are dropped; a repeated link keeps its most certain status. A
+        checked link (a precise index shows it) is matched, whatever was guessed before."""
         if source == target:
             return
+        if checked:
+            self.checked.add((source, target))
+            status = Status.MATCHED
         old = self.links.get((source, target))
         if old is None or status.certainty < old.certainty:
             self.links[(source, target)] = status

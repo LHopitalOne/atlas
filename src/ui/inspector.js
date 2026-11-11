@@ -103,7 +103,7 @@ export function openInspector(id) {
       for (const e of L.slice(0, C)) {
         const t = side === 'src' ? g.CS[e] : g.CD[e],
           st = g.CST[e];
-        o += `<button class="row" data-id="${t}">${dotHTML(t)}<span class="rn${t >= g.S ? ' mono' : ''}" ${nameAttrs}>${esc(g.name(t))}<span class="rs">${t >= g.S ? esc(g.svcName[g.own(t)]) : esc(g.repoName[g.domRepo[g.svcDom[t]]])}</span></span><span class="rm"><span class="badge ${BCLS[st]}">${st === 3 ? 'Inferred' : STATUS[st]}</span></span></button>`;
+        o += `<button class="row" data-id="${t}">${dotHTML(t)}<span class="rn${t >= g.S ? ' mono' : ''}" ${nameAttrs}>${esc(g.name(t))}<span class="rs">${t >= g.S ? esc(g.svcName[g.own(t)]) : esc(g.repoName[g.domRepo[g.svcDom[t]]])}</span></span><span class="rm">${g.CPR && g.CPR[e] ? '<span class="badge badge-scip" title="A SCIP index shows this use in the code">SCIP</span>' : `<span class="badge ${BCLS[st]}">${st === 3 ? 'Inferred' : STATUS[st]}</span>`}</span></button>`;
       }
       return o + moreBtn(key, L.length, C) + `</div>`;
     };

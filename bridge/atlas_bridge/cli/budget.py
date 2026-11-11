@@ -22,9 +22,9 @@ class MapBudget:
             if key not in keep:
                 f.symbols = []
         kept = {(f.repo, f.path, s.id) for f in graph.files.values() for s in f.symbols}
-        links, graph.links = graph.links, {}
+        links, checked, graph.links, graph.checked = graph.links, graph.checked, {}, set()
         for (a, b), status in links.items():
-            graph.link(self._lift(a, kept), self._lift(b, kept), status)
+            graph.link(self._lift(a, kept), self._lift(b, kept), status, (a, b) in checked)
         return True
 
     def _link_ends(self, graph):

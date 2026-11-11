@@ -7,6 +7,7 @@ from ..core.callgraph import Function, Site, Target
 from ..core.descriptions import Description
 from ..core.evidence import Assumption, Verdict
 from ..core.http import Call, Extraction, Route
+from ..core.references import Definition, Use
 
 
 class Extractor(ABC):
@@ -192,3 +193,20 @@ class RequestReader(ABC):
     @abstractmethod
     def read(self, cases: list[ReadCase]) -> list[FileReading | None]:
         """One FileReading per case, in order; None for a file it could not read."""
+
+
+class ReferenceIndex(ABC):
+    """Knows, from precise indexes (SCIP) of the repositories, every use of a name in a file and the definition it
+    reaches, in that repository or another one indexed alongside."""
+
+    @abstractmethod
+    def files(self, repo: str) -> frozenset[str]:
+        """The repository's files the index covers."""
+
+    @abstractmethod
+    def uses(self, repo: str, file: str) -> list[Use]:
+        """Every use in the file of a name defined somewhere, in line order (not its definitions, imports or locals)."""
+
+    @abstractmethod
+    def definition(self, key: str) -> Definition | None:
+        """Where `key` is defined in the indexed repositories, or None (a library or the standard library)."""

@@ -1,5 +1,6 @@
 """map: repositories in, the Atlas page out, in one command (also installed as `atlas`)."""
 
+import argparse
 import os
 import time
 import webbrowser
@@ -20,9 +21,14 @@ class MapCommand(Command):
         parser.add_argument('-o', '--out-dir', default='atlas-out', help='output folder (default: atlas-out)')
         parser.add_argument('--refresh', action='store_true', help='run Graphify again even if graphify-out/ exists')
         parser.add_argument(
-            '--verify', action='store_true', help='confirm links with SCIP indexes (needs Node.js and/or rust-analyzer)'
+            '--no-scip',
+            dest='scip',
+            action='store_false',
+            help='do not index with SCIP (by default each repository is indexed where an indexer runs: Node.js for '
+            'Python and TypeScript, rust-analyzer for Rust; the index checks the links and adds the edges it sees)',
         )
-        parser.add_argument('--sandbox', action='store_true', help='with --verify, index Python in Docker')
+        parser.add_argument('--verify', action='store_true', help=argparse.SUPPRESS)  # SCIP is on by default now
+        parser.add_argument('--sandbox', action='store_true', help='index Python with SCIP in Docker')
         parser.add_argument(
             '--alias',
             action='append',

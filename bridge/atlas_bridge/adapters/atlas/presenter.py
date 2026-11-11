@@ -41,11 +41,18 @@ class AtlasSpecPresenter(Presenter):
         spec = {
             'meta': self._meta(result),
             'repos': [self._repo(r) for r in result.repos],
-            'edges': sorted([ids[a], ids[b], int(st)] for (a, b), st in result.graph.links.items()),
+            'edges': sorted(
+                self._edge(ids, a, b, st, result.graph.checked) for (a, b), st in result.graph.links.items()
+            ),
         }
         if self._http is not None:
             self._add_links(spec, result, NodeIds(ids, {f.ref: f.symbols for f in files}))
         return spec
+
+    @staticmethod
+    def _edge(ids, a, b, status, checked):
+        """[source, target, status], with a fourth item, 1, when a SCIP index shows the edge."""
+        return [ids[a], ids[b], int(status), 1] if (a, b) in checked else [ids[a], ids[b], int(status)]
 
     def _meta(self, result):
         meta = {
@@ -71,9 +78,9 @@ class AtlasSpecPresenter(Presenter):
 
     def _add_links(self, spec, result, nodes):
         edges, links, unmatched = self._http.present(nodes, [r.name for r in result.repos])
-        merged = {(a, b): st for a, b, st in spec['edges']}
-        merged.update(edges)  # an HTTP link is better evidence than an import or a name match
-        spec['edges'] = sorted([a, b, st] for (a, b), st in merged.items())
+        merged = {(e[0], e[1]): e[2:] for e in spec['edges']}
+        merged.update({k: [st] for k, st in edges.items()})  # an HTTP link is better evidence than an import or a name
+        spec['edges'] = sorted([a, b, *rest] for (a, b), rest in merged.items())
         spec['links'] = links
         spec['unmatched'] = unmatched
 

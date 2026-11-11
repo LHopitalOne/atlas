@@ -43,3 +43,24 @@ test('Atlas.loadGraph rejects a malformed graph with a readable error', async ({
   expect(msg).toContain('Invalid graph spec');
   expect(msg).toContain('status 9');
 });
+
+test('edges a SCIP index shows are counted in the Key', async ({ atlas }) => {
+  await atlas.open();
+  await atlas.evaluate(() =>
+    window.Atlas.loadGraph({
+      meta: { label: 'Shop', source: 'Graphify 0.9.105, SCIP' },
+      repos: [
+        {
+          name: 'web',
+          domains: [{ name: 'checkout', services: [{ name: 'cart' }, { name: 'pay' }, { name: 'ledger' }] }],
+        },
+      ],
+      edges: [
+        [0, 1, 0, 1],
+        [1, 2, 3],
+      ],
+    }),
+  );
+  await expect(atlas.locator('#legendBody')).toContainText('Seen by SCIP');
+  await expect(atlas.locator('#legendBody')).toContainText('Indexed with Graphify 0.9.105, SCIP');
+});

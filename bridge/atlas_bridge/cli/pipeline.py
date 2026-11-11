@@ -20,7 +20,7 @@ from .inputs import GraphInput, JsonFile
 from .judge import JudgePass
 from .links import LinksCommand
 from .read import ReadOptions, ReadPass
-from .scipcheck import ScipCheck
+from .scipcheck import ScipCheck, ScipPass
 
 
 class MapPipeline:
@@ -28,13 +28,15 @@ class MapPipeline:
 
     def __init__(self, options, report):
         """options: parsed map arguments (out_dir, refresh, aliases, include_tests, verify, sandbox, group, title,
-        graph_json, within, jev, read, enrich)."""
+        graph_json, within, jev, read, enrich, scip)."""
         self._o = options
         self._report = report
         self._runner = GraphifyRunner(self._still_mapping)
         self._current = ''
         self._records = []  # the links as the page proves them (adapters.atlas.LinkRecord)
         self._folders = {}
+        self._indexes = {}  # {repo: [ScipIndex]} written by the SCIP step
+        self._checked = []  # (source node id, target node id) of the edges SCIP shows between two symbols
 
     def run(self, repos) -> str:
         """Every step for these repositories (cli.inputs.RepositoryInput); returns the page's path."""
@@ -43,13 +45,14 @@ class MapPipeline:
         merged = self._timed('graphify', lambda: GraphifyMerger().merge([(r.name, self._graph(r)) for r in repos]))
         links = self._timed('links', lambda: self._links(repos))
         graph = GraphifyLinkWriter(merged).present(links)  # graph.json, for graphify path and query
+        spec = self._timed('map', lambda: self._spec(merged))  # the links go on as provable HTTP links instead
+        GraphifyLinkWriter.add_checked(graph, self._checked)
         if self._o.graph_json or len(graph['nodes']) <= self.MAX_GRAPH_JSON_NODES:
             self._save('graph.json', graph)
         else:
             self._report(
                 f'  graph     graph.json not written: {len(graph["nodes"]):,} nodes (add --graph-json to write it)'
             )
-        spec = self._timed('map', lambda: self._spec(merged))  # the links go on as provable HTTP links instead
         self._save('spec.json', spec)
         return self._save('atlas.html', spec, AtlasPage().write)
 
@@ -94,10 +97,12 @@ class MapPipeline:
             links = self._read(links, extraction, repos, extractor)
         if getattr(self._o, 'jev', False):
             links = self._judged(links, extraction, repos)
-        if self._o.verify:
-            links = ScipCheck(self._o.out_dir, self._report, self._o.sandbox).verify(repos, links)
+        if getattr(self._o, 'scip', True):
+            check = ScipCheck(self._o.out_dir, self._report, self._o.sandbox, self._o.refresh)
+            self._indexes = check.index(repos)
+            links = check.verify(links, self._indexes)
         else:
-            self._report('  links     not checked with SCIP (add --verify; needs Node.js and/or rust-analyzer)')
+            self._report('  scip      not run (--no-scip): links and edges are read by syntax alone')
         data = LinkFilePresenter().present(LinkReport(names, extraction, links))
         self._save('links.json', data)
         self._records = LinkFile(self._out('links.json')).parse(data)
@@ -135,6 +140,9 @@ class MapPipeline:
         http = HttpLayer(self._records, CodeSource(self._folders)) if self._records else None
         if http is not None:
             http.add_files(code)
+        if self._indexes:
+            ScipPass(self._report).run(code, self._indexes)
+            self._checked = sorted((a.symbol, b.symbol) for a, b in code.checked if a.symbol and b.symbol)
         ends = {(s.repo, s.file) for r in self._records for s in (r.call, r.route) if s is not None}
         if MapBudget().fit(code, frozenset(ends)):
             self._report(
