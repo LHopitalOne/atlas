@@ -94,6 +94,9 @@ class ReadUrlTest(unittest.TestCase):
         self.assertEqual((url.base, url.path), ('settings.api', '/users/{id}'))
         self.assertEqual(ReadUrl('orders.created', 'kafka').path, '/orders.created')
         self.assertEqual(ReadUrl('users/1', 'http').path, '')  # a relative HTTP path says too little
+        url = ReadUrl("${config.get('apiHost')}${config.get('apiPath')}${version}/addons/{slug}/", 'http')
+        self.assertEqual((url.base, url.path), ("config.get('apiHost')", '/addons/{slug}/'))
+        self.assertEqual(url.bases, ("config.get('apiHost')", "config.get('apiPath')", 'version'))
 
 
 class ReadCheckTest(unittest.TestCase):
@@ -133,6 +136,23 @@ class ReadCheckTest(unittest.TestCase):
         self.assertFalse(check.helper_ok(case, ReadHelper('http', '', '{config.otherUrl}', ReadHelper.CLIENT)))
         self.assertFalse(check.helper_ok(case, ReadHelper('send', 'POST', '/api/{path}')))  # 'send' is not here
 
+    def test_a_wrapper_its_callers_pass_the_path_to_is_a_helper_when_its_base_is_written(self):
+        check, case = ReadCheck(), ReadCase('web', 'src/api.js', WRAPPER)
+        self.assertTrue(check.helper_ok(case, ReadHelper('callApi', '', '{COLLECTOR_URL}{API_PATH}/{endpoint}/')))
+        self.assertFalse(check.helper_ok(case, ReadHelper('callApi', '', '{OTHER_HOST}/{endpoint}/')))
+        self.assertFalse(check.helper_ok(case, ReadHelper('callApi', '', '{endpoint}')))  # no base at all
+
+
+WRAPPER = """export function callApi({ endpoint, method = 'GET' }) {
+  return fetch(`${COLLECTOR_URL}${API_PATH}/${endpoint}/`, { method });
+}
+"""
+SEARCH = """import { callApi } from './api';
+
+export const search = (q) => callApi({ endpoint: 'items/search', params: { q } });
+"""
+SEARCH_ROUTE = Route('collector', 'urls.py', 4, P('/api/v1/items/search'), frozenset({'GET'}), 'search')
+
 
 class ReadLinksTest(unittest.TestCase):
     FILES = {('dashboard', 'src/metrics.ts'): METRICS, ('dashboard', 'src/http.ts'): CLIENT}
@@ -167,6 +187,30 @@ class ReadLinksTest(unittest.TestCase):
         }
         out, _, _ = refine(self.FILES, answers, [open_])
         self.assertEqual([(lk.status, lk.verification) for lk in out], [(Status.INFERRED, Verification.READ)])
+
+    def test_files_that_pass_a_wrapper_the_path_are_read_again_with_it(self):
+        url = '{COLLECTOR_URL}{API_PATH}/{endpoint}/'
+        quote = "callApi({ endpoint: 'items/search', params: { q } })"
+        answers = {
+            'src/api.js': lambda c: FileReading(helpers=(ReadHelper('callApi', 'GET', url),)),
+            'src/search.js': lambda c: (
+                FileReading(
+                    (
+                        ReadRequest(
+                            3, quote, 'GET', '{COLLECTOR_URL}{API_PATH}/items/search/', 'http', through='callApi'
+                        ),
+                    )
+                )
+                if c.helpers
+                else None
+            ),
+        }
+        files = {('dashboard', 'src/api.js'): WRAPPER, ('dashboard', 'src/search.js'): SEARCH}
+        out, _, reader = refine(files, answers, routes=(SEARCH_ROUTE,))
+        self.assertEqual([c.path for c in reader.asked], ['src/api.js', 'src/search.js'])
+        (link,) = out
+        self.assertEqual((link.call.file, link.call.line, link.route), ('src/search.js', 3, SEARCH_ROUTE))
+        self.assertEqual(link.call.hints, frozenset({'COLLECTOR_URL', 'API_PATH'}))
 
     def test_a_function_whose_request_settled_is_no_helper(self):
         caller = 'import { health } from "./metrics";\nexport const ok = () => health();\n'

@@ -1,8 +1,12 @@
 # Third test: HTTP links between Mozilla Add-ons services
 
-The second held-out test, run after the fixes made on [Open edX](../openedx/README.md). The finder was frozen
-before the key was built (a snapshot of commit `857f312` plus the uncommitted Open edX fixes, content hash
-`2760c9bbc3d7`) and run once; the score below is that run, unchanged.
+**Now a practice set.** This was the second held-out test, and its frozen score below is unchanged. On 2026-11-13
+the finder was fixed on what it missed here ([after the fixes](#after-the-fixes-2026-11-13)), so Mozilla no longer
+says how the finder does on code it has not seen; Label Studio and the sealed test still do.
+
+The held-out run came after the fixes made on [Open edX](../openedx/README.md). The finder was frozen before the key
+was built (a snapshot of commit `857f312` plus the uncommitted Open edX fixes, content hash `2760c9bbc3d7`) and run
+once; the score in the next sections is that run.
 
 | Repository | Commit |
 | --- | --- |
@@ -99,3 +103,28 @@ request wrapper that takes an options object and a route list built by a functio
 for the first is to forward object properties through wrappers as it forwards parameters; for the second, to
 evaluate list-building functions with their arguments (locals, `append`, f-strings) as it already does for URL
 helpers.
+
+## After the fixes (2026-11-13)
+
+Mozilla's two idioms were fixed as general rules, each checked on every other set first (none of their scores
+moved):
+
+1. The reading pass (`--read`) now takes a URL that starts with several expressions
+   (`{apiHost}{apiPath}{version}/addons/search/`), and a wrapper whose whole path its callers pass (`/{endpoint}/`)
+   as a helper, so the files that call `callApi` are read again with it (`usecases/reading.py`).
+2. The Django reader follows a list a function is given (`include(url_patterns)` inside
+   `get_versioned_api_routes`), routers imported from another module (`include(ratings_v4.urls)`), and
+   drf-nested-routers (`NestedSimpleRouter(accounts, r'account', lookup='user')`). addons-server's 41 key routes are
+   all read now; before, 3 of its `/api/` routes were.
+3. The same route is served under `/api/v3/`, `/api/v4/` and `/api/v5/`; a request whose base URL does not say which
+   is now matched to the newest (it was the first in alphabetical order, v3).
+
+| | Rules only | With `--read` |
+| --- | --- | --- |
+| Production links found | 1 / 41 | 32 / 41 |
+| False links | 0 | 4 |
+
+The rules alone still find 1: `callApi` takes the path as an object property, which only the reading pass follows.
+The 4 false links are page links in `AddonMoreInfo/index.js` (`/addon/{slug}/license` and the like) that fit server
+pages of the same shape. The 9 missed are the 7 ratings requests, autocomplete and logout, which the model did not
+read as requests. `--read` cost $0.31 in all over two runs.

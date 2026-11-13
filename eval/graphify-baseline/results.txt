@@ -1,0 +1,28 @@
+  devset  immich         13/46  crossing edges 3235
+  devset  plane          7/41  crossing edges 12863
+  devset  zulip          1/47  crossing edges 0
+  apps    booking        0/8  crossing edges 6
+  apps    chat           0/10  crossing edges 0
+  apps    food           0/6  crossing edges 0
+  apps    hr             0/9  crossing edges 15
+  apps    inventory      0/6  crossing edges 0
+  apps    ledger         0/6  crossing edges 5
+  apps    metrics        0/7  crossing edges 0
+  apps    notes          0/9  crossing edges 1
+  apps    shop           0/6  crossing edges 0
+  apps    taxi           0/6  crossing edges 0
+  apps2   arena          0/15  crossing edges 1
+  apps2   gateway        0/15  crossing edges 0
+  apps2   llm-desk       0/10  crossing edges 5
+  apps2   newsroom       0/12  crossing edges 0
+  apps2   payhooks       0/14  crossing edges 2
+  apps2   studynotes     0/14  crossing edges 5
+
+set       Graphify finds   edges crossing a repository or service boundary
+sentry      0 / 20         0  {}
+openedx     0 / 71         0  {}
+devset     21 / 134        16098  {'calls': 2657, 'references': 1177, 'imports': 6405, 'imports_from': 5776, 'dynamic_import': 9, 'indirect_call': 68, 're_exports': 3, 'inherits': 3}
+apps        0 / 73         27  {'references': 8, 'calls': 7, 'imports': 7, 'imports_from': 4, 'dynamic_import': 1}
+apps2       0 / 80         13  {'references': 10, 'imports': 2, 'imports_from': 1}
+
+sanity: 360 of 378 links have both their files in the graph

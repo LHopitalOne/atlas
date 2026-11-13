@@ -49,13 +49,20 @@ def excluded_by_key(key, found):
     )
 
 
+def http(link):
+    """An HTTP link: these keys judge only those. The finder also reports Kafka topics, Celery tasks and other
+    channels (sentry's Kafka links have their own key, kafka-key.json, scored with eval/tiny/score.py)."""
+    return link['call'].get('protocol', 'http') == 'http'
+
+
 def score(key, found):
-    links = [f for f in found['links'] if f.get('route')]
+    links = [f for f in found['links'] if f.get('route') and http(f)]
     report = {
         'scopes': {},
         'false': [],
         'excluded': [],
         'unmatched_calls': sum(1 for f in found['links'] if not f.get('route')),
+        'other_protocols': sum(1 for f in found['links'] if f.get('route') and not http(f)),
     }
     matched = set()
     known = {}
@@ -98,6 +105,7 @@ def score(key, found):
         'precision': f'{len(matched)}/{len(matched) + false}' if matched or false else 'n/a',
         'false_links': false,
         'links_to_excluded_calls': len(report['excluded']),
+        'other_protocols_not_judged': report['other_protocols'],
         'prod_confirmed_by_scip': f"{sum('confirmed' in r['verification'] for r in prod)}/{len(prod)}",
     }
     return report

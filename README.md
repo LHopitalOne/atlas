@@ -78,6 +78,27 @@ prefix the base URL is assumed to carry, or a URL made absolute and handed to an
 **ambiguous** (several routes fit) or **unmatched** (the named service has no such route). Requests made only by
 tests are left out unless `--include-tests`.
 
+### The rules, in short
+
+1. **Read the servers.** List every route each repository serves (Django URLs, DRF routers, Flask, FastAPI,
+   Express, axum and so on), and every queue or topic it consumes (Celery tasks, Kafka topics).
+2. **Read the clients.** List every request each repository sends, with its path and the clues near it about where
+   it goes, such as a base URL called `CATALOG_API_URL`.
+3. **Match them.** The first rule that applies decides:
+   - **Payload:** the request names a route instead of giving a path.
+   - **Named target:** a clue names another service (in a variable name, an `--alias`, or a URL in configuration).
+     That service's route whose path fits is taken, also behind a short prefix like `/api/v1`.
+   - **Path only:** nothing names a service. The path counts only if it fits another repository's route word for word,
+     has at least two fixed words, and fits nothing in its own repository.
+   - Queues and topics are matched by the name they share.
+4. **Leftovers.** A request to an outside host is marked outside. Anything else stays unmatched or ambiguous; the
+   finder never guesses.
+5. **Optional AI steps.** `--read` has a model read the files the rules could not explain. The code checks every claim
+   against the file (the quoted line exists, and the path's words are written there) and then matches it with the same
+   rules. `--jev` has a model choose among routes the rules already offered; it never invents one.
+
+The finder is careful but narrow: it rarely links wrongly, and it misses requests written in a way it was never taught.
+
 ### Confirming links with SCIP
 
 A link rests on names the finder resolved without a compiler: the client a request goes through
@@ -129,7 +150,10 @@ already read right by name); JavaScript and Rust still go by names.
 
 `eval/sentry/` and `eval/openedx/` are answer keys of the real links between four Sentry services and four Open edX
 ones (the second built after the finder was tuned on the first, to test whether it generalises);
-`eval/labelstudio/` is a held-out key the frozen finder was run on once. `eval/score.py` scores a run:
+`eval/labelstudio/` is a held-out key the frozen finder was run on once. `eval/mozilla/` was held out too, and is now
+a practice set: the finder was fixed on what it missed there. [`eval/README.md`](eval/README.md) links
+every repository the keys cover at its pinned commit, with the commands to fetch it and reproduce each score.
+`eval/score.py` scores a run:
 
 ```bash
 python3 -m atlas_bridge links sentry relay snuba symbolicator --alias upstream=sentry -o links.json
@@ -140,6 +164,14 @@ python3 eval/score.py eval/sentry/answer-key.json links.json
 | --- | --- | --- | --- |
 | Production links found | 20 / 20 | 61 / 71 (12 / 71 before the held-out fixes) | 6 / 15 (3 / 15 frozen; 4 / 4 sent by the services' own code, 2 / 11 sent through the SDK, traced with `--library`) |
 | False links | 0 | 0 (31 before) | 0 |
+
+**How far to trust these scores.** Each fix was made because a key showed a miss, so the sets the finder was fixed on
+(Sentry, Open edX, the dev set, the small apps, Mozilla) show how it does on code already studied. The honest measure
+for new code is a key nobody tuned on: Label Studio, 4 / 15 without `--library`, and a sealed test kept outside this
+repository, 16 / 112 with the rules alone and 28 / 112 with `--read`. The gap is overfitting. The fixes are general
+patterns (versioned API mounts, nested routers, request wrappers) and moved no other set when added, but each new
+codebase still brings ways of writing requests the finder has not seen. [`eval/README.md`](eval/README.md) has every
+score.
 
 `eval/score.py` once credited a key link when a found link's route sat within 3 lines of it, even when that found link
 was another key link's route; it no longer does, which took Open edX from 68 to 61 (the finder sends Discovery's list
@@ -221,6 +253,7 @@ test/                unit + architecture tests; test/e2e/ Playwright
 tools/index-self/    tree-sitter + SCIP indexer for the Self graph
 docs/                DECISIONS, ARCHITECTURE, GRAPH_SPEC, INTEGRATION
 bridge/              Python: Graphify graph.json to Atlas (core, usecases, adapters, CLI)
+eval/README.md       every answer key's code (repositories at pinned commits) and how to reproduce each score
 eval/sentry/         answer key: verified HTTP links between Sentry's repos, for scoring the link finder
 eval/openedx/, eval/labelstudio/  more answer keys, built without the finder (see each README)
 ```

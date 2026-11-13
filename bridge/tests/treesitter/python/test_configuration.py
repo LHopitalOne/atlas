@@ -147,6 +147,69 @@ class DrfRouterTest(unittest.TestCase):
             },
         )
 
+    def test_imported_and_nested_routers_in_lists_a_versioning_function_mounts(self):
+        ex = extract(
+            {
+                'proj/settings.py': "ROOT_URLCONF = 'proj.urls'\n",
+                'proj/urls.py': """
+                from django.urls import include, re_path
+                urlpatterns = [re_path(r'^api/', include('proj.api.urls'))]
+                """,
+                'proj/api/urls.py': """
+                from django.urls import include, re_path
+                from proj.accounts.urls import accounts_v5
+                from proj.ratings.api_urls import ratings
+
+                def versioned(version, url_patterns):
+                    route_pattern = rf'^{version}/'
+                    routes = url_patterns
+                    return (re_path(route_pattern, include((routes, version))),)
+
+                v5_urls = [
+                    re_path(r'^accounts/', include(accounts_v5)),
+                    re_path(r'^ratings/', include(ratings.urls)),
+                ]
+                urlpatterns = [*versioned('v5', v5_urls)]
+                """,
+                'proj/ratings/api_urls.py': """
+                from rest_framework.routers import SimpleRouter
+                ratings = SimpleRouter()
+                ratings.register(r'rating', RatingViewSet)
+                """,
+                'proj/accounts/urls.py': """
+                from django.urls import include, re_path
+                from rest_framework_nested.routers import NestedSimpleRouter
+                accounts = SimpleRouter()
+                accounts.register(r'account', AccountViewSet)
+                collections = NestedSimpleRouter(accounts, r'account', lookup='user')
+                collections.register(r'collections', CollectionViewSet)
+                items = NestedSimpleRouter(collections, r'collections', lookup='collection')
+                items.register('addons', ItemViewSet)
+                unknown = NestedSimpleRouter(accounts, PREFIX)
+                unknown.register('lost', LostViewSet)
+                accounts_v5 = [
+                    re_path(r'', include(accounts.urls)),
+                    re_path(r'', include(collections.urls)),
+                    re_path(r'', include(items.urls)),
+                    re_path(r'', include(unknown.urls)),
+                ]
+                """,
+            }
+        )
+        self.assertEqual(
+            {path for path, _ in routes(ex)},
+            {
+                '/api/v5/accounts/account',
+                '/api/v5/accounts/account/{pk}',
+                '/api/v5/accounts/account/{user_pk}/collections',
+                '/api/v5/accounts/account/{user_pk}/collections/{pk}',
+                '/api/v5/accounts/account/{user_pk}/collections/{collection_pk}/addons',
+                '/api/v5/accounts/account/{user_pk}/collections/{collection_pk}/addons/{pk}',
+                '/api/v5/ratings/rating',
+                '/api/v5/ratings/rating/{pk}',
+            },
+        )
+
 
 class PluginMountsTest(unittest.TestCase):
     def test_plugin_app_url_configs(self):

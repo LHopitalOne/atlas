@@ -13,14 +13,16 @@ from .ports import ReadCase, ReadHelper, ReadRequest, ReadRoute
 
 
 class ReadUrl:
-    """A URL as a reader writes it, split into host, base expression and path: 'https://api.x.com/v1/items',
-    '{settings.api_url}/users/{id}', '/api/orders', or, for a channel, a bare name ('orders.created'). A channel named
+    """A URL as a reader writes it, split into host, base expressions and path: 'https://api.x.com/v1/items',
+    '{settings.api_url}/users/{id}', '{API_HOST}{API_PATH}/users' (base: the first expression; bases: each),
+    '/api/orders', or, for a channel, a bare name ('orders.created'). A channel named
     by a member of a constant class ('JobName.SendMail') is that member's name, however either side spells the
     class; a route's own parameter syntax ('<int:pk>', ':id') is written '{pk}'."""
 
     TEMPLATE = re.compile(r'\$\{([^{}]*)\}')  # a JavaScript template's '${x}' is written '{x}'
     ABSOLUTE = re.compile(r'^(?:[a-z][a-z0-9+.-]*:)?//(?P<host>[^/?#{}:]+)(?::\d+)?(?P<path>/[^#]*)?$', re.IGNORECASE)
-    BASED = re.compile(r'^\{(?P<base>[^{}]+)\}(?P<path>/[^#]*)?$')  # '{API_URL}/users'
+    BASED = re.compile(r'^(?P<bases>(?:\{[^{}]+\})+)(?P<path>/[^#]*)?$')  # '{API_URL}/users', '{host}{prefix}/users'
+    EXPRESSION = re.compile(r'\{(?P<expression>[^{}]+)\}')
     CHANNEL = re.compile(r'^\{?(?P<name>[\w.:-]+)\}?$')  # 'orders.created', 'mail:send', '{JobName.SendMail}'
     MEMBER = re.compile(r'^[A-Z]\w*\.(?P<member>[A-Za-z_]\w*)$')  # 'JobName.SendMail', not 'orders.created'
     ROUTE_PARAM = re.compile(r'<(?:[^<>:]*:)?(?P<name>[^<>:]+)>|(?<=/):(?P<colon>\w+)')  # '<int:pk>', '<id>', ':id'
@@ -28,6 +30,7 @@ class ReadUrl:
     def __init__(self, url: str, protocol: str):
         text = self.TEMPLATE.sub(r'{\1}', (url or '').strip()).split('#')[0]
         self.host, self.base, self.path, self.name = '', '', '', ''
+        self.bases: tuple[str, ...] = ()
         absolute, based, channel = self.ABSOLUTE.match(text), self.BASED.match(text), self.CHANNEL.match(text)
         if protocol != Protocol.HTTP and channel:
             self.name = channel.group('name')
@@ -36,7 +39,8 @@ class ReadUrl:
         elif absolute:
             self.host, self.path = absolute.group('host').lower(), absolute.group('path') or '/'
         elif based:
-            self.base, self.path = based.group('base').strip(), based.group('path') or ''
+            self.bases = tuple(e.strip() for e in self.EXPRESSION.findall(based.group('bases')))
+            self.base, self.path = self.bases[0], based.group('path') or ''
         elif text.startswith('/'):
             self.path = text
 
@@ -142,15 +146,20 @@ class ReadCheck:
 
     def helper_ok(self, case: ReadCase, helper: ReadHelper) -> bool:
         """A helper worth telling other files about: its name is written in its file; a function's URL has a fixed
-        word, every one written in the file; a client's base is an expression or URL the file writes."""
+        word, every one written in the file, or is all parameters behind a base the file writes (a wrapper its callers
+        pass the path to: '{API_BASE}/{endpoint}/'); a client's base is an expression or URL the file writes."""
         if not self.NAME.match(helper.function or '') or helper.name not in case.text:
             return False
-        url = ReadUrl(helper.url, Protocol.HTTP)
+        url, text = ReadUrl(helper.url, Protocol.HTTP), case.text.lower()
         if helper.kind == ReadHelper.CLIENT:
             base = url.host or url.base
-            return bool(base) and base.lower() in case.text.lower()
+            return bool(base) and base.lower() in text
         path = PathTemplate.parse(url.path) if url.path else None
-        return path is not None and path.literals > 0 and self.fixed_words_written(path, case.text.lower())
+        if path is None:
+            return False
+        if path.literals:
+            return self.fixed_words_written(path, text)
+        return any(b.lower() in text for b in (url.host, *url.bases) if b)
 
     def placed(self, text: str, line: int, code: str) -> int | None:
         """The line the quoted code is on: the nearest to `line` within NEAR, else the only one in the file."""
@@ -187,8 +196,7 @@ class ReadCheck:
 
     def _hints(self, request, url, written):
         hints = {Call.ORIGIN + url.host} if url.host else set()
-        if url.base and url.base.lower() in written:
-            hints.add(url.base)
+        hints |= {b for b in url.bases if b.lower() in written}
         base = request.base.strip('{}$ ')
         if base and base.lower() in written:
             hints.add(base)

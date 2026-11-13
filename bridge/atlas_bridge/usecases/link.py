@@ -14,7 +14,7 @@ from ..core.model import Status
 from ..core.words import Words
 from .addresses import AddressBook
 from .ambiguity import Underdetermined
-from .bases import BaseHints
+from .bases import BaseHints, PrefixOrder
 
 
 @dataclass(frozen=True)
@@ -135,7 +135,8 @@ class RouteIndex:
     def best_prefixed(self, call, repo, max_prefix, known=frozenset()):
         """(prefix, routes) that fit the call behind a few fixed leading segments ('.../api/v1'), or (None, []).
         Prefixes configuration gives for the repository (`known`) come first, then those the call's hints mention
-        ('lms_coursemode_api_url' -> '/api/course_modes/v1'), then the shortest, then the best fit."""
+        ('lms_coursemode_api_url' -> '/api/course_modes/v1'), then the shortest, then the best fit, then the newest API
+        version (PrefixOrder)."""
         bases = BaseHints(call.hints)
         scored = []
         for r in self.routes(repo):
@@ -148,7 +149,7 @@ class RouteIndex:
                 scored.append((text not in known, -bases.mentions(prefix), prefix.size, -points, text, r))
         if not scored:
             return None, []
-        top = min(s[:5] for s in scored)
+        top = min(scored, key=lambda s: (*s[:4], PrefixOrder.key(s[4])))[:5]
         return top[4], [s[5] for s in scored if s[:5] == top]
 
     def catch_all(self, call, repo):

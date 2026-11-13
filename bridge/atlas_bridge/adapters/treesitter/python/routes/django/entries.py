@@ -126,19 +126,33 @@ class UrlEntries:
             if local:
                 yield from self.entries_of(source, local[-1].value, binding, seen, depth + 1)
                 return
+            argument = binding.argument(node)  # a parameter: the list the call passes (`include(url_patterns)`)
+            if argument is not None:
+                yield from self.entries_of(argument[0], argument[1], None, seen, depth + 1)
+                return
         ref = self.list_ref(source, name)
         if ref is not None:
             yield from self.list_entries(ref[0], ref[1], seen, depth)
 
     def _attribute(self, source, node, seen, depth):
-        """`router.urls` of a DRF router in this file, else `module.LIST`."""
+        """`router.urls` of a DRF router in this file or imported from another, else `module.LIST`."""
         owner = node.child_by_field_name('object')
         name = PythonSyntax.text(owner) if owner.type == 'identifier' else ''
-        if PythonSyntax.text(node.child_by_field_name('attribute')) == 'urls' and self._routers.is_router(source, name):
-            for register in self._routers.registrations(source, name):
-                yield Entry(source, register, None, Entry.ROUTER)
+        router = (
+            self._router(source, name) if PythonSyntax.text(node.child_by_field_name('attribute')) == 'urls' else None
+        )
+        if router is not None:
+            for register in self._routers.registrations(*router):
+                yield Entry(router[0], register, None, Entry.ROUTER)
             return
         yield from self._module_attribute(source, node, seen, depth)
+
+    def _router(self, source, name, depth=0):
+        """(file, name) of the router `name` stands for, following `from x import name`; or None."""
+        if self._routers.is_router(source, name):
+            return source, name
+        found = self._workspace.names.imported_from(source, name) if name and depth < NameLookup.MAX_IMPORTS else None
+        return self._router(found[0], found[1], depth + 1) if found is not None else None
 
     def _module_attribute(self, source, node, seen, depth):
         found = self._workspace.names.expression(source, node.child_by_field_name('object'))
@@ -162,7 +176,10 @@ class UrlEntries:
             yield from self._builder(source, node, (pos, kw), binding, seen, depth)
 
     def _builder(self, source, node, args, outer, seen, depth):
-        found = self._workspace.names.expression(source, node.child_by_field_name('function'))
+        function = node.child_by_field_name('function')
+        if function.type == 'list_splat' and function.named_children:  # tree-sitter reads `[*f(x)]` as `(*f)(x)`
+            function = function.named_children[0]
+        found = self._workspace.names.expression(source, function)
         if not found or not found.is_function or (found.source.path, found.node.start_byte) in seen:
             return
         func = found.node

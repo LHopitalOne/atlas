@@ -2,7 +2,7 @@ import unittest
 
 from atlas_bridge.core.http import Call, Extraction, PathTemplate, Route
 from atlas_bridge.core.model import Status
-from atlas_bridge.usecases.bases import BaseHints
+from atlas_bridge.usecases.bases import BaseHints, PrefixOrder
 from atlas_bridge.usecases.link import LinkFinder
 
 P = PathTemplate.parse
@@ -72,6 +72,18 @@ class PrefixedLinksTest(unittest.TestCase):
     def test_a_prefix_only_when_nothing_fits_exactly(self):
         found = self.links('/programs/{uuid}', ['catalog_client'])
         self.assertEqual(found[0][:2], ('/api/v1/programs/{uuid}', Status.INFERRED))
+
+    def test_the_same_route_in_several_api_versions_is_taken_in_the_newest(self):
+        versions = [Route('catalog', 'urls.py', 6, P(f'/api/{v}/search/{{q}}')) for v in ('v3', 'v10', 'v4')]
+        call = Call('discovery', 'a.py', 1, P('/search/{q}'), 'GET', hints=frozenset({'catalog_client'}))
+        (link,) = LinkFinder(['catalog', 'discovery']).find(Extraction(versions, [call]))
+        self.assertEqual((str(link.route.path), link.status), ('/api/v10/search/{q}', Status.INFERRED))
+
+
+class PrefixOrderTest(unittest.TestCase):
+    def test_versions_of_one_base_newest_first_anything_else_by_text(self):
+        order = sorted(['/api/v3', '/api/v5', '/api/v4', '/api', '/api/beta'], key=PrefixOrder.key)
+        self.assertEqual(order, ['/api', '/api/beta', '/api/v5', '/api/v4', '/api/v3'])
 
 
 if __name__ == '__main__':

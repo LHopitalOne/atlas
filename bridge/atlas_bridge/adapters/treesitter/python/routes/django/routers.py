@@ -19,16 +19,21 @@ class RouterRoute(NamedTuple):
 
 class DrfRouters:
     """Finds routers (`router = DefaultRouter()`), what is registered on them, and the routes that makes: the list
-    route `prefix/`, the detail route `prefix/{pk}/`, and one route per `@action` of the viewset."""
+    route `prefix/`, the detail route `prefix/{pk}/`, and one route per `@action` of the viewset.
+
+    A nested router (drf-nested-routers: `NestedSimpleRouter(accounts, r'account', lookup='user')`) puts its routes
+    under its parent's: `account/{user_pk}/` and whatever its parent sits under."""
 
     ROUTER_SUFFIX = 'Router'  # DefaultRouter, SimpleRouter, ExtendedSimpleRouter, NestedSimpleRouter...
     LOOKUP = '{pk}'
     ACTION = 'action'
+    MAX_NESTING = 5  # nested routers under nested routers
 
     def __init__(self, workspace, values):
         self._workspace = workspace
         self._values = values
         self._registered = {}  # path -> {router name: [register call]}
+        self._nested = {}  # path -> {router name: the NestedSimpleRouter(parent, prefix, lookup=...) call}
 
     def is_router(self, source, name):
         """Whether `name` is a module-level router of this file."""
@@ -48,11 +53,36 @@ class DrfRouters:
         v = self._values.resolve(prefix_node, Scope.at(source, register))[0]
         if not v.is_literal or Marker.names(v.text):
             return []
+        owner = PythonSyntax.receiver(register)
+        under = self._under(source, PythonSyntax.text(owner) if owner is not None else '')
+        if under is None:
+            return []
         handler = PythonSyntax.text(viewset)
         out = []
         for prefix in DjangoRegex.templates(v.text.strip('^$')):
-            out += self._viewset_routes(source, viewset, prefix.strip('/'), handler)
+            out += self._viewset_routes(source, viewset, under + prefix.strip('/'), handler)
         return out
+
+    def _under(self, source, name, depth=0):
+        """The path a router's routes sit under: '' for a router, 'account/{user_pk}/' for one nested under the
+        `account` registration of another; None when a nested router's prefix is not a literal."""
+        call = self._nesting(source).get(name)
+        if call is None:
+            return ''
+        pos, kw = PythonSyntax.call_args(call)
+        parent = pos[0] if pos else kw.get('parent_router')
+        prefix = self._literal(source, pos[1] if len(pos) > 1 else kw.get('parent_prefix'))
+        lookup = self._literal(source, kw.get('lookup')) or 'parent'
+        if depth >= self.MAX_NESTING or parent is None or parent.type != 'identifier' or not prefix:
+            return None
+        above = self._under(source, PythonSyntax.text(parent), depth + 1)
+        return None if above is None else f'{above}{prefix.strip("^$/")}/{{{lookup}_pk}}/'
+
+    def _literal(self, source, node):
+        if node is None:
+            return ''
+        v = self._values.resolve(node, Scope.at(source, node))[0]
+        return v.text if v.is_literal and not Marker.names(v.text) else ''
 
     def _viewset_routes(self, source, viewset, prefix, handler):
         anything = frozenset({ANY})
@@ -88,24 +118,29 @@ class DrfRouters:
         return [(detail, url_path, frozenset(verbs))]
 
     def _read(self, source):
-        found = self._registered.get(source.path)
-        if found is None:
-            found = self._registered[source.path] = self._scan(source)
-        return found
+        if source.path not in self._registered:
+            self._registered[source.path], self._nested[source.path] = self._scan(source)
+        return self._registered[source.path]
+
+    def _nesting(self, source):
+        self._read(source)
+        return self._nested[source.path]
 
     def _scan(self, source):
-        routers = {}
+        routers, nested = {}, {}
         for st in PythonSyntax.module_statements(source.root):
             for e in st.named_children if st.type == 'expression_statement' else ():
-                self._statement(e, routers)
-        return routers
+                self._statement(e, routers, nested)
+        return routers, nested
 
-    def _statement(self, e, routers):
+    def _statement(self, e, routers, nested):
         if e.type == 'assignment':
             left, right = e.child_by_field_name('left'), e.child_by_field_name('right')
             is_call = left.type == 'identifier' and right is not None and right.type == 'call'
             if is_call and PythonSyntax.callee(right).endswith(self.ROUTER_SUFFIX):
                 routers[PythonSyntax.text(left)] = []
+                if PythonSyntax.call_args(right)[0] or 'parent_router' in PythonSyntax.call_args(right)[1]:
+                    nested[PythonSyntax.text(left)] = right  # a router made from another: drf-nested-routers
         elif e.type == 'call' and PythonSyntax.callee(e) == 'register':
             owner = PythonSyntax.receiver(e)
             name = PythonSyntax.text(owner) if owner is not None else ''

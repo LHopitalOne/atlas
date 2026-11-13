@@ -5,9 +5,11 @@ Each service folder is one repository; no aliases are given (a first try, as on 
 service (a frontend calling its own backend) are looked for with --within.
 
 A TRUTH.json may name its code's folder with "root" (the development-set keys in eval/devset do); otherwise the
-code is the app folder itself.
+code is the app folder itself. --repos <folder> looks for that code in <folder>/<the root's last name> instead
+(eval/README.md fetches it there).
 
-Usage: python3 eval/tiny/run.py <apps folder> <output folder> [--python /path/to/python] [-- extra links options]
+Usage: python3 eval/tiny/run.py <apps folder> <output folder> [--python /path/to/python] [--repos <folder>]
+       [-- extra links options]
 """
 
 import json
@@ -21,10 +23,12 @@ sys.path.insert(0, HERE)
 from score import score  # noqa: E402
 
 
-def run_app(app, python, out, extra):
+def run_app(app, python, out, extra, repos=None):
     with open(os.path.join(app, 'TRUTH.json'), encoding='utf-8') as f:
         truth = json.load(f)
     root = os.path.expanduser(truth.get('root', app))  # a key kept apart from its code names the code's folder
+    if repos and 'root' in truth:  # --repos: the code was fetched elsewhere, in a folder named like the key's root
+        root = os.path.join(repos, os.path.basename(root.rstrip('/')))
     repos = [f'{name}={os.path.normpath(os.path.join(root, folder))}' for name, folder in truth['services'].items()]
     links = os.path.join(out, f'{truth["project"]}.links.json')
     cmd = [python, '-m', 'atlas_bridge', 'links', *repos, '--within', '-o', links, *extra]
@@ -39,11 +43,12 @@ def main(argv):
     apps, out = os.path.abspath(argv[1]), os.path.abspath(argv[2])
     python = argv[argv.index('--python') + 1] if '--python' in argv else sys.executable
     extra = argv[argv.index('--') + 1 :] if '--' in argv else []
+    repos = os.path.abspath(argv[argv.index('--repos') + 1]) if '--repos' in argv[: len(argv) - len(extra)] else None
     os.makedirs(out, exist_ok=True)
     reports = []
     for name in sorted(os.listdir(apps)):
         if os.path.isfile(os.path.join(apps, name, 'TRUTH.json')):
-            reports.append(run_app(os.path.join(apps, name), python, out, extra))
+            reports.append(run_app(os.path.join(apps, name), python, out, extra, repos))
     totals, false = {}, 0
     for r in reports:
         if 'error' in r:

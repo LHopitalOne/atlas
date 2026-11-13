@@ -35,3 +35,19 @@ class BaseHints:
     def _squash(cls, text):
         """Lower case, no separators, no plural 's': 'course_modes' -> 'coursemode'."""
         return cls.SEPARATORS.sub('', text.lower()).rstrip('s')
+
+
+class PrefixOrder:
+    """The order in which prefixes that fit a request equally are taken: the same base in several API versions
+    ('/api/v3', '/api/v4', '/api/v5') gives the newest first, since a server keeps old versions for old clients and
+    current code calls the newest; anything else by its text."""
+
+    NUMBER = re.compile(r'\d+')
+
+    @classmethod
+    def key(cls, prefix: str) -> tuple:
+        segments = prefix.split('/')
+        versions = [bool(PathTemplate.VERSION.match(s)) for s in segments]
+        base = '/'.join('{version}' if v else s for s, v in zip(segments, versions, strict=True))
+        newest = tuple(-int(cls.NUMBER.search(s).group()) for s, v in zip(segments, versions, strict=True) if v)
+        return base, newest, prefix

@@ -148,6 +148,8 @@ class ScoreTest(unittest.TestCase):
         found['links'].append(
             {**found['links'][0], 'route': {**found['links'][0]['route'], 'path': '/nope', 'line': 99}}
         )
+        kafka = {**found['links'][0]['call'], 'protocol': 'kafka', 'path': '/events'}
+        found['links'].append({**found['links'][0], 'call': kafka})  # an HTTP key does not judge a Kafka topic
         report = score.score(key, found)
         self.assertEqual([r['found'] for r in report['scopes']['prod']], [True, False])
         self.assertEqual(
@@ -157,6 +159,7 @@ class ScoreTest(unittest.TestCase):
                 'precision': '1/2',
                 'false_links': 1,
                 'links_to_excluded_calls': 1,
+                'other_protocols_not_judged': 1,
                 'prod_confirmed_by_scip': '0/2',
             },
         )
