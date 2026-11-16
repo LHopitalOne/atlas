@@ -15,7 +15,7 @@ atlas ./api ./web --verify # also confirm each link with SCIP indexes (uses Node
 Everything lands in `atlas-out/`: `atlas.html` (the map, one file), `links.json` (each link and why), and `graph.json`
 (Graphify's graph with the links added, for `graphify path` / `query`). A `graphify-out/graph.json` already in a
 repository is reused; `--refresh` rebuilds it. One repository works too: its browser code is linked to its own
-server routes (`atlas ./sentry` finds 225; `--no-within` turns that off). `atlas --help` lists the rest.
+server routes (`atlas ./sentry` finds 235; `--no-within` turns that off). `atlas --help` lists the rest.
 
 ## Build the page from source
 
@@ -137,7 +137,7 @@ python3 -m atlas_bridge links label-studio label-studio-ml-backend --library lab
 Most products keep their frontend and backend in one repository. `links --within` also links browser code to its own
 repository's server routes: a request to a relative path goes to the origin that served the page. It needs every
 fixed word of the path to meet a route's (a catch-all page route never takes it), and a generic helper that requests
-`/api/0/{anything}` is linked only when one route fits. On Sentry alone that is 225 frontend-to-backend links, on
+`/api/0/{anything}` is linked only when one route fits. On Sentry alone that is 235 frontend-to-backend links, on
 Label Studio 9; these have no answer key yet, so they are not in the scores above.
 
 With SCIP indexes, Python extraction also asks them first wherever it would otherwise go by names: a call is a request

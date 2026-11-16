@@ -9,30 +9,40 @@
 
 const LINK = /\s+([<>|])\s+/;
 
+// A control line, wherever the model put it and however it dressed it: `FLOW: …`, `**FLOW:** …`, `- FLOW: …`, `` `FLOW: …` ``
+const CONTROL_LINE = /^[ \t>*_`-]*(FLOW|FOLLOWUPS|SUMMARY)[*_`]*[ \t]*:[*_`]*[ \t]*(.*?)[ \t*_`]*$/i;
+// A code fence left empty once its control line is gone
+const EMPTY_FENCE = /```[\w-]*\s*```/g;
+
 /**
- * Split the trailing control lines (FLOW:, SUMMARY:, FOLLOWUPS:) off an answer, in any order.
+ * Split the control lines (FLOW:, SUMMARY:, FOLLOWUPS:) off an answer, in any order and wherever they are, so none
+ * shows as text; the last of each kind wins.
  * @returns {{body:string, followups:string[], flow:string|null, summary:{kind:string, ref?:string}|null}}
  */
 export function splitControl(text) {
-  let body = String(text),
-    followups = [],
+  let followups = [],
     flow = null,
-    summary = null,
-    m;
-  while ((m = body.match(/\n?[ \t]*(FLOW|FOLLOWUPS|SUMMARY):[ \t]*([^\n]*)\s*$/i))) {
+    summary = null;
+  const kept = [];
+  for (const line of String(text).split('\n')) {
+    const m = line.match(CONTROL_LINE);
+    if (!m) {
+      kept.push(line);
+      continue;
+    }
     const kind = m[1].toUpperCase();
     if (kind === 'SUMMARY') {
       const [k, ref] = m[2].trim().split(/\s+/);
-      summary = summary ?? { kind: (k || '').toLowerCase(), ref };
-    } else if (kind === 'FLOW') flow = flow ?? m[2].trim();
+      summary = { kind: (k || '').toLowerCase(), ref };
+    } else if (kind === 'FLOW') flow = m[2].trim() || flow;
     else
       followups = m[2]
         .split('|')
         .map(s => s.trim())
         .filter(Boolean)
         .slice(0, 3);
-    body = body.slice(0, m.index);
   }
+  const body = kept.join('\n').replace(EMPTY_FENCE, '').trimEnd();
   return { body, followups, flow, summary };
 }
 

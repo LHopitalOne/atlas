@@ -10,7 +10,9 @@
 #                credentials,frontend-app-learning}/, checked out at the answer keys' commits
 #   PY           a Python with atlas-bridge[links] installed (default: python3)
 #   GRAPHIFY_PY  the Python Graphify is installed in (default: the one `graphify` runs with)
-#   SCIP_SENTRY, SCIP_OPENEDX  folders of <repo>.scip indexes (optional; without them no link is "Confirmed by SCIP")
+#   SCIP_SENTRY, SCIP_OPENEDX  folders of <repo>.scip indexes (optional; without them no link is "Confirmed by SCIP",
+#                and the maps show Graphify's edges only, none from SCIP)
+#   READ=1       also run the AI reading pass (`links --read`, needs OPENROUTER_API_KEY; cents, cached after)
 #   WORK         scratch folder (default: .demo-work, git-ignored)
 #   GRAPHIFY_ONLY  map only these repositories again (space-separated), e.g. GRAPHIFY_ONLY=sentry
 set -euo pipefail
@@ -43,11 +45,14 @@ NOT_PRODUCTION='(^|/)(tests?|testutils|test_utils|fixtures|__tests__|testing|ben
 
 graphify_step() {
   for repo in ${GRAPHIFY_ONLY:-${SENTRY[*]} ${OPENEDX[*]}}; do
-    local src m=$WORK/mirror/$repo
+    local src m=$WORK/mirror/$repo specs
     src=$(folder "$repo")
     rm -rf "$m" && mkdir -p "$m"
-    # shellcheck disable=SC2046
-    git -C "$src" ls-files -- $(sources "$repo") | grep -Ev "$NOT_PRODUCTION" > "$m.files"
+    # its own git root: Graphify skips files git ignores, and Atlas's .gitignore ignores .demo-work/
+    git init -q "$m"
+    # read, not $(...) unquoted: the shell would match `src/*.js` against Atlas's own src/ before git saw it
+    read -ra specs <<< "$(sources "$repo")"
+    git -C "$src" ls-files -- "${specs[@]}" | grep -Ev "$NOT_PRODUCTION" > "$m.files"
     # Sentry's frontend is 10,000 files; only those that call its own API (the --within links) go on the map
     [[ $repo == sentry ]] && python3 -c 'import json,sys; print("\n".join(sorted({l["call"]["file"] for l in json.load(open(sys.argv[1]))["links"]})))' \
       "$WORK/sentry-within.json" >> "$m.files"
@@ -62,6 +67,7 @@ links_step() {
   local scip_s=() scip_o=()
   [[ -n ${SCIP_SENTRY:-} ]] && scip_s=(--scip-dir "$SCIP_SENTRY")
   [[ -n ${SCIP_OPENEDX:-} ]] && scip_o=(--scip-dir "$SCIP_OPENEDX")
+  [[ -n ${READ:-} ]] && scip_s+=(--read) && scip_o+=(--read)
   (cd bridge && "$PY" -m atlas_bridge links $(for r in "${SENTRY[@]}"; do echo "$r=$(folder "$r")"; done) \
     --alias upstream=sentry ${scip_s[@]+"${scip_s[@]}"} -o "$WORK/sentry-links.json")
   (cd bridge && "$PY" -m atlas_bridge links $(for r in "${OPENEDX[@]}"; do echo "$r=$(folder "$r")"; done) \
@@ -81,10 +87,11 @@ links_step() {
   echo "score     openedx $(tail -1 "$WORK/openedx-score.txt")"
 }
 
-spec_one() { # key title repos...
+spec_one() { # key title scip-folder repos...
   local key=$1 title=$2 graphs=() folders=() more=() r
-  shift 2
-  [[ -f $WORK/$key-within.json ]] && more=(--links "$WORK/$key-within.json")
+  [[ -n $3 ]] && more+=(--scip-dir "$3")
+  shift 3
+  [[ -f $WORK/$key-within.json ]] && more+=(--links "$WORK/$key-within.json")
   for r in "$@"; do
     graphs+=("$r=$WORK/mirror/$r/graphify-out/graph.json")
     folders+=(--repo "$r=$(folder "$r")")
@@ -97,8 +104,8 @@ spec_one() { # key title repos...
 }
 
 spec_step() {
-  spec_one sentry 'Sentry, mapped by Graphify' "${SENTRY[@]}"
-  spec_one openedx 'Open edX, mapped by Graphify' "${OPENEDX[@]}"
+  spec_one sentry 'Sentry, mapped by Graphify' "${SCIP_SENTRY:-}" "${SENTRY[@]}"
+  spec_one openedx 'Open edX, mapped by Graphify' "${SCIP_OPENEDX:-}" "${OPENEDX[@]}"
 }
 
 page_step() {

@@ -13,6 +13,22 @@ test('control lines split off in either order', () => {
   }
 });
 
+test('control lines are taken out wherever the model puts them, however it dresses them', () => {
+  const mid = splitControl('First.\nFLOW: n4 > n3 > n2\n\nThen more prose.\nFOLLOWUPS: a | b');
+  assert.equal(mid.body, 'First.\n\nThen more prose.');
+  assert.equal(mid.flow, 'n4 > n3 > n2');
+  assert.deepEqual(mid.followups, ['a', 'b']);
+  for (const line of ['**FLOW:** n1 > n2', '**FLOW**: n1 > n2', '`FLOW: n1 > n2`', '- FLOW: n1 > n2']) {
+    const r = splitControl(`Body.\n\n${line}`);
+    assert.equal(r.body, 'Body.', line);
+    assert.equal(r.flow, 'n1 > n2', line);
+  }
+  const fenced = splitControl('Body.\n\n```\nFLOW: n1 > n2\n```\n');
+  assert.equal(fenced.body, 'Body.');
+  assert.equal(fenced.flow, 'n1 > n2');
+  assert.equal(splitControl('The flow: data goes in, then out.').body, 'The flow: data goes in, then out.');
+});
+
 test('step lines: routes with directions, stages with titles, unknown refs dropped', () => {
   assert.deepEqual(parseFlow('n1 > n2 < n3'), {
     stops: [

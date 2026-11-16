@@ -36,7 +36,7 @@ export function renderAnswer(text, isValid, nameOf, streaming = false) {
     body = body
       .replace(/\[\[[^\]]*$/, '')
       .replace(/\n?[ \t]*(FOLLOWUPS|FLOW|SUMMARY):[^\n]*$/i, '')
-      .replace(/\n[ \t]*F[LOWUPS]{0,8}$/i, '');
+      .replace(/\n[ \t>*_`-]*F[LOWUPS]{0,8}[*_`]*$/i, '');
   const refs = [],
     groups = [];
   let group = [];

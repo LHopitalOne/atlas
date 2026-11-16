@@ -14,6 +14,7 @@ BridgeError
 │   ├── SourceReadError         a source file cannot be read
 │   ├── IndexerUnavailableError a SCIP indexer is not installed
 │   ├── IndexerFailedError      a SCIP indexer ran but did not produce an index
+│   ├── IndexingIncompleteError some indexes of an index run could not be written (the others were)
 │   ├── GraphifyUnavailableError the graphify command is not installed
 │   └── GraphifyFailedError     graphify ran but wrote no graph.json
 ├── JudgeError                  asking a model (about a link, or to describe a file) failed
@@ -100,6 +101,14 @@ class IndexerUnavailableError(ExtractionError):
 class IndexerFailedError(ExtractionError):
     def __init__(self, tool: str, repo: str, problem: str):
         super().__init__(f'{tool} could not index {repo}: {problem}')
+
+
+class IndexingIncompleteError(ExtractionError):
+    def __init__(self, failed: list[str]):
+        super().__init__(
+            f'{len(failed)} index{"es" if len(failed) != 1 else ""} not written: {", ".join(failed)}',
+            'the other indexes were written; the reasons are above',
+        )
 
 
 class LinkFormatError(InputError):

@@ -1,5 +1,5 @@
 {
- "how": "A second key, built the same way after the finder was tuned on Sentry. The finder's first, frozen run on it found 12 of 71 with 31 false links. 61 of 71 is after general fixes made while looking at those misses, so it is no longer a held-out number.",
- "missed": "E55-E59 and E60, E62 (the platform's catalog and list requests are sent to a neighbouring or detail route, so they do not count), E07 and E17 (the base URL arrives through a constructor argument or a model property) and E28 (the path gains a segment in one branch of a conditional).",
+ "how": "A second key, built the same way after the finder was tuned on Sentry. The finder's first, frozen run on it found 12 of 71 with 31 false links. The rules alone now find 61 of 71, after general fixes made while looking at those misses, so it is no longer a held-out number; the AI reading pass (--read), whose every claim the code checks against the file, brings it to 67.",
+ "missed": "E07 and E17 (the base URL arrives through a constructor argument or a model property), E28 (the path gains a segment in one branch of a conditional) and E60 (a list request sent to a neighbouring route). The one false link is GET /currency, matched to the catalog's /api/v1/currency, which the key does not count.",
  "key": "eval/openedx/README.md"
 }

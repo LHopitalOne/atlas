@@ -3,6 +3,7 @@
 import os
 
 from ..adapters.scip import INDEXERS, PythonScipIndexer, SandboxedPythonIndexer
+from ..core.errors import IndexerFailedError, IndexerUnavailableError, IndexingIncompleteError
 from .command import Command
 from .inputs import RepositoryInput
 
@@ -22,13 +23,23 @@ class IndexCommand(Command):
         )
 
     def run(self, args):
+        """Every index that can be written is: a failing indexer is reported and the run goes on; the run then fails
+        naming what was not written."""
         os.makedirs(args.out_dir, exist_ok=True)
-        for repo in (RepositoryInput.parse(item).checked() for item in args.repos):
+        repos = [RepositoryInput.parse(item).checked() for item in args.repos]
+        failed = []
+        for repo in repos:
             indexers = [i for i in (cls() for cls in self._indexers(args.sandbox)) if i.applies(repo.path)]
             if not indexers:
                 self.report(f'{repo.name}: no indexer applies')
             for indexer in indexers:
-                self.report(f'{repo.name}: {indexer.index(repo.name, repo.path, args.out_dir)}')
+                try:
+                    self.report(f'{repo.name}: {indexer.index(repo.name, repo.path, args.out_dir)}')
+                except (IndexerFailedError, IndexerUnavailableError) as e:
+                    self.report(f'{repo.name}: skipped {indexer.LANGUAGE}, {e}')
+                    failed.append(f'{repo.name} ({indexer.LANGUAGE})')
+        if failed:
+            raise IndexingIncompleteError(failed)
 
     @staticmethod
     def _indexers(sandbox):

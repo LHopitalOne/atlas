@@ -50,6 +50,27 @@ class ScipCliTest(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(d, 'out', 'shop.fake.scip')))
             self.assertIn('empty: no indexer applies', err.getvalue())
 
+    def test_one_failing_indexer_does_not_stop_the_run(self):
+        class Fails(WritesIndex):
+            LANGUAGE = 'broken'
+
+            def __init__(self):
+                super().__init__('raise SystemExit(1)')
+
+        indexers = (Fails, WritesIndex)
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(index_command, 'INDEXERS', indexers):
+            for name in ('first', 'second'):
+                os.makedirs(os.path.join(d, name))
+                open(os.path.join(d, name, 'marker'), 'w').close()
+            out = os.path.join(d, 'out')
+            with contextlib.redirect_stderr(io.StringIO()) as err:
+                code = App().run(['index', os.path.join(d, 'first'), os.path.join(d, 'second'), '-o', out])
+            self.assertEqual(code, 1)
+            self.assertTrue(os.path.exists(os.path.join(out, 'first.fake.scip')))
+            self.assertTrue(os.path.exists(os.path.join(out, 'second.fake.scip')))  # written after first's failure
+            self.assertIn('first: skipped broken', err.getvalue())
+            self.assertIn('2 indexes not written: first (broken), second (broken)', err.getvalue())
+
 
 if __name__ == '__main__':
     unittest.main()
