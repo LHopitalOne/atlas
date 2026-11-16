@@ -1,9 +1,10 @@
 // Build the single-file artifact: bundle src/ with esbuild, inline it into src/index.html with the self graph.
 // Usage: node scripts/build.mjs [--offline]   (--offline also inlines d3-hierarchy so the file works with no network)
+//        [--graph=g.json] [--maps=key:spec.json[:Label],...] [--external-maps] [--out=file.html]
 import { build } from 'esbuild';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { copyFileSync, readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
-const offline = process.argv.includes('--offline');
 const graphArg = process.argv.find(a => a.startsWith('--graph='));
 const graphFile = graphArg ? graphArg.slice('--graph='.length) : 'generated/self-graph.json';
 const result = await build({
@@ -35,12 +36,23 @@ const maps = mapsArg
         return { key, file, label: label || key };
       })
   : [];
+// --external-maps keeps each map out of the page, in maps/<key>.json next to it, downloaded when first shown: for a
+// host that caps one file's size. The page then needs a web server (a browser will not fetch files beside a file://).
+const external = process.argv.includes('--external-maps');
+const outArg = process.argv.find(a => a.startsWith('--out='));
+const offline = process.argv.includes('--offline');
+const out = outArg ? outArg.slice(6) : offline ? 'dist/atlas-offline.html' : 'dist/atlas.html';
+if (external && maps.length) mkdirSync(join(dirname(out), 'maps'), { recursive: true });
+const mapScript = m => {
+  if (!external) {
+    return `<script type="application/json" id="map-${m.key}">${readFileSync(m.file, 'utf8').replaceAll('</', '<\\/')}</script>`;
+  }
+  copyFileSync(m.file, join(dirname(out), 'maps', `${m.key}.json`));
+  return `<script type="application/json" id="map-${m.key}" data-src="maps/${m.key}.json"></script>`;
+};
 const mapsHtml = [
   `<script type="application/json" id="mapIndex">${JSON.stringify(maps.map(({ key, label }) => ({ key, label })))}</script>`,
-  ...maps.map(
-    m =>
-      `<script type="application/json" id="map-${m.key}">${readFileSync(m.file, 'utf8').replaceAll('</', '<\\/')}</script>`,
-  ),
+  ...maps.map(mapScript),
 ].join('\n');
 
 // one pass over the template: inserted text is never scanned again (the source bundle contains index.html itself)
@@ -66,8 +78,6 @@ if (offline) {
     )
     .replace('<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>\n', '');
 }
-mkdirSync('dist', { recursive: true });
-const outArg = process.argv.find(a => a.startsWith('--out='));
-const out = outArg ? outArg.slice(6) : offline ? 'dist/atlas-offline.html' : 'dist/atlas.html';
+mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, html);
 console.log(`${out}  ${(html.length / 1024).toFixed(0)} KB`);

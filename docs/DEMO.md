@@ -50,6 +50,11 @@ run Graphify's AST pass there, so the repositories are not touched), `spec` (dra
 `page` (one HTML file). `STEPS="spec page" tools/demo/build.sh` reruns only the last two. The output is
 **`dist/demo/index.html`**: about 19 MB, 2.8 MB gzipped (GitHub Pages serves it gzipped), and it works offline.
 
+`SPLIT=1 STEPS=page tools/demo/build.sh` writes the same page to **`dist/demo-split/`** with each map in its own
+file (`maps/sentry.json` 15 MB, `maps/openedx.json` 3.7 MB), downloaded when that map is first shown. Use it for a
+host that caps one file's size, such as a Claude artifact (16 MB a file). It needs a web server: a browser opened on
+the file itself cannot fetch the maps beside it.
+
 ## Publish it on GitHub Pages
 
 Nothing below has been run; each step publishes.

@@ -15,6 +15,8 @@
 #   READ=1       also run the AI reading pass (`links --read`, needs OPENROUTER_API_KEY; cents, cached after)
 #   WORK         scratch folder (default: .demo-work, git-ignored)
 #   GRAPHIFY_ONLY  map only these repositories again (space-separated), e.g. GRAPHIFY_ONLY=sentry
+#   SPLIT=1      write dist/demo-split/: the page plus maps/<key>.json, for a host that caps a file's size (the
+#                one-file page is 19 MB); it needs a web server, since a browser fetches nothing beside a file://
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 ATLAS=$PWD
@@ -109,8 +111,12 @@ spec_step() {
 }
 
 page_step() {
-  node scripts/build.mjs --offline --maps="sentry:$WORK/sentry-spec.json:Sentry,openedx:$WORK/openedx-spec.json:Open edX" \
-    --out=dist/demo/index.html
+  local maps="sentry:$WORK/sentry-spec.json:Sentry,openedx:$WORK/openedx-spec.json:Open edX"
+  if [[ -n ${SPLIT:-} ]]; then
+    node scripts/build.mjs --offline --maps="$maps" --external-maps --out=dist/demo-split/index.html
+  else
+    node scripts/build.mjs --offline --maps="$maps" --out=dist/demo/index.html
+  fi
 }
 
 for step in $STEPS; do "${step}_step"; done

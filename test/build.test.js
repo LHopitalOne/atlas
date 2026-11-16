@@ -19,3 +19,19 @@ test('build embeds a graph containing "</script>" without breaking the page or t
   assert.ok(m, 'graph script tag is intact');
   assert.equal(JSON.parse(m[1]).repos[0].domains[0].services[0].name, 'evil</script><b>x');
 });
+
+test('--external-maps writes each map beside the page and leaves only its file name in the page', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'atlas-'));
+  const spec = { meta: {}, repos: [], edges: [], links: [] };
+  writeFileSync(join(dir, 'shop.json'), JSON.stringify(spec));
+  const out = join(dir, 'site', 'index.html');
+  execFileSync('node', [
+    'scripts/build.mjs',
+    `--maps=shop:${join(dir, 'shop.json')}:Shop`,
+    '--external-maps',
+    `--out=${out}`,
+  ]);
+  const html = readFileSync(out, 'utf8');
+  assert.match(html, /<script type="application\/json" id="map-shop" data-src="maps\/shop\.json"><\/script>/);
+  assert.deepEqual(JSON.parse(readFileSync(join(dir, 'site', 'maps', 'shop.json'), 'utf8')), spec);
+});

@@ -3,7 +3,8 @@
 // test/fixtures/http-shop.json is written by bridge/tests/test_atlas_http.py.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { createServer } from 'node:http';
+import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { test, expect } from './fixtures.js';
 
@@ -110,5 +111,48 @@ test.describe('a build with embedded maps', () => {
     await expect(atlas.locator('#linksBtn')).toBeHidden();
     await atlas.goto(pathToFileURL(MAPS_PAGE).href + '#nosuchmap');
     await expect(atlas.locator('#scale [data-v="shop"]')).toHaveAttribute('aria-checked', 'true');
+  });
+});
+
+test.describe('a build that keeps its maps in their own files', () => {
+  const page = resolve('dist/test-external/index.html');
+  let server, base;
+  test.beforeAll(async () => {
+    const maps = `shop:test/fixtures/http-shop.json:Shop,graphify:test/fixtures/graphify-shop.json:Plain`;
+    execFileSync('node', ['scripts/build.mjs', '--offline', `--maps=${maps}`, '--external-maps', `--out=${page}`]);
+    // a browser fetches files beside a page only over http, so serve the folder (a missing map answers 404)
+    server = createServer((req, res) => {
+      try {
+        res.end(readFileSync(join(dirname(page), new URL(req.url, 'http://x').pathname.slice(1) || 'index.html')));
+      } catch {
+        res.writeHead(404).end();
+      }
+    });
+    await new Promise(done => server.listen(0, '127.0.0.1', done));
+    base = `http://127.0.0.1:${server.address().port}/`;
+  });
+  test.afterAll(() => server.close());
+
+  test('downloads the first map, then each other map when it is chosen', async ({ atlas }) => {
+    const asked = [];
+    atlas.on('request', r => r.url().includes('/maps/') && asked.push(new URL(r.url()).pathname));
+    await atlas.goto(base);
+    await expect(atlas.locator('#count')).toContainText('nodes');
+    await expect(atlas.locator('#links')).toBeVisible();
+    expect(asked).toEqual(['/maps/shop.json']);
+    await atlas.locator('#scale [data-v="graphify"]').click();
+    await expect(atlas).toHaveURL(/#graphify/);
+    await expect(atlas.locator('#links')).toBeHidden();
+    await atlas.locator('#scale [data-v="shop"]').click();
+    await expect(atlas.locator('#links')).toBeVisible();
+    expect(asked).toEqual(['/maps/shop.json', '/maps/graphify.json']);
+  });
+
+  test('a map that cannot be downloaded says so', async ({ atlas }) => {
+    await atlas.route('**/maps/graphify.json', r => r.fulfill({ status: 404, body: '' }));
+    await atlas.goto(base);
+    await expect(atlas.locator('#count')).toContainText('nodes');
+    await atlas.locator('#scale [data-v="graphify"]').click();
+    await expect(atlas.locator('.toast')).toContainText('Could not download Plain (404');
   });
 });

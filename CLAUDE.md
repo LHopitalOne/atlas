@@ -40,7 +40,8 @@ E2E uses your Playwright browsers; set `CHROMIUM_PATH` to use another Chromium. 
    every share link changes. Layout is deterministic; `test/model.test.js` checks it.
 8. **URL hash** uses only letters, digits and hyphens (`app/url-codec.js`), because artifact links pass only `#name`.
 9. **Output is one file.** The page must work as a single HTML file: no external assets except the pinned d3-hierarchy
-   script (inlined in the offline build). Keep `src/index.html` self-contained.
+   script (inlined in the offline build). Keep `src/index.html` self-contained. The one exception is opt-in:
+   `--external-maps` keeps embedded maps in `maps/<key>.json` beside the page, for hosts that cap a file's size.
 
 ## Where things are
 

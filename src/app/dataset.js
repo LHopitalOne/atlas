@@ -7,7 +7,7 @@ import { computeFocus, computeHttpFocus, computeRouteFocus, LINK_FOCUS, ROUTE_FO
 import { computeRoute } from './route.js';
 import { applyHashState, writeHash } from './url.js';
 import { app, BLD, glc, ov } from '../dom.js';
-import { isMap, mapLabel, mapList, mapSpec } from '../model/maps.js';
+import { isMap, loadMap, mapLabel, mapList, mapSource, mapSpec } from '../model/maps.js';
 import { selfSpec } from '../model/self.js';
 import { buildSpec } from '../model/spec.js';
 import { build } from '../model/synthetic.js';
@@ -38,87 +38,104 @@ export function resolveDataset(n) {
 /** How a dataset is named in messages. */
 const datasetName = n => (n === 'self' ? 'Atlas’s own code' : typeof n === 'string' ? mapLabel(n) : fmt(n) + ' nodes');
 
+let loading = 0; // the latest request: a map still downloading when another is chosen is not shown
+
 export function loadDataset(n, state) {
   n = resolveDataset(n);
   const hadState = store.G && (store.selectedId >= 0 || !!route.from || !!route.to);
+  const isFile = typeof n === 'string' && n !== 'self';
+  const ticket = ++loading;
   setGroup($('#scale'), n);
   $('#scaleSel').value = String(n);
-  $('#buildMsg').textContent =
+  const msg = () =>
     n === 'self'
       ? 'Loading Atlas’s own code graph…'
-      : typeof n === 'string'
+      : isFile
         ? `Laying out ${mapLabel(n)}…`
         : `Building ${fmt(n)} nodes…`;
+  $('#buildMsg').textContent = isFile && mapSource(n) ? `Downloading ${mapLabel(n)}…` : msg();
   BLD.classList.add('on');
-  setTimeout(() => {
-    requestAnimationFrame(() => {
-      store.selectedId = -1;
-      store.hover = null;
-      store.focusId = -1;
-      store.focusT = 0;
-      store.focusGoal = 0;
-      store.dimT = 0;
-      store.dimGoal = 0;
-      app.classList.remove('has-insp');
-      expanded.clear();
-      route.from = route.to = null;
-      route.picking = null;
-      route.detailSet = false;
-      route.path = [];
-      route.hops = [];
-      store.IDX = null;
-      measure.clear();
-      store.placed = new Map();
-      store.labelA = new Map();
-      store.labelSide.clear();
-      store.placeDirty = true;
-      store.linkId = -1;
-      store.httpImpact = '';
-      store.G = n === 'self' ? buildSpec(selfSpec()) : typeof n === 'string' ? buildSpec(mapSpec(n)) : build(n);
-      store.G.src = n;
-      resetAsk();
-      store.inF = new Uint8Array(store.G.N);
-      // labels come from the dataset: indexed code uses its own vocabulary for statuses and kinds
-      STATUS.splice(0, 4, ...((store.G.meta && store.G.meta.status) || DEFAULT_STATUS));
-      KIND.splice(0, 4, ...((store.G.meta && store.G.meta.kind) || DEFAULT_KIND));
-      store.focusList = [];
-      store.focusEdges = [];
-      store.repoRank = new Uint16Array(store.G.R);
-      store.G.repoOrder.forEach((r, i) => (store.repoRank[r] = i));
-      if (!store.userColor) store.colorMode = store.G.R <= 5 || n === 'self' ? 'repo' : 'health';
-      setGroup($('#seg'), store.colorMode);
-      loadRecent();
-      buildAttn();
-      const tUp = buildScene();
-      store.buildInfo = { t: store.G.tGen + store.G.tLay + tUp, bytes: store.G.bytes + store.gpuBytes };
-      $('#count').innerHTML = `<b>${fmt(store.G.N)}</b> nodes&nbsp; <b>${fmt(store.G.L + store.G.C)}</b> edges`;
-      $('#issueN').textContent = fmt(store.G.BYST[1] + store.G.BYST[2]);
-      renderLegend();
-      renderPerf();
-      renderRoute();
-      renderAttn();
-      autoOpenLinks(); // before fitting: the panel covers part of the map
-      const B = store.G.bounds,
-        t = fitBox(B.x0, B.y0, B.x1, B.y1, 1e-4, 2.2);
-      store.KMIN = t.k * 0.5;
-      store.KMAX = Math.max(14, t.k * 4);
-      const c = viewCenter(),
-        wx = (c.x - t.x) / t.k,
-        wy = (c.y - t.y) / t.k;
-      cam.k = t.k * 0.88;
-      cam.x = c.x - wx * cam.k;
-      cam.y = c.y - wy * cam.k;
-      store.introT0 = performance.now();
-      store.introP = 0;
-      flyTo(t, 600);
-      store.whereKey = '';
+  (isFile ? loadMap(n) : Promise.resolve()).then(
+    () => {
+      if (ticket !== loading) return;
+      $('#buildMsg').textContent = msg();
+      setTimeout(() => requestAnimationFrame(() => ticket === loading && showDataset(n, state, hadState)), 30);
+    },
+    err => {
+      if (ticket !== loading) return;
       BLD.classList.remove('on');
-      if (state) applyHashState(state);
-      else writeHash();
-      if (hadState && !state) toast(`Switched to ${datasetName(n)}. Selection and route were cleared.`);
-      else announce(`Showing ${fmt(store.G.N)} nodes and ${fmt(store.G.L + store.G.C)} edges.`);
-    });
-  }, 30);
+      toast(`Could not download ${mapLabel(n)} (${err.message}).`);
+    },
+  );
+}
+
+/** Replace the shown graph with dataset `n` and reset every view of it. */
+function showDataset(n, state, hadState) {
+  store.selectedId = -1;
+  store.hover = null;
+  store.focusId = -1;
+  store.focusT = 0;
+  store.focusGoal = 0;
+  store.dimT = 0;
+  store.dimGoal = 0;
+  app.classList.remove('has-insp');
+  expanded.clear();
+  route.from = route.to = null;
+  route.picking = null;
+  route.detailSet = false;
+  route.path = [];
+  route.hops = [];
+  store.IDX = null;
+  measure.clear();
+  store.placed = new Map();
+  store.labelA = new Map();
+  store.labelSide.clear();
+  store.placeDirty = true;
+  store.linkId = -1;
+  store.httpImpact = '';
+  store.G = n === 'self' ? buildSpec(selfSpec()) : typeof n === 'string' ? buildSpec(mapSpec(n)) : build(n);
+  store.G.src = n;
+  resetAsk();
+  store.inF = new Uint8Array(store.G.N);
+  // labels come from the dataset: indexed code uses its own vocabulary for statuses and kinds
+  STATUS.splice(0, 4, ...((store.G.meta && store.G.meta.status) || DEFAULT_STATUS));
+  KIND.splice(0, 4, ...((store.G.meta && store.G.meta.kind) || DEFAULT_KIND));
+  store.focusList = [];
+  store.focusEdges = [];
+  store.repoRank = new Uint16Array(store.G.R);
+  store.G.repoOrder.forEach((r, i) => (store.repoRank[r] = i));
+  if (!store.userColor) store.colorMode = store.G.R <= 5 || n === 'self' ? 'repo' : 'health';
+  setGroup($('#seg'), store.colorMode);
+  loadRecent();
+  buildAttn();
+  const tUp = buildScene();
+  store.buildInfo = { t: store.G.tGen + store.G.tLay + tUp, bytes: store.G.bytes + store.gpuBytes };
+  $('#count').innerHTML = `<b>${fmt(store.G.N)}</b> nodes&nbsp; <b>${fmt(store.G.L + store.G.C)}</b> edges`;
+  $('#issueN').textContent = fmt(store.G.BYST[1] + store.G.BYST[2]);
+  renderLegend();
+  renderPerf();
+  renderRoute();
+  renderAttn();
+  autoOpenLinks(); // before fitting: the panel covers part of the map
+  const B = store.G.bounds,
+    t = fitBox(B.x0, B.y0, B.x1, B.y1, 1e-4, 2.2);
+  store.KMIN = t.k * 0.5;
+  store.KMAX = Math.max(14, t.k * 4);
+  const c = viewCenter(),
+    wx = (c.x - t.x) / t.k,
+    wy = (c.y - t.y) / t.k;
+  cam.k = t.k * 0.88;
+  cam.x = c.x - wx * cam.k;
+  cam.y = c.y - wy * cam.k;
+  store.introT0 = performance.now();
+  store.introP = 0;
+  flyTo(t, 600);
+  store.whereKey = '';
+  BLD.classList.remove('on');
+  if (state) applyHashState(state);
+  else writeHash();
+  if (hadState && !state) toast(`Switched to ${datasetName(n)}. Selection and route were cleared.`);
+  else announce(`Showing ${fmt(store.G.N)} nodes and ${fmt(store.G.L + store.G.C)} edges.`);
 }
 export function resize() {
   const r = ov.getBoundingClientRect(),
