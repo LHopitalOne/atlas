@@ -58,7 +58,7 @@ class LinksLiveTest(unittest.TestCase):
                 capture_output=True,
                 text=True,
             )
-        http = [e for e in with_links['links'] if e['relation'] == 'calls_http']
+        http = [e for e in with_links['links'] if e['relation'] == 'calls_endpoint']
         self.assertEqual({e['source'] for e in http}, {'web::src_api_placeorder', 'web::src_api_loadorder'})
         self.assertEqual(path.returncode, 0, path.stdout + path.stderr)
         self.assertEqual(validate(spec_data), [])

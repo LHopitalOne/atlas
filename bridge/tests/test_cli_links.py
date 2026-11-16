@@ -38,7 +38,7 @@ class LinksCliTest(unittest.TestCase):
         routes = {lk['route']['path'] for lk in found['links'] if lk['route']}
         self.assertEqual(routes, {'/orders', '/orders/{order_id}'})
         self.assertEqual(found['repos']['api']['routes'], 2)
-        self.assertEqual(sum(e['relation'] == 'calls_http' for e in graph['links']), 2)
+        self.assertEqual(sum(e['relation'] == 'calls_endpoint' for e in graph['links']), 2)
 
     def test_split_repo(self):
         self.assertEqual(RepositoryInput.parse('core=/x/y'), RepositoryInput('core', '/x/y'))

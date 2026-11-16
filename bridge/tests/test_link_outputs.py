@@ -1,3 +1,4 @@
+import dataclasses
 import importlib.util
 import os
 import unittest
@@ -61,11 +62,98 @@ class WithLinksTest(unittest.TestCase):
     def test_without_a_graph_and_through_to_atlas(self):
         out = GraphifyLinkWriter().present(LINKS[:1])
         caller = [n for n in out['nodes'] if n['repo'] == 'web'][0]
-        self.assertEqual(caller['id'], 'web::src/api.js::placeOrder')
+        self.assertEqual(caller['id'], 'web::src_api_placeorder')  # the id Graphify gives placeOrder in src/api.js
         g = CodeGraph()
         GraphifyReader(g).read(out, 'unused')
         self.assertEqual(sorted(g.files), [('api', 'app/main.py'), ('web', 'src/api.js')])
         self.assertEqual(list(g.links.values()), [Status.MATCHED])
+
+
+class GraphifyShapeTest(unittest.TestCase):
+    """The edges take Graphify's HTTP endpoint shape, so its own tools read them like the ones it extracts."""
+
+    SERVED = {
+        'nodes': MERGED['nodes']
+        + [
+            {'id': 'api::app_main', 'label': 'main.py', 'repo': 'api', 'source_file': 'app/main.py'},
+            {
+                'id': 'api::app_main_post_order',
+                'label': 'post_order()',
+                'repo': 'api',
+                'source_file': 'app/main.py',
+                'source_location': 'L11',
+                '_callable': True,
+            },
+        ],
+        'links': [],
+    }
+
+    def test_caller_calls_endpoint_and_endpoint_serves_handler(self):
+        out = GraphifyLinkWriter(self.SERVED).present(LINKS[:1])
+        call, serve = out['links']
+        self.assertEqual(
+            (call['source'], call['relation'], call['target']),
+            ('web::src_api_placeorder', 'calls_endpoint', 'api::http:POST /orders'),
+        )
+        self.assertEqual(
+            (serve['source'], serve['relation'], serve['target']),
+            ('api::http:POST /orders', 'serves', 'api::app_main_post_order'),
+        )
+        self.assertEqual({call['context'], serve['context']}, {'http'})
+        self.assertEqual(call['metadata']['atlas']['reason'], 'named target, one route fits')
+        endpoint = next(n for n in out['nodes'] if n['id'] == 'api::http:POST /orders')
+        self.assertEqual(endpoint['type'], 'http_endpoint')
+        self.assertEqual(endpoint['metadata']['http_endpoint']['methods'], ['POST'])
+
+    def test_no_serves_edge_when_the_handler_name_is_not_unique(self):
+        twice = dict(self.SERVED, nodes=self.SERVED['nodes'] + [dict(self.SERVED['nodes'][-1], id='api::other')])
+        out = GraphifyLinkWriter(twice).present(LINKS[:1])
+        self.assertEqual([e['relation'] for e in out['links']], ['calls_endpoint'])
+
+    def test_rubric_confidences(self):
+        out = GraphifyLinkWriter(MERGED).present(LINKS)
+        self.assertEqual([e['confidence_score'] for e in out['links']], [1.0, 0.75])
+
+    def test_writing_twice_adds_nothing_twice(self):
+        once = GraphifyLinkWriter(self.SERVED).present(LINKS)
+        twice = GraphifyLinkWriter(once).present(LINKS)
+        self.assertEqual(twice['links'], once['links'])
+        self.assertEqual(sorted(n['id'] for n in twice['nodes']), sorted(n['id'] for n in once['nodes']))
+
+    def test_one_edge_per_caller_and_endpoint_the_most_certain(self):
+        guess = Link(CALL, 'web', 'api', ROUTE, Status.AMBIGUOUS, 'a guess')
+        out = GraphifyLinkWriter(MERGED).present([guess, LINKS[0], guess])
+        self.assertEqual(
+            [(e['confidence'], e['metadata']['atlas']['reason']) for e in out['links']],
+            [
+                ('EXTRACTED', 'named target, one route fits'),
+            ],
+        )
+
+    def test_endpoint_ids_never_land_on_code(self):
+        clash = {'id': 'api::http_post_orders', 'label': 'orders()', 'repo': 'api', 'source_file': 'http/post.py'}
+        out = GraphifyLinkWriter(dict(MERGED, nodes=MERGED['nodes'] + [clash])).present(LINKS[:1])
+        self.assertEqual(out['links'][0]['target'], 'api::http:POST /orders')
+
+    def test_no_serves_edge_in_a_graph_of_one_repository(self):
+        base = {'nodes': [{k: v for k, v in n.items() if k != 'repo'} for n in self.SERVED['nodes']], 'links': []}
+        out = GraphifyLinkWriter(base).present(LINKS[:1])
+        self.assertEqual([e['relation'] for e in out['links']], ['calls_endpoint'])
+
+    def test_serves_only_a_handler_read_from_the_code(self):
+        named = dataclasses.replace(ROUTE, framework='named')
+        read = dataclasses.replace(ROUTE, framework='read')
+        for route, expected in ((named, []), (read, [('serves', 'INFERRED')])):
+            out = GraphifyLinkWriter(self.SERVED).present([dataclasses.replace(LINKS[0], route=route)])
+            serves = [(e['relation'], e['confidence']) for e in out['links'] if e['relation'] == 'serves']
+            self.assertEqual(serves, expected)
+
+    def test_output_of_the_earlier_writer_is_replaced(self):
+        old = {'id': 'api::http:POST /orders', 'label': 'POST /orders', 'repo': 'api'}
+        edge = {'source': 'web::src_api_placeorder', 'target': old['id'], 'relation': 'calls_http'}
+        out = GraphifyLinkWriter(dict(MERGED, nodes=MERGED['nodes'] + [old], links=[edge])).present(LINKS[:1])
+        self.assertEqual([e['relation'] for e in out['links']], ['calls_endpoint'])
+        self.assertEqual(sum(n['id'] == old['id'] for n in out['nodes']), 1)
 
 
 class SingleRepoGraphTest(unittest.TestCase):
@@ -85,8 +173,8 @@ class SingleRepoGraphTest(unittest.TestCase):
                 'web::src_api_placeorder',
                 'web::src_api_later',
                 'web::src_api',
-                'web::src/other.js::one',
-                'web::src/other.js::two',
+                'web::src_other_one',
+                'web::src_other_two',
             ],
         )
 

@@ -58,6 +58,11 @@ graphify path "placeOrder()" "POST /orders" --graph merged-links.json   # Graphi
 python3 -m atlas_bridge spec merged-links.json -o graph.json             # and so does the Atlas map
 ```
 
+The links use the same shape as Graphify's own HTTP endpoints: the calling function `calls_endpoint` an
+`http_endpoint` node, and that node `serves` the handler (when the graph has exactly one function of that name). Each
+edge's `metadata.atlas` keeps why it was matched. `graphify affected` follows them only when asked:
+`graphify affected "post_order()" --relation calls_endpoint --relation serves --relation calls`.
+
 It reads routes (Django URLconfs with includes, DRF routers and their `@action`s, plugin URL configs, Flask and
 FastAPI decorators, axum and actix routers, Express) and requests (urllib3, requests, httpx, reqwest, fetch, axios,
 and request types that declare their own path). It follows URLs through wrapper functions back to the literal path,
