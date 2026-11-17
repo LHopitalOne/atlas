@@ -7,7 +7,7 @@ import { esc } from '../util/format.js';
 import { parseFlow, splitControl } from './diagram.js';
 
 /** The step line's own path: a route as one group; stages joined last-to-first, stage to stage. */
-function flowGroups(flow) {
+export function flowGroups(flow) {
   if (!flow) return [];
   if (flow.stops.every(s => !s.title && s.refs.length === 1)) return [flow.stops.map(s => s.refs[0])];
   const out = [];
@@ -16,6 +16,15 @@ function flowGroups(flow) {
 }
 
 const CITE = /\[\[([ndr]\d+)\]\]/g;
+
+/** What to light on the map for an answer: its diagram's items and arrows when it drew one (the picture the answer
+ * chose), otherwise every item it cites, joined within each paragraph. */
+export function mapFocusOf(r) {
+  const refs = r.flow ? [...new Set(r.flow.stops.flatMap(s => s.refs))] : [];
+  return refs.length > 1
+    ? { refs, groups: flowGroups(r.flow), flow: true }
+    : { refs: r.refs, groups: r.groups, flow: false };
+}
 
 /** Split off the follow-up line (kept for callers that only need follow-ups). */
 export function splitFollowups(text) {

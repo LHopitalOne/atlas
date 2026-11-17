@@ -30,6 +30,15 @@ The maps show production code only: tests, fixtures, migrations, benches and exa
 JavaScript frontend (10,000 files) only the 134 files that call its API are on the map. Graphify ran in AST mode (no LLM), so domains
 are Graphify's communities and their names are `Community N`.
 
+## The welcome tour
+
+The page is built with `--tour`, so a first-time viewer gets a short tour: the page dims and the parts that matter stay
+lit while a card explains them. It welcomes them to Sentry with a card over the whole map (the links panel waits for
+its own step), waits for them to click a link and lights both its proof and the link on the map, switches to
+Open edX, and opens Ask Atlas with one sample question whose answer is drawn as a diagram (a route across three
+repositories; the questions are `TOUR.ask` in `src/config.js`). Skip or Escape ends it, it does not come back on its
+own, and the `?` button in the toolbar plays it again.
+
 ## Build it
 
 ```bash
@@ -84,3 +93,67 @@ Nothing below has been run; each step publishes.
    view can be shared, since the selection lives in the hash (`#sentry-node-80899`).
 
 To update it later, rebuild, copy the file into `../atlas-pages`, commit and push again.
+
+## Host it on Vercel
+
+On Vercel, Ask Atlas can use the model without the viewer giving a key: two functions stand in for `atlas serve`'s
+local helper (`/api/llm/ping`, `/api/llm/chat/completions`), and the OpenRouter key stays on Vercel. The page itself
+is unchanged; it tries `./api/llm` first, as it does under `atlas serve`.
+
+1. Build the folder (from the specs already in `.demo-work`; rerun the other steps first if they changed):
+
+   ```bash
+   VERCEL=1 STEPS=page REPOS=/path/to/demo-repos tools/demo/build.sh
+   ```
+
+   It writes **`dist/demo-vercel/`**: the split page (`index.html`, `maps/`) plus `tools/demo/vercel/` (`api/llm/`,
+   `lib/llm-proxy.js`, `vercel.json`, a `package.json` that only marks the files as ES modules). A rebuild keeps
+   `.vercel/`, the project link made in step 2.
+
+2. Link that folder to a Vercel project (once). Every `vercel` command below runs with `--cwd dist/demo-vercel`, so
+   it acts on this project and not on one for the repository root:
+
+   ```bash
+   vercel link --cwd dist/demo-vercel
+   ```
+
+3. Give the project its key, for production and preview both (you type it; use an OpenRouter key made for this demo,
+   so it can be revoked on its own). One command per environment; for preview, press Enter at the branch question
+   to cover every branch:
+
+   ```bash
+   vercel env add OPENROUTER_API_KEY production --cwd dist/demo-vercel
+   vercel env add OPENROUTER_API_KEY preview --cwd dist/demo-vercel
+   ```
+
+   A key added or changed here only reaches deployments made after it, so deploy again after any change.
+
+4. Deploy a preview, try Ask on it, then deploy to production:
+
+   ```bash
+   vercel deploy --cwd dist/demo-vercel
+   vercel deploy --prod --cwd dist/demo-vercel
+   ```
+
+   If Ask asks the viewer for an OpenRouter key, `/api/llm/ping` answered 404: the deployment has no key, so check
+   step 3 and deploy again.
+
+What the functions do: every request must come from the demo's own page, meaning its `Origin` header (or `Referer`,
+which a same-origin GET sends instead) names the host it was sent to; that holds on any preview or production URL.
+`ALLOWED_HOSTS` (comma-separated) accepts more page hosts, but only for a page that reaches `/api` on its own origin,
+through a proxy that sends a different `Host`: the functions send no CORS headers and answer no preflight, so a page
+on another site cannot call them (its JSON POST is blocked before the host check runs). The model is always `meta/muse-ember` whatever the request
+asks for (`MODEL` in `lib/llm-proxy.js`, kept equal to `ASK_MODEL` by `test/vercel.test.js`), bodies over 4,000,000
+bytes or not JSON are refused, and OpenRouter's status and body come back as they are. There is no token or spending
+cap; set a credit limit on the key in OpenRouter if you want one.
+
+What the check does not stop: it keeps other websites from spending the key through their visitors' browsers, but a
+script outside a browser can send any `Origin` it likes, so anyone who finds the URL can still call the model.
+Revoke the key when the demo is over.
+
+`vercel.json` sets no framework, Fluid compute, `maxDuration` 300 s for the functions (the Hobby maximum with Fluid
+compute), `index.html` uncached and `maps/*.json` cached for an hour (their names do not change between builds, so
+longer would show an old map with a new page). Sources: [function duration](https://vercel.com/docs/functions/configuring-functions/duration),
+[limits](https://vercel.com/docs/functions/limitations) (4.5 MB request body),
+[Node.js runtime](https://vercel.com/docs/functions/runtimes/node-js) (`export function GET(request)`, ES modules
+need `"type": "module"`), [vercel.json](https://vercel.com/docs/project-configuration/vercel-json).

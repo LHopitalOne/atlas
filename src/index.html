@@ -21,6 +21,7 @@
   --warning:#d97706; --destructive:#e7000b; --inferred:#7c3aed; --route:#0070f3; --proof:#15803d;
   --r0:#0070f3; --r1:#7928ca; --r2:#eb367f; --r3:#0d9488; --r4:#65a30d; --other:#a3a3a3;
   --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 16px -6px rgba(0,0,0,.08);
+  --tour-dim:rgba(10,10,10,.5); --tour-soft:rgba(10,10,10,.22);
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
@@ -32,6 +33,7 @@
     --warning:#fbbf24; --destructive:#ff6467; --inferred:#a78bfa; --route:#3291ff; --proof:#4ade80;
     --r0:#3291ff; --r1:#a855f7; --r2:#f472b6; --r3:#2dd4bf; --r4:#a3e635; --other:#525252;
     --shadow:0 0 0 1px rgba(0,0,0,.5),0 10px 30px -10px rgba(0,0,0,.8);
+    --tour-dim:rgba(0,0,0,.72); --tour-soft:rgba(0,0,0,.4);
     color-scheme:dark;
   }
 }
@@ -43,6 +45,7 @@
   --warning:#fbbf24; --destructive:#ff6467; --inferred:#a78bfa; --route:#3291ff; --proof:#4ade80;
   --r0:#3291ff; --r1:#a855f7; --r2:#f472b6; --r3:#2dd4bf; --r4:#a3e635; --other:#525252;
   --shadow:0 0 0 1px rgba(0,0,0,.5),0 10px 30px -10px rgba(0,0,0,.8);
+  --tour-dim:rgba(0,0,0,.72); --tour-soft:rgba(0,0,0,.4);
   color-scheme:dark;
 }
 :root{
@@ -156,6 +159,9 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 .lpanel.on{display:flex}
 .ph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 8px 10px 16px}
 .ph h2{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em}
+/* header buttons keep their size and sit beside the title, however long the line under it wraps (-6px centres a
+   32px button on the 20px title line) */
+.ph > .btn-icon,.ph > .ph-actions{flex:none;align-self:flex-start;margin-top:-6px}
 .ph p{margin:2px 0 0;color:var(--muted-foreground);font-size:12.5px}
 .rt-fields{display:grid;grid-template-columns:16px 1fr 32px;gap:6px 10px;align-items:center;padding:4px 10px 12px 16px}
 .rt-pin{width:10px;height:10px;border-radius:50%;justify-self:center}
@@ -212,6 +218,14 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 .legend summary svg{color:var(--muted-foreground);transition:transform 150ms var(--ease-out)}
 .legend[open] summary svg{transform:rotate(180deg)}
 .lg-body{padding:0 8px 10px}
+/* sections behind a segmented control: one at a time keeps the Key short enough for any screen */
+.lg-tabs{display:flex;margin:0 0 8px}
+.lg-tabs button{flex:1;padding:0 6px}
+/* every section shares one cell, so the Key keeps the tallest one's height and does not jump when switching */
+.lg-panes{display:grid}
+.lg-pane{grid-area:1/1}
+.lg-pane[hidden]{display:block;visibility:hidden}
+.lg-foot{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
 .lg-h{color:var(--muted-foreground);font-size:11.5px;font-weight:500;margin:4px 6px 4px}
 .lg-group + .lg-group{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
 .lg-row{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:8px;width:100%;text-align:left;padding:5px 6px;border-radius:6px;font-size:13px;min-height:28px}
@@ -621,6 +635,43 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
 @media (max-width:1040px) and (min-width:761px){ .codeview{top:114px} }
 @media (max-width:760px){ .codeview{inset:0;width:auto;right:0;top:0;bottom:0;border-radius:0;z-index:30} }
 @media (prefers-reduced-motion: reduce){ .codeview{transition:none} }
+
+/* ---------- welcome tour (builds with --tour): the page dims, one part stays lit, a card explains it ---------- */
+.tour-btn[hidden]{display:none}
+.tour{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:0;transition:opacity 180ms var(--ease-out)}
+.tour.on{opacity:1}
+/* the dim: one path over the window with a hole per lit part (even-odd); the path takes clicks, its holes let them
+   through to the page; a thin ring marks each hole */
+.tour-shade{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.tour-shade path{fill:var(--tour-dim);pointer-events:visiblePainted;transition:fill 200ms ease}
+.tour.soft .tour-shade path{fill:var(--tour-soft)}
+.tour-shade rect{fill:none;stroke:color-mix(in srgb,var(--foreground) 55%,transparent);stroke-width:2;pointer-events:none}
+.tour.moving .tour-shade path{transition:d 320ms var(--ease-in-out),fill 200ms ease}
+.tour-card{position:absolute;left:0;top:0;width:320px;max-height:calc(100% - 24px);overflow:auto;padding:14px 16px 12px;pointer-events:auto;outline:none}
+.tour-card.enter{animation:tour-in 200ms var(--ease-out) both}
+/* the card never slides across the screen: it appears where it belongs, once its step's target is on screen */
+.tour-card.pending{visibility:hidden}
+.tour-card:focus-visible{box-shadow:var(--shadow),0 0 0 3px color-mix(in srgb,var(--ring) 55%,transparent)}
+.tour-top{display:flex;align-items:center;justify-content:space-between;margin:-4px -8px 4px 0}
+.tour-n{color:var(--muted-foreground);font-size:12px;font-variant-numeric:tabular-nums}
+.tour-card h2{margin:0 0 4px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.tour-card p{margin:0;color:var(--muted-foreground);font-size:13.5px;line-height:1.5;text-wrap:pretty}
+.tour-wait{display:flex;align-items:center;gap:8px;margin-top:10px;color:var(--foreground);font-size:12.5px}
+.tour-wait::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--route);animation:tour-pulse 1.4s ease-in-out infinite}
+.tour-q{display:block;margin-top:12px;text-align:left}
+.tour-nav{display:flex;justify-content:flex-end;gap:6px;margin-top:14px}
+.tour-nav .btn[aria-disabled="true"]{opacity:.5;cursor:default}
+/* phones: a sheet across the bottom, or the top when the lit part is low */
+.tour-card.sheet{left:8px;right:8px;width:auto;top:auto;bottom:calc(8px + env(safe-area-inset-bottom,0px));translate:none;max-height:45%}
+.tour-card.sheet.top{top:calc(8px + env(safe-area-inset-top,0px));bottom:auto}
+@keyframes tour-in{from{opacity:0;transform:translateY(4px) scale(.98)}}
+@keyframes tour-pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion: reduce){
+  .tour.moving .tour-shade path{transition:none}
+  .tour-card.enter{animation:tour-fade 150ms ease both}
+  .tour-wait::before{animation:none}
+}
+@keyframes tour-fade{from{opacity:0}}
 </style>
 </head>
 <body>
@@ -671,6 +722,7 @@ button{background:none;border:0;cursor:pointer;padding:0;touch-action:manipulati
     </div>
     <span class="sep-v"></span>
     <button class="btn btn-outline btn-issues" id="issues" aria-pressed="false" title="Show only ambiguous and unmatched contracts (I)">Issues <span class="badge badge-destructive" id="issueN"></span></button>
+    <button class="btn btn-ghost btn-icon tour-btn" id="tourBtn" aria-label="Replay the tour" title="Tour" hidden><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.3" stroke="currentColor" stroke-width="1.4"/><path d="M6.2 6.3a1.9 1.9 0 013.7.5c0 1.3-1.9 1.6-1.9 2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="11.3" r=".85" fill="currentColor"/></svg></button>
   </div>
 
   <details class="legend card" id="legend" open>

@@ -7,7 +7,7 @@
 import { store, route } from '../state.js';
 import { ASK, ov } from '../dom.js';
 import { esc } from '../util/format.js';
-import { renderAnswer } from '../ask/format.js';
+import { mapFocusOf, renderAnswer } from '../ask/format.js';
 import { refName, resolve, search, toolSet } from '../ask/tools.js';
 import { answerLocally } from '../ask/local.js';
 import { askClaude, claudeAvailable, disableClaude } from '../ask/claude.js';
@@ -138,18 +138,20 @@ function followOnMap(i) {
   showing = i;
   store.askSet = refs;
   store.askGroups = groups;
+  store.askFlow = false;
   store.focusId = -1;
   updateFocus();
 }
 
 /** Light up an answer's items on the map (everything else dims) and bring them into view. */
 function showOnMap(i, quiet) {
-  const { refs, groups } = renderAnswer(thread[i].text, valid, nameOf);
+  const { refs, groups, flow } = mapFocusOf(renderAnswer(thread[i].text, valid, nameOf));
   if (refs.length < 2 && quiet) return;
   if (showing !== i) clearShowing();
   showing = i;
   store.askSet = refs;
   store.askGroups = groups;
+  store.askFlow = flow;
   store.focusId = -1;
   updateFocus();
   const b = ASK.querySelector(`[data-show="${i}"]`);

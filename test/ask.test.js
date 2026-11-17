@@ -5,7 +5,7 @@ import './setup.js';
 import { buildSpec } from '../src/model/spec.js';
 import { tinyGraph } from './helpers.js';
 import { parseQuestion, answerLocally } from '../src/ask/local.js';
-import { renderAnswer, splitFollowups } from '../src/ask/format.js';
+import { mapFocusOf, renderAnswer, splitFollowups } from '../src/ask/format.js';
 import { resolve, search, route, impact, toolSet } from '../src/ask/tools.js';
 
 const self = buildSpec(JSON.parse(readFileSync('generated/self-graph.json', 'utf8')));
@@ -85,9 +85,26 @@ test('formatter escapes text, drops citations to nothing, hides half-written one
 test('the tool set is described for Claude, with source reading only when available', () => {
   assert.deepEqual(
     toolSet(self).map(t => t.name),
-    ['search', 'describe', 'impact', 'route', 'overview'],
+    ['search', 'describe', 'impact', 'route', 'overview', 'cycles'],
   );
   assert.ok(toolSet(self, { readSource: () => null }).some(t => t.name === 'read_source'));
+  // the model answers cycle questions from the graph, as the offline answerer does
+  const found = toolSet(self)
+    .find(t => t.name === 'cycles')
+    .run({});
+  assert.ok(found.services && found.domains && typeof found.services.count === 'number');
+  // each cycle says which repositories it spans (with how many members) and names a sample of its members
+  for (const level of [found.services, found.domains])
+    level.groups.forEach((grp, k) => {
+      assert.equal(
+        grp.repositories.reduce((a, r) => a + r.members, 0),
+        grp.size,
+      );
+      assert.match(grp.repositories[0].ref, /^r\d+$/);
+      // the biggest group names some members; the others give only their size, repositories and loop
+      if (k === 0) assert.ok(grp.sample.length > 0 && grp.sample.length <= Math.min(12, grp.size));
+      else assert.equal(grp.sample, undefined);
+    });
 });
 
 test('the rendering walkthrough cites real functions on the Self map', async () => {
@@ -126,4 +143,22 @@ test('cycle questions are recognised and answered with a loop that closes on its
   assert.equal(flow[0], flow.at(-1), 'the loop comes back to its start');
   assert.match(answerLocally(self, 'Is routeSearch in a cycle?'), /isn't part of any dependency cycle/);
   assert.match(answerLocally(self, 'Are there circular imports between modules?'), /Between modules: 1 cycle/);
+});
+
+test("the map lights an answer's diagram when it drew one, else everything it cites", () => {
+  const ok = () => true,
+    name = r => r;
+  // a cycle answer citing two repositories and a two-file loop: the map shows the loop, there and back
+  const withFlow = renderAnswer(
+    'It spans [[r1]] and [[r2]]. The loop: [[n3]] and [[n4]].\n\nFLOW: n3 > n4 > n3',
+    ok,
+    name,
+  );
+  assert.deepEqual(mapFocusOf(withFlow), { refs: ['n3', 'n4'], groups: [['n3', 'n4', 'n3']], flow: true });
+  assert.equal(
+    mapFocusOf(renderAnswer('[[n3]] calls [[n4]], so a change to [[n3]] reaches it.', ok, name)).flow,
+    false,
+  );
+  const plain = renderAnswer('It spans [[r1]] and [[r2]].', ok, name);
+  assert.deepEqual(mapFocusOf(plain).refs, ['r1', 'r2']);
 });

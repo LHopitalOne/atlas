@@ -55,3 +55,27 @@ export const HTTP_ARC = {
   endpointPx: 3.2, // endpoint marker radius, drawn at every zoom so endpoints show before their streets do
   flowSpeed: 0.11, // flow dots, screen px per ms
 };
+
+/** Welcome tour on demo pages, built with --tour (see ui/tour.js). */
+export const TOUR = {
+  storeKey: 'atlas.tourDone', // localStorage: set once the tour is finished or skipped
+  startMs: 700, // after the first map appears (its intro flight is FLIGHT.introMs)
+  settleMs: 700, // after a step changes, follow the target every frame this long (panels slide in)
+  stillMs: 50, // the card appears once the lit parts have not moved for this long (or settleMs is up)
+  fadeMs: 180, // the dim layer fades out this long when the tour closes
+  pad: 6, // spotlight margin around the target, px
+  radius: 14, // corner radius of a lit part, px
+  linkPad: 28, // ...around the map's links, which bulge past their ends
+  minHole: 160, // smallest spotlight around the map's links, px
+  edge: 12, // the card keeps this far from the window's edges, px
+  gap: 12, // between the spotlight and the card, px
+  top: 64, // a card in a top corner starts below the toolbar, px
+  phone: '(max-width:760px)', // the card becomes a sheet at the bottom (or the top, when the target is low)
+  // the sample question, per map: a route across three repositories, so the answer draws it as a diagram
+  ask: {
+    sentry: 'How does relay reach snuba?',
+    openedx: 'How does frontend-app-learning reach credentials?',
+  },
+  askAny: 'How does {from} reach {to}?', // other maps with links: the busiest pair of repositories
+  askPlain: 'Are there any dependency cycles?', // maps without links
+};

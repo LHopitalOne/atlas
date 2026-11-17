@@ -17,6 +17,8 @@
 #   GRAPHIFY_ONLY  map only these repositories again (space-separated), e.g. GRAPHIFY_ONLY=sentry
 #   SPLIT=1      write dist/demo-split/: the page plus maps/<key>.json, for a host that caps a file's size (the
 #                one-file page is 19 MB); it needs a web server, since a browser fetches nothing beside a file://
+#   VERCEL=1     also write dist/demo-vercel/: the SPLIT=1 page and maps plus tools/demo/vercel (the Ask helper as
+#                functions, vercel.json), to deploy as docs/DEMO.md says (link, key, deploy); implies SPLIT=1
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 ATLAS=$PWD
@@ -25,6 +27,7 @@ PY=${PY:-python3}
 GRAPHIFY_PY=${GRAPHIFY_PY:-$(head -1 "$(command -v graphify)" | sed 's/^#!//')}
 WORK=${WORK:-$ATLAS/.demo-work}
 STEPS=${STEPS:-links graphify spec page}
+[[ -n ${VERCEL:-} ]] && SPLIT=1
 mkdir -p "$WORK/mirror" dist/demo
 
 SENTRY=(sentry relay snuba symbolicator)
@@ -113,10 +116,19 @@ spec_step() {
 page_step() {
   local maps="sentry:$WORK/sentry-spec.json:Sentry,openedx:$WORK/openedx-spec.json:Open edX"
   if [[ -n ${SPLIT:-} ]]; then
-    node scripts/build.mjs --offline --maps="$maps" --external-maps --out=dist/demo-split/index.html
+    node scripts/build.mjs --offline --maps="$maps" --external-maps --tour --out=dist/demo-split/index.html
   else
-    node scripts/build.mjs --offline --maps="$maps" --out=dist/demo/index.html
+    node scripts/build.mjs --offline --maps="$maps" --tour --out=dist/demo/index.html
   fi
 }
 
+vercel_folder() { # the split page plus the functions; keeps .vercel/ (the project link `vercel link` makes)
+  local out=dist/demo-vercel
+  mkdir -p "$out"
+  find "$out" -mindepth 1 -maxdepth 1 ! -name .vercel -exec rm -rf {} +
+  cp -R dist/demo-split/. tools/demo/vercel/. "$out/"
+  echo "vercel    $out: deploy with  vercel deploy --cwd $out  (first time: docs/DEMO.md)"
+}
+
 for step in $STEPS; do "${step}_step"; done
+if [[ -n ${VERCEL:-} && " $STEPS " == *' page '* ]]; then vercel_folder; fi

@@ -24,6 +24,7 @@ export const store = {
   askSet: [],
   askHops: [],
   askGroups: [],
+  askFlow: false, // askGroups are an answer's diagram (its FLOW line), so a group that ends where it began is a loop
   kbdMap: false,
   focusId: -1,
   focusT: 0,

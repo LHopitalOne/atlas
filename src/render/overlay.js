@@ -118,10 +118,7 @@ function drawRouteFlow(fx) {
     oc.strokeStyle = css(theme.halo);
     oc.fillStyle = css(theme.route);
     for (const h of hops) {
-      const x0 = g.PX[h.a],
-        y0 = g.PY[h.a],
-        x1 = g.PX[h.b],
-        y1 = g.PY[h.b],
+      const [x0, y0, x1, y1] = h.ends || [g.PX[h.a], g.PY[h.a], g.PX[h.b], g.PY[h.b]],
         dx = x1 - x0,
         dy = y1 - y0,
         cx = (x0 + x1) / 2 - dy * 0.1,

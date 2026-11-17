@@ -1,6 +1,6 @@
 // Build the single-file artifact: bundle src/ with esbuild, inline it into src/index.html with the self graph.
 // Usage: node scripts/build.mjs [--offline]   (--offline also inlines d3-hierarchy so the file works with no network)
-//        [--graph=g.json] [--maps=key:spec.json[:Label],...] [--external-maps] [--out=file.html]
+//        [--graph=g.json] [--maps=key:spec.json[:Label],...] [--external-maps] [--tour] [--out=file.html]
 import { build } from 'esbuild';
 import { copyFileSync, readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -50,9 +50,12 @@ const mapScript = m => {
   copyFileSync(m.file, join(dirname(out), 'maps', `${m.key}.json`));
   return `<script type="application/json" id="map-${m.key}" data-src="maps/${m.key}.json"></script>`;
 };
+// --tour adds the welcome tour (ui/tour.js) for first-time viewers: for the demo page, not for maps people work in
+const tour = process.argv.includes('--tour');
 const mapsHtml = [
   `<script type="application/json" id="mapIndex">${JSON.stringify(maps.map(({ key, label }) => ({ key, label })))}</script>`,
   ...maps.map(mapScript),
+  ...(tour ? ['<script type="application/json" id="tourOn">{}</script>'] : []),
 ].join('\n');
 
 // one pass over the template: inserted text is never scanned again (the source bundle contains index.html itself)

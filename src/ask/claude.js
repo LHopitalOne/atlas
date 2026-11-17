@@ -14,6 +14,8 @@ Rules:
 - Use read_source only when the summary and signature are not enough, and say that you read the code.
 - If something isn't on the map, say so.
 - If the answer describes an order (a route, a pipeline, steps), add one line before the follow-ups: FLOW: ref > ref < ref (> follows the call, < goes against it), or stages as FLOW: Title=ref,ref | Title=ref.
+- For questions about dependency cycles or circular dependencies, use the cycles tool; never search for the word. When it finds a loop, name its steps in a sentence, and draw the shortest one as FLOW: ref > ref > ref > (the first ref again). The tool also gives each cycle's repositories (with how many members in each) and a sample of its members: use them to say what is in a cycle.
+- A FLOW line always stands alone, right before the FOLLOWUPS line, never inside a sentence: the page turns it into a diagram there.
 - End with exactly one line: FOLLOWUPS: question 1 | question 2 | question 3 (short follow-up questions the user might ask next).`;
 
 let sampleFn;
@@ -39,6 +41,8 @@ export const STEP = {
   impact: (i, name) => `Checked the impact of ${name(i.ref)}`,
   route: (i, name) => `Found a route from ${name(i.from)} to ${name(i.to)}`,
   overview: () => 'Read the map overview',
+  cycles: (i, name) =>
+    i && i.ref ? `Checked whether ${name(i.ref)} is in a cycle` : 'Looked for dependency cycles in the call graph',
   read_source: (i, name) => `Read the code of ${name(i.ref)} (live, not stored)`,
 };
 

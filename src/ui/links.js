@@ -17,11 +17,21 @@ import { $ } from '../util/dom.js';
 import { esc, fmt } from '../util/format.js';
 
 let closedByUser = false;
+let held = false; // the welcome tour is showing or about to: the panel waits for the tour's step about it
 
-/** Open the panel when a map with links loads, unless the viewer closed it. */
+/** Open the panel when a map with links loads, unless the viewer closed it or the tour holds it. */
 export function autoOpenLinks() {
-  if (store.G && store.G.http && !closedByUser) openLinksPanel();
+  if (store.G && store.G.http && !closedByUser && !held) openLinksPanel();
   else renderLinks();
+}
+
+/** While held, a map loading does not open the panel; holding closes it, without counting as the viewer's choice. */
+export function holdLinks(on) {
+  held = on;
+  if (on && store.linksOpen) {
+    store.linksOpen = false;
+    renderLinks();
+  }
 }
 
 export function openLinksPanel() {

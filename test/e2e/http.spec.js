@@ -41,6 +41,47 @@ test('the links panel shows the accuracy, every link by direction, and requests 
   await expect(panel).toBeVisible();
 });
 
+test('the panel close button keeps its size and sits beside the title, however long the subtitle', async ({
+  atlas,
+}) => {
+  await openShop(atlas);
+  await atlas.setViewportSize({ width: 420, height: 860 }); // narrow: the subtitle wraps over several lines
+  const btn = await atlas.locator('#links [data-lclose]').boundingBox();
+  const title = await atlas.locator('#linksTitle').boundingBox();
+  expect(btn.width).toBe(32);
+  expect(Math.abs(btn.y + btn.height / 2 - (title.y + title.height / 2))).toBeLessThan(2);
+});
+
+test('the Key shows one section at a time and keeps one height, below the toolbar', async ({ atlas }) => {
+  await atlas.setViewportSize({ width: 1280, height: 640 });
+  await openShop(atlas);
+  await atlas.keyboard.press('Escape'); // the links panel
+  await atlas.locator('#legend').evaluate(d => (d.open = true));
+  const tabs = atlas.locator('#legendBody .lg-tabs [role="radio"]');
+  await expect(tabs).toHaveText(['Links', 'Code', 'Repos']);
+  await expect(tabs.first()).toHaveAttribute('aria-checked', 'true');
+  const heights = [];
+  for (const [i, shown] of [
+    [1, 'code'],
+    [2, 'repos'],
+    [0, 'links'],
+  ]) {
+    await tabs.nth(i).click();
+    await expect(atlas.locator(`#legendBody .lg-pane[data-pane="${shown}"]`)).toBeVisible();
+    await expect(atlas.locator('#legendBody .lg-pane:not([hidden])')).toHaveCount(1);
+    heights.push((await atlas.locator('#legend').boundingBox()).height);
+  }
+  expect(new Set(heights).size).toBe(1);
+  const key = await atlas.locator('#legend').boundingBox();
+  const bar = await atlas.locator('.toolbar').boundingBox();
+  expect(key.y).toBeGreaterThan(bar.y + bar.height);
+  // arrow keys move between sections, as on the map switcher
+  await tabs.first().focus();
+  await atlas.keyboard.press('ArrowRight');
+  await expect(tabs.nth(1)).toBeFocused();
+  await expect(tabs.nth(1)).toHaveAttribute('aria-checked', 'true');
+});
+
 test('a link opens its proof: the line that sends it, the route that serves it, GitHub links', async ({ atlas }) => {
   await openShop(atlas);
   await atlas.locator('#links [data-link]').first().click();

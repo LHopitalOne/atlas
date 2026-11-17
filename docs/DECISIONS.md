@@ -177,6 +177,10 @@ deliberate, so a rewrite keeps them. Each entry says why. Values live in `src/co
 - **The minimap box only draws edges that are really inside the overview,** and nothing when the whole map is in view.
   Why: a box clamped to the minimap's border looks like a frame, not like "you are here".
 - **In the source view, line numbers stay pinned and the definition is highlighted across the full line.**
+- **The demo page has a welcome tour; other builds do not.** It is opt-in (`--tour`), dims the page and lights the
+  parts a step is about (the proof and its link on the map together), waits for a real click on a link, and shows once
+  (the Tour button replays it). Why: a first-time
+  viewer of the demo needs a guide, while people working in their own map would only be interrupted by one.
 
 ## Accessibility
 

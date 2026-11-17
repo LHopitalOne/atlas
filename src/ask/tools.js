@@ -45,6 +45,9 @@ const where = (g, i) => {
     d = g.svcDom[s];
   return `${g.repoName[g.domRepo[d]]} > ${g.domName[d]}${i < g.S ? '' : ` > ${g.svcName[s]}`}`;
 };
+// members of a cycle the cycles tool lists by name, beside its size and repositories (here, not in config.js: this
+// module stays pure and imports nothing outside model, graph and util)
+const CYCLE_SAMPLE = 12;
 const brief = (g, i) => ({ ref: refOf('n', i), name: g.name(i), where: where(g, i) });
 const docOf = (g, i) => (g.doc ? g.doc(i) || '' : '');
 const words = q =>
@@ -237,12 +240,27 @@ export function cycles(g, { ref, level } = {}) {
       ? { ...item, inCycle: true, groupSize: hit.size, loop: hit.loop.map(i => (svcLevel ? brief(g, i) : dname(i))) }
       : { ...item, inCycle: false };
   }
+  // which repositories a group spans, and a sample of its members, so "what is in it" has an answer
+  const repoOf = (lvl, i) => (lvl === 'service' ? g.domRepo[g.svcDom[i]] : g.domRepo[i]);
+  const spread = (lvl, members) => {
+    const n = new Map();
+    for (const m of members) n.set(repoOf(lvl, m), (n.get(repoOf(lvl, m)) || 0) + 1);
+    return [...n]
+      .sort((a, b) => b[1] - a[1])
+      .map(([r, k]) => ({ ref: refOf('r', r), name: g.repoName[r], members: k }));
+  };
   const pack = (lvl, toItem) => {
     const c = cyclesOf(g, lvl);
     return {
       count: c.groups.length,
       members: c.groups.reduce((a, x) => a + x.members.length, 0),
-      groups: c.groups.slice(0, 5).map(x => ({ size: x.members.length, loop: x.loop.map(toItem) })),
+      groups: c.groups.slice(0, 5).map((x, k) => ({
+        size: x.members.length,
+        repositories: spread(lvl, x.members),
+        loop: x.loop.map(toItem),
+        // members by name for the biggest group only: five groups' worth would crowd the result past what Ask passes on
+        ...(k === 0 ? { sample: x.members.slice(0, CYCLE_SAMPLE).map(toItem) } : {}),
+      })),
     };
   };
   const out = {};
@@ -308,6 +326,16 @@ export function toolSet(g, { readSource } = {}) {
       name: 'overview',
       description: 'The shape of the whole codebase: repositories with their sizes, and totals.',
       run: () => overview(g),
+    },
+    {
+      name: 'cycles',
+      description:
+        'Dependency cycles in the call graph, found from the graph itself: how many there are between services and between domains, each with its shortest loop. Give a ref to check whether that one service or domain is in a cycle. Optional level: "service" or "domain".',
+      inputSchema: {
+        type: 'object',
+        properties: { ref: { type: 'string' }, level: { type: 'string', enum: ['service', 'domain'] } },
+      },
+      run: input => cycles(g, input || {}),
     },
   ];
   if (readSource)

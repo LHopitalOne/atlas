@@ -6,7 +6,7 @@ import { route, store } from '../state.js';
 import { requestRender } from '../render/frame.js';
 import { LY, patch, upload } from '../render/gl.js';
 import { put4, theme } from '../render/theme.js';
-import { answerTrail, impactOf, pairContract } from '../graph/insights.js';
+import { answerHops, impactOf, pairContract } from '../graph/insights.js';
 import { httpImpact } from '../model/http.js';
 import { fitNodes, flyTo } from './camera.js';
 import { announce } from '../ui/feedback.js';
@@ -182,7 +182,7 @@ export function updateFocus() {
     store.focusGoal = 1;
   } else if (store.askSet.length) {
     if (store.focusId !== ASK_FOCUS) {
-      computeSetFocus(store.askSet, store.askGroups);
+      computeSetFocus(store.askSet, store.askGroups, store.askFlow);
       store.focusId = ASK_FOCUS;
     }
     store.focusGoal = 1;
@@ -261,7 +261,7 @@ export function toggleImpact(id) {
 }
 
 /** Light up an answer: its items, the trail joining them in reading order, and the services the trail passes through. */
-export function computeSetFocus(refs, groups = [refs]) {
+export function computeSetFocus(refs, groups = [refs], flow = false) {
   const g = store.G;
   for (const i of store.focusList) store.inF[i] = 0;
   store.focusList = [];
@@ -284,20 +284,9 @@ export function computeSetFocus(refs, groups = [refs]) {
     }
   }
   // trails join items only within a paragraph, list item or the step line, so separate findings stay separate
-  const hops = [],
-    seen = new Set();
-  for (const grp of groups) {
-    const svcs = grp.filter(r => r[0] === 'n').map(r => g.own(+r.slice(1)));
-    const t = answerTrail(g, svcs);
-    t.via.forEach(add);
-    for (const h of t.hops) {
-      const key = h.a < h.b ? `${h.a}-${h.b}` : `${h.b}-${h.a}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        hops.push(h);
-      }
-    }
-  }
+  const t = answerHops(g, groups, flow);
+  t.via.forEach(add);
+  const hops = t.hops;
   const trail = { hops };
   store.askHops = hops;
   for (let j = 0; j < store.A.svcs.n; j++) store.A.svcs.fl[j * 2] = 0;
@@ -314,7 +303,7 @@ export function computeSetFocus(refs, groups = [refs]) {
     prm = new Float32Array(n * 4),
     col = new Uint8Array(n * 4);
   trail.hops.forEach((h, j) => {
-    seg.set([g.PX[h.a], g.PY[h.a], g.PX[h.b], g.PY[h.b]], j * 4);
+    seg.set(h.ends || [g.PX[h.a], g.PY[h.a], g.PX[h.b], g.PY[h.b]], j * 4);
     prm.set([1.8, 0.1, h.fwd ? 0 : 1, 0], j * 4);
     put4(col, j, theme.route, 0.85);
   });

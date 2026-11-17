@@ -1,7 +1,7 @@
 import globals from 'globals';
 export default [
   {
-    files: ['src/**/*.js', 'test/**/*.js', 'scripts/**/*.mjs'],
+    files: ['src/**/*.js', 'test/**/*.js', 'scripts/**/*.mjs', 'tools/demo/vercel/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',

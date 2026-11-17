@@ -112,7 +112,7 @@ export function pairContract(g, p) {
  * @returns {{hops: {a:number, b:number, fwd:boolean, p:number}[], via:number[]}} hops in reading order; via = services
  *   the trail passes through that the answer did not name
  */
-export function answerTrail(g, services, maxHops = 3) {
+export function answerTrail(g, services, maxHops = 3, directed = false) {
   const hops = [],
     seen = new Set(),
     named = new Set(services),
@@ -126,12 +126,55 @@ export function answerTrail(g, services, maxHops = 3) {
     for (let j = 1; j < r.path.length; j++) {
       const u = r.path[j - 1],
         v = r.path[j],
-        key = u < v ? `${u}-${v}` : `${v}-${u}`;
+        // a loop (A > B > A) keeps both directions; elsewhere one line per pair is enough
+        key = directed ? `${u}>${v}` : u < v ? `${u}-${v}` : `${v}-${u}`;
       if (!named.has(v)) via.add(v);
       if (seen.has(key)) continue;
       seen.add(key);
       hops.push({ a: u, b: v, fwd: !!r.fwd[v], p: r.via[v] });
     }
+  }
+  return { hops, via: [...via] };
+}
+
+/**
+ * The trail lines of an answer, group by group (a paragraph, a list item, or its diagram's line).
+ * @param {string[][]} groups refs in reading order, per group
+ * @param {boolean} flow the groups are the answer's diagram: a group that ends where it began is a loop, drawn both ways
+ * @returns {{hops: object[], via: number[]}} hops between services ({a, b, fwd}) or domains ({ends, fwd}); via = the
+ *   services the trails pass through that the answer did not name
+ */
+export function answerHops(g, groups, flow = false) {
+  const hops = [],
+    via = new Set(),
+    seen = new Set();
+  const keep = (key, h) => {
+    if (seen.has(key)) return;
+    seen.add(key);
+    hops.push(h);
+  };
+  for (const grp of groups) {
+    // a diagram's loop (it ends where it started) keeps both directions, drawn as two arcs bending apart; a paragraph
+    // that names a service twice is not a loop
+    const loop = flow && grp.length > 2 && grp[0] === grp.at(-1);
+    const doms = grp.filter(r => r[0] === 'd').map(r => +r.slice(1));
+    if (doms.length > 1 && doms.length === grp.length) {
+      // a chain of domains (a cycle between domains): lines between their centres, in order, only where the two
+      // domains really call each other (a sentence naming two unrelated domains draws nothing)
+      for (let k = 1; k < doms.length; k++) {
+        const [a, b] = [doms[k - 1], doms[k]];
+        if (a !== b && g.dp.map.has(Math.min(a, b) * g.D + Math.max(a, b)))
+          keep(loop ? `d${a}>${b}` : `d${Math.min(a, b)}-${Math.max(a, b)}`, {
+            fwd: true,
+            ends: [g.dcx[a], g.dcy[a], g.dcx[b], g.dcy[b]],
+          });
+      }
+      continue;
+    }
+    const svcs = grp.filter(r => r[0] === 'n').map(r => g.own(+r.slice(1)));
+    const t = answerTrail(g, svcs, 3, loop);
+    t.via.forEach(v => via.add(v));
+    for (const h of t.hops) keep(loop ? `${h.a}>${h.b}` : h.a < h.b ? `${h.a}-${h.b}` : `${h.b}-${h.a}`, h);
   }
   return { hops, via: [...via] };
 }

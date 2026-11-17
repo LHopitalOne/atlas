@@ -27,6 +27,7 @@ import { init as init_ui_links } from './ui/links.js';
 import { init as init_ui_directions } from './ui/directions.js';
 import { init as init_ui_search } from './ui/search.js';
 import { init as init_app_keys } from './app/keys.js';
+import { init as init_ui_tour } from './ui/tour.js';
 
 function showFallback(message) {
   const el = $('#nogl');
@@ -54,6 +55,7 @@ export function start() {
   init_ui_search();
   init_app_keys();
   init_app_url();
+  init_ui_tour();
   // boot
   new ResizeObserver(resize).observe(ov);
   mq.addEventListener ? mq.addEventListener('change', onTheme) : mq.addListener(onTheme);
