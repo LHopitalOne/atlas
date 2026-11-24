@@ -4,6 +4,19 @@ A zoomable map of a codebase or a service graph: repositories, domains, services
 Google Maps-style navigation, labels and directions; WebGL2 rendering that stays smooth at 100,000 nodes.
 Builds to a single HTML file. By default it shows its own source code, indexed with tree-sitter and SCIP.
 
+**Live demo: [atlas-demo-livid.vercel.app](https://atlas-demo-livid.vercel.app)**. Sentry's four repositories and
+Open edX, mapped by Graphify, with every HTTP call between them found in the code.
+
+![Sentry's four repositories on the map, with the HTTP links between them and how they were scored](docs/images/demo-map.jpg)
+
+Click a link to see its proof: the line that sends the request, the route that serves it, and what SCIP confirmed.
+
+![The proof of one link: sentry's request in tasks.py and snuba's route in views.py, confirmed by SCIP](docs/images/demo-proof.jpg)
+
+Ask about the code in plain words. The answer cites the files it used, draws the route, and lights it on the map.
+
+![Ask Atlas answering how relay reaches snuba, with the route drawn as a diagram and on the map](docs/images/demo-ask.jpg)
+
 ## Map your own repositories
 
 ```bash
